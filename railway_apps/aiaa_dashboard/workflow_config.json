@@ -1,0 +1,16 @@
+{
+  "project_id": "3b96c81f-9518-4131-b2bc-bcd7a524a5ef",
+  "cache_ttl_seconds": 300,
+  "workflows": {
+    "5615aab5-63ad-4be5-b273-065eeb1ae6cc": {
+      "name": "Test Doc Generator",
+      "description": "Creates a test Google Doc and sends it to Slack every 2 hours",
+      "enabled": true
+    },
+    "5fbf1961-5c49-41ec-a776-fb4c7723bf69": {
+      "name": "X Keyword Search \u2192 YouTube Content",
+      "description": "Searches X for trending posts and generates YouTube video ideas with full outlines",
+      "enabled": true
+    }
+  }
+}

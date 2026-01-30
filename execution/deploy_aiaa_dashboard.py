@@ -118,40 +118,55 @@ def create_railway_project(name: str = "aiaa-dashboard") -> str:
 def link_railway_project(project_id: str) -> bool:
     """Link to an existing Railway project."""
     print(f"\n  Linking to Railway project: {project_id}")
-    
+
+    # MUST use -p flag — positional arg fails with "unexpected argument" error
     code, stdout, stderr = run_command(
-        ["railway", "link", project_id],
+        ["railway", "link", "-p", project_id],
         cwd=str(DASHBOARD_DIR)
     )
-    
+
     return code == 0
 
 
-def set_railway_variables(variables: dict) -> bool:
-    """Set environment variables in Railway."""
+def set_railway_variables(variables: dict, service_name: str = None) -> bool:
+    """Set environment variables in Railway.
+
+    Uses 'railway variable set KEY=VALUE' (modern syntax).
+    Falls back to legacy '--set' if modern syntax fails.
+    """
     print(f"\n  Setting {len(variables)} environment variables...")
-    
+
     for key, value in variables.items():
-        # Use railway variables --set
-        code, stdout, stderr = run_command(
-            ["railway", "variables", "--set", f"{key}={value}"],
-            cwd=str(DASHBOARD_DIR)
-        )
+        # Modern syntax: railway variable set KEY=VALUE --service <name>
+        cmd = ["railway", "variable", "set", f"{key}={value}"]
+        if service_name:
+            cmd.extend(["--service", service_name])
+
+        code, stdout, stderr = run_command(cmd, cwd=str(DASHBOARD_DIR))
+
+        if code != 0:
+            # Fallback to legacy syntax
+            legacy_cmd = ["railway", "variables", "--set", f"{key}={value}"]
+            if service_name:
+                legacy_cmd.extend(["--service", service_name])
+            code, stdout, stderr = run_command(legacy_cmd, cwd=str(DASHBOARD_DIR))
+
         if code != 0:
             print(f"    WARNING: Failed to set {key}: {stderr}")
         else:
             masked = f"{value[:4]}...{value[-4:]}" if len(value) > 10 else "***"
             print(f"    Set {key} = {masked}")
-    
+
     return True
 
 
-def deploy_to_railway() -> tuple[bool, str]:
+def deploy_to_railway(service_name: str = "aiaa-dashboard") -> tuple[bool, str]:
     """Deploy the dashboard to Railway."""
-    print("\n  Deploying to Railway...")
-    
+    print(f"\n  Deploying to Railway (service: {service_name})...")
+
+    # Must specify --service when multiple services exist in the project
     code, stdout, stderr = run_command(
-        ["railway", "up", "--detach"],
+        ["railway", "up", "--detach", "--service", service_name],
         cwd=str(DASHBOARD_DIR),
         capture=False  # Show output in real-time
     )
@@ -254,7 +269,7 @@ def main():
     # Load from .env if not skipped
     if not args.skip_env:
         env_vars = get_env_vars_from_dotenv()
-        
+
         # Only include relevant API keys
         keys_to_include = [
             "OPENROUTER_API_KEY",
@@ -264,12 +279,25 @@ def main():
             "GOOGLE_OAUTH_TOKEN_JSON",
             "ANTHROPIC_API_KEY",
         ]
-        
+
         for key in keys_to_include:
             if key in env_vars:
                 variables[key] = env_vars[key]
-    
-    set_railway_variables(variables)
+
+    # Add RAILWAY_API_TOKEN from Railway CLI config (needed for dynamic workflow loading and cron management)
+    try:
+        railway_config_path = Path.home() / ".railway" / "config.json"
+        if railway_config_path.exists():
+            with open(railway_config_path) as f:
+                railway_config = json.load(f)
+            railway_token = railway_config.get("user", {}).get("token", "")
+            if railway_token:
+                variables["RAILWAY_API_TOKEN"] = railway_token
+                print("  Added RAILWAY_API_TOKEN from Railway CLI config")
+    except Exception as e:
+        print(f"  WARNING: Could not read Railway token: {e}")
+
+    set_railway_variables(variables, service_name="aiaa-dashboard")
     
     # Deploy
     print("\n[4/5] Deploying dashboard...")

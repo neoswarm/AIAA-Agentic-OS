@@ -1,12 +1,4 @@
-# SKILL BIBLE: Dream 100 Deliverable Creation Mastery
-
-## Executive Summary
-
-This skill bible teaches the complete system for creating high-impact, plug-and-play deliverables that open doors with dream prospects through cold outreach. Unlike generic cold emails, Dream 100 deliverables are custom-created pieces of work that prove your expertise before asking for anything in return. This approach transforms cold outreach from interruption marketing into value delivery, dramatically increasing response rates and client acquisition success.
-
-The system covers 27+ specific deliverable types across different service categories (ad agencies, copywriting, design, content creation, etc.), complete with creation processes, time investments, packaging strategies, and quality standards. Each deliverable serves as both a demonstration of capability and a strategic entry point for sales conversations. The philosophy centers on treating free work with the same professionalism as paid work, creating implementation-ready solutions that prospects can use immediately.
-
-This comprehensive guide provides everything needed to execute Dream 100 campaigns effectively: from choosing the right deliverable type for each prospect, to creating professional packages with video walkthroughs, to advanced tactics that naturally lead to sales conversations. The result is a systematic approach to cold outreach that consistently generates high-quality leads and clients.
+sistently generates high-quality leads and clients.
 
 ## Source
 - **Type:** Internal SOP/Skill Document

@@ -21,6 +21,8 @@ from datetime import datetime
 from functools import wraps
 from collections import deque
 import threading
+import time
+from pathlib import Path
 
 from flask import Flask, request, jsonify, render_template_string, redirect, url_for, session
 from markupsafe import Markup
@@ -55,6 +57,381 @@ RAILWAY_API_URL = "https://backboard.railway.app/graphql/v2"
 events_log = deque(maxlen=500)
 events_lock = threading.Lock()
 RUNTIME_ENV_VARS = {}
+
+# =============================================================================
+# Dynamic Workflow Loading
+# =============================================================================
+
+WORKFLOW_CONFIG_PATH = Path(__file__).parent / "workflow_config.json"
+_workflow_cache = {"data": None, "timestamp": 0}
+_workflow_cache_lock = threading.Lock()
+
+def load_workflow_config():
+    """Load workflow metadata from config file."""
+    try:
+        if WORKFLOW_CONFIG_PATH.exists():
+            with open(WORKFLOW_CONFIG_PATH, 'r') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"Error loading workflow config: {e}")
+    return {"project_id": "", "cache_ttl_seconds": 300, "workflows": {}}
+
+def fetch_active_workflows_from_railway():
+    """Fetch active workflows (cron services) from Railway API with caching."""
+    config = load_workflow_config()
+    cache_ttl = config.get("cache_ttl_seconds", 300)
+
+    with _workflow_cache_lock:
+        # Check cache
+        if _workflow_cache["data"] is not None:
+            age = time.time() - _workflow_cache["timestamp"]
+            if age < cache_ttl:
+                return _workflow_cache["data"]
+
+    if not RAILWAY_API_TOKEN:
+        return []
+
+    project_id = config.get("project_id", "3b96c81f-9518-4131-b2bc-bcd7a524a5ef")
+    workflow_metadata = config.get("workflows", {})
+
+    query = """
+    query {
+        project(id: "%s") {
+            id
+            name
+            services {
+                edges {
+                    node {
+                        id
+                        name
+                        serviceInstances {
+                            edges {
+                                node {
+                                    id
+                                    cronSchedule
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    """ % project_id
+
+    try:
+        response = http_requests.post(
+            RAILWAY_API_URL,
+            headers={
+                "Authorization": f"Bearer {RAILWAY_API_TOKEN}",
+                "Content-Type": "application/json"
+            },
+            json={"query": query},
+            timeout=10
+        )
+        data = response.json()
+
+        if "errors" in data or not data.get("data", {}).get("project"):
+            return []
+
+        services = data["data"]["project"]["services"]["edges"]
+        active_workflows = []
+
+        for service_edge in services:
+            service = service_edge["node"]
+            service_id = service["id"]
+            service_name = service["name"]
+
+            # Get cron schedule from service instance
+            instances = service.get("serviceInstances", {}).get("edges", [])
+            cron_schedule = None
+            for inst in instances:
+                cron_schedule = inst["node"].get("cronSchedule")
+                if cron_schedule:
+                    break
+
+            # Skip services without cron schedule
+            if not cron_schedule:
+                continue
+
+            # Get metadata from config or use defaults
+            meta = workflow_metadata.get(service_id, {})
+            if not meta.get("enabled", True):
+                continue
+
+            # Parse cron to human-readable
+            cron_readable = parse_cron_to_readable(cron_schedule)
+
+            active_workflows.append({
+                "name": meta.get("name", service_name),
+                "description": meta.get("description", f"Railway cron service: {service_name}"),
+                "schedule": cron_readable,
+                "cron": cron_schedule,
+                "status": "active",
+                "platform": "Railway Cron",
+                "last_run": "Scheduled",
+                "project_id": project_id,
+                "project_url": f"https://railway.com/project/{project_id}",
+                "service_id": service_id
+            })
+
+        # Update cache
+        with _workflow_cache_lock:
+            _workflow_cache["data"] = active_workflows
+            _workflow_cache["timestamp"] = time.time()
+
+        return active_workflows
+
+    except Exception as e:
+        print(f"Error fetching workflows from Railway: {e}")
+        return []
+
+def parse_cron_to_readable(cron: str) -> str:
+    """Convert cron expression to human-readable string."""
+    if not cron:
+        return "Not scheduled"
+
+    parts = cron.split()
+    if len(parts) < 5:
+        return cron
+
+    minute, hour, day, month, weekday = parts[:5]
+
+    # Common patterns
+    if minute == "0" and hour.startswith("*/"):
+        hours = hour[2:]
+        return f"Every {hours} hours"
+    if minute.startswith("*/"):
+        mins = minute[2:]
+        return f"Every {mins} minutes"
+    if minute == "0" and hour == "*":
+        return "Every hour"
+    if minute == "0" and hour == "0":
+        return "Daily at midnight"
+
+    return f"Cron: {cron}"
+
+def invalidate_workflow_cache():
+    """Invalidate the workflow cache (call after deploying new workflow)."""
+    with _workflow_cache_lock:
+        _workflow_cache["data"] = None
+        _workflow_cache["timestamp"] = 0
+
+# =============================================================================
+# Dynamic Webhook Loading (in-memory + env var persistence)
+# =============================================================================
+#
+# Webhook config lives in memory at runtime. On startup, it loads from:
+#   1. WEBHOOK_CONFIG env var (JSON string) — primary, survives redeploys
+#   2. webhook_config.json file — fallback seed for first deploy
+#
+# Registering/toggling webhooks via API updates memory instantly (no rebuild).
+# Changes are persisted to the WEBHOOK_CONFIG env var via Railway API so they
+# survive restarts.
+# =============================================================================
+
+WEBHOOK_CONFIG_PATH = Path(__file__).parent / "webhook_config.json"
+_webhook_registry = {"webhooks": {}}
+_webhook_lock = threading.Lock()
+
+def _init_webhook_registry():
+    """Initialize webhook registry from env var or file seed."""
+    global _webhook_registry
+    # Priority 1: env var (persisted across restarts)
+    env_config = os.getenv("WEBHOOK_CONFIG", "")
+    if env_config:
+        try:
+            _webhook_registry = json.loads(env_config)
+            print(f"Loaded {len(_webhook_registry.get('webhooks', {}))} webhooks from WEBHOOK_CONFIG env var")
+            return
+        except Exception as e:
+            print(f"Error parsing WEBHOOK_CONFIG env var: {e}")
+
+    # Priority 2: file seed
+    try:
+        if WEBHOOK_CONFIG_PATH.exists():
+            with open(WEBHOOK_CONFIG_PATH, 'r') as f:
+                _webhook_registry = json.load(f)
+            print(f"Loaded {len(_webhook_registry.get('webhooks', {}))} webhooks from webhook_config.json seed")
+            return
+    except Exception as e:
+        print(f"Error loading webhook_config.json: {e}")
+
+    _webhook_registry = {"webhooks": {}}
+
+def _persist_webhook_config():
+    """Persist webhook config to Railway env var (non-blocking, best-effort)."""
+    if not RAILWAY_API_TOKEN:
+        return
+    config_json = json.dumps(_webhook_registry)
+    # Use Railway GraphQL variableUpsert (best-effort — known to be flaky)
+    # Also write to disk as backup
+    try:
+        with open(WEBHOOK_CONFIG_PATH, 'w') as f:
+            json.dump(_webhook_registry, f, indent=2)
+    except Exception:
+        pass
+
+    def _do_persist():
+        try:
+            project_id = "3b96c81f-9518-4131-b2bc-bcd7a524a5ef"
+            service_id = "415686bb-d10c-40c5-b610-4c5e41bbe762"
+            env_id = "951885c9-85a5-46f5-96a1-2151936b0314"
+            query = '''mutation { variableUpsert(input: { projectId: "%s", serviceId: "%s", environmentId: "%s", name: "WEBHOOK_CONFIG", value: %s }) }''' % (
+                project_id, service_id, env_id, json.dumps(config_json)
+            )
+            http_requests.post(
+                RAILWAY_API_URL,
+                headers={"Authorization": f"Bearer {RAILWAY_API_TOKEN}", "Content-Type": "application/json"},
+                json={"query": query},
+                timeout=10
+            )
+        except Exception:
+            pass  # Best-effort — file backup exists
+
+    threading.Thread(target=_do_persist, daemon=True).start()
+
+def load_webhook_config():
+    """Return current webhook config from in-memory registry."""
+    with _webhook_lock:
+        return _webhook_registry.copy()
+
+def save_webhook_config(config):
+    """Update in-memory registry and persist."""
+    global _webhook_registry
+    with _webhook_lock:
+        _webhook_registry = config
+    _persist_webhook_config()
+    return True
+
+def get_webhook_workflows(base_url=""):
+    """Return list of webhook workflow dicts for the template."""
+    with _webhook_lock:
+        webhooks = _webhook_registry.get("webhooks", {})
+    result = []
+    for slug, meta in webhooks.items():
+        entry = {
+            "name": meta.get("name", slug),
+            "description": meta.get("description", f"Webhook: {slug}"),
+            "source": meta.get("source", "Unknown"),
+            "enabled": meta.get("enabled", True),
+            "slack_notify": meta.get("slack_notify", False),
+            "slug": slug,
+            "webhook_url": f"{base_url}/webhook/{slug}",
+            "type": "webhook"
+        }
+        fwd = meta.get("forward_url", "")
+        if fwd:
+            entry["forward_url"] = fwd
+        result.append(entry)
+    return result
+
+# Initialize webhook registry on module load
+_init_webhook_registry()
+
+def send_slack_message(text, blocks=None):
+    """Send a message to Slack via webhook URL."""
+    slack_url = os.getenv("SLACK_WEBHOOK_URL", "")
+    if not slack_url:
+        return False
+    payload = {"text": text}
+    if blocks:
+        payload["blocks"] = blocks
+    try:
+        resp = http_requests.post(slack_url, json=payload, timeout=10)
+        return resp.status_code == 200
+    except Exception:
+        return False
+
+
+# =============================================================================
+# Webhook Custom Handlers
+# =============================================================================
+
+def handle_ai_news_webhook(payload):
+    """Custom handler for /webhook/ai-news — fetches latest AI news via Perplexity and sends digest to Slack."""
+    topic = payload.get("topic", "artificial intelligence")
+    count = min(int(payload.get("count", 5)), 10)
+
+    api_key = os.getenv("PERPLEXITY_API_KEY", "")
+    if not api_key:
+        return {"error": "PERPLEXITY_API_KEY not configured", "status": "failed"}
+
+    today = datetime.now().strftime("%B %d, %Y")
+    query = (
+        f"Find the {count} most important and recent news articles about {topic} from today or this week (today is {today}).\n\n"
+        f"For each article, provide EXACTLY this format:\n\n"
+        f"ARTICLE 1:\nTitle: [exact headline]\nSource: [publication name]\nURL: [full URL to the article]\n"
+        f"Summary: [one-sentence summary of the key finding or announcement]\n\n"
+        f"ARTICLE 2:\nTitle: ...\n(continue for all {count} articles)\n\n"
+        f"Requirements:\n- Only include real, verifiable articles from the past 7 days\n"
+        f"- Prioritize major announcements, product launches, research breakthroughs, and industry moves\n"
+        f"- Include the actual URL to each article\n- Each summary should be exactly one sentence"
+    )
+
+    # Call Perplexity API
+    try:
+        resp = http_requests.post(
+            "https://api.perplexity.ai/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json={"model": "sonar", "messages": [{"role": "user", "content": query}], "temperature": 0.2, "max_tokens": 3000},
+            timeout=60
+        )
+        if resp.status_code != 200:
+            return {"error": f"Perplexity API error: {resp.status_code}", "status": "failed"}
+        raw_text = resp.json()["choices"][0]["message"]["content"]
+    except Exception as e:
+        return {"error": f"Perplexity request failed: {str(e)}", "status": "failed"}
+
+    # Parse articles
+    articles = []
+    current = {}
+    for line in raw_text.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        if line.lower().startswith("title:"):
+            if current.get("title"):
+                articles.append(current)
+                current = {}
+            current["title"] = line.split(":", 1)[1].strip()
+        elif line.lower().startswith("source:"):
+            current["source"] = line.split(":", 1)[1].strip()
+        elif line.lower().startswith("url:"):
+            url_start = line.find("http")
+            current["url"] = line[url_start:].strip() if url_start != -1 else ""
+        elif line.lower().startswith("summary:"):
+            current["summary"] = line.split(":", 1)[1].strip()
+    if current.get("title"):
+        articles.append(current)
+
+    articles = [a for a in articles[:count] if a.get("title") and a.get("summary")]
+
+    if not articles:
+        return {"error": "No articles parsed from Perplexity response", "status": "failed", "raw": raw_text[:500]}
+
+    # Send formatted digest to Slack
+    blocks = [
+        {"type": "header", "text": {"type": "plain_text", "text": f"AI News Digest: {topic.title()}"}},
+        {"type": "context", "elements": [{"type": "mrkdwn", "text": f"{len(articles)} articles | {datetime.now().strftime('%B %d, %Y')}"}]},
+        {"type": "divider"},
+    ]
+    for i, a in enumerate(articles, 1):
+        title_text = f"*{i}. <{a.get('url', '#')}|{a['title']}>*" if a.get("url") else f"*{i}. {a['title']}*"
+        blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": f"{title_text}\n_{a.get('source', 'Unknown')}_\n{a['summary']}"}})
+    blocks.append({"type": "divider"})
+    blocks.append({"type": "context", "elements": [{"type": "mrkdwn", "text": f"Generated by AIAA Agentic OS | {datetime.now().strftime('%H:%M:%S')}"}]})
+
+    send_slack_message(f"AI News Digest: {topic.title()} - {len(articles)} articles", blocks=blocks)
+
+    return {
+        "status": "success",
+        "topic": topic,
+        "articles_found": len(articles),
+        "articles": [{"title": a["title"], "source": a.get("source", ""), "url": a.get("url", "")} for a in articles],
+        "timestamp": datetime.now().isoformat()
+    }
+
 
 # =============================================================================
 # Simple Markdown to HTML Converter
@@ -2981,28 +3358,20 @@ ENV_TEMPLATE = f'''
 def workflow_page():
     username = session.get('username', 'admin')
     base_url = request.host_url.rstrip('/')
+
+    # Build endpoints list dynamically from webhook config
     endpoints = [
         {"method": "GET", "path": "/", "description": "Dashboard"},
         {"method": "GET", "path": "/health", "description": "Health check"},
         {"method": "GET", "path": "/api/events", "description": "Events JSON"},
-        {"method": "POST", "path": "/webhook/calendly", "description": "Calendly meeting prep"},
-        {"method": "POST", "path": "/webhook/<workflow>", "description": "Generic workflow webhook"}
     ]
-    active_workflows = [
-        {
-            "name": "X Keyword Search → YouTube Content",
-            "description": "Searches X for trending posts and generates YouTube video ideas with full outlines",
-            "schedule": "Every 3 hours",
-            "cron": "0 */3 * * *",
-            "status": "active",
-            "platform": "Railway Cron",
-            "last_run": "Scheduled",
-            "project_id": "3b96c81f-9518-4131-b2bc-bcd7a524a5ef",
-            "project_url": "https://railway.com/project/3b96c81f-9518-4131-b2bc-bcd7a524a5ef",
-            "service_id": "5fbf1961-5c49-41ec-a776-fb4c7723bf69"
-        }
-    ]
-    return render_template_string(WORKFLOW_TEMPLATE, base_url=base_url, endpoints=endpoints, active_workflows=active_workflows, sidebar=render_sidebar("workflow", username))
+    webhook_wfs = get_webhook_workflows(base_url)
+    for wh in webhook_wfs:
+        endpoints.append({"method": "POST", "path": f"/webhook/{wh['slug']}", "description": wh['name']})
+
+    # Dynamically load active workflows from Railway API (cached for 5 minutes)
+    active_workflows = fetch_active_workflows_from_railway()
+    return render_template_string(WORKFLOW_TEMPLATE, base_url=base_url, endpoints=endpoints, active_workflows=active_workflows, webhook_workflows=webhook_wfs, sidebar=render_sidebar("workflow", username))
 
 WORKFLOW_TEMPLATE = f'''
 <!DOCTYPE html>
@@ -3346,6 +3715,73 @@ WORKFLOW_TEMPLATE = f'''
             No active workflows configured yet.
         </div>
         {{% endif %}}
+
+        <!-- Webhook Workflows Section -->
+        <div class="section-title" style="margin-top:2rem;">Webhook Workflows</div>
+        {{% if webhook_workflows %}}
+        {{% for wh in webhook_workflows %}}
+        <div class="workflow-card" data-webhook-slug="{{{{ wh.slug }}}}">
+            <div class="workflow-header">
+                <div>
+                    <div class="workflow-name">{{{{ wh.name }}}}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <span class="badge" style="background:{{% if wh.enabled %}}#dbeafe;color:#1d4ed8;{{% else %}}#fee2e2;color:#dc2626;{{% endif %}}border-radius:12px;padding:0.25rem 0.75rem;font-size:0.75rem;font-weight:500;">
+                        {{% if wh.enabled %}}Enabled{{% else %}}Disabled{{% endif %}}
+                    </span>
+                    <span class="badge" style="background:#f0fdf4;color:#15803d;border-radius:12px;padding:0.25rem 0.75rem;font-size:0.75rem;font-weight:500;">
+                        Webhook
+                    </span>
+                    <span class="badge" style="background:var(--bg-elevated);color:var(--text-muted);border-radius:12px;padding:0.25rem 0.75rem;font-size:0.75rem;font-weight:500;">
+                        {{{{ wh.source }}}}
+                    </span>
+                    {{% if wh.forward_url %}}
+                    <span class="badge" style="background:#fef3c7;color:#92400e;border-radius:12px;padding:0.25rem 0.75rem;font-size:0.75rem;font-weight:500;">
+                        Forwarding
+                    </span>
+                    {{% endif %}}
+                </div>
+            </div>
+            <div class="workflow-desc">{{{{ wh.description }}}}</div>
+            <div class="workflow-meta">
+                <div class="workflow-meta-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                    <span class="workflow-meta-label">URL:</span>
+                    <code class="mono" style="font-size:0.75rem;color:var(--accent);word-break:break-all;">{{{{ wh.webhook_url }}}}</code>
+                </div>
+                {{% if wh.forward_url %}}
+                <div class="workflow-meta-item" style="margin-top:0.25rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 014-4h12"/></svg>
+                    <span class="workflow-meta-label">Forwards to:</span>
+                    <code class="mono" style="font-size:0.75rem;color:#92400e;word-break:break-all;">{{{{ wh.forward_url }}}}</code>
+                </div>
+                {{% endif %}}
+            </div>
+            <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-subtle);display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                <button onclick="copyWebhookUrl('{{{{ wh.webhook_url }}}}')" class="btn-control" style="background:var(--bg-muted);color:var(--text-secondary);" title="Copy webhook URL to clipboard">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    Copy URL
+                </button>
+                <button onclick="testWebhook('{{{{ wh.slug }}}}', '{{{{ wh.name }}}}')" class="btn-control btn-start" title="Send test payload to webhook">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Test
+                </button>
+                <button onclick="toggleWebhook('{{{{ wh.slug }}}}', '{{{{ wh.name }}}}')" class="btn-control webhook-toggle-btn" data-slug="{{{{ wh.slug }}}}" style="background:{{% if wh.enabled %}}#fee2e2;color:#dc2626;border:1px solid #fecaca;{{% else %}}#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe;{{% endif %}}" title="{{% if wh.enabled %}}Disable this webhook{{% else %}}Enable this webhook{{% endif %}}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">{{% if wh.enabled %}}<path d="M18.36 6.64A9 9 0 015.64 18.36 9 9 0 0118.36 6.64z"/><line x1="1" y1="1" x2="23" y2="23"/>{{% else %}}<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>{{% endif %}}</svg>
+                    {{% if wh.enabled %}}Disable{{% else %}}Enable{{% endif %}}
+                </button>
+                <button onclick="deleteWebhookWorkflow('{{{{ wh.slug }}}}', '{{{{ wh.name }}}}')" class="btn-control" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;" title="Delete this webhook workflow">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    Delete
+                </button>
+            </div>
+        </div>
+        {{% endfor %}}
+        {{% else %}}
+        <div class="card" style="padding:2rem;text-align:center;color:var(--text-muted);">
+            No webhook workflows configured yet.
+        </div>
+        {{% endif %}}
     </main>
     <script>
         async function startWorkflow(serviceId, name) {{
@@ -3681,6 +4117,115 @@ WORKFLOW_TEMPLATE = f'''
                 setTimeout(() => toast.remove(), 300);
             }}, 3000);
         }}
+
+        // ===== Webhook Workflow Functions =====
+
+        async function copyWebhookUrl(url) {{
+            try {{
+                await navigator.clipboard.writeText(url);
+                showToast('Webhook URL copied to clipboard', 'success');
+            }} catch (err) {{
+                // Fallback for non-HTTPS contexts
+                const ta = document.createElement('textarea');
+                ta.value = url;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+                showToast('Webhook URL copied to clipboard', 'success');
+            }}
+        }}
+
+        async function testWebhook(slug, name) {{
+            const btn = event.target.closest('.btn-control');
+            if (btn.classList.contains('loading')) return;
+
+            btn.classList.add('loading');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Testing...';
+
+            try {{
+                const response = await fetch('/api/webhook-workflows/test', {{
+                    method: 'POST',
+                    headers: {{ 'Content-Type': 'application/json' }},
+                    body: JSON.stringify({{ slug: slug }})
+                }});
+                const data = await response.json();
+
+                if (response.ok && data.test_status === 'success') {{
+                    showToast(`Test payload sent to ${{name}} successfully`, 'success');
+                }} else {{
+                    showToast(data.error || `Test failed for ${{name}}`, 'error');
+                }}
+            }} catch (err) {{
+                showToast('Network error: ' + err.message, 'error');
+            }} finally {{
+                btn.classList.remove('loading');
+                btn.innerHTML = origHTML;
+            }}
+        }}
+
+        async function toggleWebhook(slug, name) {{
+            const btn = event.target.closest('.btn-control');
+            if (btn.classList.contains('loading')) return;
+
+            btn.classList.add('loading');
+            try {{
+                const response = await fetch('/api/webhook-workflows/toggle', {{
+                    method: 'POST',
+                    headers: {{ 'Content-Type': 'application/json' }},
+                    body: JSON.stringify({{ slug: slug }})
+                }});
+                const data = await response.json();
+
+                if (response.ok) {{
+                    const enabled = data.enabled;
+                    showToast(`${{name}} ${{enabled ? 'enabled' : 'disabled'}}`, 'success');
+                    // Reload page to reflect new state
+                    setTimeout(() => window.location.reload(), 500);
+                }} else {{
+                    showToast(data.error || `Failed to toggle ${{name}}`, 'error');
+                }}
+            }} catch (err) {{
+                showToast('Network error: ' + err.message, 'error');
+            }} finally {{
+                btn.classList.remove('loading');
+            }}
+        }}
+
+        async function deleteWebhookWorkflow(slug, name) {{
+            if (!confirm(`Are you sure you want to delete "${{name}}"?\\n\\nThis will unregister the webhook workflow.`)) {{
+                return;
+            }}
+
+            const btn = event.target.closest('.btn-control');
+            if (btn.classList.contains('loading')) return;
+
+            btn.classList.add('loading');
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Deleting...';
+
+            try {{
+                const response = await fetch('/api/webhook-workflows/unregister', {{
+                    method: 'POST',
+                    headers: {{ 'Content-Type': 'application/json' }},
+                    body: JSON.stringify({{ slug: slug }})
+                }});
+                const data = await response.json();
+
+                if (response.ok) {{
+                    showToast(`${{name}} deleted`, 'success');
+                    setTimeout(() => window.location.reload(), 500);
+                }} else {{
+                    showToast(data.error || 'Failed to delete webhook', 'error');
+                    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> Delete';
+                }}
+            }} catch (err) {{
+                showToast('Network error: ' + err.message, 'error');
+                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> Delete';
+            }} finally {{
+                btn.classList.remove('loading');
+            }}
+        }}
     </script>
     <style>
         @keyframes slideIn {{ from {{ transform: translateX(100%); opacity: 0; }} to {{ transform: translateX(0); opacity: 1; }} }}
@@ -3728,7 +4273,7 @@ LOGS_TEMPLATE = f'''
 
 @app.route('/health')
 def health():
-    return jsonify({"status": "ok", "service": "aiaa-dashboard", "version": "2.3.0", "workflows": len(WORKFLOWS), "timestamp": datetime.now().isoformat()})
+    return jsonify({"status": "ok", "service": "aiaa-dashboard", "version": "2.4.0", "workflows": len(WORKFLOWS), "timestamp": datetime.now().isoformat()})
 
 @app.route('/api/events')
 def api_events():
@@ -3742,6 +4287,31 @@ def api_workflows():
     if not session.get('logged_in'):
         return jsonify({"error": "Unauthorized"}), 401
     return jsonify({k: {"description": v["description"], "has_script": v["has_script"], "category": v.get("category", "General")} for k, v in WORKFLOWS.items()})
+
+@app.route('/api/active-workflows')
+def api_active_workflows():
+    """Get active workflows (cron + webhook) as JSON."""
+    if not session.get('logged_in'):
+        return jsonify({"error": "Unauthorized"}), 401
+    cron_workflows = fetch_active_workflows_from_railway()
+    base_url = request.host_url.rstrip('/')
+    webhook_workflows = get_webhook_workflows(base_url)
+    return jsonify({
+        "workflows": cron_workflows,
+        "webhook_workflows": webhook_workflows,
+        "count": len(cron_workflows),
+        "webhook_count": len(webhook_workflows)
+    })
+
+@app.route('/api/active-workflows/refresh', methods=['POST'])
+def api_refresh_workflows():
+    """Refresh the workflow cache by invalidating it."""
+    if not session.get('logged_in'):
+        return jsonify({"error": "Unauthorized"}), 401
+    invalidate_workflow_cache()
+    workflows = fetch_active_workflows_from_railway()
+    log_event("workflow", "cache_refreshed", {"count": len(workflows)}, source="api")
+    return jsonify({"status": "refreshed", "workflows": workflows, "count": len(workflows)})
 
 @app.route('/api/env', methods=['POST'])
 def api_set_env():
@@ -3894,6 +4464,8 @@ def api_workflow_delete():
         return jsonify({"error": error_msg}), 500
 
     log_event("workflow", "deleted", {"service_id": service_id, "name": workflow_name}, source="api")
+    # Invalidate workflow cache so the deleted workflow is removed from the list
+    invalidate_workflow_cache()
     return jsonify({
         "status": "deleted",
         "service_id": service_id,
@@ -4326,15 +4898,264 @@ def api_workflow_cron_status():
         })
 
 
-@app.route('/webhook/<workflow_name>', methods=['POST'])
-def generic_webhook(workflow_name):
+# =============================================================================
+# Webhook Workflow API Endpoints
+# =============================================================================
+
+@app.route('/api/webhook-workflows', methods=['GET'])
+@login_required
+def api_webhook_workflows():
+    """Return all registered webhook workflows."""
+    base_url = request.host_url.rstrip('/')
+    workflows = get_webhook_workflows(base_url)
+    return jsonify({"webhook_workflows": workflows})
+
+
+@app.route('/api/webhook-workflows/register', methods=['POST'])
+@login_required
+def api_webhook_register():
+    """Register a new webhook workflow (no rebuild required).
+
+    POST JSON: {"slug": "stripe", "name": "Stripe Payments", "description": "...", "source": "Stripe", "slack_notify": true, "forward_url": "https://my-processor.up.railway.app/process"}
+    If forward_url is set, incoming webhooks are forwarded to that URL for custom processing.
+    """
+    data = request.get_json() or {}
+    slug = data.get("slug", "").strip().lower().replace(" ", "-")
+    name = data.get("name", "").strip()
+    description = data.get("description", "").strip()
+
+    if not slug or not name:
+        return jsonify({"error": "Missing required fields: 'slug' and 'name'"}), 400
+
+    if not all(c.isalnum() or c == '-' for c in slug):
+        return jsonify({"error": "Invalid slug. Use lowercase letters, numbers, and hyphens only."}), 400
+
+    config = load_webhook_config()
+    webhooks = config.get("webhooks", {})
+    already_exists = slug in webhooks
+
+    entry = {
+        "name": name,
+        "description": description or f"Webhook: {slug}",
+        "enabled": data.get("enabled", True),
+        "source": data.get("source", "Unknown"),
+        "slack_notify": data.get("slack_notify", False)
+    }
+    forward_url = data.get("forward_url", "").strip()
+    if forward_url:
+        entry["forward_url"] = forward_url
+    webhooks[slug] = entry
+    config["webhooks"] = webhooks
+    save_webhook_config(config)
+
+    base_url = request.host_url.rstrip('/')
+    action = "updated" if already_exists else "registered"
+    log_event(f"webhook:{slug}", action, {"name": name, "forward_url": forward_url or None}, source="api")
+    resp = {
+        "status": action,
+        "slug": slug,
+        "name": name,
+        "webhook_url": f"{base_url}/webhook/{slug}"
+    }
+    if forward_url:
+        resp["forward_url"] = forward_url
+    return jsonify(resp), 200 if already_exists else 201
+
+
+@app.route('/api/webhook-workflows/unregister', methods=['POST'])
+@login_required
+def api_webhook_unregister():
+    """Unregister a webhook workflow (no rebuild required).
+
+    POST JSON: {"slug": "stripe"}
+    """
+    data = request.get_json() or {}
+    slug = data.get("slug")
+    if not slug:
+        return jsonify({"error": "Missing 'slug' parameter"}), 400
+
+    config = load_webhook_config()
+    webhooks = config.get("webhooks", {})
+
+    if slug not in webhooks:
+        return jsonify({"error": f"Webhook '{slug}' not found"}), 404
+
+    name = webhooks[slug].get("name", slug)
+    del webhooks[slug]
+    config["webhooks"] = webhooks
+    save_webhook_config(config)
+
+    log_event(f"webhook:{slug}", "unregistered", {"name": name}, source="api")
+    return jsonify({"status": "unregistered", "slug": slug, "name": name})
+
+
+@app.route('/api/webhook-workflows/toggle', methods=['POST'])
+@login_required
+def api_webhook_toggle():
+    """Toggle a webhook workflow's enabled state."""
+    data = request.get_json() or {}
+    slug = data.get("slug")
+    if not slug:
+        return jsonify({"error": "Missing 'slug' parameter"}), 400
+
+    config = load_webhook_config()
+    webhooks = config.get("webhooks", {})
+
+    if slug not in webhooks:
+        return jsonify({"error": f"Webhook '{slug}' not found"}), 404
+
+    current = webhooks[slug].get("enabled", True)
+    webhooks[slug]["enabled"] = not current
+    config["webhooks"] = webhooks
+
+    if save_webhook_config(config):
+        new_state = webhooks[slug]["enabled"]
+        log_event(f"webhook:{slug}", "toggled", {"enabled": new_state}, source="api")
+        return jsonify({"slug": slug, "enabled": new_state, "name": webhooks[slug].get("name", slug)})
+    else:
+        return jsonify({"error": "Failed to save config"}), 500
+
+
+@app.route('/api/webhook-workflows/test', methods=['POST'])
+@login_required
+def api_webhook_test():
+    """Send a test payload to a webhook endpoint."""
+    data = request.get_json() or {}
+    slug = data.get("slug")
+    if not slug:
+        return jsonify({"error": "Missing 'slug' parameter"}), 400
+
+    config = load_webhook_config()
+    if slug not in config.get("webhooks", {}):
+        return jsonify({"error": f"Webhook '{slug}' not found"}), 404
+
+    # Self-POST to the webhook endpoint
+    base_url = request.host_url.rstrip('/')
+    test_payload = {
+        "test": True,
+        "source": "dashboard_test",
+        "timestamp": datetime.now().isoformat(),
+        "message": f"Test payload for webhook '{slug}'"
+    }
+    try:
+        resp = http_requests.post(
+            f"{base_url}/webhook/{slug}",
+            json=test_payload,
+            timeout=10
+        )
+        return jsonify({
+            "slug": slug,
+            "test_status": "success" if resp.status_code == 200 else "failed",
+            "response_code": resp.status_code,
+            "response": resp.json() if resp.headers.get("content-type", "").startswith("application/json") else resp.text[:200]
+        })
+    except Exception as e:
+        return jsonify({"slug": slug, "test_status": "error", "error": str(e)}), 500
+
+
+@app.route('/webhook/<slug>', methods=['POST'])
+def webhook_handler(slug):
+    """Enhanced webhook handler with config-based routing, Slack notifications, and toggle support."""
     payload = request.get_json() or {}
-    log_event(f"webhook:{workflow_name}", "received", {"workflow": workflow_name}, source="webhook")
-    if workflow_name not in WORKFLOWS:
-        log_event(f"webhook:{workflow_name}", "error", {"error": "Not found"}, source="webhook")
-        return jsonify({"error": f"Workflow '{workflow_name}' not found"}), 404
-    log_event(f"webhook:{workflow_name}", "success", {"workflow": workflow_name}, source="webhook")
-    return jsonify({"status": "received", "workflow": workflow_name, "timestamp": datetime.now().isoformat()})
+    log_event(f"webhook:{slug}", "received", {"slug": slug, "payload_keys": list(payload.keys())}, source="webhook")
+
+    # Load webhook config
+    config = load_webhook_config()
+    webhooks = config.get("webhooks", {})
+
+    # Check if webhook is registered
+    if slug not in webhooks:
+        log_event(f"webhook:{slug}", "error", {"error": "Not registered"}, source="webhook")
+        return jsonify({"error": f"Webhook '{slug}' not registered", "registered": list(webhooks.keys())}), 404
+
+    webhook_meta = webhooks[slug]
+
+    # Check if webhook is enabled
+    if not webhook_meta.get("enabled", True):
+        log_event(f"webhook:{slug}", "disabled", {"slug": slug}, source="webhook")
+        return jsonify({"error": f"Webhook '{slug}' is currently disabled"}), 503
+
+    # --- Forward to external processing service if forward_url is set ---
+    forward_url = webhook_meta.get("forward_url", "")
+    if forward_url:
+        log_event(f"webhook:{slug}", "forwarding", {"forward_url": forward_url}, source="webhook")
+        try:
+            fwd_payload = {
+                "webhook_slug": slug,
+                "webhook_name": webhook_meta.get("name", slug),
+                "source": webhook_meta.get("source", "Unknown"),
+                "payload": payload,
+                "timestamp": datetime.now().isoformat()
+            }
+            fwd_resp = http_requests.post(forward_url, json=fwd_payload, timeout=30)
+            try:
+                fwd_data = fwd_resp.json()
+            except Exception:
+                fwd_data = {"raw_response": fwd_resp.text[:500]}
+            log_event(f"webhook:{slug}", "forwarded", {"status_code": fwd_resp.status_code, "forward_url": forward_url}, source="webhook")
+
+            # Send Slack notification if configured
+            if webhook_meta.get("slack_notify", False):
+                fwd_status = "OK" if fwd_resp.status_code < 400 else f"ERROR ({fwd_resp.status_code})"
+                send_slack_message(
+                    f"Webhook '{webhook_meta.get('name', slug)}' forwarded to processing service — {fwd_status}",
+                    blocks=[
+                        {"type": "header", "text": {"type": "plain_text", "text": f"Webhook Forwarded: {webhook_meta.get('name', slug)}"}},
+                        {"type": "section", "text": {"type": "mrkdwn", "text": f"*Source:* {webhook_meta.get('source', 'Unknown')}\n*Forward URL:* `{forward_url}`\n*Status:* {fwd_status}"}},
+                    ]
+                )
+
+            return jsonify({
+                "status": "forwarded",
+                "webhook": slug,
+                "forward_url": forward_url,
+                "forward_status": fwd_resp.status_code,
+                "response": fwd_data,
+                "timestamp": datetime.now().isoformat()
+            }), fwd_resp.status_code if fwd_resp.status_code < 500 else 502
+        except Exception as e:
+            log_event(f"webhook:{slug}", "forward_error", {"error": str(e), "forward_url": forward_url}, source="webhook")
+            return jsonify({
+                "status": "forward_error",
+                "webhook": slug,
+                "forward_url": forward_url,
+                "error": str(e),
+                "timestamp": datetime.now().isoformat()
+            }), 502
+
+    # --- Slug-specific custom handlers (legacy — prefer forward_url) ---
+    if slug == "ai-news":
+        log_event(f"webhook:{slug}", "processing", {"topic": payload.get("topic", "artificial intelligence")}, source="webhook")
+        result = handle_ai_news_webhook(payload)
+        status = "success" if result.get("status") == "success" else "error"
+        log_event(f"webhook:{slug}", status, result, source="webhook")
+        status_code = 200 if status == "success" else 500
+        return jsonify(result), status_code
+
+    # --- Default handler: Slack notification for generic webhooks ---
+    if webhook_meta.get("slack_notify", False):
+        name = webhook_meta.get("name", slug)
+        source = webhook_meta.get("source", "Unknown")
+        summary_lines = []
+        for k, v in list(payload.items())[:5]:
+            val_str = str(v)[:100]
+            summary_lines.append(f"  {k}: {val_str}")
+        summary = "\n".join(summary_lines) if summary_lines else "  (empty payload)"
+
+        blocks = [
+            {"type": "header", "text": {"type": "plain_text", "text": f"Webhook Received: {name}"}},
+            {"type": "section", "text": {"type": "mrkdwn", "text": f"*Source:* {source}\n*Endpoint:* `/webhook/{slug}`\n*Payload keys:* {', '.join(payload.keys()) or 'none'}"}},
+            {"type": "section", "text": {"type": "mrkdwn", "text": f"```\n{summary}\n```"}},
+        ]
+        send_slack_message(f"Webhook received: {name} from {source}", blocks=blocks)
+
+    log_event(f"webhook:{slug}", "success", {"slug": slug, "source": webhook_meta.get("source", "")}, source="webhook")
+    return jsonify({
+        "status": "received",
+        "webhook": slug,
+        "name": webhook_meta.get("name", slug),
+        "timestamp": datetime.now().isoformat()
+    })
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8080))
