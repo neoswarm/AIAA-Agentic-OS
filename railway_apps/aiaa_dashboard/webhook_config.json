@@ -1,0 +1,18 @@
+{
+  "webhooks": {
+    "calendly": {
+      "name": "Calendly Meeting Prep",
+      "description": "Receives Calendly webhook, researches attendee, creates prep doc, sends to Slack",
+      "enabled": true,
+      "source": "Calendly",
+      "slack_notify": true
+    },
+    "ai-news": {
+      "name": "AI News Digest",
+      "description": "Fetches latest AI news via Perplexity and sends formatted digest to Slack. POST with optional {\"topic\": \"AI agents\", \"count\": 5}",
+      "enabled": true,
+      "source": "Manual/Automation",
+      "slack_notify": false
+    }
+  }
+}
