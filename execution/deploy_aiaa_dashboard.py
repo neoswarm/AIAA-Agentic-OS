@@ -36,8 +36,13 @@ DASHBOARD_DIR = PROJECT_ROOT / "railway_apps" / "aiaa_dashboard"
 
 
 def hash_password(password: str) -> str:
-    """Hash a password using SHA-256."""
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Hash a password using bcrypt (preferred) or SHA-256 fallback."""
+    try:
+        import bcrypt
+        return bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12)).decode()
+    except ImportError:
+        print("WARNING: bcrypt not installed, falling back to SHA-256. Run: pip install bcrypt")
+        return hashlib.sha256(password.encode()).hexdigest()
 
 
 def run_command(cmd: list, cwd: str = None, capture: bool = True) -> tuple[int, str, str]:

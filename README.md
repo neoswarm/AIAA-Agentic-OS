@@ -1,8 +1,104 @@
 # AIAA Agentic OS
 
-An AI-powered agency operating system that runs inside Claude Code. Just paste prompts and Claude handles everything - from VSL funnels to cold emails to market research. Includes a beautiful web dashboard for monitoring workflows and managing your system.
+An AI-powered agency operating system that runs inside Claude Code. Just paste prompts and Claude handles everything - from VSL funnels to cold emails to market research. Includes a web dashboard for monitoring workflows, 120 automated enforcement hooks, and a complete DOE architecture.
 
-**Version:** 2.3 | **139 Workflows** | **Last Updated:** January 2026
+**Version:** 3.0 | **150 Workflows** | **120 Hooks** | **Last Updated:** February 2026
+
+---
+
+## System Architecture (DOE Pattern)
+
+This system uses a **Directive-Orchestration-Execution (DOE)** architecture:
+
+```
+                         USER REQUEST
+                "Create a VSL funnel for Acme Corp"
+                              |
+                              v
+              +-------------------------------+
+              |  DIRECTIVE (What to do)       |
+              |  directives/*.md              |
+              |  Natural language SOPs with   |
+              |  inputs, steps, quality gates |
+              +-------------------------------+
+                              |
+                              v
+              +-------------------------------+
+              |  ORCHESTRATION (Claude Code)  |
+              |  Reads directives, loads      |
+              |  skill bibles, calls scripts  |
+              |  Hooks enforce compliance     |
+              +-------------------------------+
+                              |
+                              v
+              +-------------------------------+
+              |  EXECUTION (Python scripts)   |
+              |  execution/*.py               |
+              |  Deterministic API calls and  |
+              |  data processing              |
+              +-------------------------------+
+                              |
+                              v
+                           OUTPUT
+              Local files, Google Docs, Slack
+```
+
+**Why DOE:** LLMs are probabilistic (90% accuracy = 59% over 5 steps). Push deterministic work into Python scripts. The orchestrator focuses on decision-making. Hooks enforce the pattern automatically.
+
+---
+
+## Directory Structure
+
+```
+AIAA-Agentic-OS/
+|
+|-- .claude/                    # Claude Code configuration
+|   |-- hooks/                  # 120 enforcement hooks (Python)
+|   `-- settings.local.json     # Hook registrations (126 entries)
+|
+|-- .env                        # API keys (never committed)
+|-- .tmp/                       # Intermediate outputs (gitignored)
+|-- credentials.json            # Google OAuth credentials
+|-- token.pickle                # Google OAuth token
+|
+|-- context/                    # AGENCY CONTEXT - Who you are
+|   |-- agency.md               # Agency info, services, positioning
+|   |-- owner.md                # Owner profile, background, expertise
+|   |-- brand_voice.md          # Tone, style, communication preferences
+|   `-- services.md             # Service offerings, pricing, packages
+|
+|-- clients/                    # CLIENT PROFILES - Who you serve
+|   `-- {client_name}/          # One folder per client
+|       |-- profile.md          # Client info, business, goals
+|       |-- rules.md            # Specific rules for this client
+|       |-- preferences.md      # Style, tone, do's and don'ts
+|       `-- history.md          # Past work, context, outcomes
+|
+|-- directives/                 # SOPs - What to do (150 files)
+|   |-- vsl_funnel_orchestrator.md
+|   |-- company_market_research.md
+|   `-- ...
+|
+|-- execution/                  # Python scripts - Doing (151 files)
+|   |-- generate_vsl_funnel.py
+|   |-- create_google_doc.py
+|   `-- ...
+|
+|-- skills/                     # Domain expertise (286 skill bibles)
+|   |-- SKILL_BIBLE_*.md
+|   `-- ...
+|
+|-- railway_apps/               # Dashboard deployment
+|   `-- aiaa_dashboard/         # Flask dashboard app
+|       |-- app.py
+|       |-- Procfile
+|       `-- requirements.txt
+|
+|-- AGENTS.md                   # Full agent instructions
+|-- CLAUDE.md                   # Mirrored instructions for Claude Code
+|-- QUICKSTART_PROMPT.md        # Setup prompt for new users
+`-- requirements.txt            # Python dependencies
+```
 
 ---
 
@@ -17,7 +113,7 @@ Claude will automatically install: Homebrew, Python, Git, Node.js, Railway CLI, 
 **Open Claude Code and paste this entire prompt to get started:**
 
 ```
-I want to set up AIAA Agentic OS v2.3. Please help me through the entire process interactively, asking me ONE question at a time and waiting for my response before moving on.
+I want to set up AIAA Agentic OS v3.0. Please help me through the entire process interactively, asking me ONE question at a time and waiting for my response before moving on.
 
 ## Prerequisites Check (Do This FIRST)
 
@@ -124,7 +220,7 @@ Create my .env file with API keys. Ask me for each one individually, and walk me
 **How to get it:**
 1. Go to https://openrouter.ai
 2. Click "Sign Up" (top right) - use Google or email
-3. Once logged in, click your profile icon → "Keys"
+3. Once logged in, click your profile icon > "Keys"
 4. Click "Create Key"
 5. Name it "AIAA" and click "Create"
 6. Copy the key (starts with `sk-or-`)
@@ -140,7 +236,7 @@ Create my .env file with API keys. Ask me for each one individually, and walk me
 **How to get it:**
 1. Go to https://perplexity.ai
 2. Sign up or log in
-3. Click your profile icon (bottom left) → "Settings"
+3. Click your profile icon (bottom left) > "Settings"
 4. Click "API" in the left sidebar
 5. Click "Generate" to create a new API key
 6. Copy the key (starts with `pplx-`)
@@ -155,7 +251,7 @@ Create my .env file with API keys. Ask me for each one individually, and walk me
 
 **How to get it:**
 1. Go to https://api.slack.com/apps
-2. Click "Create New App" → "From scratch"
+2. Click "Create New App" > "From scratch"
 3. Name it "AIAA Notifications" and select your workspace
 4. Click "Create App"
 5. In the left sidebar, click "Incoming Webhooks"
@@ -174,7 +270,7 @@ Create my .env file with API keys. Ask me for each one individually, and walk me
 **How to get it:**
 1. Go to https://console.anthropic.com
 2. Sign up with email
-3. Click "Get API Keys" → "Create Key"
+3. Click "Get API Keys" > "Create Key"
 4. Copy the key (starts with `sk-ant-`)
 
 ---
@@ -183,7 +279,7 @@ Create my .env file with API keys. Ask me for each one individually, and walk me
 
 **How to get it:**
 1. Go to https://fal.ai
-2. Sign up → click your profile → "Dashboard" → "Keys"
+2. Sign up > click your profile > "Dashboard" > "Keys"
 3. Click "Create Key" and copy it
 
 ---
@@ -192,7 +288,7 @@ Create my .env file with API keys. Ask me for each one individually, and walk me
 
 **How to get it:**
 1. Go to https://console.apify.com
-2. Sign up → click "Settings" → "Integrations"
+2. Sign up > click "Settings" > "Integrations"
 3. Copy your API token
 
 ---
@@ -205,18 +301,18 @@ This enables automatic document creation, lead exports to Sheets, and file manag
 
 ### Step 3a: Create Google Cloud Project
 1. Go to https://console.cloud.google.com
-2. Click the project dropdown → "NEW PROJECT"
-3. Name it "AIAA Agentic OS" → Click "CREATE"
+2. Click the project dropdown > "NEW PROJECT"
+3. Name it "AIAA Agentic OS" > Click "CREATE"
 
 ### Step 3b: Enable Required APIs
-1. Go to "APIs & Services" → "Library"
+1. Go to "APIs & Services" > "Library"
 2. Search and ENABLE each: **Google Docs API**, **Google Sheets API**, **Google Drive API**
 
 ### Step 3c: Create OAuth 2.0 Credentials
-1. Go to "APIs & Services" → "Credentials"
-2. Click "+ CREATE CREDENTIALS" → "OAuth client ID"
+1. Go to "APIs & Services" > "Credentials"
+2. Click "+ CREATE CREDENTIALS" > "OAuth client ID"
 3. If prompted, configure consent screen (External, add your email as test user)
-4. Application type: "Desktop app" → Name: "AIAA Desktop Client" → CREATE
+4. Application type: "Desktop app" > Name: "AIAA Desktop Client" > CREATE
 
 ### Step 3d: Download Credentials
 1. Click "DOWNLOAD JSON" on the popup
@@ -351,7 +447,7 @@ RUN (using the domain from above):
 
 curl -s "https://[THE_GENERATED_DOMAIN]/health"
 
-Check if it returns: {"status": "ok", "version": "2.3.0", "workflows": 139}
+Check if it returns: {"status": "ok", "version": "3.0", "workflows": 150}
 
 If successful, tell me "Dashboard is live!" If it fails, wait 30 seconds and try again (deployment may still be starting).
 
@@ -362,7 +458,7 @@ Once everything is deployed, give me:
 - Password (the one I chose)
 - Remind me to bookmark it!
 
-Tell me: "Your AIAA Dashboard is now live! You can monitor all 139 workflows, manage environment variables, and track webhook events."
+Tell me: "Your AIAA Dashboard is now live! You can monitor all 150 workflows, manage environment variables, and track webhook events."
 
 ## Step 6: Test the System
 
@@ -380,7 +476,7 @@ Show me the output file location and tell me if it was successful.
 
 ## Step 7: Show What's Available
 
-Give me a quick tour of the 139 workflows:
+Give me a quick tour of the 150 workflows:
 
 **Content Creation (25+ workflows):**
 - Blog posts, LinkedIn posts, Twitter threads
@@ -441,17 +537,137 @@ When you paste this prompt, Claude Code becomes your personal setup assistant:
 2. **Configures API keys** - One-by-one walkthrough with detailed instructions
 3. **Sets up Google integration** - Drive, Docs & Sheets for auto-documents and exports
 4. **Creates agency profile** - Your brand voice and services
-5. **Deploys dashboard to Railway** - **Fully automated:**
-   - Creates Railway project
-   - Deploys dashboard code
-   - Sets all environment variables (generates hashes/secrets for you)
-   - Generates public domain
-   - Verifies deployment
-   - Provides login credentials
+5. **Deploys dashboard to Railway** - Fully automated deployment with environment config
 6. **Tests the system** - Verifies everything works
-7. **Shows capabilities** - Tour of all 139 workflows
+7. **Shows capabilities** - Tour of all 150 workflows
 
-**Time to complete:** 20-30 minutes
+---
+
+## System Overview
+
+| Resource | Count | Location |
+|----------|-------|----------|
+| Workflow Directives | 150 | `directives/` |
+| Execution Scripts | 151 | `execution/` |
+| Skill Bibles | 286 | `skills/` |
+| Enforcement Hooks | 120 | `.claude/hooks/` |
+| Hook Registrations | 126 | `.claude/settings.local.json` |
+
+---
+
+## Claude Code Hooks (Automated Enforcement)
+
+The hook system is the enforcement layer of the DOE architecture. Every time Claude uses a tool (reading files, writing code, running commands), the relevant hooks fire automatically to enforce compliance, prevent mistakes, and track system health.
+
+### How Hooks Work
+
+```
+Claude decides to use a tool
+            |
+            v
+  +-------------------------+
+  |  PreToolUse Hooks       |  <-- BEFORE the tool runs
+  |  (52 registrations)     |
+  |                         |
+  |  Can BLOCK the action   |
+  |  Can WARN the agent     |
+  |  Can silently log       |
+  +-------------------------+
+            |
+            v
+     Tool executes
+     (if not blocked)
+            |
+            v
+  +-------------------------+
+  |  PostToolUse Hooks      |  <-- AFTER the tool runs
+  |  (74 registrations)     |
+  |                         |
+  |  Can REJECT the result  |
+  |  Can flag quality       |
+  |  Can track metrics      |
+  +-------------------------+
+            |
+            v
+  Claude continues with task
+```
+
+Hooks are Python scripts that receive tool call data via stdin and respond with exit codes (PreToolUse) or JSON decisions (PostToolUse). They use only Python standard library -- no pip dependencies.
+
+### 15 Tiers of Enforcement
+
+The 120 hooks are organized into 15 tiers, each targeting a specific layer of system reliability:
+
+| Tier | Name | Hooks | Purpose |
+|------|------|-------|---------|
+| 1 | System Stability | 1-10 | Prevent dangerous operations, guard secrets, validate API keys |
+| 2 | DOE Enforcement | 11-20 | Enforce DOE pattern, context loading, directive compliance |
+| 3 | Quality Gates | 21-30 | Output validation, content length, markdown formatting |
+| 4 | Operations | 31-40 | API cost tracking, rate limits, execution logging |
+| 5 | Workflow Intelligence | 41-50 | VSL/cold email SOP compliance, funnel completeness |
+| 6 | Pre-Execution Safety | 51-60 | Script validation, argument checking, dependency chains |
+| 7 | Output Validation | 61-65 | JSON validation, Google Docs formatting, delivery pipeline |
+| 8 | Railway & Deployment | 66-70 | Deploy guards, env var completeness, cron validation |
+| 9 | Analytics | 71-75 | Session tracking, productivity scoring, word counts |
+| 10 | Monitoring | 76-80 | Hook health, self-anneal tracking, daily summaries |
+| 11 | DOE Structural Integrity | 81-90 | Directive completeness, phase ordering, SOP compliance |
+| 12 | Content Intelligence | 91-100 | Brand voice, CTA validation, SEO, tone consistency |
+| 13 | Execution Safety | 101-105 | API response validation, retry loops, path traversal |
+| 14 | Client & Delivery | 106-115 | Client isolation, SLA monitoring, deliverable tracking |
+| 15 | System Optimization | 116-120 | Bottleneck detection, quality trends, health reporting |
+
+### Hook Behavior Summary
+
+| Behavior | Count | What It Does |
+|----------|-------|--------------|
+| Hard Block | 14 | Stops dangerous actions (secrets in code, path traversal, command injection) |
+| Warn / Info | 62 | Alerts on quality issues, missing context, SOP deviations |
+| Silent Tracking | 44 | Logs metrics, patterns, and usage data for system improvement |
+
+### Key Use Cases
+
+**DOE Pattern Enforcement**
+
+The `doe_enforcer` and `context_loader_enforcer` hooks ensure Claude follows the Directive-Orchestration-Execution pattern. If Claude tries to generate content without first loading `context/agency.md` or the relevant client profile, the hook warns. If a directive exists for the task but Claude skips it, the hook catches that too.
+
+**Secret Protection**
+
+The `secrets_guard` hook scans every file write for API keys, tokens, webhook URLs, and credentials. If Claude writes a hardcoded secret into a file, the hook blocks the write before it reaches disk. The `pii_detection_guard` does the same for personally identifiable information.
+
+**Quality Gates on Output**
+
+When Claude writes deliverables to `.tmp/`, hooks like `output_quality_gate`, `content_length_enforcer`, and `brand_voice_compliance` validate the output meets minimum standards. Sales copy gets checked for CTAs (`cta_validation`). Blog posts get checked for SEO keywords (`seo_keyword_validator`). Everything gets checked against the brand voice defined in `context/brand_voice.md`.
+
+**Client Data Isolation**
+
+The `multi_client_context_isolation` and `client_data_isolation_guard` hooks prevent cross-contamination between clients. If Claude is working on a deliverable for Client A and accidentally loads context from Client B, the hook catches it. The `client_rules_enforcer` makes sure client-specific rules from `clients/{name}/rules.md` are being followed.
+
+**Workflow SOP Compliance**
+
+Workflow-specific hooks like `vsl_workflow_enforcer` and `cold_email_workflow_enforcer` ensure Claude follows the step-by-step process defined in each directive. If the directive says "research first, then write," and Claude tries to skip research, the hook intervenes.
+
+**Execution Safety**
+
+Before running any Python script, hooks validate that the script exists (`script_exists_guard`), has valid arguments (`script_argument_validator`), and won't exceed resource limits (`memory_usage_estimator`). The `retry_loop_detector` catches infinite retry loops. The `command_injection_guard` blocks shell injection patterns.
+
+**Self-Annealing Support**
+
+After every task, hooks like `self_anneal_reminder` track whether Claude updated directives and skill bibles with what it learned. The `workflow_completion_tracker` and `error_categorizer` log patterns so the system improves over time. The `quality_trend_analyzer` identifies declining output quality before it becomes a problem.
+
+### Hook State & Debugging
+
+All hook state persists in `.tmp/hooks/*.json`. Every hook supports CLI flags:
+
+```bash
+# Check what a hook is tracking
+python3 .claude/hooks/secrets_guard.py --status
+
+# Reset a hook's state
+python3 .claude/hooks/workflow_completion_tracker.py --reset
+
+# Check system-wide hook health
+python3 .claude/hooks/system_health_reporter.py --status
+```
 
 ---
 
@@ -550,34 +766,21 @@ Create a monthly report for [CLIENT NAME]. Key metrics: [LIST METRICS]. Highligh
 
 ---
 
-## System Overview
+## AIAA Dashboard
 
-| What | Count |
-|------|-------|
-| Workflow Templates | 139 |
-| Execution Scripts | 130+ |
-| Skill Bibles (AI Knowledge) | 280+ |
-
-The system uses a **DOE** architecture:
-- **Directives** - Natural language SOPs that define what to do
-- **Orchestration** - Claude Code reads directives and makes decisions
-- **Execution** - Python scripts handle API calls and data processing
-
----
-
-## AIAA Dashboard (v2.3)
-
-A beautiful web dashboard for monitoring and managing your AIAA system. Deploy to Railway in minutes.
+A web dashboard for monitoring and managing your AIAA system. Deploy to Railway in minutes.
 
 ### Dashboard Features
 
-- **139 Documented Workflows** - Full descriptions, prerequisites, how-to-run instructions
+- **150 Documented Workflows** - Full descriptions, prerequisites, how-to-run instructions
+- **Active Workflow Management** - Run Now, Schedule Editor, Cron Toggle
+- **Webhook Workflows** - Register, test, toggle, and delete webhooks with optional HTTP forwarding to standalone services
+- **Project-Wide Shared Variables** - Set API keys once, all services inherit them automatically
 - **Light/Dark Mode** - Toggle with localStorage persistence
-- **Environment Variables** - View and set API keys from the UI
-- **Webhook Monitoring** - Track incoming webhooks and events
-- **Real-time Logs** - See all workflow executions
+- **Environment Variables** - View and set API keys from the UI (sets project-wide shared variables)
+- **Real-time Logs** - See all workflow executions and webhook events
 - **Mobile Responsive** - Works on phones and tablets
-- **Password Protected** - Secure login system
+- **Password Protected** - Secure SHA-256 hashed login
 
 ### Deploy to Railway
 
@@ -585,41 +788,59 @@ A beautiful web dashboard for monitoring and managing your AIAA system. Deploy t
 - Railway account (https://railway.app)
 - Railway CLI installed: `npm install -g @railway/cli`
 
-**Step 1: Login to Railway**
 ```bash
 railway login
-```
-
-**Step 2: Navigate to dashboard folder**
-```bash
 cd railway_apps/aiaa_dashboard
+railway init       # Select "Empty Project"
+railway up         # Deploy
+railway domain     # Generate public URL
 ```
 
-**Step 3: Initialize Railway project**
-```bash
-railway init
-```
-Select "Empty Project" when prompted.
-
-**Step 4: Deploy**
-```bash
-railway up
-```
-
-**Step 5: Configure environment variables**
-
-In Railway's dashboard (https://railway.app), add these variables:
+**Required Environment Variables (Dashboard Service):**
 
 | Variable | Description |
 |----------|-------------|
-| `DASHBOARD_USERNAME` | Login username (default: admin) |
+| `DASHBOARD_USERNAME` | Login username |
 | `DASHBOARD_PASSWORD_HASH` | SHA-256 hash of your password |
-| `FLASK_SECRET_KEY` | Random secret for sessions (optional) |
-| `OPENROUTER_API_KEY` | Your OpenRouter API key |
-| `PERPLEXITY_API_KEY` | Your Perplexity API key |
-| `SLACK_WEBHOOK_URL` | Slack notifications (optional) |
+| `FLASK_SECRET_KEY` | Random secret for sessions |
+| `RAILWAY_API_TOKEN` | Railway API token (manages cron, shared variables) |
 
-**Generate password hash (use heredoc to avoid escape issues with special characters like ! or \):**
+**Project-Wide Shared Variables (set once, all services inherit):**
+
+| Variable | Description |
+|----------|-------------|
+| `OPENROUTER_API_KEY` | All AI generation workflows |
+| `PERPLEXITY_API_KEY` | Research workflows |
+| `SLACK_WEBHOOK_URL` | Notifications |
+| `ANTHROPIC_API_KEY` | Direct Claude access |
+| `FAL_KEY` | Image generation |
+| `APIFY_API_TOKEN` | Lead scraping |
+| `CALENDLY_API_KEY` | Calendly integration |
+| `INSTANTLY_API_KEY` | Email outreach |
+
+Shared variables are set via the dashboard's Environment page (which calls the Railway API internally) or via the `/api/shared-variables/sync` endpoint. New services automatically inherit all shared variables.
+
+### Deploy Workflows
+
+All workflows are deployed via a single unified script:
+
+```bash
+# Cron workflow (runs on schedule)
+python3 execution/deploy_to_railway.py --directive x_keyword_youtube_content --type cron --schedule "0 */3 * * *" --auto
+
+# Webhook workflow (triggered by external events)
+python3 execution/deploy_to_railway.py --directive calendly_meeting_prep --type webhook --slug calendly --slack-notify --auto
+
+# Web service (always-on)
+python3 execution/deploy_to_railway.py --directive ai_news_digest --type web --auto
+
+# List deployable directives
+python3 execution/deploy_to_railway.py --list
+```
+
+Every workflow deploys as a standalone Railway service. API keys are synced as project-level shared variables (not duplicated per service). The deploy script handles scaffolding, deployment, env var sync, cron configuration, webhook registration, and dashboard config updates.
+
+**Generate password hash:**
 ```bash
 python3 << 'PYHASH'
 import hashlib
@@ -627,34 +848,6 @@ password = "YOUR_PASSWORD_HERE"
 print(hashlib.sha256(password.encode()).hexdigest())
 PYHASH
 ```
-
-**Step 6: Generate domain**
-
-In Railway dashboard, go to Settings → Generate Domain to get your public URL.
-
-Your dashboard will be available at: `https://your-app.up.railway.app`
-
-### Dashboard Screenshots
-
-Once deployed, your dashboard includes:
-- **Overview** - Stats, recent events, quick workflow access
-- **Workflows** - Browse all 139 workflows with search
-- **Workflow Details** - Full documentation with code examples
-- **Environment** - Manage API keys
-- **Webhooks** - Available endpoints
-- **Logs** - Event history
-
----
-
-## Required API Keys
-
-| Key | What It's For | Get It At |
-|-----|---------------|-----------|
-| OPENROUTER_API_KEY | Powers all AI generation (required) | https://openrouter.ai/keys |
-| PERPLEXITY_API_KEY | Deep research capabilities | https://perplexity.ai/settings/api |
-| FAL_API_KEY | AI image generation (Nano Banana Pro) | https://fal.ai/dashboard/keys |
-| SLACK_WEBHOOK_URL | Notifications | https://api.slack.com/apps |
-| APIFY_API_TOKEN | Lead scraping | https://console.apify.com |
 
 ---
 
@@ -664,52 +857,28 @@ Once deployed, your dashboard includes:
 - `agency.md` - Your agency name, positioning, mission
 - `brand_voice.md` - Your tone and style guidelines
 - `services.md` - What you offer
+- `owner.md` - Owner profile and background
 
 ### Your Clients (`clients/{name}/` folders)
-- `profile.md` - Client business info
-- `rules.md` - Content rules for this client
+- `profile.md` - Client business info, goals, audience
+- `rules.md` - Content rules and compliance requirements
 - `preferences.md` - Their style preferences
+- `history.md` - Past work and outcomes
+
+Context is loaded automatically by Claude before generating any content. Hooks enforce that this loading happens.
 
 ---
 
-## New Features (v2.3 - January 2026)
+## Required API Keys
 
-### AIAA Dashboard
-Beautiful web dashboard deployed to Railway with:
-- 139 fully documented workflows
-- Light/dark mode toggle
-- Environment variable management
-- Webhook monitoring & logs
-- Mobile-responsive design
-
-### AI Ad Creative Generation
-All ad workflows now generate actual images using **fal.ai Nano Banana Pro**:
-- `generate_meta_ads_campaign.py --generate-images`
-- `generate_ad_creative.py --generate-images`
-- `generate_static_ad.py --generate-images`
-
-### Calendly Meeting Prep Automation
-Automatic research when meetings are booked:
-- Instant Slack alerts
-- Company & prospect research via Perplexity
-- AI-generated talking points via Claude
-- Formatted Google Docs with meeting briefs
-
-### Landing Page Generator with PROPS Formula
-Generate high-converting landing pages with the PROPS funnel structure:
-- Problem amplification (3-layer deep)
-- Result demonstration (Triple R formula)
-- Proof pyramid (testimonials)
-- Objection handling (FAQ)
-- Simple next step (offer stack)
-
-### 139 Workflow Categories
-- **Content Creation** (25+): Blogs, social posts, YouTube scripts, newsletters
-- **Sales & Funnels** (30+): VSL scripts, sales pages, webinar funnels, email sequences
-- **Research** (20+): Company research, competitor monitoring, niche validation
-- **Lead Generation** (15+): Google Maps, LinkedIn, email enrichment
-- **Paid Advertising** (15+): Meta ads, Google Ads, ad creative generation
-- **Client Management** (20+): Onboarding, QBRs, churn alerts, invoices
+| Key | What It's For | Get It At |
+|-----|---------------|-----------|
+| `OPENROUTER_API_KEY` | Powers all AI generation (required) | https://openrouter.ai/keys |
+| `PERPLEXITY_API_KEY` | Deep research capabilities | https://perplexity.ai/settings/api |
+| `FAL_KEY` | AI image generation | https://fal.ai/dashboard/keys |
+| `SLACK_WEBHOOK_URL` | Notifications | https://api.slack.com/apps |
+| `APIFY_API_TOKEN` | Lead scraping | https://console.apify.com |
+| `ANTHROPIC_API_KEY` | Direct Claude access (optional) | https://console.anthropic.com |
 
 ---
 

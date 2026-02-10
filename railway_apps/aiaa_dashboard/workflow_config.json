@@ -11,6 +11,11 @@
       "name": "X Keyword Search \u2192 YouTube Content",
       "description": "Searches X for trending posts and generates YouTube video ideas with full outlines",
       "enabled": true
+    },
+    "641bb3a1-caa0-4004-861a-91b4b63c8d79": {
+      "name": "Calendly Meeting Prep",
+      "description": "Automatically prepares you for sales calls when someone books a Calendly meeting",
+      "enabled": true
     }
   }
 }

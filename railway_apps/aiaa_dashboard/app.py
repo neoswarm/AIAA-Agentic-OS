@@ -15,6 +15,7 @@ Features:
 import os
 import json
 import hashlib
+import hmac
 import secrets
 import re
 from datetime import datetime
@@ -95,8 +96,8 @@ def fetch_active_workflows_from_railway():
     workflow_metadata = config.get("workflows", {})
 
     query = """
-    query {
-        project(id: "%s") {
+    query($projectId: String!) {
+        project(id: $projectId) {
             id
             name
             services {
@@ -117,7 +118,7 @@ def fetch_active_workflows_from_railway():
             }
         }
     }
-    """ % project_id
+    """
 
     try:
         response = http_requests.post(
@@ -126,7 +127,7 @@ def fetch_active_workflows_from_railway():
                 "Authorization": f"Bearer {RAILWAY_API_TOKEN}",
                 "Content-Type": "application/json"
             },
-            json={"query": query},
+            json={"query": query, "variables": {"projectId": project_id}},
             timeout=10
         )
         data = response.json()
@@ -273,21 +274,31 @@ def _persist_webhook_config():
         pass
 
     def _do_persist():
-        try:
-            project_id = "3b96c81f-9518-4131-b2bc-bcd7a524a5ef"
-            service_id = "415686bb-d10c-40c5-b610-4c5e41bbe762"
-            env_id = "951885c9-85a5-46f5-96a1-2151936b0314"
-            query = '''mutation { variableUpsert(input: { projectId: "%s", serviceId: "%s", environmentId: "%s", name: "WEBHOOK_CONFIG", value: %s }) }''' % (
-                project_id, service_id, env_id, json.dumps(config_json)
-            )
-            http_requests.post(
-                RAILWAY_API_URL,
-                headers={"Authorization": f"Bearer {RAILWAY_API_TOKEN}", "Content-Type": "application/json"},
-                json={"query": query},
-                timeout=10
-            )
-        except Exception:
-            pass  # Best-effort — file backup exists
+        project_id = os.getenv("RAILWAY_PROJECT_ID", "3b96c81f-9518-4131-b2bc-bcd7a524a5ef")
+        service_id = os.getenv("RAILWAY_SERVICE_ID", "415686bb-d10c-40c5-b610-4c5e41bbe762")
+        env_id = os.getenv("RAILWAY_ENV_ID", "951885c9-85a5-46f5-96a1-2151936b0314")
+        query = """mutation($input: VariableUpsertInput!) { variableUpsert(input: $input) }"""
+        variables = {
+            "input": {
+                "projectId": project_id,
+                "serviceId": service_id,
+                "environmentId": env_id,
+                "name": "WEBHOOK_CONFIG",
+                "value": config_json
+            }
+        }
+        for attempt in range(3):
+            try:
+                http_requests.post(
+                    RAILWAY_API_URL,
+                    headers={"Authorization": f"Bearer {RAILWAY_API_TOKEN}", "Content-Type": "application/json"},
+                    json={"query": query, "variables": variables},
+                    timeout=10
+                )
+                return  # Success
+            except Exception:
+                if attempt < 2:
+                    time.sleep(2 ** attempt)
 
     threading.Thread(target=_do_persist, daemon=True).start()
 
@@ -2862,12 +2873,25 @@ for name, wf in WORKFLOWS.items():
 # =============================================================================
 
 def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Hash password. Supports bcrypt ($2b$) or falls back to SHA-256 for backward compat."""
+    try:
+        import bcrypt
+        return bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12)).decode()
+    except ImportError:
+        return hashlib.sha256(password.encode()).hexdigest()
 
 def check_password(password):
     if not DASHBOARD_PASSWORD_HASH:
         return False
-    return hash_password(password) == DASHBOARD_PASSWORD_HASH
+    # Detect bcrypt hash (starts with $2b$)
+    if DASHBOARD_PASSWORD_HASH.startswith("$2b$"):
+        try:
+            import bcrypt
+            return bcrypt.checkpw(password.encode(), DASHBOARD_PASSWORD_HASH.encode())
+        except ImportError:
+            return False
+    # Legacy SHA-256 fallback with constant-time comparison
+    return hmac.compare_digest(hashlib.sha256(password.encode()).hexdigest(), DASHBOARD_PASSWORD_HASH)
 
 def login_required(f):
     @wraps(f)
@@ -3320,10 +3344,19 @@ def env_page():
         var_name = request.form.get('var_name', '').strip()
         var_value = request.form.get('var_value', '').strip()
         if var_name and var_value:
-            RUNTIME_ENV_VARS[var_name] = var_value
-            os.environ[var_name] = var_value
-            log_event("env_var", "set", {"variable": var_name}, source="dashboard")
-            message, message_type = f"Successfully set {var_name}", "success"
+            # Set as project-level shared variable via Railway API
+            result = _set_shared_variables({var_name: var_value})
+            if isinstance(result, dict) and "error" in result:
+                # Fallback to in-memory only
+                RUNTIME_ENV_VARS[var_name] = var_value
+                os.environ[var_name] = var_value
+                log_event("env_var", "set", {"variable": var_name, "scope": "local_only", "reason": result["error"]}, source="dashboard")
+                message, message_type = f"Set {var_name} (local only — shared variable API unavailable)", "warning"
+            else:
+                RUNTIME_ENV_VARS[var_name] = var_value
+                os.environ[var_name] = var_value
+                log_event("shared_var", "set", {"variable": var_name}, source="dashboard")
+                message, message_type = f"Set {var_name} as project-wide shared variable", "success"
         else:
             message, message_type = "Please provide both name and value", "error"
     env_vars = [{"name": var, "set": bool(os.getenv(var, "") or RUNTIME_ENV_VARS.get(var, "")), "preview": f"{(os.getenv(var, '') or RUNTIME_ENV_VARS.get(var, ''))[:4]}...{(os.getenv(var, '') or RUNTIME_ENV_VARS.get(var, ''))[-4:]}" if len(os.getenv(var, "") or RUNTIME_ENV_VARS.get(var, "")) > 10 else "***" if os.getenv(var, "") or RUNTIME_ENV_VARS.get(var, "") else ""} for var in TRACKED_ENV_VARS]
@@ -3345,7 +3378,7 @@ ENV_TEMPLATE = f'''
         {{% if message %}}<div class="alert alert-{{{{ message_type }}}}">{{{{ message }}}}</div>{{% endif %}}
         <div class="card"><div class="card-header"><span class="card-title">Set Environment Variable</span></div><div class="card-body"><form method="POST"><div style="display:grid;grid-template-columns:1fr 2fr auto;gap:1rem;align-items:end;"><div class="form-group" style="margin-bottom:0;"><label class="form-label">Variable Name</label><select name="var_name" class="form-input">{{% for var in tracked_vars %}}<option value="{{{{ var }}}}">{{{{ var }}}}</option>{{% endfor %}}</select></div><div class="form-group" style="margin-bottom:0;"><label class="form-label">Value</label><input type="password" name="var_value" class="form-input" placeholder="Enter API key..."></div><button type="submit" class="btn">Set Variable</button></div></form></div></div>
         <div class="card"><div class="card-header"><span class="card-title">Current Configuration</span></div><ul style="list-style:none;">{{% for var in env_vars %}}<li style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border-subtle);"><span class="mono">{{{{ var.name }}}}</span><div style="display:flex;align-items:center;gap:0.75rem;">{{% if var.set %}}<span class="mono" style="color:var(--text-muted);background:var(--bg-elevated);padding:0.25rem 0.5rem;border-radius:4px;">{{{{ var.preview }}}}</span>{{% else %}}<span style="font-size:0.8125rem;color:var(--text-muted);">Not configured</span>{{% endif %}}<span style="width:8px;height:8px;border-radius:50%;background:{{{{ 'var(--success)' if var.set else 'var(--error)' }}}};"></span></div></li>{{% endfor %}}</ul></div>
-        <div style="padding:1rem 1.25rem;background:var(--bg-elevated);border-radius:8px;font-size:0.8125rem;color:var(--text-secondary);"><strong>Note:</strong> Variables set here are stored in memory for this session. For persistent storage, set them in Railway's dashboard.</div>
+        <div style="padding:1rem 1.25rem;background:var(--bg-elevated);border-radius:8px;font-size:0.8125rem;color:var(--text-secondary);"><strong>Note:</strong> Variables set here are saved as project-wide shared variables via the Railway API. All services in the project will inherit them automatically.</div>
     </main>
 </body>
 </html>
@@ -4273,7 +4306,7 @@ LOGS_TEMPLATE = f'''
 
 @app.route('/health')
 def health():
-    return jsonify({"status": "ok", "service": "aiaa-dashboard", "version": "2.4.0", "workflows": len(WORKFLOWS), "timestamp": datetime.now().isoformat()})
+    return jsonify({"status": "ok", "timestamp": datetime.now().isoformat()})
 
 @app.route('/api/events')
 def api_events():
@@ -4325,6 +4358,133 @@ def api_set_env():
     log_event("env_var", "set", {"variable": data['name']}, source="api")
     return jsonify({"status": "ok", "variable": data['name']})
 
+
+# =============================================================================
+# Shared Variables API (Project-Level)
+# =============================================================================
+
+def _get_project_env_ids():
+    """Return (project_id, environment_id) from env vars or defaults."""
+    return (
+        os.getenv("RAILWAY_PROJECT_ID", "3b96c81f-9518-4131-b2bc-bcd7a524a5ef"),
+        os.getenv("RAILWAY_ENVIRONMENT_ID", os.getenv("RAILWAY_ENV_ID", "951885c9-85a5-46f5-96a1-2151936b0314")),
+    )
+
+
+def _set_shared_variables(variables: dict) -> dict:
+    """Set project-level shared variables via Railway GraphQL API (no serviceId)."""
+    if not RAILWAY_API_TOKEN:
+        return {"error": "RAILWAY_API_TOKEN not configured"}
+    project_id, env_id = _get_project_env_ids()
+    query = """mutation variableCollectionUpsert($input: VariableCollectionUpsertInput!) {
+        variableCollectionUpsert(input: $input)
+    }"""
+    result = railway_api_call(query, {
+        "input": {
+            "projectId": project_id,
+            "environmentId": env_id,
+            "variables": variables,
+        }
+    })
+    return result
+
+
+def _get_shared_variables() -> dict:
+    """Fetch project-level shared variables (no serviceId = shared)."""
+    if not RAILWAY_API_TOKEN:
+        return {"error": "RAILWAY_API_TOKEN not configured"}
+    project_id, env_id = _get_project_env_ids()
+    query = """query variables($projectId: String!, $environmentId: String!, $serviceId: String) {
+        variables(projectId: $projectId, environmentId: $environmentId, serviceId: $serviceId)
+    }"""
+    result = railway_api_call(query, {"projectId": project_id, "environmentId": env_id, "serviceId": None})
+    if "error" in result:
+        return result
+    data = result.get("data", {})
+    if data is None:
+        errors = result.get("errors", [])
+        return {"error": errors[0].get("message", "Unknown API error") if errors else "Unknown API error"}
+    return data.get("variables", {})
+
+
+@app.route('/api/shared-variables', methods=['GET'])
+def api_get_shared_variables():
+    """List all project-level shared variables (redacted).
+    Tries Railway API first; falls back to locally known env vars.
+    """
+    if not session.get('logged_in'):
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        result = _get_shared_variables()
+        if isinstance(result, dict) and "error" in result:
+            # API query may not be authorized -- fall back to local env knowledge
+            result = None
+    except Exception:
+        result = None
+
+    # If API failed, build list from TRACKED_ENV_VARS + RUNTIME_ENV_VARS
+    if result is None:
+        result = {}
+        for var in TRACKED_ENV_VARS:
+            val = os.getenv(var, "") or RUNTIME_ENV_VARS.get(var, "")
+            if val:
+                result[var] = val
+
+    redacted = {}
+    for k, v in (result or {}).items():
+        if isinstance(v, str) and len(v) > 10:
+            redacted[k] = f"{v[:4]}...{v[-4:]}"
+        elif isinstance(v, str) and v:
+            redacted[k] = "***"
+        else:
+            redacted[k] = ""
+    return jsonify({"shared_variables": redacted, "count": len(redacted)})
+
+
+@app.route('/api/shared-variables/set', methods=['POST'])
+def api_set_shared_variable():
+    """Set a single shared variable at the project level."""
+    if not session.get('logged_in'):
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json()
+    if not data or 'name' not in data or 'value' not in data:
+        return jsonify({"error": "Missing name or value"}), 400
+    result = _set_shared_variables({data['name']: data['value']})
+    if isinstance(result, dict) and "error" in result:
+        return jsonify(result), 500
+    RUNTIME_ENV_VARS[data['name']] = data['value']
+    os.environ[data['name']] = data['value']
+    log_event("shared_var", "set", {"variable": data['name']}, source="api")
+    return jsonify({"status": "ok", "variable": data['name'], "scope": "shared"})
+
+
+@app.route('/api/shared-variables/sync', methods=['POST'])
+def api_sync_shared_variables():
+    """Bulk-set multiple shared variables at the project level.
+    POST body: {"variables": {"KEY1": "val1", "KEY2": "val2"}}
+    """
+    if not session.get('logged_in'):
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json()
+    if not data or 'variables' not in data or not isinstance(data['variables'], dict):
+        return jsonify({"error": "Missing 'variables' dict in body"}), 400
+    try:
+        variables = data['variables']
+        result = _set_shared_variables(variables)
+        if isinstance(result, dict) and "error" in result:
+            return jsonify(result), 500
+        # Check for GraphQL errors in the response
+        if isinstance(result, dict) and result.get("errors"):
+            return jsonify({"error": result["errors"][0].get("message", "GraphQL error")}), 500
+        for k, v in variables.items():
+            RUNTIME_ENV_VARS[k] = v
+            os.environ[k] = v
+        log_event("shared_var", "bulk_sync", {"count": len(variables), "keys": list(variables.keys())}, source="api")
+        return jsonify({"status": "ok", "count": len(variables), "scope": "shared", "keys": list(variables.keys())})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 # =============================================================================
 # Workflow Control API (Start/Stop)
 # =============================================================================
@@ -4347,7 +4507,7 @@ def railway_api_call(query: str, variables: dict = None) -> dict:
         response = http_requests.post(RAILWAY_API_URL, json=payload, headers=headers, timeout=30)
         return response.json()
     except Exception as e:
-        return {"error": str(e)}
+        return {"error": "Railway API request failed"}
 
 
 @app.route('/api/workflow/start', methods=['POST'])
@@ -4541,6 +4701,7 @@ def api_workflow_schedule():
     state = get_cron_state(service_id, new_cron)
     state["active"] = True
     state["original_cron"] = new_cron
+    _save_cron_states()
 
     log_event("workflow", "schedule_updated", {"service_id": service_id, "name": workflow_name, "cron": new_cron}, source="api")
     return jsonify({
@@ -4595,17 +4756,41 @@ def api_workflow_status():
             "last_deploy": deployment["createdAt"] if deployment else None
         })
     except (KeyError, TypeError) as e:
-        return jsonify({"error": f"Failed to parse response: {str(e)}"}), 500
+        return jsonify({"error": "Failed to parse workflow status"}), 500
 
 
-# Store cron states locally for tracking
+# Store cron states with file persistence
+CRON_STATES_PATH = Path(__file__).parent / "cron_states.json"
 CRON_STATES = {}  # service_id -> {"active": bool, "original_cron": str}
+_cron_lock = threading.Lock()
+
+def _load_cron_states():
+    """Load cron states from disk on startup."""
+    global CRON_STATES
+    try:
+        if CRON_STATES_PATH.exists():
+            with open(CRON_STATES_PATH, 'r') as f:
+                CRON_STATES = json.load(f)
+    except Exception:
+        CRON_STATES = {}
+
+def _save_cron_states():
+    """Persist cron states to disk."""
+    try:
+        with open(CRON_STATES_PATH, 'w') as f:
+            json.dump(CRON_STATES, f, indent=2)
+    except Exception:
+        pass
+
+_load_cron_states()
 
 def get_cron_state(service_id: str, original_cron: str) -> dict:
     """Get or initialize cron state for a service."""
-    if service_id not in CRON_STATES:
-        CRON_STATES[service_id] = {"active": True, "original_cron": original_cron}
-    return CRON_STATES[service_id]
+    with _cron_lock:
+        if service_id not in CRON_STATES:
+            CRON_STATES[service_id] = {"active": True, "original_cron": original_cron}
+            _save_cron_states()
+        return CRON_STATES[service_id]
 
 
 @app.route('/api/workflow/cron/deactivate', methods=['POST'])
@@ -4706,6 +4891,7 @@ def api_workflow_cron_deactivate():
     state = get_cron_state(service_id, original_cron)
     state["active"] = False
     state["original_cron"] = original_cron
+    _save_cron_states()
 
     log_event("workflow", "cron_deactivated", {"service_id": service_id, "name": workflow_name, "original_cron": original_cron}, source="api")
     return jsonify({
@@ -4818,6 +5004,7 @@ def api_workflow_cron_activate():
     # Update state
     state = get_cron_state(service_id, original_cron)
     state["active"] = True
+    _save_cron_states()
 
     log_event("workflow", "cron_activated", {"service_id": service_id, "name": workflow_name, "cron": original_cron}, source="api")
     return jsonify({
@@ -5050,7 +5237,7 @@ def api_webhook_test():
             "response": resp.json() if resp.headers.get("content-type", "").startswith("application/json") else resp.text[:200]
         })
     except Exception as e:
-        return jsonify({"slug": slug, "test_status": "error", "error": str(e)}), 500
+        return jsonify({"slug": slug, "test_status": "error", "error": "Test request failed"}), 500
 
 
 @app.route('/webhook/<slug>', methods=['POST'])
@@ -5066,7 +5253,7 @@ def webhook_handler(slug):
     # Check if webhook is registered
     if slug not in webhooks:
         log_event(f"webhook:{slug}", "error", {"error": "Not registered"}, source="webhook")
-        return jsonify({"error": f"Webhook '{slug}' not registered", "registered": list(webhooks.keys())}), 404
+        return jsonify({"error": f"Webhook '{slug}' not registered"}), 404
 
     webhook_meta = webhooks[slug]
 
@@ -5156,6 +5343,16 @@ def webhook_handler(slug):
         "name": webhook_meta.get("name", slug),
         "timestamp": datetime.now().isoformat()
     })
+
+@app.after_request
+def set_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    if not request.host.startswith('localhost') and not request.host.startswith('127.'):
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    return response
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8080))
