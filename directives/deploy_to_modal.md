@@ -1,6 +1,6 @@
 # Deploy Workflow to Modal AI
 
-> **Status:** Production Ready | **Last Updated:** January 7, 2026
+> **Status:** Production Ready | **Last Updated:** February 4, 2026
 
 ## What This Workflow Is
 Fully automated deployment of any workflow to Modal AI as a serverless webhook. The agent handles ALL setup automatically - just say "deploy X to Modal" and get back working endpoints.
@@ -152,6 +152,50 @@ Send POST requests with this structure:
 Parameters are passed to the execution script as CLI args:
 `--param_name "value" --another_param "value"`
 
+## Critical: dotenv Import Pattern for Modal
+
+**BREAKING BUG:** Scripts that bundle `requests` and `dotenv` in the same `try/except` with `sys.exit(1)` will crash on Modal because `python-dotenv` is not installed in the Modal container image. Modal injects env vars via secrets -- no `.env` file is needed.
+
+**Bad (crashes Modal container):**
+```python
+try:
+    import requests
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    print("Error: pip install requests python-dotenv")
+    sys.exit(1)
+```
+
+**Good (works locally AND on Modal):**
+```python
+try:
+    import requests
+except ImportError:
+    print("Error: pip install requests")
+    sys.exit(1)
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # Not needed on Modal -- env vars injected via secrets
+```
+
+**Before deploying any script to Modal**, check its import block and fix this pattern. As of February 2026, 37 scripts in `execution/` still have the crash-causing version.
+
+## Debugging Failed Deployments
+
+When a Modal deployment hangs (requests connect but never return), check container logs:
+```bash
+modal app logs <app-name>
+```
+
+Common causes:
+1. **Import crash** (dotenv pattern above) -- container dies on startup, no response sent
+2. **Missing secret** -- function can't start without its declared secrets
+3. **Cold start timeout** -- first request after idle may take 2-10 seconds
+
 ## Edge Cases
 - Modal not installed → Auto-installs with pip
 - Modal not authenticated → Prompts one-time browser auth
@@ -159,6 +203,7 @@ Parameters are passed to the execution script as CLI args:
 - Directive not found → Returns error with available list
 - Script not found → Falls back to directive name or first existing script
 - Google token missing → Skips Google token upload, may fail at runtime
+- **8 endpoint limit reached** → Stop unused apps with `modal app stop <app-id>`, then redeploy
 
 ## Quality Gates
 - [ ] Modal CLI accessible
@@ -183,9 +228,24 @@ curl -X POST "https://[workspace]--[app]-webhook.modal.run" \
 ```
 
 ## Modal Free Tier Limits
-- 8 web endpoints max
+- **8 web endpoints max** (across ALL deployed apps combined)
 - 30 compute hours/month
-- Cold starts: 2-5 seconds after ~15min idle
+- Cold starts: 2-10 seconds after ~15min idle
+
+### Managing Endpoint Limits
+```bash
+# List all apps and their state
+modal app list
+
+# Stop an app to free endpoints (2 per app: webhook + health)
+modal app stop <app-id>
+
+# Check logs for a deployed app
+modal app logs <app-name>
+
+# List configured secrets
+modal secret list
+```
 
 ## Related
 - All directives in `directives/*.md` are deployable

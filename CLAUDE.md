@@ -395,10 +395,9 @@ railway up            # Deploy the app
 
 **Configure Environment Variables:**
 
-**CRITICAL:** When deploying to Railway, you MUST set the environment variables the app needs. Railway apps don't have access to your local `.env` file - you must explicitly set each variable.
-
+**Dashboard-specific variables:**
 ```bash
-# Generate password hash (use heredoc to avoid escape issues)
+# Generate password hash
 python3 << 'PYHASH'
 import hashlib
 password = "your-password"
@@ -409,39 +408,27 @@ PYHASH
 railway variables set DASHBOARD_USERNAME="admin"
 railway variables set DASHBOARD_PASSWORD_HASH="<hash-from-above>"
 railway variables set FLASK_SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
-
-# Set API keys from your .env (copy values from local .env file)
-railway variables set OPENROUTER_API_KEY="<your-key>"
-railway variables set PERPLEXITY_API_KEY="<your-key>"
-railway variables set ANTHROPIC_API_KEY="<your-key>"
-railway variables set SLACK_WEBHOOK_URL="<your-webhook>"
+railway variables set RAILWAY_API_TOKEN="<your-railway-api-token>"
 
 # Generate public domain
 railway domain
 ```
 
-**Quick way to sync .env to Railway:**
-```bash
-# View your current .env values
-cat .env
+**API keys are project-level shared variables** -- set once via the dashboard Environment page or the `/api/shared-variables/sync` endpoint, and all services inherit them automatically. The deploy script (`deploy_to_railway.py`) handles this during deployment.
 
-# Then set each one that the app needs:
-railway variables set KEY_NAME="value"
-```
-
-**Required Variables by Feature:**
-| Variable | Required For |
-|----------|-------------|
-| `DASHBOARD_USERNAME` | Dashboard login |
-| `DASHBOARD_PASSWORD_HASH` | Dashboard login |
-| `FLASK_SECRET_KEY` | Session security |
-| `RAILWAY_API_TOKEN` | Cron management (Run Now, Schedule Editor, Toggle) |
-| `OPENROUTER_API_KEY` | All AI generation workflows |
-| `PERPLEXITY_API_KEY` | Research workflows |
-| `ANTHROPIC_API_KEY` | Direct Claude access |
-| `SLACK_WEBHOOK_URL` | Notifications |
-| `FAL_KEY` | Image generation |
-| `APIFY_API_TOKEN` | Lead scraping |
+**Required Variables:**
+| Variable | Scope | Required For |
+|----------|-------|-------------|
+| `DASHBOARD_USERNAME` | Dashboard service | Dashboard login |
+| `DASHBOARD_PASSWORD_HASH` | Dashboard service | Dashboard login |
+| `FLASK_SECRET_KEY` | Dashboard service | Session security |
+| `RAILWAY_API_TOKEN` | Dashboard service | Cron management, shared variable sync |
+| `OPENROUTER_API_KEY` | **Shared (project)** | All AI generation workflows |
+| `PERPLEXITY_API_KEY` | **Shared (project)** | Research workflows |
+| `ANTHROPIC_API_KEY` | **Shared (project)** | Direct Claude access |
+| `SLACK_WEBHOOK_URL` | **Shared (project)** | Notifications |
+| `FAL_KEY` | **Shared (project)** | Image generation |
+| `APIFY_API_TOKEN` | **Shared (project)** | Lead scraping |
 
 ### Dashboard Endpoints
 
@@ -452,11 +439,13 @@ Once deployed, your dashboard provides these endpoints:
 | `/` | GET | Dashboard home (requires login) |
 | `/health` | GET | Health check (public) |
 | `/login` | GET/POST | Authentication |
-| `/workflows` | GET | Browse all 139 workflows |
+| `/workflows` | GET | Active Workflows page (cron + webhook) |
 | `/workflow/<id>` | GET | Workflow details & documentation |
-| `/env` | GET | Environment variable management |
-| `/webhooks` | GET | Available webhook endpoints |
+| `/env` | GET/POST | Environment variable management (sets project-wide shared variables) |
 | `/logs` | GET | Execution logs |
+| `/api/shared-variables` | GET | List shared variables (redacted) |
+| `/api/shared-variables/set` | POST | Set a single shared variable |
+| `/api/shared-variables/sync` | POST | Bulk-set multiple shared variables |
 
 ### Webhook Integration
 

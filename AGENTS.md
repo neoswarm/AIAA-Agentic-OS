@@ -345,10 +345,10 @@ Hooks catch mistakes automatically before and after every tool call. They enforc
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### All 70 Hooks by Tier
+### All 128 Hooks by Tier
 
-**Total: 70 hooks | 38 PreToolUse | 35 PostToolUse | 3 Dual-mode**
-**Settings: `.claude/settings.local.json` (38 Pre entries + 35 Post entries = 73 registrations)**
+**Total: 128 hooks | 60 PreToolUse | 78 PostToolUse | 3 Dual-mode**
+**Settings: `.claude/settings.local.json` (60 Pre entries + 78 Post entries = 134 registrations)**
 
 #### Tier 1: System Stability (4 hooks)
 | # | Hook | Type | Tool | Blocks? | Purpose |
@@ -530,13 +530,25 @@ Hooks catch mistakes automatically before and after every tool call. They enforc
 | 119 | `quality_trend_analyzer.py` | Post | Write | Warn | Detects quality degradation compared to historical averages |
 | 120 | `system_health_reporter.py` | Post | Bash | Warn | Aggregates all hook metrics into unified health report |
 
+#### Tier 16: Deployment Guards — Modal & Railway (8 hooks)
+| # | Hook | Type | Tool | Blocks? | Purpose |
+|---|------|------|------|---------|---------|
+| 121 | `modal_deploy_guard.py` | Pre | Bash | Warn | Pre-deploy checklist: CLI installed, dotenv pattern, secrets, endpoint count |
+| 122 | `modal_dotenv_crash_detector.py` | Pre | Bash | Warn | Scans target script for crash-causing `requests+dotenv` import bundle |
+| 123 | `modal_secret_validator.py` | Pre | Bash | Warn | Validates `Secret.from_name()` refs against `modal secret list` |
+| 124 | `modal_endpoint_limit_tracker.py` | Pre | Bash | **Yes (8)** | Blocks deploy if would exceed Modal free tier 8-endpoint limit |
+| 125 | `modal_deploy_logger.py` | Post | Bash | No | Logs deploy results, reminds to check `modal app logs` |
+| 126 | `modal_health_verifier.py` | Post | Bash | No | Outputs verification curl commands after Modal deploy |
+| 127 | `railway_post_deploy_verifier.py` | Post | Bash | No | Outputs health check + log commands after `railway up` |
+| 128 | `railway_domain_drift_detector.py` | Post | Bash | Warn | Detects Railway URL changes that break external webhooks |
+
 ### Hook Summary by Behavior
 
 | Behavior | Count | Examples |
 |----------|-------|---------|
-| **Hard Block** | 14 | secrets_guard, pii_detection, file_size_limit, json_output_validator, agent_limiter, context_budget_guard (85%), large_file_read_blocker, script_exists_guard, retry_loop_detector (3 fails), file_path_traversal_guard, command_injection_guard, backup_before_destructive, context_pollution_preventer (12+), memory_usage_estimator (2GB+) |
-| **Warn/Info** | 62 | doe_enforcer, quality gates, workflow enforcers, deploy guards, content intelligence, phase enforcers, SLA monitor, scope guard |
-| **Silent Tracking** | 44 | execution_logger, activity_logger, pattern_tracker, coverage_tracker, cost_estimator, deliverable_tracker, billing_estimator, versioning, benchmarker, error_categorizer, bottleneck_detector |
+| **Hard Block** | 15 | secrets_guard, pii_detection, file_size_limit, json_output_validator, agent_limiter, context_budget_guard (85%), large_file_read_blocker, script_exists_guard, retry_loop_detector (3 fails), file_path_traversal_guard, command_injection_guard, backup_before_destructive, context_pollution_preventer (12+), memory_usage_estimator (2GB+), modal_endpoint_limit_tracker (8 endpoints) |
+| **Warn/Info** | 67 | doe_enforcer, quality gates, workflow enforcers, deploy guards, content intelligence, phase enforcers, SLA monitor, scope guard, modal_deploy_guard, modal_dotenv_crash_detector, modal_secret_validator, railway_domain_drift_detector |
+| **Silent Tracking** | 46 | execution_logger, activity_logger, pattern_tracker, coverage_tracker, cost_estimator, deliverable_tracker, billing_estimator, versioning, benchmarker, error_categorizer, bottleneck_detector, modal_deploy_logger, modal_health_verifier, railway_post_deploy_verifier |
 
 ### Quality Rules (output_quality_gate.py)
 
@@ -790,6 +802,73 @@ python3 execution/generate_newsletter.py --theme "Weekly AI updates"
 
 ---
 
+## Modal Serverless Deployment
+
+Execution scripts can be deployed to Modal as serverless webhooks. This gives workflows a public URL that can be triggered by external services (Calendly, Stripe, cron, etc.) without running a server.
+
+### Deploy Command
+```bash
+modal deploy execution/<script>.py
+```
+
+### Currently Deployed Apps
+
+| App | Endpoints | Purpose |
+|-----|-----------|---------|
+| `calendly-meeting-prep` | webhook, health | Auto-research when meetings booked |
+| `slack-test` | webhook, health | Test Modal → Slack pipeline |
+
+### Modal Secrets (configured at modal.com)
+
+| Secret Name | Environment Variable |
+|-------------|---------------------|
+| `openrouter-secret` | OPENROUTER_API_KEY |
+| `perplexity-secret` | PERPLEXITY_API_KEY |
+| `slack-webhook` | SLACK_WEBHOOK_URL |
+| `google-service-account` | GOOGLE_SERVICE_ACCOUNT_JSON |
+| `calendly-secret` | CALENDLY_API_KEY |
+
+### Critical: dotenv Import Pattern
+
+Scripts deployed to Modal MUST separate `requests` and `dotenv` imports. Modal containers don't have `python-dotenv` installed, and bundling both in a single `try/except sys.exit(1)` block crashes the container silently (requests hang forever, no error returned).
+
+```python
+# CORRECT - works on Modal and locally
+try:
+    import requests
+except ImportError:
+    sys.exit(1)
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # Not needed on Modal
+```
+
+**37 scripts in `execution/` still have the crash-causing pattern.** Fix each one before deploying to Modal.
+
+### Free Tier Limits
+- **8 web endpoints max** (across all apps, ~4 apps with webhook+health each)
+- 30 compute hours/month
+- Cold starts: 2-10 seconds after idle
+
+### Managing Apps
+```bash
+modal app list                    # See all apps and status
+modal app stop <app-id>           # Free up endpoints
+modal app logs <app-name>         # Debug failures
+modal secret list                 # Check configured secrets
+```
+
+### Debugging Hangs
+If `curl` connects but never returns:
+1. Run `modal app logs <app-name>` — usually reveals an import crash
+2. Check that all declared `modal.Secret.from_name()` secrets exist
+3. Verify the script runs locally with `python3 execution/<script>.py --test`
+
+---
+
 ## AIAA Dashboard & Webhook Deployment
 
 All workflows are managed through the AIAA Dashboard deployed on Railway. The dashboard provides a central hub for monitoring, executing, and configuring workflows.
@@ -826,10 +905,9 @@ railway up            # Deploy the app
 
 **Configure Environment Variables:**
 
-**CRITICAL:** When deploying to Railway, you MUST set the environment variables the app needs. Railway apps don't have access to your local `.env` file - you must explicitly set each variable.
-
+**Dashboard-specific variables (set per-service):**
 ```bash
-# Generate password hash (use heredoc to avoid escape issues)
+# Generate password hash
 python3 << 'PYHASH'
 import hashlib
 password = "your-password"
@@ -840,38 +918,41 @@ PYHASH
 railway variables set DASHBOARD_USERNAME="admin"
 railway variables set DASHBOARD_PASSWORD_HASH="<hash-from-above>"
 railway variables set FLASK_SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
-
-# Set API keys from your .env (copy values from local .env file)
-railway variables set OPENROUTER_API_KEY="<your-key>"
-railway variables set PERPLEXITY_API_KEY="<your-key>"
-railway variables set ANTHROPIC_API_KEY="<your-key>"
-railway variables set SLACK_WEBHOOK_URL="<your-webhook>"
+railway variables set RAILWAY_API_TOKEN="<your-railway-api-token>"
 
 # Generate public domain
 railway domain
 ```
 
-**Quick way to sync .env to Railway:**
-```bash
-# View your current .env values
-cat .env
+**API Keys as Project-Wide Shared Variables:**
 
-# Then set each one that the app needs:
-railway variables set KEY_NAME="value"
+API keys are set as **project-level shared variables** so ALL services inherit them automatically. Set them once via the dashboard's Environment page or the shared variables API:
+
+```bash
+# Via the dashboard UI: go to Environment page, set each key
+# Via the API (from any script that can reach the dashboard):
+curl -X POST "https://your-dashboard.up.railway.app/api/shared-variables/sync" \
+  -H "Content-Type: application/json" -H "Cookie: session=$SESSION" \
+  -d '{"variables": {"OPENROUTER_API_KEY": "...", "PERPLEXITY_API_KEY": "..."}}'
 ```
 
-**Required Variables by Feature:**
-| Variable | Required For |
-|----------|-------------|
-| `DASHBOARD_USERNAME` | Dashboard login |
-| `DASHBOARD_PASSWORD_HASH` | Dashboard login |
-| `FLASK_SECRET_KEY` | Session security |
-| `OPENROUTER_API_KEY` | All AI generation workflows |
-| `PERPLEXITY_API_KEY` | Research workflows |
-| `ANTHROPIC_API_KEY` | Direct Claude access |
-| `SLACK_WEBHOOK_URL` | Notifications |
-| `FAL_KEY` | Image generation |
-| `APIFY_API_TOKEN` | Lead scraping |
+The deploy script (`execution/deploy_to_railway.py`) automatically syncs API keys as shared variables during deployment.
+
+**Required Variables:**
+| Variable | Scope | Required For |
+|----------|-------|-------------|
+| `DASHBOARD_USERNAME` | Dashboard service | Dashboard login |
+| `DASHBOARD_PASSWORD_HASH` | Dashboard service | Dashboard login |
+| `FLASK_SECRET_KEY` | Dashboard service | Session security |
+| `RAILWAY_API_TOKEN` | Dashboard service | Cron management, shared variable sync |
+| `OPENROUTER_API_KEY` | **Shared (project)** | All AI generation workflows |
+| `PERPLEXITY_API_KEY` | **Shared (project)** | Research workflows |
+| `ANTHROPIC_API_KEY` | **Shared (project)** | Direct Claude access |
+| `SLACK_WEBHOOK_URL` | **Shared (project)** | Notifications |
+| `FAL_KEY` | **Shared (project)** | Image generation |
+| `APIFY_API_TOKEN` | **Shared (project)** | Lead scraping |
+| `CALENDLY_API_KEY` | **Shared (project)** | Calendly integration |
+| `INSTANTLY_API_KEY` | **Shared (project)** | Email outreach |
 
 ### Dashboard Endpoints
 
@@ -900,6 +981,10 @@ Once deployed, your dashboard provides these endpoints:
 | `/api/webhook-workflows/toggle` | POST | Yes | Enable/disable a webhook |
 | `/api/webhook-workflows/test` | POST | Yes | Send test payload to a webhook |
 | `/webhook/<slug>` | POST | No | Public webhook endpoint (receives external payloads) |
+| **Shared Variables API** | | | |
+| `/api/shared-variables` | GET | Yes | List all project-level shared variables (redacted) |
+| `/api/shared-variables/set` | POST | Yes | Set a single shared variable |
+| `/api/shared-variables/sync` | POST | Yes | Bulk-set multiple shared variables |
 
 ### Webhook Workflow System
 
@@ -978,10 +1063,10 @@ curl -X POST "https://your-dashboard.up.railway.app/api/webhook-workflows/regist
 Set `forward_url` to route payloads to a standalone processing service. The dashboard acts as a router — receives the webhook, wraps the payload with metadata, and forwards it. No dashboard rebuild needed for custom processing logic.
 
 **Key Files:**
-- `railway_apps/aiaa_dashboard/app.py` — webhook handler, registry, API endpoints
-- `railway_apps/aiaa_dashboard/webhook_config.json` — seed config (loaded on first deploy)
-- `execution/deploy_webhook_workflow.py` — CLI registration script
-- `directives/deploy_webhook_workflow_to_dashboard.md` — full deployment SOP
+- `railway_apps/aiaa_dashboard/app.py` — webhook handler, registry, shared variables API, all endpoints
+- `railway_apps/aiaa_dashboard/workflow_config.json` — workflow metadata (friendly names, descriptions)
+- `execution/deploy_to_railway.py` — unified deploy script (cron, webhook, web) with shared variable sync
+- `directives/deploy_to_railway.md` — full deployment SOP
 
 ### Workflow Execution via Dashboard
 
@@ -1018,7 +1103,19 @@ Each workflow in the dashboard includes:
 
 **MANDATORY DIRECTIVE:** Whenever you are asked to deploy, publish, or schedule ANY workflow, you MUST read and follow this entire section. Do not skip any rules. This applies to ALL workflow deployments without exception.
 
-**IMPORTANT:** When instructed to publish, deploy, or schedule a workflow, you MUST read your /directives/deploy_workflow_to_dashboard.md directive AND follow these rules:
+**IMPORTANT:** When instructed to publish, deploy, or schedule a workflow, you MUST read your `/directives/deploy_to_railway.md` directive AND use the unified deploy script:
+
+```bash
+# Deploy any workflow (auto-detects type, sets shared vars, registers with dashboard)
+python3 execution/deploy_to_railway.py --directive <name> --auto
+
+# Or specify type explicitly
+python3 execution/deploy_to_railway.py --directive <name> --type cron --schedule "0 */3 * * *" --auto
+python3 execution/deploy_to_railway.py --directive <name> --type webhook --slug <slug> --slack-notify --auto
+python3 execution/deploy_to_railway.py --directive <name> --type web --auto
+```
+
+The deploy script handles ALL of the following automatically: scaffolding, deployment, shared variable sync, cron configuration, webhook registration, and `workflow_config.json` updates.
 
 ### Rule 1: Same Railway Project as Dashboard
 ALL workflows MUST be deployed to the **SAME Railway project** where the AIAA Dashboard was installed during initial setup. Never create separate Railway projects for individual workflows.
@@ -1081,18 +1178,21 @@ railway service status --all --json
 **To force refresh the workflow list (optional):**
 Call POST `/api/active-workflows/refresh` while logged into the dashboard.
 
-### Rule 3: Upload ALL Required API Keys
-Every time you deploy a workflow, you MUST set ALL environment variables the workflow needs to run successfully:
+### Rule 3: Environment Variables via Shared Variables
+API keys are now **project-level shared variables** -- set once, inherited by all services automatically. The deploy script (`deploy_to_railway.py`) syncs them via the dashboard's `/api/shared-variables/sync` endpoint during deployment.
 
+**Shared API keys** (set once, all services get them):
+- OPENROUTER_API_KEY, PERPLEXITY_API_KEY, SLACK_WEBHOOK_URL, ANTHROPIC_API_KEY, FAL_KEY, APIFY_API_TOKEN, INSTANTLY_API_KEY, CALENDLY_API_KEY
+
+**Service-specific variables** (set per-service, e.g. GOOGLE_OAUTH_TOKEN_PICKLE) are still set via Railway CLI by the deploy script.
+
+**To manually sync shared variables:**
 ```bash
-# Get keys from local .env
-cat .env | grep -E "OPENROUTER|PERPLEXITY|SLACK|ANTHROPIC|FAL|APIFY"
-
-# Set each required key in Railway
-railway variables set OPENROUTER_API_KEY="<value>"
-railway variables set SLACK_WEBHOOK_URL="<value>"
-railway variables set PERPLEXITY_API_KEY="<value>"
-# ... any other keys the workflow needs
+# Via dashboard Environment page (sets project-wide shared variables)
+# Or via API:
+curl -X POST "https://your-dashboard.up.railway.app/api/shared-variables/sync" \
+  -H "Content-Type: application/json" -H "Cookie: session=$SESSION" \
+  -d '{"variables": {"OPENROUTER_API_KEY": "...", "PERPLEXITY_API_KEY": "..."}}'
 ```
 
 **Check the workflow's directive** (`directives/<workflow>.md`) for the "Prerequisites" section listing required API keys.
@@ -1379,47 +1479,43 @@ The dashboard's Active Workflows page loads workflows dynamically from Railway's
 - Manual: `POST /api/active-workflows/refresh`
 - On delete: `api_workflow_delete()` calls `invalidate_workflow_cache()` after successful deletion
 
-### Rule 10: Webhook Workflow Deployment (No Rebuild)
+### Rule 10: Webhook Workflow Deployment
 
-**IMPORTANT:** Webhook workflows are deployed differently from cron workflows. They do NOT require `railway up` or any rebuild. Read `/directives/deploy_webhook_workflow_to_dashboard.md` for the full SOP.
+**IMPORTANT:** Webhook workflows now deploy as **standalone Railway services** (just like cron workflows) with a Flask app. The dashboard registers a webhook slug with a `forward_url` pointing to the standalone service. Use the unified deploy script:
+
+```bash
+# Deploy webhook workflow (deploys standalone service + registers webhook on dashboard)
+python3 execution/deploy_to_railway.py --directive calendly_meeting_prep --type webhook --slug calendly --slack-notify --auto
+```
 
 **Key Differences from Cron Deployment:**
 | Aspect | Cron Workflows | Webhook Workflows |
 |--------|---------------|-------------------|
-| Deploy method | `railway up --service <name>` | `POST /api/webhook-workflows/register` |
-| Rebuild needed | Yes | **No** |
-| Where code runs | Standalone Railway service | Dashboard-hosted (handler in `app.py`) |
-| Config file | `workflow_config.json` (service ID → name) | `webhook_config.json` (seed only) |
-| Trigger | Railway cron schedule | External HTTP POST to `/webhook/<slug>` |
-| Custom processing | Code in standalone service | `forward_url` routes to external service |
+| Deploy method | `deploy_to_railway.py --type cron` | `deploy_to_railway.py --type webhook` |
+| Service type | Standalone with `run.py` + `railway.json` | Standalone Flask app with `/webhook` endpoint |
+| Dashboard integration | Auto-appears via Railway API | Webhook registered with `forward_url` to service |
+| Trigger | Railway cron schedule | External HTTP POST → dashboard → forward to service |
+| Processing | In standalone service | In standalone service (heavy processing supported) |
 
-**Deployment Methods (all no-rebuild):**
-```bash
-# Via execution script (recommended)
-python3 execution/deploy_webhook_workflow.py --slug <slug> --name "<name>" --description "<desc>" --source "<source>" --slack-notify
-
-# Via curl
-curl -X POST "https://your-dashboard.up.railway.app/api/webhook-workflows/register" \
-  -H "Content-Type: application/json" -H "Cookie: session=$SESSION" \
-  -d '{"slug": "<slug>", "name": "<name>", "description": "<desc>", "source": "<source>", "slack_notify": true}'
-
-# Via dashboard UI
-# Navigate to Active Workflows → webhook workflows appear with Copy URL, Test, Toggle, Delete buttons
+**Architecture:**
+```
+External Service (Calendly, Stripe, etc.)
+    → POST /webhook/<slug> on dashboard
+    → Dashboard forwards payload to standalone service's /webhook endpoint
+    → Standalone service does the heavy processing (API calls, doc creation, etc.)
 ```
 
 **Webhook Persistence:**
 - **In-memory registry** is the source of truth (instant updates)
 - **WEBHOOK_CONFIG env var** provides durability across restarts (set via Railway API, best-effort)
 - **webhook_config.json** is seed data for first deploy only (file is baked into image)
-- Registration/deletion/toggling all update in-memory immediately, then persist in background
 
 **Webhook Deployment Checklist:**
-- [ ] Webhook registered via API or execution script
+- [ ] Standalone service deployed and healthy
+- [ ] Webhook registered on dashboard with `forward_url` pointing to service
 - [ ] Webhook visible in dashboard Active Workflows page
 - [ ] Test button works from dashboard UI
-- [ ] Slack notification received (if `slack_notify: true`)
-- [ ] External service configured to POST to webhook URL
-- [ ] If using forwarding: processing service deployed and `forward_url` set
+- [ ] External service configured to POST to dashboard webhook URL
 
 ---
 
@@ -1454,7 +1550,7 @@ curl -X POST "https://your-dashboard.up.railway.app/api/webhook-workflows/regist
 | Script | Purpose |
 |--------|---------|
 | `deploy_aiaa_dashboard.py` | Deploy/update AIAA dashboard to Railway |
-| `deploy_webhook_workflow.py` | Register webhook workflow via live API (no rebuild) |
+| `deploy_to_railway.py` | Unified deploy for any workflow (cron, webhook, web) with shared variable sync |
 
 ### Utilities
 | Script | Purpose |
@@ -1789,14 +1885,20 @@ python3 execution/send_slack_notification.py --message "Task complete" --channel
 # Deploy/update dashboard
 cd railway_apps/aiaa_dashboard && railway up
 
-# Register a webhook workflow (no rebuild needed)
-python3 execution/deploy_webhook_workflow.py --slug my-webhook --name "My Webhook" --description "Does something" --source "External" --slack-notify
+# Deploy any workflow to Railway (unified script)
+python3 execution/deploy_to_railway.py --directive <name> --auto
 
-# List registered webhooks
-python3 execution/deploy_webhook_workflow.py --list
+# Deploy cron workflow
+python3 execution/deploy_to_railway.py --directive <name> --type cron --schedule "0 */3 * * *" --auto
 
-# Delete a webhook
-python3 execution/deploy_webhook_workflow.py --unregister --slug my-webhook
+# Deploy webhook workflow
+python3 execution/deploy_to_railway.py --directive <name> --type webhook --slug <slug> --slack-notify --auto
+
+# List deployable directives
+python3 execution/deploy_to_railway.py --list
+
+# Check deployment info for a directive
+python3 execution/deploy_to_railway.py --directive <name> --info
 
 # Check dashboard health
 curl https://your-app.up.railway.app/health
