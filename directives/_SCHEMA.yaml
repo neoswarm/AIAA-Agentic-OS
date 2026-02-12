@@ -1,0 +1,255 @@
+# Directive Metadata Schema v1.0
+# All directives must include YAML frontmatter with these fields
+# This schema is used by validate_directive_metadata.py for validation
+
+# === REQUIRED FIELDS ===
+
+id:
+  type: string
+  required: true
+  pattern: ^[a-z0-9_]+$
+  description: Unique identifier (snake_case, matches filename)
+  example: cold_email_scriptwriter
+
+name:
+  type: string
+  required: true
+  max_length: 100
+  description: Human-readable name displayed in dashboard
+  example: Cold Email Scriptwriter
+
+version:
+  type: string
+  required: true
+  pattern: ^\d+\.\d+\.\d+$
+  description: Semantic version (MAJOR.MINOR.PATCH)
+  example: 1.2.0
+  default: 1.0.0
+
+category:
+  type: enum
+  required: true
+  values:
+    - Lead Generation
+    - Content Creation
+    - Sales & Outreach
+    - Analytics & Reporting
+    - Client Management
+    - Automation
+    - Integration
+    - Video Production
+    - Design
+    - General
+  description: Workflow category for dashboard organization
+  example: Lead Generation
+
+type:
+  type: enum
+  required: true
+  values:
+    - manual      # Run on-demand via CLI
+    - cron        # Scheduled execution on Railway
+    - webhook     # HTTP-triggered (inbound events)
+    - web         # Web service with UI/API
+  description: Deployment type determines Railway configuration
+  example: manual
+
+description:
+  type: string
+  required: true
+  max_length: 500
+  description: Brief description shown in dashboard (1-2 sentences)
+  example: |
+    Generates personalized cold email sequences with A/B variants
+    using AI research and proven copywriting frameworks.
+
+execution_scripts:
+  type: array[string]
+  required: true
+  min_items: 1
+  description: Python scripts to execute (in order, relative to execution/)
+  example:
+    - write_cold_emails.py
+    - research_prospect_deep.py
+
+# === OPTIONAL FIELDS ===
+
+env_vars:
+  type: array[string]
+  required: false
+  description: Required environment variables (checked before deployment)
+  example:
+    - OPENROUTER_API_KEY
+    - PERPLEXITY_API_KEY
+    - SLACK_WEBHOOK_URL
+
+integrations:
+  type: array[string]
+  required: false
+  description: External services/APIs used by this workflow
+  allowed_values:
+    # Communication
+    - slack
+    - discord
+    - telegram
+
+    # Google Services
+    - google_docs
+    - google_sheets
+    - google_drive
+    - gmail
+    - google_calendar
+
+    # AI/LLM
+    - perplexity
+    - openrouter
+    - anthropic
+    - openai
+    - cohere
+
+    # Data/Scraping
+    - apify
+    - brightdata
+
+    # Media
+    - fal
+    - replicate
+    - elevenlabs
+
+    # CRM/Sales
+    - hubspot
+    - salesforce
+    - pipedrive
+    - calendly
+    - instantly
+    - smartlead
+
+    # Payment
+    - stripe
+    - paypal
+
+    # Social
+    - twitter
+    - linkedin
+    - instagram
+    - facebook
+
+  example:
+    - google_sheets
+    - slack
+    - perplexity
+
+dependencies:
+  type: object
+  required: false
+  description: Explicit dependency declarations
+  properties:
+    python_packages:
+      type: array[string]
+      description: Required pip packages (with optional version pins)
+      example:
+        - openai>=1.0.0
+        - requests>=2.31.0
+        - google-api-python-client>=2.100.0
+
+    skill_bibles:
+      type: array[string]
+      description: Related skill bible files (relative to skills/)
+      example:
+        - SKILL_BIBLE_cold_email_mastery.md
+        - SKILL_BIBLE_email_deliverability.md
+
+deployment:
+  type: object
+  required: false
+  description: Railway deployment configuration
+  properties:
+    cron_schedule:
+      type: string
+      pattern: ^[\d\*\-\,/\s]+$
+      description: Cron expression (required if type=cron)
+      example: "0 */3 * * *"
+
+    port:
+      type: integer
+      default: 8080
+      min: 1024
+      max: 65535
+      description: Port for web services (if type=web)
+
+    railway_config:
+      type: object
+      description: Override default Railway deployment settings
+      properties:
+        restart_policy:
+          type: enum
+          values: [ON_FAILURE, NEVER, ALWAYS]
+          default: ON_FAILURE
+          description: When to restart the service
+
+        max_retries:
+          type: integer
+          default: 3
+          min: 0
+          max: 10
+          description: Max restart attempts (if restart_policy=ON_FAILURE)
+
+        timeout_seconds:
+          type: integer
+          default: 120
+          min: 30
+          max: 600
+          description: Request timeout for web services
+
+        workers:
+          type: integer
+          default: 1
+          min: 1
+          max: 10
+          description: Gunicorn workers (web services only)
+
+        start_command:
+          type: string
+          description: Override default start command
+          example: python3 run.py --production
+
+quality_gates:
+  type: array[string]
+  required: false
+  description: Validation checklist (verified before/after execution)
+  example:
+    - All env vars set
+    - Google OAuth configured
+    - Output Google Sheet created
+    - Slack notification sent
+
+related_directives:
+  type: array[string]
+  required: false
+  description: Related workflows (for discovery/recommendations)
+  example:
+    - company_market_research
+    - ai_prospect_researcher
+
+tags:
+  type: array[string]
+  required: false
+  description: Searchable tags for filtering
+  example:
+    - email
+    - cold-outreach
+    - ai-personalization
+    - lead-gen
+
+author:
+  type: string
+  required: false
+  description: Workflow creator
+  example: Lucas Nolan
+
+last_updated:
+  type: string
+  required: false
+  pattern: ^\d{4}-\d{2}-\d{2}$
+  description: Last modification date (YYYY-MM-DD)
+  example: "2026-02-11"

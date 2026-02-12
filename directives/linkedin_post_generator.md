@@ -1,3 +1,21 @@
+---
+id: linkedin_post_generator
+name: AI LinkedIn Post Generator
+version: 1.0.0
+category: Content Creation
+type: manual
+description: This workflow generates LinkedIn posts optimized for engagement using
+  proven frameworks, strong hooks, and algorithm-friendly formatting.
+execution_scripts:
+- generate_linkedin_post.py
+env_vars:
+- ANTHROPIC_API_KEY
+- OPENAI_API_KEY
+integrations:
+- anthropic
+- openai
+---
+
 # AI LinkedIn Post Generator
 
 ## What This Workflow Is

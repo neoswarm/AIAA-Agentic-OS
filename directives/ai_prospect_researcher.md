@@ -1,3 +1,27 @@
+---
+id: ai_prospect_researcher
+name: AI Prospect Research Agent
+version: 1.0.0
+category: Lead Generation
+type: manual
+description: This workflow creates an AI research agent that automatically gathers
+  intelligence on prospects and their companies, producing comprehensive dossiers
+  for sales call preparation and personalized outreach.
+execution_scripts:
+- research_prospect_deep.py
+- read_sheet.py
+env_vars:
+- GOOGLE_APPLICATION_CREDENTIALS
+- OPENAI_API_KEY
+- PERPLEXITY_API_KEY
+integrations:
+- anthropic
+- google_docs
+- hubspot
+- openai
+- perplexity
+---
+
 # AI Prospect Research Agent
 
 ## What This Workflow Is
