@@ -1,3 +1,28 @@
+---
+id: calendly_meeting_prep
+name: Calendly Meeting Prep Workflow
+version: 1.0.0
+category: Sales & Outreach
+type: webhook
+description: 'Automatically prepares you for sales calls when someone books a Calendly
+  meeting:'
+execution_scripts:
+- calendly_meeting_prep.py
+env_vars:
+- CALENDLY_API_KEY
+- GOOGLE_OAUTH_TOKEN_JSON
+- OPENROUTER_API_KEY
+- PERPLEXITY_API_KEY
+- SLACK_WEBHOOK_URL
+integrations:
+- anthropic
+- calendly
+- google_docs
+- openrouter
+- perplexity
+- slack
+---
+
 # Calendly Meeting Prep Workflow
 
 ## What This Workflow Does

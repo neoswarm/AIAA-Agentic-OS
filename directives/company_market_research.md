@@ -1,3 +1,24 @@
+---
+id: company_market_research
+name: Company & Offer Market Research
+version: 1.0.0
+category: Sales & Outreach
+type: manual
+description: This workflow conducts comprehensive market research on a company and
+  their offer using Perplexity AI to gather intelligence for VSL funnel creation,
+  positioning strategy, and competitive analysis.
+execution_scripts:
+- research_company_offer.py
+env_vars:
+- OPENAI_API_KEY
+- PERPLEXITY_API_KEY
+integrations:
+- google_docs
+- openai
+- perplexity
+- slack
+---
+
 # Company & Offer Market Research
 
 ## What This Workflow Is

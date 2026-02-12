@@ -1,3 +1,28 @@
+---
+id: vsl_funnel_orchestrator
+name: VSL Funnel Orchestrator (Master Workflow)
+version: 1.0.0
+category: Sales & Outreach
+type: manual
+description: '**Master orchestrator** that coordinates the complete VSL funnel creation
+  pipeline. Single entry point that triggers all sub-workflows in sequence, manages
+  data flow, handles errors, and delivers final outputs.'
+execution_scripts:
+- generate_complete_vsl_funnel.py
+env_vars:
+- GOOGLE_APPLICATION_CREDENTIALS
+- OPENROUTER_API_KEY
+- PERPLEXITY_API_KEY
+- SLACK_WEBHOOK_URL
+integrations:
+- anthropic
+- google_docs
+- openai
+- openrouter
+- perplexity
+- slack
+---
+
 # VSL Funnel Orchestrator (Master Workflow)
 
 ## What This Workflow Is

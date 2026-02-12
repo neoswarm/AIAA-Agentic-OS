@@ -1,3 +1,25 @@
+---
+id: cold_email_scriptwriter
+name: Cold Email Scriptwriter
+version: 1.0.0
+category: Sales & Outreach
+type: manual
+description: This workflow generates personalized cold email sequences with A/B variants
+  using AI research and proven copywriting frameworks.
+execution_scripts:
+- write_cold_emails.py
+env_vars:
+- GOOGLE_APPLICATION_CREDENTIALS
+- OPENROUTER_API_KEY
+- PERPLEXITY_API_KEY
+integrations:
+- google_sheets
+- openai
+- openrouter
+- perplexity
+- slack
+---
+
 # Cold Email Scriptwriter
 
 ## What This Workflow Is

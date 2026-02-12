@@ -1,3 +1,24 @@
+---
+id: newsletter_writer
+name: Newsletter Writer
+version: 1.0.0
+category: Content Creation
+type: manual
+description: This workflow generates email newsletters by curating relevant content
+  from RSS feeds, social media, and news sources, then formatting it with original
+  commentary and clear CTAs.
+execution_scripts:
+- generate_newsletter.py
+env_vars:
+- CONVERTKIT_API_KEY
+- MAILCHIMP
+- OPENAI_API_KEY
+- SENDGRID
+integrations:
+- anthropic
+- openai
+---
+
 # Newsletter Writer
 
 ## What This Workflow Is
