@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RESTORE Center for Integrative Medicine</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--primary:#667eea;--secondary:#764ba2;--accent:#f093fb;
+--text:#1a202c;--bg:#ffffff;--gray-50:#f7fafc;--gray-100:#edf2f7;
+--gray-200:#e2e8f0;--gray-300:#cbd5e0;--gray-400:#a0aec0;
+--gray-500:#718096;--gray-600:#4a5568;--gray-700:#2d3748;
+--gradient:linear-gradient(135deg,var(--primary),var(--secondary));
+--gradient-accent:linear-gradient(135deg,var(--secondary),var(--accent));
+--radius:12px;--radius-sm:8px;--shadow:0 4px 24px rgba(102,126,234,0.12);
+--shadow-lg:0 12px 48px rgba(102,126,234,0.18);
+--transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--primary);text-decoration:none}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+img{max-width:100%;display:block}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+
+/* Layout */
+.container{max-width:960px;margin:0 auto;padding:0 20px}
+section{padding:64px 0}
+
+/* Hero */
+.hero{background:var(--gradient);color:#fff;padding:80px 0 100px;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:80px;background:var(--bg);clip-path:ellipse(55% 100% at 50% 100%)}
+.hero h1{font-size:clamp(1.75rem,5vw,2.75rem);font-weight:800;line-height:1.15;margin-bottom:16px;max-width:640px}
+.hero p{font-size:clamp(1rem,2.5vw,1.2rem);opacity:0.92;max-width:560px;margin-bottom:32px;line-height:1.7}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.18);backdrop-filter:blur(8px);padding:8px 18px;border-radius:40px;font-size:0.85rem;font-weight:600;margin-bottom:20px;border:1px solid rgba(255,255,255,0.25)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 32px;border-radius:50px;font-size:1rem;font-weight:700;border:none;cursor:pointer;transition:var(--transition);text-align:center;line-height:1.3}
+.btn-white{background:#fff;color:var(--secondary)}
+.btn-white:hover{background:var(--gray-100);transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.btn-gradient{background:var(--gradient);color:#fff}
+.btn-gradient:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);opacity:0.95}
+.btn-outline{background:transparent;color:var(--primary);border:2px solid var(--primary)}
+.btn-outline:hover{background:var(--primary);color:#fff}
+.btn-sm{padding:10px 22px;font-size:0.9rem}
+
+/* Provider */
+.provider-section{background:var(--gray-50)}
+.provider-card{display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:40px 24px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow)}
+.provider-avatar{width:96px;height:96px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff;font-weight:700;flex-shrink:0}
+.provider-card h3{font-size:1.25rem;font-weight:700}
+.provider-card .creds{color:var(--gray-500);font-size:0.9rem;font-weight:500}
+.provider-card .spec{color:var(--primary);font-size:0.85rem;font-weight:600;margin-top:4px}
+
+/* How It Works */
+.steps{display:grid;gap:24px;margin-top:40px}
+.step{display:flex;gap:20px;align-items:flex-start;padding:24px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);transition:var(--transition)}
+.step:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.step-num{width:48px;height:48px;border-radius:50%;background:var(--gradient);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;flex-shrink:0}
+.step h3{font-size:1.05rem;font-weight:700;margin-bottom:4px}
+.step p{color:var(--gray-600);font-size:0.92rem}
+
+/* Offerings */
+.offerings-grid{display:grid;gap:24px;margin-top:40px}
+.offering-card{padding:32px 24px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);border-left:4px solid var(--primary);transition:var(--transition)}
+.offering-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.offering-card h3{font-size:1.1rem;font-weight:700;margin-bottom:8px;color:var(--secondary)}
+.offering-card p{color:var(--gray-600);font-size:0.92rem;line-height:1.65}
+.offering-icon{font-size:1.6rem;margin-bottom:12px}
+
+/* Approach */
+.approach-tags{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+.approach-tag{padding:10px 20px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:50px;font-size:0.88rem;font-weight:600;color:var(--gray-700);transition:var(--transition)}
+.approach-tag:hover{border-color:var(--primary);color:var(--primary);background:rgba(102,126,234,0.06)}
+
+/* Trust */
+.trust-section{background:var(--gray-50)}
+.trust-grid{display:grid;gap:20px;margin-top:32px}
+.trust-item{display:flex;gap:16px;align-items:flex-start;padding:20px;background:#fff;border-radius:var(--radius-sm);box-shadow:0 2px 12px rgba(0,0,0,0.04)}
+.trust-icon{width:40px;height:40px;border-radius:10px;background:var(--gradient);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.trust-item h4{font-size:0.95rem;font-weight:700;margin-bottom:2px}
+.trust-item p{color:var(--gray-500);font-size:0.85rem}
+
+/* Section Headers */
+.section-label{display:inline-block;font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--primary);margin-bottom:8px}
+.section-title{font-size:clamp(1.4rem,4vw,2rem);font-weight:800;margin-bottom:12px;line-height:1.25}
+.section-subtitle{color:var(--gray-500);font-size:1rem;max-width:560px;line-height:1.6}
+
+/* CTA Banner */
+.cta-banner{background:var(--gradient);color:#fff;padding:64px 0;text-align:center}
+.cta-banner h2{font-size:clamp(1.3rem,4vw,1.9rem);font-weight:800;margin-bottom:12px}
+.cta-banner p{opacity:0.9;margin-bottom:28px;font-size:1rem}
+
+/* Sticky CTA */
+.sticky-cta{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(12px);padding:12px 20px;box-shadow:0 -4px 24px rgba(0,0,0,0.1);z-index:1000;display:flex;justify-content:center;transform:translateY(100%);transition:var(--transition)}
+.sticky-cta.visible{transform:translateY(0)}
+.sticky-cta .btn{width:100%;max-width:400px}
+
+/* Disclaimer */
+.disclaimer{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:16px 20px;font-size:0.8rem;color:var(--gray-500);line-height:1.6;margin-top:24px}
+.disclaimer strong{color:var(--gray-600)}
+
+/* ===== ASSESSMENT ===== */
+.assessment-overlay{position:fixed;inset:0;background:var(--bg);z-index:2000;overflow-y:auto;display:none}
+.assessment-overlay.active{display:block}
+.assessment-header{position:sticky;top:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--gray-200);padding:12px 20px;z-index:10}
+.assessment-header-inner{max-width:680px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.assessment-logo{font-weight:800;font-size:0.95rem;color:var(--secondary)}
+.assessment-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--gray-400);padding:4px;transition:var(--transition)}
+.assessment-close:hover{color:var(--text)}
+.progress-wrap{max-width:680px;margin:0 auto;padding:8px 20px 0}
+.progress-bar-bg{height:6px;background:var(--gray-200);border-radius:3px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--gradient);border-radius:3px;transition:width 0.4s ease}
+.progress-meta{display:flex;justify-content:space-between;margin-top:6px;font-size:0.78rem;color:var(--gray-400);font-weight:500}
+
+.assessment-body{max-width:680px;margin:0 auto;padding:32px 20px 120px}
+.assessment-step{display:none}
+.assessment-step.active{display:block;animation:fadeUp 0.35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.step-header{margin-bottom:28px}
+.step-header h2{font-size:1.35rem;font-weight:800;margin-bottom:6px}
+.step-header p{color:var(--gray-500);font-size:0.92rem}
+
+/* Form Elements */
+fieldset{border:none;padding:0;margin:0 0 24px}
+legend{font-size:0.95rem;font-weight:700;margin-bottom:12px;color:var(--text)}
+.field-hint{font-size:0.8rem;color:var(--gray-400);margin-top:-8px;margin-bottom:12px}
+
+.input-group{margin-bottom:20px}
+.input-group label{display:block;font-size:0.9rem;font-weight:600;margin-bottom:6px;color:var(--gray-700)}
+.input-group .required-star{color:#e53e3e;margin-left:2px}
+.input-group input,.input-group textarea,.input-group select{width:100%;padding:12px 16px;border:2px solid var(--gray-200);border-radius:var(--radius-sm);font-size:0.95rem;font-family:inherit;color:var(--text);background:#fff;transition:var(--transition)}
+.input-group input:focus,.input-group textarea:focus,.input-group select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(102,126,234,0.15)}
+.input-group textarea{resize:vertical;min-height:100px}
+.input-group .char-count{text-align:right;font-size:0.75rem;color:var(--gray-400);margin-top:4px}
+.input-error{border-color:#e53e3e !important;box-shadow:0 0 0 3px rgba(229,62,62,0.15) !important}
+.error-msg{color:#e53e3e;font-size:0.8rem;margin-top:4px;display:none}
+.error-msg.visible{display:block}
+
+/* Chips (multi-select) */
+.chips-wrap{display:flex;flex-wrap:wrap;gap:10px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;width:0;height:0}
+.chip label{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border:2px solid var(--gray-200);border-radius:50px;font-size:0.88rem;font-weight:600;color:var(--gray-600);cursor:pointer;transition:var(--transition);user-select:none;background:#fff}
+.chip label:hover{border-color:var(--primary);color:var(--primary)}
+.chip input:checked+label{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 2px 12px rgba(102,126,234,0.3)}
+.chip input:focus-visible+label{outline:3px solid var(--accent);outline-offset:2px}
+.chip label .check-icon{display:none;font-size:0.75rem}
+.chip input:checked+label .check-icon{display:inline}
+
+/* Radio Cards */
+.radio-cards{display:grid;gap:12px}
+.radio-card{position:relative}
+.radio-card input{position:absolute;opacity:0;width:0;height:0}
+.radio-card label{display:block;padding:16px 20px;border:2px solid var(--gray-200);border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition);background:#fff}
+.radio-card label:hover{border-color:var(--primary)}
+.radio-card input:checked+label{border-color:var(--primary);background:rgba(102,126,234,0.04);box-shadow:0 0 0 1px var(--primary)}
+.radio-card input:focus-visible+label{outline:3px solid var(--accent);outline-offset:2px}
+.radio-card label .rc-title{font-weight:700;font-size:0.92rem;margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.radio-card label .rc-desc{font-size:0.82rem;color:var(--gray-500)}
+.radio-card label .rc-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--gray-300);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+.radio-card input:checked+label .rc-dot{border-color:var(--primary);background:var(--primary)}
+.radio-card input:checked+label .rc-dot::after{content:'';width:8px;height:8px;border-radius:50%;background:#fff}
+
+/* Slider */
+.slider-wrap{padding:8px 0}
+.slider-wrap input[type=range]{-webkit-appearance:none;width:100%;height:8px;border-radius:4px;background:var(--gray-200);outline:none;transition:var(--transition)}
+.slider-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:var(--gradient);cursor:pointer;box-shadow:0 2px 8px rgba(102,126,234,0.3);border:3px solid #fff}
+.slider-wrap input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--primary);cursor:pointer;border:3px solid #fff}
+.slider-labels{display:flex;justify-content:space-between;font-size:0.78rem;color:var(--gray-400);margin-top:6px}
+.slider-value{text-align:center;font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:8px}
+
+/* Checklist */
+.checklist{display:grid;gap:10px}
+.checklist-item{position:relative}
+.checklist-item input{position:absolute;opacity:0;width:0;height:0}
+.checklist-item label{display:flex;align-items:center;gap:12px;padding:14px 18px;border:2px solid var(--gray-200);border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition);font-size:0.9rem;font-weight:500;background:#fff}
+.checklist-item label:hover{border-color:var(--primary)}
+.checklist-item input:checked+label{border-color:var(--primary);background:rgba(102,126,234,0.04)}
+.checklist-item input:focus-visible+label{outline:3px solid var(--accent);outline-offset:2px}
+.checklist-item label .cb-box{width:22px;height:22px;border:2px solid var(--gray-300);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:var(--transition);font-size:0.7rem;color:transparent}
+.checklist-item input:checked+label .cb-box{background:var(--primary);border-color:var(--primary);color:#fff}
+
+/* Assessment Nav */
+.assessment-nav{display:flex;gap:12px;justify-content:space-between;margin-top:36px;padding-top:24px;border-top:1px solid var(--gray-200)}
+.assessment-nav .btn{min-width:120px}
+
+/* Review */
+.review-section{margin-bottom:24px;padding:20px;background:var(--gray-50);border-radius:var(--radius-sm);border:1px solid var(--gray-200)}
+.review-section h3{font-size:0.95rem;font-weight:700;margin-bottom:12px;color:var(--secondary);display:flex;align-items:center;justify-content:space-between}
+.review-section .edit-btn{font-size:0.8rem;color:var(--primary);cursor:pointer;background:none;border:none;font-weight:600;text-decoration:underline}
+.review-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--gray-200);font-size:0.88rem}
+.review-row:last-child{border-bottom:none}
+.review-label{color:var(--gray-500);font-weight:500;flex-shrink:0}
+.review-value{font-weight:600;text-align:right;word-break:break-word}
+
+/* Results */
+.results-overlay{position:fixed;inset:0;background:var(--bg);z-index:3000;overflow-y:auto;display:none}
+.results-overlay.active{display:block}
+.results-body{max-width:680px;margin:0 auto;padding:40px 20px 80px}
+.results-header{text-align:center;margin-bottom:40px}
+.results-header .check-circle{width:72px;height:72px;border-radius:50%;background:var(--gradient);color:#fff;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 20px}
+.results-header h2{font-size:1.5rem;font-weight:800;margin-bottom:8px}
+.results-header p{color:var(--gray-500);font-size:0.95rem}
+
+.summary-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:24px;margin-bottom:24px;font-size:0.88rem;line-height:1.7;white-space:pre-wrap;font-family:'Courier New',monospace;max-height:300px;overflow-y:auto}
+.json-toggle{margin-bottom:24px}
+.json-box{background:var(--gray-700);color:#a0f0a0;border-radius:var(--radius);padding:20px;font-size:0.8rem;line-height:1.6;white-space:pre-wrap;font-family:'Courier New',monospace;max-height:300px;overflow-y:auto;display:none}
+.json-box.visible{display:block}
+
+.results-actions{display:flex;flex-direction:column;gap:12px;margin-top:32px}
+.copy-feedback{text-align:center;font-size:0.85rem;color:var(--primary);font-weight:600;min-height:24px}
+
+.emergency-box{background:#fff5f5;border:2px solid #feb2b2;border-radius:var(--radius-sm);padding:16px 20px;margin-top:24px}
+.emergency-box h4{color:#c53030;font-size:0.9rem;font-weight:700;margin-bottom:4px}
+.emergency-box p{color:#9b2c2c;font-size:0.82rem;line-height:1.5}
+
+/* Footer */
+footer{background:var(--gray-700);color:var(--gray-400);padding:32px 0;text-align:center;font-size:0.82rem}
+footer a{color:var(--gray-300)}
+
+/* Responsive */
+@media(min-width:640px){
+  .steps{grid-template-columns:1fr}
+  .offerings-grid{grid-template-columns:repeat(2,1fr)}
+  .trust-grid{grid-template-columns:repeat(2,1fr)}
+  .provider-card{flex-direction:row;text-align:left}
+  .radio-cards{grid-template-columns:repeat(2,1fr)}
+}
+@media(min-width:768px){
+  .sticky-cta{display:none !important}
+}
+@media print{
+  .sticky-cta,.assessment-overlay,.results-overlay{display:none !important}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LANDING PAGE ===== -->
+<header class="hero" role="banner">
+  <div class="container">
+    <div class="hero-badge" aria-hidden="true">✦ Integrative &amp; Functional Medicine</div>
+    <h1>Uncover the Root Cause.<br>Restore Your Health.</h1>
+    <p>RESTORE Center for Integrative Medicine offers a multi-disciplinary, team-based approach to help you move beyond symptom management and toward lasting well-being.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:12px">
+      <button class="btn btn-white" onclick="openAssessment()" aria-label="Begin your health assessment">Begin Health Assessment</button>
+      <a href="#how-it-works" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.5)">Learn How It Works</a>
+    </div>
+  </div>
+</header>
+
+<!-- Provider -->
+<section class="provider-section" aria-labelledby="provider-heading">
+  <div class="container">
+    <span class="section-label">Your Care Team Lead</span>
+    <h2 class="section-title" id="provider-heading">Led by a Board-Certified Integrative Medicine Physician</h2>
+    <div class="provider-card" style="margin-top:28px">
+      <div class="provider-avatar" aria-hidden="true">AA</div>
+      <div>
+        <h3>Ayesha Aman</h3>
+        <p class="creds">MD, MPH, ABOIM</p>
+        <p class="spec">Integrative Medicine &bull; Functional Medicine</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section id="how-it-works" aria-labelledby="hiw-heading">
+  <div class="container">
+    <span class="section-label">Your Journey</span>
+    <h2 class="section-title" id="hiw-heading">How It Works</h2>
+    <p class="section-subtitle">A structured path from initial contact through a comprehensive integrative health program.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num" aria-hidden="true">1</div>
+        <div>
+          <h3>Initial Contact &amp; Consultation Scheduling</h3>
+          <p>Reach out and schedule your new patient consultation. Share your health history and goals so the team can prepare for your visit.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" aria-hidden="true">2</div>
+        <div>
+          <h3>Synergy 4 Team Approach Assessment</h3>
+          <p>Experience a multi-disciplinary evaluation where a team of practitioners collaborates to understand the full picture of your health.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" aria-hidden="true">3</div>
+        <div>
+          <h3>18-Week Integrative Health Program</h3>
+          <p>Engage in a structured, time-intensive program designed around root-cause focus and prevention-oriented care.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Offerings -->
+<section style="background:var(--gray-50)" aria-labelledby="offerings-heading">
+  <div class="container">
+    <span class="section-label">What We Offer</span>
+    <h2 class="section-title" id="offerings-heading">Services &amp; Approach</h2>
+    <p class="section-subtitle">A care model built around collaboration, time, and your unique health picture.</p>
+    <div class="offerings-grid">
+      <div class="offering-card">
+        <div class="offering-icon" aria-hidden="true">🤝</div>
+        <h3>Synergy 4 Team Approach</h3>
+        <p>A multi-disciplinary team works together on your behalf, integrating perspectives to address the complexity of your health concerns.</p>
+      </div>
+      <div class="offering-card">
+        <div class="offering-icon" aria-hidden="true">🔍</div>
+        <h3>Root Cause Focus</h3>
+        <p>Rather than managing symptoms alone, the clinical approach prioritizes identifying and addressing underlying contributors to your health challenges.</p>
+      </div>
+      <div class="offering-card">
+        <div class="offering-icon" aria-hidden="true">⏱️</div>
+        <h3>Time-Intensive Care</h3>
+        <p>Appointments are designed to give you and your care team the time needed for thorough evaluation and meaningful conversation.</p>
+      </div>
+      <div class="offering-card">
+        <div class="offering-icon" aria-hidden="true">🛡️</div>
+        <h3>Prevention-Oriented</h3>
+        <p>Whether you have a family history of concern or want to stay ahead of potential issues, the approach emphasizes proactive, preventive strategies.</p>
+      </div>
+    </div>
+
+    <!-- Conditions -->
+    <div style="margin-top:40px">
+      <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:16px">Areas of Focus</h3>
+      <div class="approach-tags">
+        <span class="approach-tag">Prediabetes &amp; Metabolic Syndrome</span>
+      </div>
+    </div>
+
+    <!-- Clinical Approach Tags -->
+    <div style="margin-top:32px">
+      <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:16px">Clinical Approach</h3>
+      <div class="approach-tags">
+        <span class="approach-tag">Synergy 4 Team Model</span>
+        <span class="approach-tag">Time-Intensive Care</span>
+        <span class="approach-tag">Root Cause Focus</span>
+        <span class="approach-tag">Prevention-Oriented</span>
+        <span class="approach-tag">Cash-Pay Freedom</span>
+        <span class="approach-tag">Multi-Disciplinary Integration</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust -->
+<section class="trust-section" aria-labelledby="trust-heading">
+  <div class="container">
+    <span class="section-label">Trust &amp; Safety</span>
+    <h2 class="section-title" id="trust-heading">Your Well-Being Comes First</h2>
+    <div class="trust-grid">
+      <div class="trust-item">
+        <div class="trust-icon" aria-hidden="true">🩺</div>
+        <div>
+          <h4>Board-Certified Physician</h4>
+          <p>Led by Ayesha Aman, MD, MPH, ABOIM — board-certified in integrative medicine.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon" aria-hidden="true">🔒</div>
+        <div>
+          <h4>Your Information Is Handled With Care</h4>
+          <p>Assessment responses are summarized locally on your device and are not transmitted to any server.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon" aria-hidden="true">📋</div>
+        <div>
+          <h4>No Diagnosis or Treatment Claims</h4>
+          <p>This assessment is for informational and scheduling purposes only. It does not constitute medical advice.</p>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon" aria-hidden="true">👥</div>
+        <div>
+          <h4>Multi-Disciplinary Team</h4>
+          <p>The Synergy 4 model brings together multiple practitioners for a collaborative approach to your care.</p>
+        </div>
+      </div>
+    </div>
+    <div class="disclaimer">
+      <strong>Disclaimer:</strong> The information provided on this page and through the health assessment is for informational and scheduling purposes only. It is not intended to be a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition. If you are experiencing a medical emergency, call 911 or go to your nearest emergency room immediately.
+    </div>
+  </div>
+</section>
+
+<!-- CTA Banner -->
+<section class="cta-banner">
+  <div class="container">
+    <h2>Ready to Explore a Different Approach to Your Health?</h2>
+    <p>Complete a brief health assessment to help the RESTORE team prepare for your consultation.</p>
+    <button class="btn btn-white" onclick="openAssessment()">Start Your Health Assessment</button>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <p>&copy; RESTORE Center for Integrative Medicine. All rights reserved.</p>
+    <p style="margin-top:8px">This site is for informational purposes only and does not constitute medical advice.</p>
+  </div>
+</footer>
+
+<!-- Sticky Mobile CTA -->
+<div class="sticky-cta" id="stickyCta" role="complementary" aria-label="Quick action">
+  <button class="btn btn-gradient" onclick="openAssessment()">Begin Health Assessment</button>
+</div>
+
+<!-- ===== HEALTH ASSESSMENT OVERLAY ===== -->
+<div class="assessment-overlay" id="assessmentOverlay" role="dialog" aria-modal="true" aria-label="Health Assessment">
+  <div class="assessment-header">
+    <div class="assessment-header-inner">
+      <span class="assessment-logo">RESTORE Health Assessment</span>
+      <button class="assessment-close" onclick="closeAssessment()" aria-label="Close assessment">&times;</button>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-meta">
+      <span id="progressStep">Step 1 of 10</span>
+      <span id="progressTime">~10 min remaining</span>
+    </div>
+  </div>
+
+  <div class="assessment-body" id="assessmentBody">
+    <!-- Steps are rendered by JS -->
+  </div>
+</div>
+
+<!-- ===== RESULTS OVERLAY ===== -->
+<div class="results-overlay" id="resultsOverlay" role="dialog" aria-modal="true" aria-label="Assessment Results">
+  <div class="results-body" id="resultsBody">
+    <!-- Rendered by JS -->
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+// ===== DATA =====
+var BOOKING_URL = 'https://therestorecenter.com/contact/';
+var PAYLOAD_LIMIT = 500;
+
+var STEPS = [
+  {
+    id:'contact',
+    title:'Let\'s Start With Your Information',
+    subtitle:'Required fields help the scheduling team reach you.',
+    fields:[
+      {type:'text',name:'name',label:'Full Name',required:true,placeholder:'Your full name'},
+      {type:'email',name:'email',label:'Email Address',required:true,placeholder:'you@example.com'},
+      {type:'tel',name:'phone',label:'Phone Number',required:true,placeholder:'(555) 123-4567'},
+      {type:'date',name:'dob',label:'Date of Birth',required:false}
+    ]
+  },
+  {
+    id:'patient_type',
+    title:'Which Best Describes You?',
+    subtitle:'Select the option that most closely matches your current situation.',
+    fields:[
+      {type:'radio-cards',name:'patient_type',label:'I would describe myself as:',required:true,options:[
+        {value:'prevention',title:'Prevention-Oriented',desc:'I want to stay ahead of potential health issues and optimize my well-being.'},
+        {value:'vague_complaints',title:'Vague or Undiagnosed Complaints',desc:'I have symptoms that haven\'t been fully explained or addressed.'},
+        {value:'family_history',title:'Pre-Diagnosis with Family History',desc:'I have a family history of health conditions and want proactive evaluation.'},
+        {value:'significant_problems',title:'Significant Health Problems',desc:'I am dealing with one or more significant health challenges.'}
+      ]}
+    ]
+  },
+  {
+    id:'primary_concern',
+    title:'What Is Your Primary Health Concern?',
+    subtitle:'Describe in your own words what brought you here today.',
+    fields:[
+      {type:'textarea',name:'primary_concern',label:'Primary Concern',required:true,placeholder:'Please describe your main health concern, including how long you\'ve been experiencing it and how it affects your daily life...',maxlength:800},
+      {type:'chips',name:'concern_areas',label:'Are any of these relevant to your concern? (Select all that apply)',required:false,options:[
+        'Energy & Fatigue','Digestive Health','Weight Management','Blood Sugar / Metabolic',
+        'Hormonal Balance','Sleep Quality','Mood & Stress','Pain & Inflammation',
+        'Cardiovascular Health','Autoimmune Concerns','Cognitive Function','Skin Health'
+      ]}
+    ]
+  },
+  {
+    id:'metabolic',
+    title:'Metabolic & Blood Sugar Health',
+    subtitle:'These questions help the team understand your metabolic health picture. This is not a diagnostic tool.',
+    fields:[
+      {type:'radio-cards',name:'blood_sugar_dx',label:'Have you ever been told by a healthcare provider that you have prediabetes, metabolic syndrome, or type 2 diabetes?',required:false,options:[
+        {value:'yes_prediabetes',title:'Yes — Prediabetes',desc:''},
+        {value:'yes_metabolic',title:'Yes — Metabolic Syndrome',desc:''},
+        {value:'yes_diabetes',title:'Yes — Type 2 Diabetes',desc:''},
+        {value:'no',title:'No',desc:''},
+        {value:'unsure',title:'Not Sure',desc:''}
+      ]},
+      {type:'chips',name:'metabolic_symptoms',label:'Do you experience any of the following? (Select all that apply)',required:false,options:[
+        'Increased thirst','Frequent urination','Unexplained weight changes','Fatigue after meals',
+        'Sugar or carb cravings','Difficulty losing weight','Darkened skin patches','Elevated blood pressure (told by provider)'
+      ]}
+    ]
+  },
+  {
+    id:'health_history',
+    title:'Health History Overview',
+    subtitle:'A brief snapshot to help the team prepare for your consultation.',
+    fields:[
+      {type:'chips',name:'diagnosed_conditions',label:'Have you been diagnosed with any of the following? (Select all that apply)',required:false,options:[
+        'High blood pressure','High cholesterol','Thyroid disorder','Autoimmune condition',
+        'Anxiety or depression','Chronic pain','Digestive disorder','Heart disease',
+        'Hormonal imbalance','Sleep disorder','None of these'
+      ]},
+      {type:'textarea',name:'medications',label:'Current Medications & Supplements',required:false,placeholder:'List any medications, supplements, or vitamins you currently take...',maxlength:500},
+      {type:'textarea',name:'allergies',label:'Known Allergies',required:false,placeholder:'List any known allergies (medications, foods, environmental)...',maxlength:300}
+    ]
+  },
+  {
+    id:'lifestyle',
+    title:'Lifestyle & Daily Habits',
+    subtitle:'Understanding your daily patterns helps inform a whole-person approach.',
+    fields:[
+      {type:'slider',name:'sleep_hours',label:'Average hours of sleep per night',min:2,max:12,step:0.5,default:7,unit:' hours'},
+      {type:'radio-cards',name:'sleep_quality',label:'How would you rate your sleep quality?',required:false,options:[
+        {value:'excellent',title:'Excellent',desc:'I fall asleep easily and wake refreshed.'},
+        {value:'good',title:'Good',desc:'Generally restful with occasional disruptions.'},
+        {value:'fair',title:'Fair',desc:'I often feel unrested or wake frequently.'},
+        {value:'poor',title:'Poor',desc:'I consistently struggle with sleep.'}
+      ]},
+      {type:'radio-cards',name:'exercise_freq',label:'How often do you engage in intentional physical activity?',required:false,options:[
+        {value:'daily',title:'Daily or Almost Daily',desc:''},
+        {value:'3_5',title:'3–5 Times Per Week',desc:''},
+        {value:'1_2',title:'1–2 Times Per Week',desc:''},
+        {value:'rarely',title:'Rarely or Never',desc:''}
+      ]}
+    ]
+  },
+  {
+    id:'nutrition_stress',
+    title:'Nutrition & Stress',
+    subtitle:'These factors play an important role in overall health.',
+    fields:[
+      {type:'radio-cards',name:'diet_desc',label:'Which best describes your typical eating pattern?',required:false,options:[
+        {value:'whole_foods',title:'Mostly Whole Foods',desc:'Vegetables, lean proteins, whole grains, minimal processed food.'},
+        {value:'mixed',title:'Mixed',desc:'A combination of whole foods and processed/convenience foods.'},
+        {value:'processed',title:'Mostly Processed / Convenience',desc:'Frequent fast food, packaged meals, or irregular eating.'},
+        {value:'restricted',title:'Restricted / Specialized Diet',desc:'Following a specific dietary protocol (keto, vegan, elimination, etc.).'}
+      ]},
+      {type:'slider',name:'stress_level',label:'Rate your average daily stress level',min:1,max:10,step:1,default:5,unit:'/10'},
+      {type:'chips',name:'stress_sources',label:'Primary sources of stress (Select all that apply)',required:false,options:[
+        'Work / Career','Financial','Relationships','Health concerns',
+        'Caregiving responsibilities','Life transitions','Loneliness / Isolation','Other'
+      ]}
+    ]
+  },
+  {
+    id:'previous_care',
+    title:'Previous Care & Expectations',
+    subtitle:'Help us understand your experience with healthcare so far.',
+    fields:[
+      {type:'radio-cards',name:'prev_integrative',label:'Have you previously worked with an integrative or functional medicine provider?',required:false,options:[
+        {value:'yes',title:'Yes',desc:''},
+        {value:'no',title:'No',desc:''},
+        {value:'unsure',title:'Not Sure',desc:''}
+      ]},
+      {type:'textarea',name:'prev_treatments',label:'What treatments or approaches have you already tried for your primary concern?',required:false,placeholder:'E.g., medications, physical therapy, dietary changes, supplements, specialist visits...',maxlength:500},
+      {type:'chips',name:'goals',label:'What are your top goals for working with RESTORE? (Select all that apply)',required:false,options:[
+        'Identify root cause of symptoms','Reduce or eliminate medications','Improve energy and vitality',
+        'Optimize metabolic health','Develop a sustainable nutrition plan','Manage stress more effectively',
+        'Improve sleep','Preventive health strategy','Better understand my lab work','Comprehensive health evaluation'
+      ]}
+    ]
+  },
+  {
+    id:'logistics',
+    title:'Logistics & Preferences',
+    subtitle:'A few final details to help with scheduling.',
+    fields:[
+      {type:'radio-cards',name:'heard_about',label:'How did you hear about RESTORE Center for Integrative Medicine?',required:false,options:[
+        {value:'search',title:'Online Search',desc:''},
+        {value:'referral',title:'Referral from Provider',desc:''},
+        {value:'friend_family',title:'Friend or Family',desc:''},
+        {value:'social',title:'Social Media',desc:''},
+        {value:'other',title:'Other',desc:''}
+      ]},
+      {type:'radio-cards',name:'payment_aware',label:'RESTORE operates on a cash-pay model. Are you comfortable with this approach?',required:false,options:[
+        {value:'yes',title:'Yes, I understand',desc:''},
+        {value:'questions',title:'I have questions about this',desc:''},
+        {value:'need_info',title:'I\'d like more information first',desc:''}
+      ]},
+      {type:'textarea',name:'additional_notes',label:'Anything else you\'d like the team to know before your consultation?',required:false,placeholder:'Any additional context, questions, or preferences...',maxlength:500}
+    ]
+  },
+  {
+    id:'review',
+    title:'Review Your Responses',
+    subtitle:'Please review your information below. You can go back to edit any section.',
+    fields:[] // dynamically rendered
+  }
+];
+
+var TOTAL_STEPS = STEPS.length;
+var currentStep = 0;
+var formData = {};
+
+// ===== ASSESSMENT OPEN/CLOSE =====
+window.openAssessment = function(){
+  document.getElementById('assessmentOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  currentStep = 0;
+  renderStep();
+};
+window.closeAssessment = function(){
+  if(confirm('Are you sure you want to close? Your responses will not be saved.')){
+    document.getElementById('assessmentOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+};
+
+// ===== STICKY CTA =====
+var stickyCta = document.getElementById('stickyCta');
+window.addEventListener('scroll', function(){
+  stickyCta.classList.toggle('visible', window.scrollY > 400);
+});
+
+// ===== RENDER STEP =====
+function renderStep(){
+  var step = STEPS[currentStep];
+  var body = document.getElementById('assessmentBody');
+  var pct = Math.round(((currentStep) / TOTAL_STEPS) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressStep').textContent = 'Step ' + (currentStep+1) + ' of ' + TOTAL_STEPS;
+  var minsLeft = Math.max(1, Math.round((TOTAL_STEPS - currentStep) * 1.1));
+  document.getElementById('progressTime').textContent = '~' + minsLeft + ' min remaining';
+
+  if(step.id === 'review'){
+    renderReview(body);
+    return;
+  }
+
+  var html = '<div class="assessment-step active">';
+  html += '<div class="step-header"><h2>' + esc(step.title) + '</h2>';
+  if(step.subtitle) html += '<p>' + esc(step.subtitle) + '</p>';
+  html += '</div>';
+
+  step.fields.forEach(function(f){
+    html += renderField(f);
+  });
+
+  html += '<div class="assessment-nav">';
+  if(currentStep > 0){
+    html += '<button class="btn btn-outline btn-sm" type="button" onclick="prevStep()">&#8592; Back</button>';
+  } else {
+    html += '<div></div>';
+  }
+  html += '<button class="btn btn-gradient btn-sm" type="button" onclick="nextStep()">Continue &#8594;</button>';
+  html += '</div>';
+  html += '</div>';
+
+  body.innerHTML = html;
+  restoreValues();
+  body.scrollTop = 0;
+  document.getElementById('assessmentOverlay').scrollTop = 0;
+}
+
+function renderField(f){
+  var html = '';
+  switch(f.type){
+    case 'text':
+    case 'email':
+    case 'tel':
+    case 'date':
+      html += '<div class="input-group">';
+      html += '<label for="f_'+f.name+'">' + esc(f.label);
+      if(f.required) html += '<span class="required-star" aria-label="required">*</span>';
+      html += '</label>';
+      html += '<input type="'+f.type+'" id="f_'+f.name+'" name="'+f.name+'"';
+      if(f.placeholder) html += ' placeholder="'+esc(f.placeholder)+'"';
+      if(f.required) html += ' required aria-required="true"';
+      html += '>';
+      html += '<div class="error-msg" id="err_'+f.name+'"></div>';
+      html += '</div>';
+      break;
+
+    case 'textarea':
+      html += '<div class="input-group">';
+      html += '<label for="f_'+f.name+'">' + esc(f.label);
+      if(f.required) html += '<span class="required-star" aria-label="required">*</span>';
+      html += '</label>';
+      html += '<textarea id="f_'+f.name+'" name="'+f.name+'"';
+      if(f.placeholder) html += ' placeholder="'+esc(f.placeholder)+'"';
+      if(f.maxlength) html += ' maxlength="'+f.maxlength+'"';
+      if(f.required) html += ' required aria-required="true"';
+      html += '></textarea>';
+      if(f.maxlength) html += '<div class="char-count"><span id="cc_'+f.name+'">0</span>/'+f.maxlength+'</div>';
+      html += '<div class="error-msg" id="err_'+f.name+'"></div>';
+      html += '</div>';
+      break;
+
+    case 'chips':
+      html += '<fieldset><legend>' + esc(f.label) + '</legend>';
+      if(!f.required) html += '<p class="field-hint">Optional — select all that apply, click again to deselect</p>';
+      html += '<div class="chips-wrap">';
+      f.options.forEach(function(opt, i){
+        var val = typeof opt === 'string' ? opt : opt.value;
+        var lbl = typeof opt === 'string' ? opt : opt.title;
+        var uid = 'chip_'+f.name+'_'+i;
+        html += '<div class="chip">';
+        html += '<input type="checkbox" id="'+uid+'" name="'+f.name+'" value="'+esc(val)+'">';
+        html += '<label for="'+uid+'"><span class="check-icon" aria-hidden="true">✓</span> '+esc(lbl)+'</label>';
+        html += '</div>';
+      });
+      html += '</div></fieldset>';
+      break;
+
+    case 'radio-cards':
+      html += '<fieldset><legend>' + esc(f.label);
+      if(f.required) html += '<span class="required-star" aria-label="required">*</span>';
+      html += '</legend>';
+      html += '<div class="radio-cards">';
+      f.options.forEach(function(opt, i){
+        var uid = 'rc_'+f.name+'_'+i;
+        html += '<div class="radio-card">';
+        html += '<input type="radio" id="'+uid+'" name="'+f.name+'" value="'+esc(opt.value)+'"';
+        if(f.required) html += ' required';
+        html += '>';
+        html += '<label for="'+uid+'"><div class="rc-title"><span class="rc-dot"></span> '+esc(opt.title)+'</div>';
+        if(opt.desc) html += '<div class="rc-desc">'+esc(opt.desc)+'</div>';
+        html += '</label></div>';
+      });
+      html += '</div>';
+      html += '<div class="error-msg" id="err_'+f.name+'"></div>';
+      html += '</fieldset>';
+      break;
+
+    case 'slider':
+      var val = formData[f.name] !== undefined ? formData[f.name] : f.default;
+      html += '<div class="input-group">';
+      html += '<label for="f_'+f.name+'">' + esc(f.label) + '</label>';
+      html += '<div class="slider-wrap">';
+      html += '<div class="slider-value" id="sv_'+f.name+'">' + val + esc(f.unit) + '</div>';
+      html += '<input type="range" id="f_'+f.name+'" name="'+f.name+'" min="'+f.min+'" max="'+f.max+'" step="'+f.step+'" value="'+val+'"';
+      html += ' oninput="document.getElementById(\'sv_'+f.name+'\').textContent=this.value+\''+esc(f.unit)+'\'">';
+      html += '<div class="slider-labels"><span>'+f.min+esc(f.unit)+'</span><span>'+f.max+esc(f.unit)+'</span></div>';
+      html += '</div></div>';
+      break;
+  }
+  return html;
+}
+
+function restoreValues(){
+  Object.keys(formData).forEach(function(key){
+    var val = formData[key];
+    if(Array.isArray(val)){
+      val.forEach(function(v){
+        var els = document.querySelectorAll('input[name="'+key+'"]');
+        els.forEach(function(el){
+          if(el.type === 'checkbox' && el.value === v) el.checked = true;
+        });
+      });
+    } else {
+      var el = document.getElementById('f_'+key);
+      if(el){
+        el.value = val;
+        if(el.type === 'range'){
+          var sv = document.getElementById('sv_'+key);
+          if(sv){
+            var field = findField(key);
+            sv.textContent = val + (field ? field.unit : '');
+          }
+        }
+      }
+      var radios = document.querySelectorAll('input[name="'+key+'"][type="radio"]');
+      radios.forEach(function(r){ if(r.value === val) r.checked = true; });
+    }
+  });
+  // char count listeners
+  document.querySelectorAll('textarea[maxlength]').forEach(function(ta){
+    var cc = document.getElementById('cc_'+ta.name);
+    if(cc){
+      cc.textContent = ta.value.length;
+      ta.addEventListener('input', function(){ cc.textContent = ta.value.length; });
+    }
+  });
+}
+
+function findField(name){
+  for(var i=0;i<STEPS.length;i++){
+    for(var j=0;j<STEPS[i].fields.length;j++){
+      if(STEPS[i].fields[j].name === name) return STEPS[i].fields[j];
+    }
+  }
+  return null;
+}
+
+function collectCurrentStep(){
+  var step = STEPS[currentStep];
+  if(step.id === 'review') return;
+  step.fields.forEach(function(f){
+    if(f.type === 'chips'){
+      var checked = [];
+      document.querySelectorAll('input[name="'+f.name+'"]:checked').forEach(function(el){
+        checked.push(el.value);
+      });
+      formData[f.name] = checked;
+    } else if(f.type === 'radio-cards'){
+      var sel = document.querySelector('input[name="'+f.name+'"]:checked');
+      formData[f.name] = sel ? sel.value : '';
+    } else if(f.type === 'slider'){
+      var el = document.getElementById('f_'+f.name);
+      formData[f.name] = el ? parseFloat(el.value) : f.default;
+    } else {
+      var el = document.getElementById('f_'+f.name);
+      formData[f.name] = el ? el.value.trim() : '';
+    }
+  });
+}
+
+function validateCurrentStep(){
+  var step = STEPS[currentStep];
+  if(step.id === 'review') return true;
+  var valid = true;
+  step.fields.forEach(function(f){
+    if(!f.required) return;
+    var errEl = document.getElementById('err_'+f.name);
+    if(f.type === 'text' || f.type === 'email' || f.type === 'tel' || f.type === 'date'){
+      var el = document.getElementById('f_'+f.name);
+      var val = el ? el.value.trim() : '';
+      if(!val){
+        valid = false;
+        if(el) el.classList.add('input-error');
+        if(errEl){ errEl.textContent = esc(f.label) + ' is required.'; errEl.classList.add('visible'); }
+      } else if(f.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
+        valid = false;
+        if(el) el.classList.add('input-error');
+        if(errEl){ errEl.textContent = 'Please enter a valid email address.'; errEl.classList.add('visible'); }
+      } else {
+        if(el) el.classList.remove('input-error');
+        if(errEl) errEl.classList.remove('visible');
+      }
+    } else if(f.type === 'textarea'){
+      var el = document.getElementById('f_'+f.name);
+      var val = el ? el.value.trim() : '';
+      if(!val){
+        valid = false;
+        if(el) el.classList.add('input-error');
+        if(errEl){ errEl.textContent = esc(f.label) + ' is required.'; errEl.classList.add('visible'); }
+      } else {
+        if(el) el.classList.remove('input-error');
+        if(errEl) errEl.classList.remove('visible');
+      }
+    } else if(f.type === 'radio-cards'){
+      var sel = document.querySelector('input[name="'+f.name+'"]:checked');
+      if(!sel){
+        valid = false;
+        if(errEl){ errEl.textContent = 'Please select an option.'; errEl.classList.add('visible'); }
+      } else {
+        if(errEl) errEl.classList.remove('visible');
+      }
+    }
+  });
+  return valid;
+}
+
+window.nextStep = function(){
+  collectCurrentStep();
+  if(!validateCurrentStep()) return;
+  if(currentStep < TOTAL_STEPS - 1){
+    currentStep++;
+    renderStep();
+  }
+};
+window.prevStep = function(){
+  collectCurrentStep();
+  if(currentStep > 0){
+    currentStep--;
+    renderStep();
+  }
+};
+window.goToStep = function(idx){
+  collectCurrentStep();
+  currentStep = idx;
+  renderStep();
+};
+
+// ===== REVIEW =====
+function renderReview(body){
+  var html = '<div class="assessment-step active">';
+  html += '<div class="step-header"><h2>Review Your Responses</h2>';
+  html += '<p>Please review your information below. You can go back to edit any section.</p></div>';
+
+  STEPS.forEach(function(step, idx){
+    if(step.id === 'review') return;
+    if(step.fields.length === 0) return;
+    var hasData = false;
+    step.fields.forEach(function(f){
+      var v = formData[f.name];
+      if(v && (!Array.isArray(v) || v.length > 0)) hasData = true;
+    });
+
+    html += '<div class="review-section">';
+    html += '<h3>' + esc(step.title) + ' <button class="edit-btn" type="button" onclick="goToStep('+idx+')" aria-label="Edit '+esc(step.title)+'">Edit</button></h3>';
+
+    step.fields.forEach(function(f){
+      var v = formData[f.name];
+      var display = '';
+      if(Array.isArray(v)){
+        display = v.length > 0 ? v.join(', ') : '—';
+      } else if(f.type === 'radio-cards' && v){
+        var opt = f.options.find(function(o){ return o.value === v; });
+        display = opt ? opt.title : v;
+      } else if(f.type === 'slider'){
+        display = (v !== undefined && v !== '') ? v + (f.unit || '') : f.default + (f.unit || '');
+      } else {
+        display = v || '—';
+      }
+      html += '<div class="review-row"><span class="review-label">' + esc(f.label.replace(/\(Select all that apply\)/g,'').replace(/\?$/,'').trim()) + '</span><span class="review-value">' + esc(display) + '</span></div>';
+    });
+
+    html += '</div>';
+  });
+
+  html += '<div class="disclaimer"><strong>Important:</strong> By submitting this assessment, you acknowledge that this is for informational and scheduling purposes only. This does not establish a patient-provider relationship and is not a substitute for professional medical advice, diagnosis, or treatment.</div>';
+
+  html += '<div class="assessment-nav">';
+  html += '<button class="btn btn-outline btn-sm" type="button" onclick="prevStep()">&#8592; Back</button>';
+  html += '<button class="btn btn-gradient btn-sm" type="button" onclick="submitAssessment()">Submit &amp; View Summary &#8594;</button>';
+  html += '</div>';
+  html += '</div>';
+
+  body.innerHTML = html;
+  document.getElementById('assessmentOverlay').scrollTop = 0;
+
+  var pct = 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressStep').textContent = 'Step ' + TOTAL_STEPS + ' of ' + TOTAL_STEPS;
+  document.getElementById('progressTime').textContent = 'Final review';
+}
+
+// ===== SUBMIT =====
+window.submitAssessment = function(){
+  document.getElementById('assessmentOverlay').classList.remove('active');
+  document.getElementById('resultsOverlay').classList.add('active');
+  renderResults();
+};
+
+function buildSummary(){
+  var lines = [];
+  lines.push('RESTORE CENTER — Health Assessment Summary');
+  lines.push('==========================================');
+  lines.push('Name: ' + (formData.name || ''));
+  lines.push('Email: ' + (formData.email || ''));
+  lines.push('Phone: ' + (formData.phone || ''));
+  if(formData.dob) lines.push('DOB: ' + formData.dob);
+  lines.push('');
+
+  if(formData.patient_type){
+    var ptOpt = STEPS[1].fields[0].options.find(function(o){return o.value===formData.patient_type;});
+    lines.push('Patient Type: ' + (ptOpt ? ptOpt.title : formData.patient_type));
+  }
+  if(formData.primary_concern){
+    lines.push('Primary Concern: ' + formData.primary_concern);
+  }
+  if(formData.concern_areas && formData.concern_areas.length){
+    lines.push('Concern Areas: ' + formData.concern_areas.join(', '));
+  }
+  if(formData.blood_sugar_dx){
+    var bsOpt = STEPS[3].fields[0].options.find(function(o){return o.value===formData.blood_sugar_dx;});
+    lines.push('Blood Sugar Dx: ' + (bsOpt ? bsOpt.title : formData.blood_sugar_dx));
+  }
+  if(formData.metabolic_symptoms && formData.metabolic_symptoms.length){
+    lines.push('Metabolic Symptoms: ' + formData.metabolic_symptoms.join(', '));
+  }
+  if(formData.diagnosed_conditions && formData.diagnosed_conditions.length){
+    lines.push('Diagnosed Conditions: ' + formData.diagnosed_conditions.join(', '));
+  }
+  if(formData.medications) lines.push('Medications: ' + formData.medications);
+  if(formData.allergies) lines.push('Allergies: ' + formData.allergies);
+  if(formData.sleep_hours !== undefined) lines.push('Sleep: ' + formData.sleep_hours + ' hrs');
+  if(formData.sleep_quality){
+    var sqOpt = STEPS[5].fields[1].options.find(function(o){return o.value===formData.sleep_quality;});
+    lines.push('Sleep Quality: ' + (sqOpt ? sqOpt.title : formData.sleep_quality));
+  }
+  if(formData.exercise_freq){
+    var efOpt = STEPS[5].fields[2].options.find(function(o){return o.value===formData.exercise_freq;});
+    lines.push('Exercise: ' + (efOpt ? efOpt.title : formData.exercise_freq));
+  }
+  if(formData.diet_desc){
+    var ddOpt = STEPS[6].fields[0].options.find(function(o){return o.value===formData.diet_desc;});
+    lines.push('Diet: ' + (ddOpt ? ddOpt.title : formData.diet_desc));
+  }
+  if(formData.stress_level !== undefined) lines.push('Stress Level: ' + formData.stress_level + '/10');
+  if(formData.stress_sources && formData.stress_sources.length){
+    lines.push('Stress Sources: ' + formData.stress_sources.join(', '));
+  }
+  if(formData.goals && formData.goals.length){
+    lines.push('Goals: ' + formData.goals.join(', '));
+  }
+  if(formData.prev_treatments) lines.push('Previous Treatments: ' + formData.prev_treatments);
+  if(formData.payment_aware){
+    var paOpt = STEPS[8].fields[1].options.find(function(o){return o.value===formData.payment_aware;});
+    lines.push('Cash-Pay Awareness: ' + (paOpt ? paOpt.title : formData.payment_aware));
+  }
+  if(formData.additional_notes) lines.push('Additional Notes: ' + formData.additional_notes);
+
+  var summary = lines.join('\n');
+  if(summary.length > PAYLOAD_LIMIT){
+    summary = summary.substring(0, PAYLOAD_LIMIT - 3) + '...';
+  }
+  return summary;
+}
+
+function buildPayloadJSON(){
+  return {
+    name: formData.name || '',
+    email: formData.email || '',
+    phone: formData.phone || '',
+    primary_concern: (formData.primary_concern || '').substring(0, 200)
+  };
+}
+
+function renderResults(){
+  var summary = buildSummary();
+  var payloadJSON = JSON.stringify(buildPayloadJSON(), null, 2);
+  var fullJSON = JSON.stringify(formData, null, 2);
+
+  var html = '';
+  html += '<div class="results-header">';
+  html += '<div class="check-circle" aria-hidden="true">✓</div>';
+  html += '<h2>Your Health Assessment Is Complete</h2>';
+  html += '<p>Below is a summary of your responses. Copy this summary and bring it to your consultation scheduling.</p>';
+  html += '</div>';
+
+  html += '<h3 style="font-size:1rem;font-weight:700;margin-bottom:12px">Booking Summary</h3>';
+  html += '<div class="summary-box" id="summaryText">' + esc(summary) + '</div>';
+
+  html += '<div class="json-toggle">';
+  html += '<button class="btn btn-outline btn-sm" type="button" onclick="toggleJSON()" id="jsonToggleBtn">Show JSON View</button>';
+  html += '</div>';
+  html += '<div class="json-box" id="jsonBox">' + esc(fullJSON) + '</div>';
+
+  html += '<div class="copy-feedback" id="copyFeedback"></div>';
+
+  html += '<div class="results-actions">';
+  html += '<button class="btn btn-gradient" type="button" onclick="copySummary()">📋 Copy Summary to Clipboard</button>';
+  html += '<button class="btn btn-outline" type="button" onclick="printSummary()">🖨️ Print Summary</button>';
+  html += '<button class="btn btn-gradient" type="button" onclick="redirectToBooking()">Schedule Your Consultation →</button>';
+  html += '</div>';
+
+  html += '<div class="emergency-box" style="margin-top:32px">';
+  html += '<h4>⚠️ If You Are Experiencing a Medical Emergency</h4>';
+  html += '<p>Please call <strong>911</strong> or go to your nearest emergency room immediately. This assessment is not a substitute for emergency medical care.</p>';
+  html += '</div>';
+
+  html += '<div class="disclaimer" style="margin-top:16px">';
+  html += '<strong>Disclaimer:</strong> This health assessment is for informational and scheduling purposes only. It does not constitute medical advice, diagnosis, or treatment. No patient-provider relationship is established through this assessment. The information you provided is stored only on your device and is not transmitted to any server. Always consult with a qualified healthcare provider regarding any medical concerns.';
+  html += '</div>';
+
+  html += '<div style="text-align:center;margin-top:24px">';
+  html += '<button class="btn btn-outline btn-sm" type="button" onclick="closeResults()">Close</button>';
+  html += '</div>';
+
+  document.getElementById('resultsBody').innerHTML = html;
+  document.getElementById('resultsOverlay').scrollTop = 0;
+}
+
+window.toggleJSON = function(){
+  var box = document.getElementById('jsonBox');
+  var btn = document.getElementById('jsonToggleBtn');
+  if(box.classList.contains('visible')){
+    box.classList.remove('visible');
+    btn.textContent = 'Show JSON View';
+  } else {
+    box.classList.add('visible');
+    btn.textContent = 'Hide JSON View';
+  }
+};
+
+window.copySummary = function(){
+  var text = document.getElementById('summaryText').textContent;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      showCopyFeedback('✓ Summary copied to clipboard!');
+    }).catch(function(){
+      fallbackCopy(text);
+    });
+  } else {
+    fallbackCopy(text);
+  }
+};
+
+function fallbackCopy(text){
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try{
+    document.execCommand('copy');
+    showCopyFeedback('✓ Summary copied to clipboard!');
+  } catch(e){
+    showCopyFeedback('Unable to copy. Please select and copy manually.');
+  }
+  document.body.removeChild(ta);
+}
+
+function showCopyFeedback(msg){
+  var el = document.getElementById('copyFeedback');
+  el.textContent = msg;
+  setTimeout(function(){ el.textContent = ''; }, 4000);
+}
+
+window.printSummary = function(){
+  var w = window.open('','','width=700,height=600');
+  var summary = document.getElementById('summaryText').textContent;
+  w.document.write('<html><head><title>RESTORE Health Assessment Summary</title><style>body{font-family:monospace;padding:40px;font-size:13px;line-height:1.8;white-space:pre-wrap;color:#1a202c}</style></head><body>');
+  w.document.write(esc(summary));
+  w.document.write('</body></html>');
+  w.document.close();
+  w.print();
+};
+
+window.redirectToBooking = function(){
+  copySummaryQuiet();
+  setTimeout(function(){
+    window.open(BOOKING_URL, '_blank');
+  }, 500);
+};
+
+function copySummaryQuiet(){
+  var text = document.getElementById('summaryText').textContent;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).catch(function(){});
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); } catch(e){}
+    document.body.removeChild(ta);
+  }
+  showCopyFeedback('✓ Summary copied! Redirecting to booking...');
+}
+
+window.closeResults = function(){
+  document.getElementById('resultsOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+};
+
+function esc(s){
+  if(!s) return '';
+  var d = document.createElement('div');
+  d.appendChild(document.createTextNode(s));
+  return d.innerHTML;
+}
+
+})();
+</script>
+</body>
+</html>

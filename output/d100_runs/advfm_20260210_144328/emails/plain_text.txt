@@ -1,0 +1,103 @@
+================================================================================
+EMAIL 1: SMART PRACTICE VALUE DROP
+================================================================================
+SUBJECT: What your [PRIMARY_SYMPTOM] might be telling you, [FIRST_NAME]
+SEND: Immediately after assessment completion
+
+Hi [FIRST_NAME],
+
+Thanks for taking the time to complete your health assessment. I wanted to reach out personally because what you shared about [PRIMARY_SYMPTOM] is something we see often—and it's rarely just about managing symptoms.
+
+Here's what most people don't realize: when your body sends signals like [PRIMARY_SYMPTOM], it's usually pointing to something deeper. Think of it like a check engine light. You wouldn't just put tape over the light—you'd look under the hood.
+
+That's the core difference in functional medicine. Instead of covering symptoms, we investigate the root biochemical imbalances causing them. For many of our patients, this shift in approach has been life-changing.
+
+I know you're probably tired of feeling this way. The good news? You've already taken the most important step by seeking answers.
+
+If you'd like to explore what might actually be driving [PRIMARY_SYMPTOM], we offer a free 10-minute discovery call. No pressure, just a conversation about whether our approach might be right for you.
+
+[BOOKING_LINK]
+
+To your health,
+
+Dr. Matthew Willis & Team
+Advanced Functional Medicine
+
+
+================================================================================
+EMAIL 2: MECHANISM STORY
+================================================================================
+SUBJECT: Why conventional labs miss what's really happening (diabetes example)
+SEND: Day 2 after assessment
+
+Hi [FIRST_NAME],
+
+Quick question: have you ever had your doctor say "your labs look fine" while you still feel terrible?
+
+Here's why that happens so often.
+
+Most conventional medicine runs maybe 12-15 basic markers. If you're not in the "danger zone," you're told everything's normal. But here's the thing—your body doesn't go from perfect health to disease overnight.
+
+Think of it like a spectrum. On one end, you're thriving. On the other end, you have diabetes or thyroid disease. But there's a huge middle ground where dysfunction is building—and standard labs miss it completely.
+
+That's why we test 200+ biomarkers. We're looking at the full picture: inflammation markers, nutrient deficiencies, hormone pathways, gut health, metabolic function—all the upstream factors that eventually become symptoms.
+
+For example, with diabetes, most doctors only check fasting glucose and A1C. We're looking at insulin resistance markers, inflammatory cytokines, cortisol patterns, and micronutrient status. This is why we've helped reverse diabetes in 96% of committed patients—we're addressing causes, not just numbers.
+
+This isn't about running more tests for the sake of it. It's about finally understanding what's actually happening in your body.
+
+Curious if this approach might work for you? Let's talk.
+
+[BOOKING_LINK]
+
+Dr. Matthew Willis & Team
+
+
+================================================================================
+EMAIL 3: PROOF & RESULTS
+================================================================================
+SUBJECT: From A1C of 9.2 to completely reversed (Sarah's story)
+SEND: Day 6 after assessment
+
+Hi [FIRST_NAME],
+
+I want to share Sarah's story with you (with her permission).
+
+She came to us after 8 years of type 2 diabetes. Her A1C was 9.2. She was on three medications. Her doctor told her diabetes was "progressive and irreversible."
+
+She was exhausted, gaining weight despite eating less, and losing hope.
+
+Here's what changed: We ran comprehensive testing and found severe insulin resistance (expected), but also chronic inflammation from gut dysfunction, cortisol dysregulation from years of stress, and critical nutrient deficiencies affecting her metabolism.
+
+Her previous doctors never tested for any of this.
+
+We built a personalized protocol addressing all these root causes—not just her blood sugar. Within 6 months, her A1C was 5.4. She's off all diabetes medications. She has energy again.
+
+This is what's possible when you treat causes, not symptoms.
+
+*Important: Individual results vary. This is not a guarantee of specific outcomes, and we cannot diagnose or treat any condition without a proper medical evaluation.*
+
+But I share this because after 12+ years and hundreds of patients, we've seen this pattern repeat: when you address root causes with precision, your body can heal.
+
+If you're ready to investigate what's really driving your health concerns, let's start with a free 10-minute discovery call. No obligation—just a conversation about whether functional medicine is right for you.
+
+[BOOKING_LINK]
+
+We're here when you're ready.
+
+Dr. Matthew Willis & Team
+Advanced Functional Medicine
+California's Largest Functional Medicine Practice
+
+
+================================================================================
+PERSONALIZATION VARIABLES
+================================================================================
+[FIRST_NAME] - Patient's first name
+[PRIMARY_SYMPTOM] - Main concern from assessment
+[BOOKING_LINK] - https://www.advfunctionalmedicine.com/schedule-a-no-fee-discovery-call/
+
+TIMING:
+- Email 1: Immediate
+- Email 2: Day 2 (48 hours)
+- Email 3: Day 6 (144 hours)

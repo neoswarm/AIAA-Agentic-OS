@@ -5,7 +5,7 @@ AIAA Agentic OS Dashboard - Complete Management System v2.3
 Features:
 - Password-protected authentication
 - Light/Dark mode toggle with localStorage persistence
-- 138 workflows with comprehensive documentation
+- 139 workflows with comprehensive documentation
 - Environment variable management (view AND set)
 - Webhook endpoint monitoring
 - Real-time logs and event tracking
@@ -516,7 +516,7 @@ def markdown_to_html(text):
     return Markup(text)
 
 # =============================================================================
-# Workflow Registry with Comprehensive Descriptions (v2.3 - 138 Workflows)
+# Workflow Registry with Comprehensive Descriptions (v2.3 - 139 Workflows)
 # =============================================================================
 
 WORKFLOWS = {
@@ -1770,7 +1770,64 @@ Business basics, extracted contacts, social media, owner info, team contacts, me
         "inputs": ["search_query", "limit", "sheet_url"],
         "outputs": ["Google Sheet with leads", "Contact info", "Social profiles"]
     },
-    
+
+    "keyword_research": {
+        "category": "SEO & Content",
+        "description": "Strategic keyword research using the 6 Circles Method - no expensive tools required",
+        "has_script": True,
+        "full_description": """## Overview
+Strategic keyword research that transforms business context into a prioritized content plan. Uses the proven 6 Circles Method to expand seed keywords, validates pillars against market reality, and delivers a 90-day content calendar.
+
+## Prerequisites
+- `OPENROUTER_API_KEY` - AI analysis and expansion
+- `PERPLEXITY_API_KEY` (optional) - Competitive research
+
+## How to Run
+```bash
+python3 execution/keyword_research.py \\
+  --business "SEO services for functional medicine practices" \\
+  --audience "Functional medicine practitioners needing patients" \\
+  --goal "Generate consulting leads" \\
+  --output output/keyword_research.md
+
+# With full context
+python3 execution/keyword_research.py \\
+  --business "Your business description" \\
+  --audience "Target audience" \\
+  --website "https://yoursite.com" \\
+  --competitors "competitor1.com,competitor2.com" \\
+  --goal "traffic/leads/sales/authority" \\
+  --timeline "quick-wins/long-term/mix" \\
+  --output output/keywords.md
+```
+
+## Process (SEED → EXPAND → CLUSTER → PRIORITIZE → MAP)
+1. **Seed Generation** - Generate 20-30 initial keywords (Direct, Problem, Outcome, Category terms)
+2. **6 Circles Expansion** - Expand using: What You Sell, Problems, Outcomes, Positioning, Adjacent Topics, Entities (100-200 keywords)
+3. **Pillar Clustering** - Group into 5-10 content pillars with 4-Test Validation
+4. **Prioritization** - Score by Business Value × Opportunity × Speed to Win
+5. **Content Mapping** - Assign content types and 90-day calendar placement
+
+## 4-Test Pillar Validation
+1. Search Volume Test - >1,000 monthly searches?
+2. Market vs Product Test - What MARKET searches, not what YOU want to talk about?
+3. Competitive Reality Test - Can you realistically rank page 1?
+4. Proprietary Advantage Test - Do you have unique data/expertise?
+
+## Outputs
+- Executive Summary with top 3 opportunities
+- Quick Wins (3-month potential) and Long-Term Plays (6-12 months)
+- Validated Pillar breakdown with cluster keywords
+- 90-Day Content Calendar with specific pieces
+- Clear "Start Here" recommendation
+- Automatic Google Doc creation
+
+## Cost
+~$0.15-0.25 per research (varies by complexity)""",
+        "inputs": ["business", "audience", "website", "competitors", "goal", "timeline"],
+        "outputs": ["Keyword clusters", "Content pillars", "90-day calendar", "Priority recommendations", "Google Doc"]
+    },
+
     "linkedin_lead_scraper": {
         "category": "Lead Generation", 
         "description": "Scrape LinkedIn profiles and enrich with verified emails for cold outreach",

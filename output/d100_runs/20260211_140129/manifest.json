@@ -1,0 +1,18 @@
+{
+  "run_id": "20260211_140129",
+  "website_url": "https://ccfmed.com",
+  "timestamp": "2026-02-11T14:02:24.857534",
+  "status": "completed",
+  "outputs": {
+    "scrape_data": {
+      "raw_markdown": "/Users/neo/Documents/Claude Code/AIAA-Agentic-OS/output/d100_runs/20260211_140129/scrape_data/raw_scrape.md",
+      "structured_json": "/Users/neo/Documents/Claude Code/AIAA-Agentic-OS/output/d100_runs/20260211_140129/scrape_data/structured_data.json"
+    },
+    "seo_data": null,
+    "health_app": null,
+    "google_ads": null,
+    "email_sequence": null
+  },
+  "estimated_cost": 0.89,
+  "total_time_seconds": 0
+}

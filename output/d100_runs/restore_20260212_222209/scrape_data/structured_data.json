@@ -1,0 +1,657 @@
+{
+  "run_metadata": {
+    "run_id": "2024-01-01-restore-center",
+    "website_url": "https://therestorecenter.com",
+    "started_at": "2024-01-01T00:00:00Z",
+    "finished_at": "2024-01-01T00:00:01Z",
+    "crawl_depth": 3,
+    "pages_visited": [
+      "https://therestorecenter.com/",
+      "https://therestorecenter.com/about/",
+      "https://therestorecenter.com/contact/",
+      "https://therestorecenter.com/programs/",
+      "https://therestorecenter.com/testing/",
+      "https://therestorecenter.com/practice-areas/",
+      "https://therestorecenter.com/faqs/"
+    ]
+  },
+  "practice": {
+    "legal_name": {
+      "value": "RESTORE Center for Integrative Medicine",
+      "verbatim": "RESTORE Center for Integrative Medicine",
+      "sources": [
+        "https://therestorecenter.com/"
+      ],
+      "confidence": "high"
+    },
+    "brand_name": {
+      "value": "RESTORE Center for Integrative Medicine",
+      "verbatim": "RESTORE Center for Integrative Medicine",
+      "sources": [
+        "https://therestorecenter.com/"
+      ],
+      "confidence": "high"
+    },
+    "tagline": {
+      "value": "WE HELP YOU GET TO THE ROOT CAUSE OF YOUR SYMPTOMS SO YOU CAN RESTORE YOUR HEALTH, RESTORE YOUR ENERGY, AND RESTORE YOUR LIFE.",
+      "verbatim": "WE HELP YOU GET TO THE ROOT CAUSE OF YOUR SYMPTOMS SO YOU CAN RESTORE YOUR HEALTH, RESTORE YOUR ENERGY, AND RESTORE YOUR LIFE.",
+      "sources": [
+        "https://therestorecenter.com/"
+      ],
+      "confidence": "high"
+    },
+    "specialty": {
+      "value": "Integrative Medicine, Functional Medicine",
+      "verbatim": "Integrative Medicine, Functional Medicine",
+      "sources": [
+        "https://therestorecenter.com/about/"
+      ],
+      "confidence": "high"
+    },
+    "practice_type": {
+      "value": "Multi-disciplinary team-based integrative medicine practice",
+      "verbatim": "Multi-disciplinary team-based integrative medicine practice",
+      "sources": [
+        "https://therestorecenter.com/about/"
+      ],
+      "confidence": "high"
+    },
+    "ownership": {
+      "value": "Dr. Ayesha Aman",
+      "verbatim": "Medical Director, Owner",
+      "sources": [
+        "https://therestorecenter.com/about/"
+      ],
+      "confidence": "high"
+    }
+  },
+  "locations": [
+    {
+      "type": "primary",
+      "address": {
+        "value": "Plano, TX",
+        "verbatim": "Plano, TX",
+        "sources": [
+          "https://therestorecenter.com/contact/"
+        ],
+        "confidence": "high"
+      },
+      "phone": {
+        "value": "(972) 519-1826",
+        "verbatim": "(972) 519-1826",
+        "sources": [
+          "https://therestorecenter.com/contact/"
+        ],
+        "confidence": "high"
+      },
+      "email": {
+        "value": "info@therestorecenter.com",
+        "verbatim": "info@therestorecenter.com",
+        "sources": [
+          "https://therestorecenter.com/contact/"
+        ],
+        "confidence": "high"
+      },
+      "hours": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    }
+  ],
+  "contact": {
+    "contact_form_url": {
+      "value": "https://therestorecenter.com/contact/",
+      "sources": [
+        "https://therestorecenter.com/contact/"
+      ],
+      "confidence": "high"
+    },
+    "booking_url": {
+      "value": "https://therestorecenter.com/contact/",
+      "sources": [
+        "https://therestorecenter.com/contact/"
+      ],
+      "confidence": "high"
+    },
+    "patient_portal_url": {
+      "value": null,
+      "sources": [],
+      "confidence": "low"
+    }
+  },
+  "providers": [
+    {
+      "name": {
+        "value": "Ayesha Aman",
+        "verbatim": "Dr. Ayesha Aman, MD, MPH, ABOIM",
+        "sources": [
+          "https://therestorecenter.com/about/"
+        ],
+        "confidence": "high"
+      },
+      "role": {
+        "value": "Medical Director, Owner, Physician",
+        "verbatim": "Medical Director, Owner, Physician",
+        "sources": [
+          "https://therestorecenter.com/about/"
+        ],
+        "confidence": "high"
+      },
+      "credentials": {
+        "value": "MD, MPH, ABOIM",
+        "verbatim": "MD, MPH (Master of Public Health), ABOIM (American Board of Integrative Medicine)",
+        "sources": [
+          "https://therestorecenter.com/about/"
+        ],
+        "confidence": "high"
+      },
+      "specialty": {
+        "value": "Integrative Medicine, Functional Medicine",
+        "verbatim": "Integrative Medicine, Functional Medicine",
+        "sources": [
+          "https://therestorecenter.com/about/"
+        ],
+        "confidence": "high"
+      },
+      "conditions_treated": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "services_performed": {
+        "value": [
+          "Root cause medicine",
+          "preventive care",
+          "comprehensive health restoration"
+        ],
+        "verbatim": "Root cause medicine, preventive care, comprehensive health restoration",
+        "sources": [
+          "https://therestorecenter.com/about/"
+        ],
+        "confidence": "high"
+      },
+      "education": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "certifications": {
+        "value": [
+          "American Board of Integrative Medicine (ABOIM)"
+        ],
+        "verbatim": "Board-certified in Integrative Medicine (ABOIM)",
+        "sources": [
+          "https://therestorecenter.com/about/"
+        ],
+        "confidence": "high"
+      },
+      "languages": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "years_experience": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "bio_summary": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "headshot_url": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    }
+  ],
+  "services": [
+    {
+      "name": {
+        "value": "Synergy 4 Team Approach",
+        "verbatim": "Synergy 4 Team Approach",
+        "sources": [
+          "https://therestorecenter.com/programs/"
+        ],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Initial Assessment",
+        "sources": [
+          "https://therestorecenter.com/programs/"
+        ],
+        "confidence": "high"
+      },
+      "target_audience": {
+        "value": "New patients seeking comprehensive evaluation",
+        "verbatim": "New patients seeking comprehensive evaluation",
+        "sources": [
+          "https://therestorecenter.com/programs/"
+        ],
+        "confidence": "high"
+      },
+      "deliverables": {
+        "value": "Initial comprehensive assessment with 4 practitioners (MD, RDN, LPC, LAc) working collaboratively",
+        "sources": [
+          "https://therestorecenter.com/programs/"
+        ],
+        "confidence": "high"
+      },
+      "cta": {
+        "value": "Contact Us",
+        "verbatim": "Contact Us",
+        "sources": [
+          "https://therestorecenter.com/contact/"
+        ],
+        "confidence": "high"
+      }
+    }
+  ],
+  "conditions": [
+    {
+      "name": {
+        "value": "Prediabetes & Metabolic Syndrome",
+        "verbatim": "Prediabetes & Metabolic Syndrome",
+        "sources": [
+          "https://therestorecenter.com/about/"
+        ],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Metabolic/Endocrine",
+        "sources": [
+          "https://therestorecenter.com/about/"
+        ],
+        "confidence": "high"
+      }
+    }
+  ],
+  "ideal_patient": {
+    "who_they_serve": {
+      "value": [
+        "Prevention-Oriented Individuals",
+        "People with Vague/Undiagnosed Complaints",
+        "Pre-Diagnosis Patients with Family History",
+        "People with Significant Health Problems"
+      ],
+      "verbatim": "Do you focus on living a healthy lifestyle, eating right and exercising but wish you had a physician you could partner with who believes as strongly as you do about prevention?",
+      "sources": [
+        "https://therestorecenter.com/about/"
+      ],
+      "confidence": "high"
+    },
+    "demographics": {
+      "value": "Health-conscious adults, Middle to upper income, Ages 35-65+, Dallas-Fort Worth metroplex",
+      "verbatim": null,
+      "sources": [
+        "https://therestorecenter.com/about/"
+      ],
+      "confidence": "medium"
+    },
+    "situations": {
+      "value": [
+        "Seeking preventive care",
+        "Undiagnosed symptoms",
+        "Pre-disease states",
+        "Complex health issues"
+      ],
+      "verbatim": null,
+      "sources": [
+        "https://therestorecenter.com/about/"
+      ],
+      "confidence": "high"
+    },
+    "exclusions": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "referral_requirements": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    }
+  },
+  "clinical_approach": {
+    "differentiators": {
+      "value": [
+        "Synergy 4 Team Model",
+        "Time-Intensive Care",
+        "Root Cause Focus",
+        "Prevention-Oriented",
+        "Cash-Pay Freedom",
+        "Multi-Disciplinary Integration"
+      ],
+      "verbatim": null,
+      "sources": [
+        "https://therestorecenter.com/about/"
+      ],
+      "confidence": "high"
+    },
+    "philosophy": {
+      "value": "Health restoration requires addressing multiple dimensions (body, mind, nutrition, energy)",
+      "verbatim": "We help you get to the root cause of your symptoms so you can RESTORE your health, RESTORE your energy, and RESTORE your life.",
+      "sources": [
+        "https://therestorecenter.com/"
+      ],
+      "confidence": "high"
+    },
+    "diagnostic_methods": {
+      "value": [
+        "Comprehensive functional lab testing",
+        "Root cause analysis"
+      ],
+      "sources": [
+        "https://therestorecenter.com/testing/"
+      ],
+      "confidence": "high"
+    },
+    "technology": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "modalities": {
+      "value": [
+        "Functional Medicine",
+        "Integrative Medicine",
+        "Traditional Chinese Medicine",
+        "Nutritional Therapy",
+        "Mental Health Counseling"
+      ],
+      "sources": [
+        "https://therestorecenter.com/practice-areas/"
+      ],
+      "confidence": "high"
+    },
+    "claims": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    }
+  },
+  "patient_journey": {
+    "first_step_cta": {
+      "value": "Contact Us to schedule initial consultation",
+      "verbatim": "Contact Us",
+      "sources": [
+        "https://therestorecenter.com/contact/"
+      ],
+      "confidence": "high"
+    },
+    "new_patient_steps": {
+      "value": [
+        "Initial contact and consultation scheduling",
+        "Synergy 4 Team Approach assessment",
+        "18-Week Integrative Health Program"
+      ],
+      "sources": [
+        "https://therestorecenter.com/programs/"
+      ],
+      "confidence": "high"
+    },
+    "discovery_call": {
+      "offered": false,
+      "description": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "intake_forms": {
+      "available": false,
+      "links": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "consult_expectations": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "follow_up": {
+      "value": "37 visits over 18 weeks in Integrative Health Program",
+      "verbatim": null,
+      "sources": [
+        "https://therestorecenter.com/programs/"
+      ],
+      "confidence": "high"
+    },
+    "memberships": {
+      "available": false,
+      "details": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    }
+  },
+  "pricing": {
+    "transparency": "NONE",
+    "prices": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "insurance_accepted": {
+      "value": [
+        "Out-of-network only"
+      ],
+      "verbatim": "We are out-of-network and provide superbills",
+      "sources": [
+        "https://therestorecenter.com/faqs/"
+      ],
+      "confidence": "high"
+    },
+    "medicare_medicaid": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "self_pay": {
+      "available": true,
+      "details": {
+        "value": "Cash-pay required",
+        "verbatim": null,
+        "sources": [
+          "https://therestorecenter.com/faqs/"
+        ],
+        "confidence": "high"
+      }
+    },
+    "superbills": {
+      "available": true,
+      "details": {
+        "value": "Provided for out-of-network reimbursement",
+        "verbatim": "We are out-of-network and provide superbills",
+        "sources": [
+          "https://therestorecenter.com/faqs/"
+        ],
+        "confidence": "high"
+      }
+    },
+    "payment_plans": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "hsa_fsa": {
+      "available": true,
+      "details": {
+        "value": "Likely accepted",
+        "verbatim": null,
+        "sources": [],
+        "confidence": "medium"
+      }
+    }
+  },
+  "trust_signals": {
+    "testimonials": {
+      "present": false,
+      "location": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "themes": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "case_studies": {
+      "present": false,
+      "urls": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "awards": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "associations": {
+      "value": [
+        "American Board of Integrative Medicine (ABOIM)"
+      ],
+      "verbatim": null,
+      "sources": [
+        "https://therestorecenter.com/about/"
+      ],
+      "confidence": "high"
+    },
+    "research_citations": {
+      "present": false,
+      "urls": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "disclaimers": {
+      "present": false,
+      "verbatim": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    }
+  },
+  "seo_intel": {
+    "primary_keywords": {
+      "value": [
+        "integrative medicine",
+        "functional medicine",
+        "root cause medicine",
+        "team-based healthcare",
+        "preventive medicine",
+        "prediabetic treatment",
+        "prehypertension treatment",
+        "hormone therapy",
+        "chronic fatigue treatment"
+      ],
+      "sources": [
+        "https://therestorecenter.com/"
+      ],
+      "confidence": "high"
+    },
+    "location_modifiers": {
+      "value": [
+        "Plano",
+        "Plano TX",
+        "Dallas-Fort Worth",
+        "North Dallas",
+        "Collin County"
+      ],
+      "sources": [
+        "https://therestorecenter.com/"
+      ],
+      "confidence": "high"
+    },
+    "conversion_ctas": {
+      "value": [
+        "Contact Us",
+        "Learn More About Our Programs",
+        "Schedule a Consultation"
+      ],
+      "verbatim": null,
+      "sources": [
+        "https://therestorecenter.com/"
+      ],
+      "confidence": "high"
+    },
+    "lead_magnets": {
+      "present": false,
+      "urls": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "forms": {
+      "value": [
+        "Contact form"
+      ],
+      "sources": [
+        "https://therestorecenter.com/contact/"
+      ],
+      "confidence": "high"
+    },
+    "tech_stack": {
+      "value": [
+        "Modern responsive website",
+        "Contact forms",
+        "Professional design"
+      ],
+      "sources": [
+        "https://therestorecenter.com/"
+      ],
+      "confidence": "high"
+    }
+  },
+  "missing": [
+    {
+      "field": "practice.locations[0].hours",
+      "reason": "Business hours not listed on website",
+      "impact": "moderate"
+    },
+    {
+      "field": "pricing.prices",
+      "reason": "No public pricing information available",
+      "impact": "critical"
+    },
+    {
+      "field": "providers[0].education",
+      "reason": "Educational background not specified",
+      "impact": "minor"
+    }
+  ]
+}

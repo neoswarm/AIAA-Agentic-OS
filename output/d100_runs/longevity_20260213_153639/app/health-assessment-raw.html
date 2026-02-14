@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Longevity Health — Premium Longevity Medicine</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--primary:#667eea;--secondary:#764ba2;--accent:#f093fb;
+--text:#1a202c;--bg:#ffffff;--gray-50:#f7fafc;--gray-100:#edf2f7;
+--gray-200:#e2e8f0;--gray-300:#cbd5e0;--gray-400:#a0aec0;
+--gray-500:#718096;--gray-600:#4a5568;--gray-700:#2d3748;
+--gradient:linear-gradient(135deg,var(--primary),var(--secondary));
+--gradient-accent:linear-gradient(135deg,var(--secondary),var(--accent));
+--radius:12px;--radius-sm:8px;--radius-lg:16px;
+--shadow:0 4px 24px rgba(102,126,234,.12);
+--shadow-lg:0 12px 48px rgba(102,126,234,.18);
+--transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--primary);text-decoration:none}
+button{cursor:pointer;font-family:inherit}
+img{max-width:100%;display:block}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+
+/* LAYOUT */
+.container{max-width:1120px;margin:0 auto;padding:0 20px}
+section{padding:80px 0}
+@media(max-width:768px){section{padding:56px 0}}
+
+/* TYPOGRAPHY */
+h1{font-size:clamp(2rem,5vw,3.25rem);font-weight:800;line-height:1.15;letter-spacing:-.02em}
+h2{font-size:clamp(1.5rem,3.5vw,2.25rem);font-weight:700;line-height:1.2;letter-spacing:-.015em}
+h3{font-size:1.25rem;font-weight:600;line-height:1.3}
+p{color:var(--gray-600)}
+.subhead{font-size:1.125rem;color:var(--gray-500);max-width:640px;margin:0 auto}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 32px;border-radius:50px;font-size:1rem;font-weight:600;border:none;transition:var(--transition);text-align:center}
+.btn-primary{background:var(--gradient);color:#fff;box-shadow:0 4px 16px rgba(102,126,234,.35)}
+.btn-primary:hover,.btn-primary:focus-visible{transform:translateY(-2px);box-shadow:0 8px 28px rgba(102,126,234,.45)}
+.btn-outline{background:transparent;color:var(--primary);border:2px solid var(--primary)}
+.btn-outline:hover,.btn-outline:focus-visible{background:var(--primary);color:#fff}
+.btn-sm{padding:10px 24px;font-size:.9rem}
+.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--gray-100);transition:var(--transition)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+.nav-logo{font-size:1.25rem;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{font-size:.9rem;font-weight:500;color:var(--gray-600);transition:var(--transition)}
+.nav-links a:hover{color:var(--primary)}
+@media(max-width:768px){.nav-links .nav-link-text{display:none}}
+
+/* HERO */
+.hero{padding-top:140px;padding-bottom:100px;text-align:center;background:linear-gradient(180deg,rgba(102,126,234,.04) 0%,transparent 100%)}
+.hero h1 span{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{margin:20px auto 0;max-width:600px;font-size:1.125rem}
+.hero-cta{margin-top:36px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:50px;background:rgba(102,126,234,.08);color:var(--primary);font-size:.85rem;font-weight:600;margin-bottom:20px}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:32px;margin-top:48px}
+.step{text-align:center;padding:32px 24px;border-radius:var(--radius-lg);background:var(--gray-50);transition:var(--transition)}
+.step:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.step-num{width:48px;height:48px;border-radius:50%;background:var(--gradient);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:1.125rem;margin-bottom:16px}
+.step h3{margin-bottom:8px}
+.step p{font-size:.9rem}
+
+/* OFFERINGS */
+.offerings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px}
+.offering-card{border-radius:var(--radius-lg);padding:32px;background:var(--bg);border:1px solid var(--gray-200);transition:var(--transition);position:relative;overflow:hidden}
+.offering-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--gradient);opacity:0;transition:var(--transition)}
+.offering-card:hover{border-color:var(--primary);box-shadow:var(--shadow);transform:translateY(-2px)}
+.offering-card:hover::before{opacity:1}
+.offering-icon{width:48px;height:48px;border-radius:var(--radius-sm);background:linear-gradient(135deg,rgba(102,126,234,.1),rgba(118,75,162,.1));display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:16px}
+.offering-card h3{margin-bottom:8px}
+.offering-card p{font-size:.9rem;margin-bottom:16px}
+.offering-card ul{list-style:none;margin-bottom:16px}
+.offering-card li{font-size:.85rem;color:var(--gray-600);padding:4px 0;padding-left:20px;position:relative}
+.offering-card li::before{content:'✓';position:absolute;left:0;color:var(--primary);font-weight:700}
+
+/* CONDITIONS */
+.conditions-grid{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:40px}
+.condition-tag{padding:10px 20px;border-radius:50px;background:var(--gray-50);border:1px solid var(--gray-200);font-size:.9rem;font-weight:500;color:var(--gray-700);transition:var(--transition)}
+.condition-tag:hover{border-color:var(--primary);color:var(--primary);background:rgba(102,126,234,.05)}
+
+/* TEAM */
+.team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;margin-top:48px}
+.team-card{text-align:center;padding:32px 24px;border-radius:var(--radius-lg);background:var(--gray-50)}
+.team-avatar{width:80px;height:80px;border-radius:50%;background:var(--gradient);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:700}
+.team-card h3{margin-bottom:4px}
+.team-card p{font-size:.85rem}
+
+/* TRUST */
+.trust{background:var(--gray-50)}
+.trust-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px;margin-top:40px}
+.trust-item{display:flex;gap:16px;align-items:flex-start}
+.trust-icon{width:44px;height:44px;min-width:44px;border-radius:var(--radius-sm);background:var(--gradient);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.trust-item h3{font-size:1rem;margin-bottom:4px}
+.trust-item p{font-size:.85rem}
+
+/* CTA SECTION */
+.cta-section{background:var(--gradient);color:#fff;text-align:center;border-radius:0}
+.cta-section h2,.cta-section p{color:#fff}
+.cta-section .btn{background:#fff;color:var(--primary)}
+.cta-section .btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.2)}
+
+/* FOOTER */
+.footer{padding:40px 0;border-top:1px solid var(--gray-100);text-align:center}
+.footer p{font-size:.8rem;color:var(--gray-400)}
+.footer .disclaimer{max-width:700px;margin:12px auto 0;font-size:.75rem;color:var(--gray-400);line-height:1.5}
+
+/* STICKY CTA */
+.sticky-cta{position:fixed;bottom:0;left:0;right:0;z-index:999;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-top:1px solid var(--gray-100);padding:12px 20px;display:none;justify-content:center;gap:12px;align-items:center}
+.sticky-cta.visible{display:flex}
+@media(min-width:769px){.sticky-cta{display:none !important}}
+
+/* ===== ASSESSMENT ===== */
+.assessment-overlay{position:fixed;inset:0;z-index:2000;background:var(--bg);overflow-y:auto;display:none;flex-direction:column}
+.assessment-overlay.active{display:flex}
+.assessment-header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--gray-100);padding:16px 20px}
+.assessment-header-inner{max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.assessment-close{width:40px;height:40px;border-radius:50%;border:1px solid var(--gray-200);background:transparent;font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:var(--transition);color:var(--gray-600)}
+.assessment-close:hover{background:var(--gray-50);color:var(--text)}
+.assessment-close:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.progress-container{margin-top:12px}
+.progress-bar{height:6px;background:var(--gray-100);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:var(--gradient);border-radius:3px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+.progress-text{display:flex;justify-content:space-between;margin-top:6px;font-size:.8rem;color:var(--gray-400)}
+
+.assessment-body{flex:1;max-width:720px;width:100%;margin:0 auto;padding:40px 20px 120px}
+.assessment-step{display:none}
+.assessment-step.active{display:block}
+.step-title{font-size:1.5rem;font-weight:700;margin-bottom:8px}
+.step-subtitle{color:var(--gray-500);margin-bottom:32px;font-size:.95rem}
+
+/* FORM ELEMENTS */
+.form-group{margin-bottom:24px}
+.form-group label,.form-group legend{display:block;font-weight:600;margin-bottom:8px;font-size:.95rem;color:var(--text)}
+.form-group .helper{font-size:.8rem;color:var(--gray-400);margin-bottom:8px;font-weight:400}
+.form-input{width:100%;padding:12px 16px;border:2px solid var(--gray-200);border-radius:var(--radius-sm);font-size:1rem;transition:var(--transition);background:var(--bg);color:var(--text)}
+.form-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(102,126,234,.15)}
+.form-input::placeholder{color:var(--gray-400)}
+textarea.form-input{resize:vertical;min-height:100px}
+select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23718096' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center}
+
+/* CHIPS (multi-select) */
+fieldset.chips-group{border:none;padding:0}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;width:0;height:0}
+.chip-label{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:50px;border:2px solid var(--gray-200);background:var(--bg);font-size:.9rem;font-weight:500;color:var(--gray-600);cursor:pointer;transition:var(--transition);user-select:none}
+.chip-label:hover{border-color:var(--gray-300);background:var(--gray-50)}
+.chip input:checked+.chip-label{border-color:var(--primary);background:rgba(102,126,234,.08);color:var(--primary);font-weight:600;box-shadow:0 0 0 1px var(--primary)}
+.chip input:focus-visible+.chip-label{outline:3px solid var(--accent);outline-offset:2px}
+.chip-check{width:18px;height:18px;border-radius:4px;border:2px solid var(--gray-300);display:flex;align-items:center;justify-content:center;transition:var(--transition);font-size:.7rem;color:transparent}
+.chip input:checked+.chip-label .chip-check{background:var(--primary);border-color:var(--primary);color:#fff}
+
+/* RADIO CARDS */
+fieldset.radio-group{border:none;padding:0}
+.radio-cards{display:grid;gap:10px}
+.radio-card{position:relative}
+.radio-card input{position:absolute;opacity:0;width:0;height:0}
+.radio-card-label{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:var(--radius-sm);border:2px solid var(--gray-200);background:var(--bg);cursor:pointer;transition:var(--transition)}
+.radio-card-label:hover{border-color:var(--gray-300);background:var(--gray-50)}
+.radio-card input:checked+.radio-card-label{border-color:var(--primary);background:rgba(102,126,234,.06);box-shadow:0 0 0 1px var(--primary)}
+.radio-card input:focus-visible+.radio-card-label{outline:3px solid var(--accent);outline-offset:2px}
+.radio-dot{width:20px;height:20px;min-width:20px;border-radius:50%;border:2px solid var(--gray-300);display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+.radio-dot::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--primary);transform:scale(0);transition:var(--transition)}
+.radio-card input:checked+.radio-card-label .radio-dot{border-color:var(--primary)}
+.radio-card input:checked+.radio-card-label .radio-dot::after{transform:scale(1)}
+.radio-card-text{font-weight:500;font-size:.95rem}
+.radio-card-desc{font-size:.8rem;color:var(--gray-500);font-weight:400}
+
+/* SLIDER */
+.slider-container{padding:8px 0}
+.slider-input{width:100%;-webkit-appearance:none;appearance:none;height:8px;border-radius:4px;background:var(--gray-200);outline:none;transition:var(--transition)}
+.slider-input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:var(--gradient);cursor:pointer;box-shadow:0 2px 8px rgba(102,126,234,.3)}
+.slider-input::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--gradient);cursor:pointer;border:none}
+.slider-input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.slider-labels{display:flex;justify-content:space-between;margin-top:8px;font-size:.8rem;color:var(--gray-400)}
+.slider-value{text-align:center;font-size:1.1rem;font-weight:700;color:var(--primary);margin-top:4px}
+
+/* ASSESSMENT NAV */
+.assessment-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-top:1px solid var(--gray-100);padding:16px 20px;z-index:10}
+.assessment-nav-inner{max-width:720px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.btn-back{background:transparent;border:2px solid var(--gray-200);color:var(--gray-600);padding:12px 24px;border-radius:50px;font-weight:600;font-size:.95rem;transition:var(--transition)}
+.btn-back:hover{border-color:var(--gray-400)}
+.btn-back:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn-next{background:var(--gradient);color:#fff;padding:12px 32px;border-radius:50px;font-weight:600;font-size:.95rem;border:none;transition:var(--transition);box-shadow:0 4px 16px rgba(102,126,234,.3)}
+.btn-next:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(102,126,234,.4)}
+.btn-next:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn-next:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* REVIEW */
+.review-section{margin-bottom:24px;padding:20px;border-radius:var(--radius);background:var(--gray-50);border:1px solid var(--gray-100)}
+.review-section h3{font-size:1rem;margin-bottom:12px;color:var(--primary)}
+.review-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--gray-100);gap:12px}
+.review-row:last-child{border-bottom:none}
+.review-label{font-size:.85rem;color:var(--gray-500);min-width:120px}
+.review-value{font-size:.9rem;font-weight:500;text-align:right;word-break:break-word}
+.review-edit{font-size:.8rem;color:var(--primary);cursor:pointer;text-decoration:underline;margin-left:8px;background:none;border:none;font-family:inherit}
+.review-edit:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* RESULTS */
+.results-card{padding:32px;border-radius:var(--radius-lg);border:2px solid var(--primary);background:linear-gradient(135deg,rgba(102,126,234,.03),rgba(118,75,162,.03));margin-bottom:24px}
+.results-card h3{color:var(--primary);margin-bottom:16px}
+.summary-text{background:var(--bg);border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:16px;font-size:.85rem;line-height:1.6;white-space:pre-wrap;max-height:300px;overflow-y:auto;font-family:inherit}
+.json-toggle{margin-top:12px}
+.json-view{display:none;margin-top:12px;background:var(--gray-700);color:#a0f0a0;border-radius:var(--radius-sm);padding:16px;font-size:.8rem;overflow-x:auto;white-space:pre-wrap;font-family:'SF Mono',Monaco,Consolas,monospace;max-height:300px;overflow-y:auto}
+.json-view.visible{display:block}
+.action-buttons{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.copy-success{color:#38a169;font-size:.85rem;font-weight:600;margin-top:8px;display:none}
+.copy-success.visible{display:block}
+
+/* DISCLAIMER BOX */
+.disclaimer-box{background:rgba(237,137,54,.06);border:1px solid rgba(237,137,54,.2);border-radius:var(--radius-sm);padding:16px;margin-top:24px}
+.disclaimer-box p{font-size:.8rem;color:var(--gray-600);line-height:1.5}
+.disclaimer-box strong{color:#c05621}
+.emergency-box{background:rgba(229,62,62,.06);border:1px solid rgba(229,62,62,.2);border-radius:var(--radius-sm);padding:16px;margin-top:16px}
+.emergency-box p{font-size:.8rem;color:#c53030;line-height:1.5}
+
+/* VALIDATION */
+.form-error{color:#e53e3e;font-size:.8rem;margin-top:4px;display:none}
+.form-group.has-error .form-input{border-color:#e53e3e}
+.form-group.has-error .form-error{display:block}
+
+/* ANIMATIONS */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.animate-in{animation:fadeInUp .5s ease forwards}
+
+/* PRINT */
+@media print{
+.nav,.sticky-cta,.assessment-nav,.assessment-close{display:none !important}
+.assessment-overlay{position:static;overflow:visible}
+.assessment-body{padding:20px}
+}
+
+/* SECTION ANCHORS */
+.section-label{text-align:center;margin-bottom:8px}
+.section-label span{font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--primary);background:rgba(102,126,234,.08);padding:4px 14px;border-radius:50px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" role="navigation" aria-label="Main navigation">
+<div class="container nav-inner">
+<a href="#" class="nav-logo" aria-label="Longevity Health home">Longevity Health</a>
+<div class="nav-links">
+<a href="#how-it-works" class="nav-link-text">How It Works</a>
+<a href="#offerings" class="nav-link-text">Programs</a>
+<a href="#focus-areas" class="nav-link-text">Focus Areas</a>
+<a href="#team" class="nav-link-text">Team</a>
+<button class="btn btn-primary btn-sm" onclick="openAssessment()" aria-label="Begin your health assessment">Begin Assessment</button>
+</div>
+</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+<div class="container">
+<div class="hero-badge" aria-hidden="true">◆ Ultra-Premium Longevity Medicine</div>
+<h1>Health Is the<br><span>Ultimate Wealth</span></h1>
+<p>Longevity Health delivers an ultra-premium membership model with 24/7 doctor access, an integrated medical team, quarterly labs, and personalized protocols for high-performing executives and individuals.</p>
+<div class="hero-cta">
+<button class="btn btn-primary" onclick="openAssessment()">Start Your Health Assessment</button>
+<a href="#how-it-works" class="btn btn-outline">Learn More</a>
+</div>
+</div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+<div class="container">
+<div class="section-label"><span>How It Works</span></div>
+<h2 style="text-align:center">Your Path to Membership</h2>
+<p class="subhead" style="text-align:center;margin-top:12px">A request-based access model designed for those who prioritize their health.</p>
+<div class="steps">
+<div class="step">
+<div class="step-num">1</div>
+<h3>Request an Invite</h3>
+<p>Complete our detailed health assessment to share your goals and health priorities with our team.</p>
+</div>
+<div class="step">
+<div class="step-num">2</div>
+<h3>Join the Membership</h3>
+<p>Once accepted, join the membership program and gain access to your dedicated medical team.</p>
+</div>
+<div class="step">
+<div class="step-num">3</div>
+<h3>24/7 Doctor Access</h3>
+<p>Receive around-the-clock access to your medical team, including Dr. Vassily Eliopoulos and the integrated care team.</p>
+</div>
+<div class="step">
+<div class="step-num">4</div>
+<h3>Ongoing Optimization</h3>
+<p>Undergo quarterly blood draws and labs, and receive personalized protocols tailored to your needs.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- OFFERINGS -->
+<section id="offerings" style="background:var(--gray-50)">
+<div class="container">
+<div class="section-label"><span>Programs</span></div>
+<h2 style="text-align:center">Membership & Experiences</h2>
+<p class="subhead" style="text-align:center;margin-top:12px">Select the program that aligns with your health and performance goals.</p>
+<div class="offerings-grid">
+<div class="offering-card">
+<div class="offering-icon">◆</div>
+<h3>Premium Membership</h3>
+<p>The cornerstone of Longevity Health — an ongoing membership providing continuous, personalized care.</p>
+<ul>
+<li>24/7 access to your medical team</li>
+<li>Quarterly labs and blood draws</li>
+<li>Personalized health protocols</li>
+<li>Integrated team approach</li>
+</ul>
+</div>
+<div class="offering-card">
+<div class="offering-icon">▲</div>
+<h3>Solo Executive Program</h3>
+<p>A focused program designed for the individual executive seeking comprehensive health optimization.</p>
+<ul>
+<li>Executive-focused health evaluation</li>
+<li>Personalized protocol development</li>
+<li>Dedicated provider access</li>
+</ul>
+</div>
+<div class="offering-card">
+<div class="offering-icon">♦</div>
+<h3>Couples Retreat</h3>
+<p>A shared health experience for couples who want to invest in their longevity together.</p>
+<ul>
+<li>Joint and individual assessments</li>
+<li>Retreat-based experience</li>
+<li>Coordinated care protocols</li>
+</ul>
+</div>
+<div class="offering-card">
+<div class="offering-icon">●</div>
+<h3>Team Visit</h3>
+<p>Bring your leadership team for a group health optimization experience.</p>
+<ul>
+<li>Team-based health assessments</li>
+<li>Group and individual protocols</li>
+<li>Executive performance focus</li>
+</ul>
+</div>
+<div class="offering-card">
+<div class="offering-icon">★</div>
+<h3>Boulder Retreat</h3>
+<p>An immersive retreat experience in Boulder for deep health assessment and protocol development.</p>
+<ul>
+<li>Immersive multi-day experience</li>
+<li>Comprehensive health evaluation</li>
+<li>Personalized action plan</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+
+<!-- FOCUS AREAS -->
+<section id="focus-areas">
+<div class="container">
+<div class="section-label"><span>Focus Areas</span></div>
+<h2 style="text-align:center">Areas of Expertise</h2>
+<p class="subhead" style="text-align:center;margin-top:12px">Our integrated team addresses the full spectrum of longevity and preventive medicine.</p>
+<div class="conditions-grid">
+<span class="condition-tag">Longevity &amp; Healthspan Extension</span>
+<span class="condition-tag">Metabolic Optimization</span>
+<span class="condition-tag">Cardiovascular Disease Prevention</span>
+<span class="condition-tag">Cognitive Optimization &amp; Brain Health</span>
+<span class="condition-tag">Hormonal Optimization</span>
+<span class="condition-tag">Athletic Performance &amp; Recovery</span>
+<span class="condition-tag">Sleep Optimization</span>
+<span class="condition-tag">Gut Health &amp; Microbiome</span>
+<span class="condition-tag">Stress &amp; Resilience</span>
+<span class="condition-tag">Executive Burnout Prevention</span>
+</div>
+</div>
+</section>
+
+<!-- TEAM -->
+<section id="team" style="background:var(--gray-50)">
+<div class="container">
+<div class="section-label"><span>Your Team</span></div>
+<h2 style="text-align:center">Meet the Providers</h2>
+<p class="subhead" style="text-align:center;margin-top:12px">An integrated team dedicated to your health and longevity.</p>
+<div class="team-grid">
+<div class="team-card">
+<div class="team-avatar">VE</div>
+<h3>Dr. Vassily Eliopoulos</h3>
+<p>Medical Doctor</p>
+</div>
+<div class="team-card">
+<div class="team-avatar">DS</div>
+<h3>Dr. Smith</h3>
+<p>Provider</p>
+</div>
+<div class="team-card">
+<div class="team-avatar">JM</div>
+<h3>Jen Mills</h3>
+<p>Provider</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- TRUST -->
+<section class="trust" id="trust">
+<div class="container">
+<div class="section-label"><span>Trust &amp; Safety</span></div>
+<h2 style="text-align:center">Your Privacy &amp; Safety</h2>
+<div class="trust-items">
+<div class="trust-item">
+<div class="trust-icon">🔒</div>
+<div>
+<h3>Client-Side Only</h3>
+<p>Your assessment data stays in your browser. Nothing is transmitted to any server during the assessment.</p>
+</div>
+</div>
+<div class="trust-item">
+<div class="trust-icon">🛡</div>
+<div>
+<h3>No Diagnosis or Guarantees</h3>
+<p>This assessment is for informational and scheduling purposes only. It does not constitute medical advice, diagnosis, or treatment.</p>
+</div>
+</div>
+<div class="trust-item">
+<div class="trust-icon">📋</div>
+<div>
+<h3>You Control Your Data</h3>
+<p>Review, edit, and copy your summary before sharing. Only the information you choose to share reaches the scheduling team.</p>
+</div>
+</div>
+<div class="trust-item">
+<div class="trust-icon">⚕</div>
+<div>
+<h3>Medical Responsibility</h3>
+<p>All medical decisions are made by licensed providers during your consultation. This tool supports — not replaces — clinical judgment.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+<div class="container" style="text-align:center">
+<h2>Ready to Invest in Your Longevity?</h2>
+<p style="margin:16px auto 32px;max-width:500px;opacity:.9">Complete our health assessment to request an invite and begin your journey with Longevity Health.</p>
+<button class="btn" onclick="openAssessment()">Start Your Health Assessment</button>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+<div class="container">
+<p><strong>Longevity Health</strong> — Longevity Medicine · Preventive Medicine · Executive Health</p>
+<p class="disclaimer">This website and health assessment are for informational and scheduling purposes only. They do not constitute medical advice, diagnosis, or treatment. No provider-patient relationship is established through use of this tool. All medical decisions are made by licensed providers during consultation. If you are experiencing a medical emergency, call 911 or go to your nearest emergency room immediately.</p>
+</div>
+</footer>
+
+<!-- STICKY MOBILE CTA -->
+<div class="sticky-cta" id="stickyCta">
+<button class="btn btn-primary btn-sm" onclick="openAssessment()" style="flex:1;max-width:360px">Start Health Assessment</button>
+</div>
+
+<!-- ===== ASSESSMENT OVERLAY ===== -->
+<div class="assessment-overlay" id="assessmentOverlay" role="dialog" aria-modal="true" aria-label="Health Assessment">
+
+<div class="assessment-header">
+<div class="assessment-header-inner">
+<span class="nav-logo">Longevity Health</span>
+<button class="assessment-close" onclick="closeAssessment()" aria-label="Close assessment">✕</button>
+</div>
+<div class="progress-container" style="max-width:720px;margin:0 auto">
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="progress-text">
+<span id="progressStep">Step 1 of 10</span>
+<span id="progressTime">~10 min remaining</span>
+</div>
+</div>
+</div>
+
+<div class="assessment-body" id="assessmentBody">
+
+<!-- STEP 1: Contact Info -->
+<div class="assessment-step active" data-step="1">
+<h2 class="step-title">Let's Start With You</h2>
+<p class="step-subtitle">We need a few details to personalize your experience and prepare for your consultation.</p>
+
+<div class="form-group" id="fg-name">
+<label for="input-name">Full Name <span aria-hidden="true" style="color:#e53e3e">*</span></label>
+<input type="text" id="input-name" class="form-input" placeholder="Your full name" autocomplete="name" required aria-required="true">
+<div class="form-error" id="err-name">Please enter your name.</div>
+</div>
+
+<div class="form-group" id="fg-email">
+<label for="input-email">Email Address <span aria-hidden="true" style="color:#e53e3e">*</span></label>
+<input type="email" id="input-email" class="form-input" placeholder="you@example.com" autocomplete="email" required aria-required="true">
+<div class="form-error" id="err-email">Please enter a valid email address.</div>
+</div>
+
+<div class="form-group" id="fg-phone">
+<label for="input-phone">Phone Number <span aria-hidden="true" style="color:#e53e3e">*</span></label>
+<input type="tel" id="input-phone" class="form-input" placeholder="(555) 123-4567" autocomplete="tel" required aria-required="true">
+<div class="form-error" id="err-phone">Please enter a valid phone number.</div>
+</div>
+
+<div class="form-group">
+<label for="input-dob">Date of Birth</label>
+<input type="date" id="input-dob" class="form-input">
+</div>
+</div>
+
+<!-- STEP 2: Primary Concerns -->
+<div class="assessment-step" data-step="2">
+<h2 class="step-title">Primary Health Concerns</h2>
+<p class="step-subtitle">Select all areas you'd like to address. You may choose multiple.</p>
+
+<fieldset class="chips-group">
+<legend class="sr-only">Select your primary health concerns (multiple allowed)</legend>
+<div class="helper">Select all that apply — click to select, click again to deselect.</div>
+<div class="chips" id="chips-concerns">
+<div class="chip"><input type="checkbox" id="c-longevity" name="concerns" value="Longevity & Healthspan Extension"><label for="c-longevity" class="chip-label"><span class="chip-check">✓</span>Longevity &amp; Healthspan Extension</label></div>
+<div class="chip"><input type="checkbox" id="c-metabolic" name="concerns" value="Metabolic Optimization"><label for="c-metabolic" class="chip-label"><span class="chip-check">✓</span>Metabolic Optimization</label></div>
+<div class="chip"><input type="checkbox" id="c-cardio" name="concerns" value="Cardiovascular Disease Prevention"><label for="c-cardio" class="chip-label"><span class="chip-check">✓</span>Cardiovascular Disease Prevention</label></div>
+<div class="chip"><input type="checkbox" id="c-cognitive" name="concerns" value="Cognitive Optimization & Brain Health"><label for="c-cognitive" class="chip-label"><span class="chip-check">✓</span>Cognitive Optimization &amp; Brain Health</label></div>
+<div class="chip"><input type="checkbox" id="c-hormonal" name="concerns" value="Hormonal Optimization"><label for="c-hormonal" class="chip-label"><span class="chip-check">✓</span>Hormonal Optimization</label></div>
+<div class="chip"><input type="checkbox" id="c-athletic" name="concerns" value="Athletic Performance & Recovery"><label for="c-athletic" class="chip-label"><span class="chip-check">✓</span>Athletic Performance &amp; Recovery</label></div>
+<div class="chip"><input type="checkbox" id="c-sleep" name="concerns" value="Sleep Optimization"><label for="c-sleep" class="chip-label"><span class="chip-check">✓</span>Sleep Optimization</label></div>
+<div class="chip"><input type="checkbox" id="c-gut" name="concerns" value="Gut Health & Microbiome"><label for="c-gut" class="chip-label"><span class="chip-check">✓</span>Gut Health &amp; Microbiome</label></div>
+<div class="chip"><input type="checkbox" id="c-stress" name="concerns" value="Stress & Resilience"><label for="c-stress" class="chip-label"><span class="chip-check">✓</span>Stress &amp; Resilience</label></div>
+<div class="chip"><input type="checkbox" id="c-burnout" name="concerns" value="Executive Burnout Prevention"><label for="c-burnout" class="chip-label"><span class="chip-check">✓</span>Executive Burnout Prevention</label></div>
+</div>
+</fieldset>
+</div>
+
+<!-- STEP 3: Program Interest -->
+<div class="assessment-step" data-step="3">
+<h2 class="step-title">Program Interest</h2>
+<p class="step-subtitle">Which program are you most interested in exploring?</p>
+
+<fieldset class="radio-group">
+<legend class="sr-only">Select a program</legend>
+<div class="radio-cards">
+<div class="radio-card"><input type="radio" id="p-premium" name="program" value="Premium Membership"><label for="p-premium" class="radio-card-label"><span class="radio-dot"></span><div><span class="radio-card-text">Premium Membership</span><br><span class="radio-card-desc">Ongoing membership with 24/7 access, quarterly labs, and personalized protocols.</span></div></label></div>
+<div class="radio-card"><input type="radio" id="p-solo" name="program" value="Solo Executive Program"><label for="p-solo" class="radio-card-label"><span class="radio-dot"></span><div><span class="radio-card-text">Solo Executive Program</span><br><span class="radio-card-desc">Focused individual executive health optimization.</span></div></label></div>
+<div class="radio-card"><input type="radio" id="p-couples" name="program" value="Couples Retreat"><label for="p-couples" class="radio-card-label"><span class="radio-dot"></span><div><span class="radio-card-text">Couples Retreat</span><br><span class="radio-card-desc">A shared longevity experience for couples.</span></div></label></div>
+<div class="radio-card"><input type="radio" id="p-team" name="program" value="Team Visit"><label for="p-team" class="radio-card-label"><span class="radio-dot"></span><div><span class="radio-card-text">Team Visit</span><br><span class="radio-card-desc">Group health optimization for leadership teams.</span></div></label></div>
+<div class="radio-card"><input type="radio" id="p-boulder" name="program" value="Boulder Retreat"><label for="p-boulder" class="radio-card-label"><span class="radio-dot"></span><div><span class="radio-card-text">Boulder Retreat</span><br><span class="radio-card-desc">Immersive multi-day retreat experience in Boulder.</span></div></label></div>
+<div class="radio-card"><input type="radio" id="p-unsure" name="program" value="Not sure yet"><label for="p-unsure" class="radio-card-label"><span class="radio-dot"></span><div><span class="radio-card-text">Not sure yet</span><br><span class="radio-card-desc">I'd like to discuss options during my consultation.</span></div></label></div>
+</div>
+</fieldset>
+</div>
+
+<!-- STEP 4: Health History -->
+<div class="assessment-step" data-step="4">
+<h2 class="step-title">Health History Overview</h2>
+<p class="step-subtitle">Help us understand your current health landscape. This is for scheduling context only — not a medical record.</p>
+
+<fieldset class="chips-group">
+<legend>Have you been evaluated or received care for any of the following? <span class="helper">(Select all that apply)</span></legend>
+<div class="chips" id="chips-history">
+<div class="chip"><input type="checkbox" id="h-cardio" name="history" value="Cardiovascular concerns"><label for="h-cardio" class="chip-label"><span class="chip-check">✓</span>Cardiovascular concerns</label></div>
+<div class="chip"><input type="checkbox" id="h-metabolic" name="history" value="Metabolic or blood sugar concerns"><label for="h-metabolic" class="chip-label"><span class="chip-check">✓</span>Metabolic or blood sugar concerns</label></div>
+<div class="chip"><input type="checkbox" id="h-hormonal" name="history" value="Hormonal imbalances"><label for="h-hormonal" class="chip-label"><span class="chip-check">✓</span>Hormonal imbalances</label></div>
+<div class="chip"><input type="checkbox" id="h-sleep" name="history" value="Sleep disorders"><label for="h-sleep" class="chip-label"><span class="chip-check">✓</span>Sleep disorders</label></div>
+<div class="chip"><input type="checkbox" id="h-gut" name="history" value="Digestive or gut issues"><label for="h-gut" class="chip-label"><span class="chip-check">✓</span>Digestive or gut issues</label></div>
+<div class="chip"><input type="checkbox" id="h-mental" name="history" value="Stress, anxiety, or burnout"><label for="h-mental" class="chip-label"><span class="chip-check">✓</span>Stress, anxiety, or burnout</label></div>
+<div class="chip"><input type="checkbox" id="h-musculo" name="history" value="Musculoskeletal or joint issues"><label for="h-musculo" class="chip-label"><span class="chip-check">✓</span>Musculoskeletal or joint issues</label></div>
+<div class="chip"><input type="checkbox" id="h-neuro" name="history" value="Neurological or cognitive concerns"><label for="h-neuro" class="chip-label"><span class="chip-check">✓</span>Neurological or cognitive concerns</label></div>
+<div class="chip"><input type="checkbox" id="h-none" name="history" value="None of the above"><label for="h-none" class="chip-label"><span class="chip-check">✓</span>None of the above</label></div>
+</div>
+</fieldset>
+
+<div class="form-group" style="margin-top:24px">
+<label for="input-conditions">Any specific conditions or diagnoses you'd like to share?</label>
+<div class="helper">Optional — share only what you're comfortable with.</div>
+<textarea id="input-conditions" class="form-input" placeholder="e.g., Managed hypertension, previous knee surgery, thyroid condition..." rows="3"></textarea>
+</div>
+</div>
+
+<!-- STEP 5: Current Medications & Supplements -->
+<div class="assessment-step" data-step="5">
+<h2 class="step-title">Medications &amp; Supplements</h2>
+<p class="step-subtitle">Understanding what you're currently taking helps the team prepare for your consultation.</p>
+
+<div class="form-group">
+<label for="input-medications">Current Medications</label>
+<div class="helper">List any prescription medications you currently take. Optional.</div>
+<textarea id="input-medications" class="form-input" placeholder="e.g., Metformin 500mg, Lisinopril 10mg..." rows="3"></textarea>
+</div>
+
+<div class="form-group">
+<label for="input-supplements">Current Supplements</label>
+<div class="helper">List any supplements, vitamins, or over-the-counter products. Optional.</div>
+<textarea id="input-supplements" class="form-input" placeholder="e.g., Vitamin D 5000 IU, Omega-3, Magnesium..." rows="3"></textarea>
+</div>
+
+<fieldset class="radio-group">
+<legend>Are you currently working with any other healthcare providers?</legend>
+<div class="radio-cards">
+<div class="radio-card"><input type="radio" id="op-yes" name="other-providers" value="Yes"><label for="op-yes" class="radio-card-label"><span class="radio-dot"></span><span class="radio-card-text">Yes</span></label></div>
+<div class="radio-card"><input type="radio" id="op-no" name="other-providers" value="No"><label for="op-no" class="radio-card-label"><span class="radio-dot"></span><span class="radio-card-text">No</span></label></div>
+<div class="radio-card"><input type="radio" id="op-prefer" name="other-providers" value="Prefer not to say"><label for="op-prefer" class="radio-card-label"><span class="radio-dot"></span><span class="radio-card-text">Prefer not to say</span></label></div>
+</div>
+</fieldset>
+</div>
+
+<!-- STEP 6: Lifestyle — Energy & Sleep -->
+<div class="assessment-step" data-step="6">
+<h2 class="step-title">Energy &amp; Sleep</h2>
+<p class="step-subtitle">These factors are central to longevity and performance optimization.</p>
+
+<div class="form-group">
+<label for="slider-energy">How would you rate your overall daily energy level?</label>
+<div class="slider-container">
+<input type="range" id="slider-energy" class="slider-input" min="1" max="10" value="5" aria-valuemin="1" aria-valuemax="10" aria-valuenow="5">
+<div class="slider-labels"><span>1 — Very Low</span><span>10 — Excellent</span></div>
+<div class="slider-value" id="val-energy">5 / 10</div>
+</div>
+</div>
+
+<div class="form-group">
+<label for="slider-sleep">How would you rate your overall sleep quality?</label>
+<div class="slider-container">
+<input type="range" id="slider-sleep" class="slider-input" min="1" max="10" value="5" aria-valuemin="1" aria-valuemax="10" aria-valuenow="5">
+<div class="slider-labels"><span>1 — Very Poor</span><span>10 — Excellent</span></div>
+<div class="slider-value" id="val-sleep">5 / 10</div>
+</div>
+</div>
+
+<div class="form-group">
+<label for="input-sleep-hours">Average hours of sleep per night</label>
+<select id="input-sleep-hours" class="form-input">
+<option value="">Select...</option>
+<option value="Less than 5 hours">Less than 5 hours</option>
+<option value="5-6 hours">5–6 hours</option>
+<option value="6-7 hours">6–7 hours</option>
+<option value="7-8 hours">7–8 hours</option>
+<option value="8+ hours">8+ hours</option>
+</select>
+</div>
+
+<fieldset class="chips-group">
+<legend>Do you experience any of the following? <span class="helper">(Select all that apply)</span></legend>
+<div class="chips">
+<div class="chip"><input type="checkbox" id="sl-falling" name="sleep-issues" value="Difficulty falling asleep"><label for="sl-falling" class="chip-label"><span class="chip-check">✓</span>Difficulty falling asleep</label></div>
+<div class="chip"><input type="checkbox" id="sl-staying" name="sleep-issues" value="Difficulty staying asleep"><label for="sl-staying" class="chip-label"><span class="chip-check">✓</span>Difficulty staying asleep</label></div>
+<div class="chip"><input type="checkbox" id="sl-waking" name="sleep-issues" value="Waking unrefreshed"><label for="sl-waking" class="chip-label"><span class="chip-check">✓</span>Waking unrefreshed</label></div>
+<div class="chip"><input type="checkbox" id="sl-snoring" name="sleep-issues" value="Snoring or apnea concerns"><label for="sl-snoring" class="chip-label"><span class="chip-check">✓</span>Snoring or apnea concerns</label></div>
+<div class="chip"><input type="checkbox" id="sl-afternoon" name="sleep-issues" value="Afternoon energy crashes"><label for="sl-afternoon" class="chip-label"><span class="chip-check">✓</span>Afternoon energy crashes</label></div>
+<div class="chip"><input type="checkbox" id="sl-none" name="sleep-issues" value="None of these"><label for="sl-none" class="chip-label"><span class="chip-check">✓</span>None of these</label></div>
+</div>
+</fieldset>
+</div>
+
+<!-- STEP 7: Lifestyle — Exercise & Nutrition -->
+<div class="assessment-step" data-step="7">
+<h2 class="step-title">Exercise &amp; Nutrition</h2>
+<p class="step-subtitle">Understanding your current habits helps the team tailor your protocols.</p>
+
+<fieldset class="radio-group">
+<legend>How often do you exercise per week?</legend>
+<div class="radio-cards">
+<div class="radio-card"><input type="radio" id="ex-0" name="exercise-freq" value="Rarely or never"><label for="ex-0" class="radio-card-label"><span class="radio-dot"></span><span class="radio-card-text">Rarely or never</span></label></div>
+<div class="radio-card"><input type="radio" id="ex-1" name="exercise-freq" value="1-2 times per week"><label for="ex-1" class="radio-card-label"><span class="radio-dot"></span><span class="radio-card-text">1–2 times per week</span></label></div>
+<div class="radio-card"><input type="radio" id="ex-3" name="exercise-freq" value="3-4 times per week"><label for="ex-3" class="radio-card-label"><span class="radio-dot"></span><span class="radio-card-text">3–4 times per week</span></label></div>
+<div class="radio-card"><input type="radio" id="ex-5" name="exercise-freq" value="5+ times per week"><label for="ex-5" class="radio-card-label"><span class="radio-dot"></span><span class="radio-card-text">5+ times per week</span></label></div>
+</div>
+</fieldset>
+
+<fieldset class="chips-group" style="margin-top:24px">
+<legend>What types of exercise do you do? <span class="helper">(Select all that apply)</span></legend>
+<div class="chips">
+<div class="chip"><input type="checkbox" id="et-strength" name="exercise-type" value="Strength training"><label for="et-strength" class="chip-label"><span class="chip-check">✓</span>Strength training</label></div>
+<div class="chip"><input type="checkbox" id="et-cardio" name="exercise-type" value="Cardio / Endurance"><label for="et-cardio" class="chip-label"><span class="chip-check">✓</span>Cardio / Endurance</label></div>
+<div class="chip"><input type="checkbox" id="et-yoga" name="exercise-type" value="Yoga / Flexibility"><label for="et-yoga" class="chip-label"><span class="chip-check">✓</span>Yoga / Flexibility</label></div>
+<div class="chip"><input type="checkbox" id="et-hiit" name="exercise-type" value="HIIT / Intervals"><label for="et-hiit" class="chip-label"><span class="chip-check">✓</span>HIIT / Intervals</label></div>
+<div class="chip"><input type="checkbox" id="et-sport" name="exercise-type" value="Sports / Recreation"><label for="et-sport" class="chip-label"><span class="chip-check">✓</span>Sports / Recreation</label></div>
+<div class="chip"><input type="checkbox" id="et-walk" name="exercise-type" value="Walking / Hiking"><label for="et-walk" class="chip-label"><span class="chip-check">✓</span>Walking / Hiking</label></div>
+<div class="chip"><input type="checkbox" id="et-none" name="exercise-type" value="None currently"><label for="et-none" class="chip-label"><span class="chip-check">✓</span>None currently</label></div>
+</div>
+</fieldset>
+
+<div class="form-group" style="margin-top:24px">
+<label for="slider-nutrition">How would you rate your current nutrition?</label>
+<div class="slider-container">
+<input type="range" id="slider-nutrition" class="slider-input" min="1" max="10" value="5">
+<div class="slider-labels"><span>1 — Very Poor</span><span>10 — Excellent</span></div>
+<div class="slider-value" id="val-nutrition">5 / 10</div>
+</div>
+</div>
+</div>
+
+<!-- STEP 8: Stress & Cognitive -->
+<div class="assessment-step" data-step="8">
+<h2 class="step-title">Stress &amp; Cognitive Health</h2>
+<p class="step-subtitle">Mental performance and resilience are key pillars of longevity.</p>
+
+<div class="form-group">
+<label for="slider-stress">How would you rate your current stress level?</label>
+<div class="slider-container">
+<input type="range" id="slider-stress" class="slider-input" min="1" max="10" value="5">
+<div class="slider-labels"><span>1 — Very Low</span><span>10 — Extremely High</span></div>
+<div class="slider-value" id="val-stress">5 / 10</div>
+</div>
+</div>
+
+<fieldset class="chips-group">
+<legend>Which of these do you experience? <span class="helper">(Select all that apply)</span></legend>
+<div class="chips">
+<div class="chip"><input type="checkbox" id="st-focus" name="stress-symptoms" value="Difficulty focusing"><label for="st-focus" class="chip-label"><span class="chip-check">✓</span>Difficulty focusing</label></div>
+<div class="chip"><input type="checkbox" id="st-memory" name="stress-symptoms" value="Memory concerns"><label for="st-memory" class="chip-label"><span class="chip-check">✓</span>Memory concerns</label></div>
+<div class="chip"><input type="checkbox" id="st-motivation" name="stress-symptoms" value="Low motivation"><label for="st-motivation" class="chip-label"><span class="chip-check">✓</span>Low motivation</label></div>
+<div class="chip"><input type="checkbox" id="st-irritability" name="stress-symptoms" value="Irritability"><label for="st-irritability" class="chip-label"><span class="chip-check">✓</span>Irritability</label></div>
+<div class="chip"><input type="checkbox" id="st-overwhelm" name="stress-symptoms" value="Feeling overwhelmed"><label for="st-overwhelm" class="chip-label"><span class="chip-check">✓</span>Feeling overwhelmed</label></div>
+<div class="chip"><input type="checkbox" id="st-burnout" name="stress-symptoms" value="Signs of burnout"><label for="st-burnout" class="chip-label"><span class="chip-check">✓</span>Signs of burnout</label></div>
+<div class="chip"><input type="checkbox" id="st-none" name="stress-symptoms" value="None of these"><label for="st-none" class="chip-label"><span class="chip-check">✓</span>None of these</label></div>
+</div>
+</fieldset>
+
+<div class="form-group" style="margin-top:24px">
+<label for="input-stress-detail">Anything else about your stress or cognitive health you'd like to share?</label>
+<textarea id="input-stress-detail" class="form-input" placeholder="Optional — e.g., high-pressure role, recent life changes, specific cognitive goals..." rows="3"></textarea>
+</div>
+</div>
+
+<!-- STEP 9: Goals & Expectations -->
+<div class="assessment-step" data-step="9">
+<h2 class="step-title">Goals &amp; Expectations</h2>
+<p class="step-subtitle">What does success look like for you? This helps us prepare the right conversation.</p>
+
+<div class="form-group">
+<label for="input-goals">What are your top 1–3 health or performance goals?</label>
+<div class="helper">Be as specific as you'd like.</div>
+<textarea id="input-goals" class="form-input" placeholder="e.g., Optimize energy for a demanding travel schedule, improve body composition, prevent cardiovascular disease based on family history..." rows="4"></textarea>
+</div>
+
+<fieldset class="radio-group">
+<legend>What is your timeline for getting started?</legend>
+<div class="radio-cards">
+<div class="radio-card"><input type="radio" id="tl-asap" name="timeline" value="As soon as possible"><label for="tl-asap" class="radio-card-label"><span class="radio-dot"></span><span class="radio-card-text">As soon as possible</span></label></div>
+<div class="radio-card"><input type="radio" id="tl-month" name="timeline" value="Within the next month"><label for="tl-month" class="radio-card-label"><span class="radio-dot"></span><span class="radio-card-text">Within the next month</span></label></div>
+<div class="radio-card"><input type="radio" id="tl-quarter" name="timeline" value="Within the next quarter"><label for="tl-quarter" class="radio-card-label"><span class="radio-dot"></span><span class="radio-card-text">Within the next quarter</span></label></div>
+<div class="radio-card"><input type="radio" id="tl-exploring" name="timeline" value="Just exploring"><label for="tl-exploring" class="radio-card-label"><span class="radio-dot"></span><span class="radio-card-text">Just exploring for now</span></label></div>
+</div>
+</fieldset>
+
+<div class="form-group" style="margin-top:24px">
+<label for="input-anything-else">Anything else you'd like the team to know before your consultation?</label>
+<textarea id="input-anything-else" class="form-input" placeholder="Optional — any context, questions, or preferences..." rows="3"></textarea>
+</div>
+</div>
+
+<!-- STEP 10: Review -->
+<div class="assessment-step" data-step="10">
+<h2 class="step-title">Review Your Responses</h2>
+<p class="step-subtitle">Please review your information below. Click "Edit" on any section to make changes before submitting.</p>
+<div id="reviewContent"></div>
+
+<div class="disclaimer-box">
+<p><strong>Disclaimer:</strong> This health assessment is for informational and scheduling purposes only. It does not constitute medical advice, diagnosis, or treatment. No provider-patient relationship is established through use of this tool. All clinical decisions will be made by licensed providers during your consultation.</p>
+</div>
+</div>
+
+<!-- STEP 11: Results & Booking -->
+<div class="assessment-step" data-step="11">
+<h2 class="step-title">Your Assessment Summary</h2>
+<p class="step-subtitle">Your responses have been compiled. Copy your summary and proceed to book your new patient consultation.</p>
+
+<div class="results-card">
+<h3>Booking Summary</h3>
+<div class="summary-text" id="summaryText"></div>
+<div class="json-toggle">
+<button class="btn btn-outline btn-sm" onclick="toggleJson()" aria-expanded="false" id="jsonToggleBtn">Show JSON View</button>
+</div>
+<div class="json-view" id="jsonView" role="region" aria-label="JSON summary"></div>
+</div>
+
+<div class="action-buttons">
+<button class="btn btn-outline" onclick="copySummary()" id="copyBtn">📋 Copy Summary to Clipboard</button>
+<button class="btn btn-primary" onclick="redirectToBooking()" id="bookBtn">Book Your Consultation →</button>
+</div>
+<div class="copy-success" id="copySuccess">✓ Summary copied to clipboard!</div>
+
+<div class="action-buttons" style="margin-top:8px">
+<button class="btn btn-outline btn-sm" onclick="printSummary()">🖨 Print Summary</button>
+</div>
+
+<div class="disclaimer-box">
+<p><strong>Disclaimer:</strong> This summary is for scheduling purposes only and does not constitute medical advice, diagnosis, or treatment. No provider-patient relationship is established through this tool. All medical decisions are made by licensed providers during your consultation.</p>
+</div>
+<div class="emergency-box">
+<p><strong>If you are experiencing a medical emergency, call 911 or go to your nearest emergency room immediately.</strong> This tool is not designed for urgent or emergency medical situations.</p>
+</div>
+</div>
+
+</div><!-- /assessment-body -->
+
+<div class="assessment-nav" id="assessmentNav">
+<div class="assessment-nav-inner">
+<button class="btn-back" id="btnBack" onclick="prevStep()" style="visibility:hidden">← Back</button>
+<button class="btn-next" id="btnNext" onclick="nextStep()">Continue →</button>
+</div>
+</div>
+
+</div><!-- /assessment-overlay -->
+
+<script>
+(function(){
+'use strict';
+
+/* ===== STATE ===== */
+var currentStep = 1;
+var totalSteps = 11;
+var data = {};
+
+/* ===== LANDING PAGE ===== */
+var stickyCta = document.getElementById('stickyCta');
+function handleScroll(){
+if(window.innerWidth <= 768){
+stickyCta.classList.toggle('visible', window.scrollY > 600);
+} else {
+stickyCta.classList.remove('visible');
+}
+}
+window.addEventListener('scroll', handleScroll, {passive:true});
+window.addEventListener('resize', handleScroll, {passive:true});
+
+/* ===== ASSESSMENT OPEN/CLOSE ===== */
+window.openAssessment = function(){
+document.getElementById('assessmentOverlay').classList.add('active');
+document.body.style.overflow = 'hidden';
+currentStep = 1;
+showStep(currentStep);
+};
+window.closeAssessment = function(){
+if(currentStep < totalSteps || confirm('Close the assessment? Your responses will be lost.')){
+document.getElementById('assessmentOverlay').classList.remove('active');
+document.body.style.overflow = '';
+}
+};
+
+/* ===== STEP NAVIGATION ===== */
+function showStep(n){
+var steps = document.querySelectorAll('.assessment-step');
+steps.forEach(function(s){ s.classList.remove('active'); });
+var target = document.querySelector('[data-step="'+n+'"]');
+if(target) target.classList.add('active');
+
+// Progress
+var pct = Math.round(((n-1)/(totalSteps-1))*100);
+document.getElementById('progressFill').style.width = pct+'%';
+document.getElementById('progressStep').textContent = 'Step '+n+' of '+totalSteps;
+var remaining = Math.max(1, Math.round((totalSteps - n) * 1.1));
+document.getElementById('progressTime').textContent = n >= totalSteps ? 'Complete' : '~'+remaining+' min remaining';
+
+// Nav buttons
+var btnBack = document.getElementById('btnBack');
+var btnNext = document.getElementById('btnNext');
+btnBack.style.visibility = n <= 1 ? 'hidden' : 'visible';
+
+if(n === 10){
+btnNext.textContent = 'Submit & View Summary →';
+} else if(n === 11){
+document.getElementById('assessmentNav').style.display = 'none';
+} else {
+btnNext.textContent = 'Continue →';
+document.getElementById('assessmentNav').style.display = '';
+}
+
+// Scroll to top of assessment body
+document.getElementById('assessmentBody').scrollTop = 0;
+document.getElementById('assessmentOverlay').scrollTop = 0;
+
+// Build review on step 10
+if(n === 10) buildReview();
+// Build results on step 11
+if(n === 11) buildResults();
+}
+
+window.nextStep = function(){
+if(!validateStep(currentStep)) return;
+collectStepData(currentStep);
+if(currentStep < totalSteps){
+currentStep++;
+showStep(currentStep);
+}
+};
+window.prevStep = function(){
+if(currentStep > 1){
+collectStepData(currentStep);
+currentStep--;
+showStep(currentStep);
+}
+};
+
+/* ===== SLIDERS ===== */
+['energy','sleep','nutrition','stress'].forEach(function(key){
+var el = document.getElementById('slider-'+key);
+if(el){
+el.addEventListener('input', function(){
+document.getElementById('val-'+key).textContent = this.value + ' / 10';
+this.setAttribute('aria-valuenow', this.value);
+});
+}
+});
+
+/* ===== VALIDATION ===== */
+function validateStep(n){
+if(n === 1){
+var valid = true;
+var name = document.getElementById('input-name').value.trim();
+var email = document.getElementById('input-email').value.trim();
+var phone = document.getElementById('input-phone').value.trim();
+
+toggleError('fg-name', !name);
+if(!name) valid = false;
+
+var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+toggleError('fg-email', !emailRe.test(email));
+if(!emailRe.test(email)) valid = false;
+
+var phoneClean = phone.replace(/[\s\-\(\)\.]/g,'');
+toggleError('fg-phone', phoneClean.length < 7);
+if(phoneClean.length < 7) valid = false;
+
+return valid;
+}
+return true;
+}
+
+function toggleError(fgId, show){
+var fg = document.getElementById(fgId);
+if(show) fg.classList.add('has-error');
+else fg.classList.remove('has-error');
+}
+
+/* ===== COLLECT DATA ===== */
+function collectStepData(n){
+switch(n){
+case 1:
+data.name = document.getElementById('input-name').value.trim();
+data.email = document.getElementById('input-email').value.trim();
+data.phone = document.getElementById('input-phone').value.trim();
+data.dob = document.getElementById('input-dob').value || '';
+break;
+case 2:
+data.concerns = getCheckedValues('concerns');
+break;
+case 3:
+data.program = getRadioValue('program');
+break;
+case 4:
+data.history = getCheckedValues('history');
+data.conditions_detail = document.getElementById('input-conditions').value.trim();
+break;
+case 5:
+data.medications = document.getElementById('input-medications').value.trim();
+data.supplements = document.getElementById('input-supplements').value.trim();
+data.other_providers = getRadioValue('other-providers');
+break;
+case 6:
+data.energy_level = document.getElementById('slider-energy').value;
+data.sleep_quality = document.getElementById('slider-sleep').value;
+data.sleep_hours = document.getElementById('input-sleep-hours').value;
+data.sleep_issues = getCheckedValues('sleep-issues');
+break;
+case 7:
+data.exercise_freq = getRadioValue('exercise-freq');
+data.exercise_types = getCheckedValues('exercise-type');
+data.nutrition_rating = document.getElementById('slider-nutrition').value;
+break;
+case 8:
+data.stress_level = document.getElementById('slider-stress').value;
+data.stress_symptoms = getCheckedValues('stress-symptoms');
+data.stress_detail = document.getElementById('input-stress-detail').value.trim();
+break;
+case 9:
+data.goals = document.getElementById('input-goals').value.trim();
+data.timeline = getRadioValue('timeline');
+data.anything_else = document.getElementById('input-anything-else').value.trim();
+break;
+}
+}
+
+function getCheckedValues(name){
+var checks = document.querySelectorAll('input[name="'+name+'"]:checked');
+return Array.prototype.map.call(checks, function(c){ return c.value; });
+}
+function getRadioValue(name){
+var r = document.querySelector('input[name="'+name+'"]:checked');
+return r ? r.value : '';
+}
+
+/* ===== REVIEW ===== */
+function buildReview(){
+// Collect all steps first
+for(var i=1;i<=9;i++) collectStepData(i);
+
+var html = '';
+
+html += reviewSection('Contact Information', [
+['Name', data.name],
+['Email', data.email],
+['Phone', data.phone],
+['Date of Birth', data.dob || 'Not provided']
+], 1);
+
+html += reviewSection('Primary Concerns', [
+['Selected', data.concerns.length ? data.concerns.join(', ') : 'None selected']
+], 2);
+
+html += reviewSection('Program Interest', [
+['Program', data.program || 'Not selected']
+], 3);
+
+html += reviewSection('Health History', [
+['Areas', data.history.length ? data.history.join(', ') : 'None selected'],
+['Details', data.conditions_detail || 'Not provided']
+], 4);
+
+html += reviewSection('Medications & Supplements', [
+['Medications', data.medications || 'Not provided'],
+['Supplements', data.supplements || 'Not provided'],
+['Other Providers', data.other_providers || 'Not answered']
+], 5);
+
+html += reviewSection('Energy & Sleep', [
+['Energy Level', data.energy_level + '/10'],
+['Sleep Quality', data.sleep_quality + '/10'],
+['Sleep Hours', data.sleep_hours || 'Not selected'],
+['Sleep Issues', data.sleep_issues.length ? data.sleep_issues.join(', ') : 'None selected']
+], 6);
+
+html += reviewSection('Exercise & Nutrition', [
+['Exercise Frequency', data.exercise_freq || 'Not selected'],
+['Exercise Types', data.exercise_types.length ? data.exercise_types.join(', ') : 'None selected'],
+['Nutrition Rating', data.nutrition_rating + '/10']
+], 7);
+
+html += reviewSection('Stress & Cognitive Health', [
+['Stress Level', data.stress_level + '/10'],
+['Symptoms', data.stress_symptoms.length ? data.stress_symptoms.join(', ') : 'None selected'],
+['Details', data.stress_detail || 'Not provided']
+], 8);
+
+html += reviewSection('Goals & Expectations', [
+['Goals', data.goals || 'Not provided'],
+['Timeline', data.timeline || 'Not selected'],
+['Additional Notes', data.anything_else || 'Not provided']
+], 9);
+
+document.getElementById('reviewContent').innerHTML = html;
+}
+
+function reviewSection(title, rows, editStep){
+var h = '<div class="review-section"><h3>'+esc(title)+' <button class="review-edit" onclick="goToStep('+editStep+')" aria-label="Edit '+esc(title)+'">Edit</button></h3>';
+rows.forEach(function(r){
+h += '<div class="review-row"><span class="review-label">'+esc(r[0])+'</span><span class="review-value">'+esc(r[1])+'</span></div>';
+});
+h += '</div>';
+return h;
+}
+
+window.goToStep = function(n){
+currentStep = n;
+showStep(n);
+};
+
+/* ===== RESULTS ===== */
+function buildResults(){
+// Collect all
+for(var i=1;i<=9;i++) collectStepData(i);
+
+var primaryConcern = data.concerns.length ? data.concerns[0] : (data.goals ? data.goals.substring(0,80) : 'General longevity consultation');
+
+// Build human-readable summary (within 500 chars for payload)
+var lines = [];
+lines.push('Name: ' + data.name);
+lines.push('Email: ' + data.email);
+lines.push('Phone: ' + data.phone);
+lines.push('Primary Concern: ' + primaryConcern);
+if(data.program) lines.push('Program: ' + data.program);
+if(data.concerns.length > 1) lines.push('Also interested in: ' + data.concerns.slice(1,4).join(', '));
+if(data.timeline) lines.push('Timeline: ' + data.timeline);
+if(data.goals) lines.push('Goals: ' + data.goals.substring(0,120));
+
+var summary = lines.join('\n');
+// Enforce 500 char limit
+if(summary.length > 500) summary = summary.substring(0,497) + '...';
+
+document.getElementById('summaryText').textContent = summary;
+
+// Full JSON
+var fullPayload = {
+name: data.name,
+email: data.email,
+phone: data.phone,
+primary_concern: primaryConcern,
+program: data.program,
+concerns: data.concerns,
+history: data.history,
+conditions_detail: data.conditions_detail,
+medications: data.medications,
+supplements: data.supplements,
+other_providers: data.other_providers,
+energy_level: data.energy_level + '/10',
+sleep_quality: data.sleep_quality + '/10',
+sleep_hours: data.sleep_hours,
+sleep_issues: data.sleep_issues,
+exercise_freq: data.exercise_freq,
+exercise_types: data.exercise_types,
+nutrition_rating: data.nutrition_rating + '/10',
+stress_level: data.stress_level + '/10',
+stress_symptoms: data.stress_symptoms,
+stress_detail: data.stress_detail,
+goals: data.goals,
+timeline: data.timeline,
+anything_else: data.anything_else,
+dob: data.dob
+};
+document.getElementById('jsonView').textContent = JSON.stringify(fullPayload, null, 2);
+
+// Store for copy
+window._bookingSummary = summary;
+window._bookingJson = fullPayload;
+}
+
+/* ===== ACTIONS ===== */
+window.toggleJson = function(){
+var jv = document.getElementById('jsonView');
+var btn = document.getElementById('jsonToggleBtn');
+var showing = jv.classList.toggle('visible');
+btn.textContent = showing ? 'Hide JSON View' : 'Show JSON View';
+btn.setAttribute('aria-expanded', showing);
+};
+
+window.copySummary = function(){
+var text = window._bookingSummary || document.getElementById('summaryText').textContent;
+if(navigator.clipboard && navigator.clipboard.writeText){
+navigator.clipboard.writeText(text).then(function(){
+showCopySuccess();
+}).catch(function(){
+fallbackCopy(text);
+});
+} else {
+fallbackCopy(text);
+}
+};
+
+function fallbackCopy(text){
+var ta = document.createElement('textarea');
+ta.value = text;
+ta.style.position = 'fixed';
+ta.style.left = '-9999px';
+document.body.appendChild(ta);
+ta.select();
+try{ document.execCommand('copy'); showCopySuccess(); }catch(e){}
+document.body.removeChild(ta);
+}
+
+function showCopySuccess(){
+var el = document.getElementById('copySuccess');
+el.classList.add('visible');
+setTimeout(function(){ el.classList.remove('visible'); }, 3000);
+}
+
+window.redirectToBooking = function(){
+// Copy first
+window.copySummary();
+// Redirect after brief delay
+setTimeout(function(){
+window.open('https://calendly.com/parth-longevityhealth/15min?month=2026-02', '_blank');
+}, 600);
+};
+
+window.printSummary = function(){
+window.print();
+};
+
+/* ===== HELPERS ===== */
+function esc(s){
+if(!s) return '';
+var d = document.createElement('div');
+d.textContent = s;
+return d.innerHTML;
+}
+
+/* ===== KEYBOARD ===== */
+document.addEventListener('keydown', function(e){
+if(!document.getElementById('assessmentOverlay').classList.contains('active')) return;
+if(e.key === 'Escape') window.closeAssessment();
+});
+
+})();
+</script>
+</body>
+</html>

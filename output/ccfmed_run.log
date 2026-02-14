@@ -1,0 +1,6 @@
+/Users/neo/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Traceback (most recent call last):
+  File "/Users/neo/Documents/Claude Code/AIAA-Agentic-OS/d100_run.py", line 20, in <module>
+    from d100_app_builder import D100AppBuilder
+ModuleNotFoundError: No module named 'd100_app_builder'

@@ -1,0 +1,60 @@
+{
+  "practice": {
+    "name": "RESTORE Center for Integrative Medicine",
+    "website": "https://therestorecenter.com/",
+    "location": "Plano, TX",
+    "specialty": "Integrative Medicine, Functional Medicine",
+    "practitioners": 4,
+    "model": "Cash-pay, team-based care"
+  },
+  "run_metadata": {
+    "run_id": "restore_20260212_222209",
+    "timestamp": "2026-02-12T22:36:11.249619",
+    "status": "complete"
+  },
+  "deliverables": {
+    "scrape_data": {
+      "raw_scrape": "output/d100_runs/restore_20260212_222209/scrape_data/raw_scrape.md",
+      "structured_json": "output/d100_runs/restore_20260212_222209/scrape_data/structured_data.json",
+      "services_extracted": "10 detailed services",
+      "conditions_extracted": "12 conditions"
+    },
+    "seo_keywords": {
+      "brightlocal_keywords": "output/d100_runs/restore_20260212_222209/seo_data/brightlocal_keywords.txt",
+      "total_keywords": 100,
+      "keyword_categories": [
+        "Service-based (synergy 4, prediabetes treatment, metabolic syndrome)",
+        "Geographic modifiers (Plano, Plano North/South/East)",
+        "Near me variations",
+        "Condition-specific"
+      ],
+      "slack_notification": "\u2705 Sent"
+    },
+    "seo_analysis": {
+      "report": "output/d100_runs/restore_20260212_222209/seo_data/seo_analysis.md",
+      "format": "Doctor-friendly, plain English",
+      "sections": [
+        "Current SEO performance",
+        "Top ranking keywords",
+        "Local SEO opportunities",
+        "Action plan",
+        "Success projections",
+        "Investment required"
+      ]
+    },
+    "assets_pending": {
+      "assessment_app": "Not implemented (requires Claude Opus 4)",
+      "google_ads": "Not implemented",
+      "email_sequences": "Not implemented"
+    }
+  },
+  "key_insights": {
+    "authority_score": "10/100 (Fine)",
+    "organic_traffic": "350/month (-19% YoY)",
+    "organic_keywords": "537 (+12% YoY)",
+    "backlinks": 174,
+    "top_opportunity": "Local SEO for prediabetes/metabolic syndrome treatment",
+    "ideal_patient_personas": 4,
+    "revenue_potential": "$30K-$100K+ annually from organic search"
+  }
+}
