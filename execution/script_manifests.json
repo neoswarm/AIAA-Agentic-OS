@@ -1,0 +1,3471 @@
+{
+  "add_metadata_to_directives": {
+    "script": "add_metadata_to_directives.py",
+    "imports": [
+      "argparse",
+      "pathlib",
+      "re",
+      "subprocess",
+      "sys",
+      "typing",
+      "yaml"
+    ],
+    "packages": [
+      "PyYAML"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "alert_booked_meeting": {
+    "script": "alert_booked_meeting.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "alert_churn_risk": {
+    "script": "alert_churn_risk.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "json",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [],
+    "env_vars": [],
+    "stdlib_only": true
+  },
+  "analyze_face_directions": {
+    "script": "analyze_face_directions.py",
+    "imports": [
+      "PIL",
+      "argparse",
+      "cv2",
+      "math",
+      "mediapipe",
+      "numpy",
+      "pathlib",
+      "re",
+      "shutil"
+    ],
+    "packages": [
+      "Pillow",
+      "mediapipe",
+      "numpy",
+      "opencv-python"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "analyze_landing_page": {
+    "script": "analyze_landing_page.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "analyze_script_dependencies": {
+    "script": "analyze_script_dependencies.py",
+    "imports": [
+      "argparse",
+      "ast",
+      "json",
+      "os",
+      "pathlib",
+      "sys",
+      "typing"
+    ],
+    "packages": [],
+    "env_vars": [],
+    "stdlib_only": true
+  },
+  "analyze_win_loss": {
+    "script": "analyze_win_loss.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "append_to_sheet": {
+    "script": "append_to_sheet.py",
+    "imports": [
+      "argparse",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "gspread",
+      "json",
+      "os",
+      "sys"
+    ],
+    "packages": [
+      "google-auth",
+      "google-auth-oauthlib",
+      "gspread",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "GOOGLE_APPLICATION_CREDENTIALS"
+    ],
+    "stdlib_only": false
+  },
+  "assign_team_tasks": {
+    "script": "assign_team_tasks.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "automate_crm_deal": {
+    "script": "automate_crm_deal.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "calculate_client_health": {
+    "script": "calculate_client_health.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "json",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [],
+    "env_vars": [],
+    "stdlib_only": true
+  },
+  "calendly_meeting_prep": {
+    "script": "calendly_meeting_prep.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "googleapiclient",
+      "json",
+      "modal",
+      "os",
+      "pathlib",
+      "pickle",
+      "re",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "google-api-python-client",
+      "google-auth",
+      "google-auth-oauthlib",
+      "modal",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "APIFY_API_TOKEN",
+      "CALENDLY_API_KEY",
+      "GOOGLE_SERVICE_ACCOUNT_JSON",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY",
+      "SLACK_WEBHOOK_URL"
+    ],
+    "stdlib_only": false
+  },
+  "casualize_batch": {
+    "script": "casualize_batch.py",
+    "imports": [
+      "anthropic",
+      "argparse",
+      "concurrent",
+      "dotenv",
+      "gspread",
+      "json",
+      "os",
+      "sys",
+      "time",
+      "urllib"
+    ],
+    "packages": [
+      "anthropic",
+      "gspread",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "ANTHROPIC_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "casualize_city_names_batch": {
+    "script": "casualize_city_names_batch.py",
+    "imports": [
+      "anthropic",
+      "argparse",
+      "dotenv",
+      "gspread",
+      "os",
+      "sys",
+      "urllib"
+    ],
+    "packages": [
+      "anthropic",
+      "gspread",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "ANTHROPIC_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "casualize_company_names_batch": {
+    "script": "casualize_company_names_batch.py",
+    "imports": [
+      "anthropic",
+      "argparse",
+      "dotenv",
+      "gspread",
+      "os",
+      "sys",
+      "urllib"
+    ],
+    "packages": [
+      "anthropic",
+      "gspread",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "ANTHROPIC_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "casualize_first_names_batch": {
+    "script": "casualize_first_names_batch.py",
+    "imports": [
+      "anthropic",
+      "argparse",
+      "dotenv",
+      "gspread",
+      "os",
+      "sys",
+      "urllib"
+    ],
+    "packages": [
+      "anthropic",
+      "gspread",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "ANTHROPIC_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "classify_email_reply": {
+    "script": "classify_email_reply.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "cold_email_pipeline": {
+    "script": "cold_email_pipeline.py",
+    "imports": [
+      "anthropic",
+      "apify_client",
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "requests",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "anthropic",
+      "apify-client",
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "ANTHROPIC_API_KEY",
+      "APIFY_API_TOKEN",
+      "INSTANTLY_API_KEY",
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "collect_feedback": {
+    "script": "collect_feedback.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "convert_n8n_to_directive": {
+    "script": "convert_n8n_to_directive.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "sys"
+    ],
+    "packages": [],
+    "env_vars": [],
+    "stdlib_only": true
+  },
+  "convert_rss_to_content": {
+    "script": "convert_rss_to_content.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "create_formatted_google_doc": {
+    "script": "create_formatted_google_doc.py",
+    "imports": [
+      "argparse",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "googleapiclient",
+      "json",
+      "os",
+      "pathlib",
+      "pickle",
+      "re",
+      "regex",
+      "requests",
+      "typing"
+    ],
+    "packages": [
+      "google-api-python-client",
+      "google-auth",
+      "google-auth-oauthlib",
+      "python-dotenv",
+      "regex",
+      "requests"
+    ],
+    "env_vars": [
+      "GOOGLE_APPLICATION_CREDENTIALS",
+      "SLACK_BOT_TOKEN",
+      "SLACK_CONTENT_CHANNEL_ID"
+    ],
+    "stdlib_only": false
+  },
+  "create_google_doc": {
+    "script": "create_google_doc.py",
+    "imports": [
+      "argparse",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "googleapiclient",
+      "json",
+      "os",
+      "pathlib",
+      "pickle",
+      "re"
+    ],
+    "packages": [
+      "google-api-python-client",
+      "google-auth",
+      "google-auth-oauthlib",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "GOOGLE_APPLICATION_CREDENTIALS"
+    ],
+    "stdlib_only": false
+  },
+  "create_google_doc_formatted": {
+    "script": "create_google_doc_formatted.py",
+    "imports": [
+      "argparse",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "googleapiclient",
+      "json",
+      "os",
+      "pathlib",
+      "pickle",
+      "re",
+      "typing"
+    ],
+    "packages": [
+      "google-api-python-client",
+      "google-auth",
+      "google-auth-oauthlib",
+      "python-dotenv"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "create_google_doc_oauth": {
+    "script": "create_google_doc_oauth.py",
+    "imports": [
+      "argparse",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "googleapiclient",
+      "json",
+      "os",
+      "pathlib",
+      "pickle"
+    ],
+    "packages": [
+      "google-api-python-client",
+      "google-auth",
+      "google-auth-oauthlib",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "GOOGLE_CLIENT_SECRETS"
+    ],
+    "stdlib_only": false
+  },
+  "create_google_doc_v2": {
+    "script": "create_google_doc_v2.py",
+    "imports": [
+      "argparse",
+      "dotenv",
+      "google",
+      "googleapiclient",
+      "json",
+      "os",
+      "pathlib"
+    ],
+    "packages": [
+      "google-api-python-client",
+      "google-auth",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "GOOGLE_APPLICATION_CREDENTIALS"
+    ],
+    "stdlib_only": false
+  },
+  "create_proposal": {
+    "script": "create_proposal.py",
+    "imports": [
+      "argparse",
+      "dataclasses",
+      "dotenv",
+      "json",
+      "logging",
+      "os",
+      "re",
+      "requests",
+      "sys",
+      "time",
+      "typing"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "DEBUG",
+      "PANDADOC_API_KEY",
+      "PANDADOC_RECIPIENT_ROLE",
+      "PANDADOC_TEMPLATE_UUID",
+      "PANDADOC_TIMEOUT"
+    ],
+    "stdlib_only": false
+  },
+  "dedupe_leads": {
+    "script": "dedupe_leads.py",
+    "imports": [
+      "argparse",
+      "csv",
+      "datetime",
+      "json",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [],
+    "env_vars": [],
+    "stdlib_only": true
+  },
+  "deep_personalize_perplexity": {
+    "script": "deep_personalize_perplexity.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "requests",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "deploy_aiaa_dashboard": {
+    "script": "deploy_aiaa_dashboard.py",
+    "imports": [
+      "argparse",
+      "bcrypt",
+      "getpass",
+      "hashlib",
+      "json",
+      "os",
+      "pathlib",
+      "secrets",
+      "subprocess",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "bcrypt"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "deploy_to_cloudflare": {
+    "script": "deploy_to_cloudflare.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "subprocess",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "CLOUDFLARE_ACCOUNT_ID",
+      "CLOUDFLARE_API_TOKEN"
+    ],
+    "stdlib_only": false
+  },
+  "deploy_to_modal": {
+    "script": "deploy_to_modal.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "subprocess",
+      "sys",
+      "typing"
+    ],
+    "packages": [],
+    "env_vars": [],
+    "stdlib_only": true
+  },
+  "deploy_to_railway": {
+    "script": "deploy_to_railway.py",
+    "imports": [
+      "argparse",
+      "ast",
+      "base64",
+      "http",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "subprocess",
+      "sys",
+      "time",
+      "urllib"
+    ],
+    "packages": [],
+    "env_vars": [
+      "DASHBOARD_PASSWORD",
+      "DASHBOARD_URL",
+      "DASHBOARD_USERNAME",
+      "RAILWAY_API_TOKEN"
+    ],
+    "stdlib_only": true
+  },
+  "deploy_webhook_workflow": {
+    "script": "deploy_webhook_workflow.py",
+    "imports": [
+      "argparse",
+      "getpass",
+      "http",
+      "json",
+      "os",
+      "pathlib",
+      "sys",
+      "urllib"
+    ],
+    "packages": [],
+    "env_vars": [
+      "DASHBOARD_PASSWORD",
+      "DASHBOARD_SESSION",
+      "DASHBOARD_URL",
+      "DASHBOARD_USERNAME"
+    ],
+    "stdlib_only": true
+  },
+  "enrich_emails": {
+    "script": "enrich_emails.py",
+    "imports": [
+      "argparse",
+      "concurrent",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "gspread",
+      "json",
+      "os",
+      "requests",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "google-auth",
+      "google-auth-oauthlib",
+      "gspread",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "ANYMAILFINDER_API_KEY",
+      "GOOGLE_APPLICATION_CREDENTIALS"
+    ],
+    "stdlib_only": false
+  },
+  "extract_video_shorts": {
+    "script": "extract_video_shorts.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "fast_lead_pipeline": {
+    "script": "fast_lead_pipeline.py",
+    "imports": [
+      "anthropic",
+      "argparse",
+      "concurrent",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "anthropic",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "ANTHROPIC_API_KEY",
+      "INSTANTLY_API_KEY",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "fetch_ai_news_digest": {
+    "script": "fetch_ai_news_digest.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "PERPLEXITY_API_KEY",
+      "SLACK_WEBHOOK_URL"
+    ],
+    "stdlib_only": false
+  },
+  "find_job_board_leads": {
+    "script": "find_job_board_leads.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "full_campaign_pipeline": {
+    "script": "full_campaign_pipeline.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "FAL_API_KEY",
+      "FAL_KEY",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_ab_test_analysis": {
+    "script": "generate_ab_test_analysis.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "json",
+      "math",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [],
+    "env_vars": [],
+    "stdlib_only": true
+  },
+  "generate_ad_creative": {
+    "script": "generate_ad_creative.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "FAL_API_KEY",
+      "FAL_KEY",
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_blog_post": {
+    "script": "generate_blog_post.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_campaign_report": {
+    "script": "generate_campaign_report.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_carousel": {
+    "script": "generate_carousel.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_case_study": {
+    "script": "generate_case_study.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_client_report": {
+    "script": "generate_client_report.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys",
+      "time",
+      "typing"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_cold_email_campaign": {
+    "script": "generate_cold_email_campaign.py",
+    "imports": [
+      "argparse",
+      "csv",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys",
+      "time",
+      "typing"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_complete_vsl_funnel": {
+    "script": "generate_complete_vsl_funnel.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "subprocess",
+      "time"
+    ],
+    "packages": [
+      "python-dotenv"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "generate_content_calendar": {
+    "script": "generate_content_calendar.py",
+    "imports": [
+      "argparse",
+      "csv",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys",
+      "time",
+      "typing"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_ecom_emails": {
+    "script": "generate_ecom_emails.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_email_flow": {
+    "script": "generate_email_flow.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_email_sequence": {
+    "script": "generate_email_sequence.py",
+    "imports": [
+      "argparse",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_faq_responses": {
+    "script": "generate_faq_responses.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_followup_sequence": {
+    "script": "generate_followup_sequence.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_funnel_copy": {
+    "script": "generate_funnel_copy.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys",
+      "typing"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_funnel_strategy": {
+    "script": "generate_funnel_strategy.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_image_prompt": {
+    "script": "generate_image_prompt.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_instagram_reel": {
+    "script": "generate_instagram_reel.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_invoice": {
+    "script": "generate_invoice.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [],
+    "env_vars": [],
+    "stdlib_only": true
+  },
+  "generate_landing_page": {
+    "script": "generate_landing_page.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "subprocess",
+      "sys",
+      "time",
+      "typing"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "CLOUDFLARE_ACCOUNT_ID",
+      "CLOUDFLARE_API_TOKEN",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_linkedin_dm": {
+    "script": "generate_linkedin_dm.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_linkedin_post": {
+    "script": "generate_linkedin_post.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_local_newsletter": {
+    "script": "generate_local_newsletter.py",
+    "imports": [
+      "argparse",
+      "bs4",
+      "datetime",
+      "dotenv",
+      "hashlib",
+      "json",
+      "markdown",
+      "os",
+      "pathlib",
+      "rapidfuzz",
+      "re",
+      "requests",
+      "sqlite3",
+      "sys",
+      "time",
+      "typing",
+      "urllib",
+      "yaml"
+    ],
+    "packages": [
+      "PyYAML",
+      "beautifulsoup4",
+      "markdown",
+      "python-dotenv",
+      "rapidfuzz",
+      "requests"
+    ],
+    "env_vars": [
+      "CONVERTKIT_API_KEY",
+      "FIRECRAWL_API_KEY",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY",
+      "SCRAPECREATORS_API_KEY",
+      "UNSPLASH_ACCESS_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_meta_ads_campaign": {
+    "script": "generate_meta_ads_campaign.py",
+    "imports": [
+      "PIL",
+      "argparse",
+      "base64",
+      "datetime",
+      "dotenv",
+      "io",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys",
+      "time",
+      "typing"
+    ],
+    "packages": [
+      "Pillow",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "FAL_API_KEY",
+      "FAL_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_monthly_report": {
+    "script": "generate_monthly_report.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_newsletter": {
+    "script": "generate_newsletter.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_press_release": {
+    "script": "generate_press_release.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_product_description": {
+    "script": "generate_product_description.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_product_photoshoot": {
+    "script": "generate_product_photoshoot.py",
+    "imports": [
+      "argparse",
+      "base64",
+      "datetime",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "googleapiclient",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "google-api-python-client",
+      "google-auth",
+      "google-auth-oauthlib",
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "FAL_API_KEY",
+      "GOOGLE_DRIVE_FOLDER_ID",
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY",
+      "SLACK_BOT_TOKEN",
+      "SLACK_CONTENT_CHANNEL_ID"
+    ],
+    "stdlib_only": false
+  },
+  "generate_qbr": {
+    "script": "generate_qbr.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_reddit_ad": {
+    "script": "generate_reddit_ad.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_sales_dashboard": {
+    "script": "generate_sales_dashboard.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_sales_page": {
+    "script": "generate_sales_page.py",
+    "imports": [
+      "argparse",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_seo_audit": {
+    "script": "generate_seo_audit.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_static_ad": {
+    "script": "generate_static_ad.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "FAL_API_KEY",
+      "FAL_KEY",
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_thumbnail_ideas": {
+    "script": "generate_thumbnail_ideas.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_ticket_response": {
+    "script": "generate_ticket_response.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_twitter_thread": {
+    "script": "generate_twitter_thread.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_utm": {
+    "script": "generate_utm.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "pathlib",
+      "sys",
+      "urllib"
+    ],
+    "packages": [],
+    "env_vars": [],
+    "stdlib_only": true
+  },
+  "generate_vsl_funnel": {
+    "script": "generate_vsl_funnel.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys",
+      "typing"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_vsl_script": {
+    "script": "generate_vsl_script.py",
+    "imports": [
+      "argparse",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_vsl_script_OLD": {
+    "script": "generate_vsl_script_OLD.py",
+    "imports": [
+      "argparse",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_webinar_followup": {
+    "script": "generate_webinar_followup.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_webinar_funnel": {
+    "script": "generate_webinar_funnel.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys",
+      "typing"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_youtube_script": {
+    "script": "generate_youtube_script.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "generate_youtube_script_workflow": {
+    "script": "generate_youtube_script_workflow.py",
+    "imports": [
+      "argparse",
+      "create_formatted_google_doc",
+      "create_google_doc",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "subprocess",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY",
+      "SLACK_WEBHOOK_URL"
+    ],
+    "stdlib_only": false
+  },
+  "gmaps_lead_pipeline": {
+    "script": "gmaps_lead_pipeline.py",
+    "imports": [
+      "argparse",
+      "concurrent",
+      "datetime",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "gspread",
+      "hashlib",
+      "json",
+      "os",
+      "re",
+      "scrape_google_maps",
+      "scrape_website_contacts",
+      "sys"
+    ],
+    "packages": [
+      "google-auth",
+      "google-auth-oauthlib",
+      "gspread",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "GOOGLE_APPLICATION_CREDENTIALS"
+    ],
+    "stdlib_only": false
+  },
+  "gmaps_parallel_pipeline": {
+    "script": "gmaps_parallel_pipeline.py",
+    "imports": [
+      "argparse",
+      "concurrent",
+      "datetime",
+      "dotenv",
+      "gmaps_lead_pipeline",
+      "json",
+      "os",
+      "scrape_google_maps",
+      "scrape_website_contacts",
+      "sys",
+      "threading"
+    ],
+    "packages": [
+      "python-dotenv"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "handle_objections": {
+    "script": "handle_objections.py",
+    "imports": [
+      "argparse",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "insert_3d_transition": {
+    "script": "insert_3d_transition.py",
+    "imports": [
+      "argparse",
+      "json",
+      "jump_cut_vad",
+      "os",
+      "pan_3d_transition",
+      "pathlib",
+      "subprocess",
+      "sys",
+      "tempfile"
+    ],
+    "packages": [],
+    "env_vars": [],
+    "stdlib_only": true
+  },
+  "instantly_autoreply": {
+    "script": "instantly_autoreply.py",
+    "imports": [
+      "anthropic",
+      "argparse",
+      "google",
+      "googleapiclient",
+      "json",
+      "logging",
+      "os",
+      "requests",
+      "sys",
+      "traceback"
+    ],
+    "packages": [
+      "anthropic",
+      "google-api-python-client",
+      "google-auth",
+      "requests"
+    ],
+    "env_vars": [
+      "ANTHROPIC_API_KEY",
+      "INSTANTLY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "instantly_create_campaigns": {
+    "script": "instantly_create_campaigns.py",
+    "imports": [
+      "anthropic",
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "logging",
+      "os",
+      "pathlib",
+      "requests",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "anthropic",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "ANTHROPIC_API_KEY",
+      "INSTANTLY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "jump_cut_editor": {
+    "script": "jump_cut_editor.py",
+    "imports": [
+      "argparse",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "subprocess",
+      "sys",
+      "tempfile",
+      "whisper"
+    ],
+    "packages": [
+      "whisper"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "jump_cut_vad": {
+    "script": "jump_cut_vad.py",
+    "imports": [
+      "argparse",
+      "os",
+      "pathlib",
+      "subprocess",
+      "tempfile",
+      "torch",
+      "whisper"
+    ],
+    "packages": [
+      "torch",
+      "whisper"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "jump_cut_vad_parallel": {
+    "script": "jump_cut_vad_parallel.py",
+    "imports": [
+      "argparse",
+      "concurrent",
+      "json",
+      "os",
+      "pathlib",
+      "subprocess",
+      "tempfile",
+      "time",
+      "torch",
+      "whisper"
+    ],
+    "packages": [
+      "torch",
+      "whisper"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "jump_cut_vad_singlepass": {
+    "script": "jump_cut_vad_singlepass.py",
+    "imports": [
+      "argparse",
+      "os",
+      "pathlib",
+      "subprocess",
+      "tempfile",
+      "time",
+      "torch"
+    ],
+    "packages": [
+      "torch"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "modal_slack_test": {
+    "script": "modal_slack_test.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "modal",
+      "os",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "modal",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "SLACK_WEBHOOK_URL"
+    ],
+    "stdlib_only": false
+  },
+  "modal_webhook": {
+    "script": "modal_webhook.py",
+    "imports": [
+      "anthropic",
+      "apify_client",
+      "base64",
+      "concurrent",
+      "datetime",
+      "email",
+      "fastapi",
+      "google",
+      "googleapiclient",
+      "gspread",
+      "importlib",
+      "json",
+      "logging",
+      "modal",
+      "os",
+      "pandas",
+      "pathlib",
+      "re",
+      "requests",
+      "subprocess",
+      "sys",
+      "urllib"
+    ],
+    "packages": [
+      "anthropic",
+      "apify-client",
+      "fastapi",
+      "google-api-python-client",
+      "google-auth",
+      "gspread",
+      "modal",
+      "pandas",
+      "requests"
+    ],
+    "env_vars": [
+      "ANTHROPIC_API_KEY",
+      "ANYMAILFINDER_API_KEY",
+      "APIFY_API_TOKEN",
+      "GOOGLE_TOKEN_JSON",
+      "INSTANTLY_API_KEY",
+      "PANDADOC_API_KEY",
+      "SLACK_WEBHOOK_URL"
+    ],
+    "stdlib_only": false
+  },
+  "monitor_brand_mentions": {
+    "script": "monitor_brand_mentions.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "monitor_competitors": {
+    "script": "monitor_competitors.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "onboard_client": {
+    "script": "onboard_client.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "onboarding_post_kickoff": {
+    "script": "onboarding_post_kickoff.py",
+    "imports": [
+      "argparse",
+      "base64",
+      "datetime",
+      "email",
+      "glob",
+      "google",
+      "googleapiclient",
+      "json",
+      "logging",
+      "os",
+      "pathlib",
+      "re",
+      "subprocess",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "google-api-python-client",
+      "google-auth"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "pan_3d_transition": {
+    "script": "pan_3d_transition.py",
+    "imports": [
+      "argparse",
+      "json",
+      "os",
+      "pathlib",
+      "shutil",
+      "subprocess",
+      "tempfile"
+    ],
+    "packages": [],
+    "env_vars": [],
+    "stdlib_only": true
+  },
+  "parse_vtt_transcript": {
+    "script": "parse_vtt_transcript.py",
+    "imports": [
+      "argparse",
+      "os",
+      "pathlib",
+      "re",
+      "sys"
+    ],
+    "packages": [],
+    "env_vars": [],
+    "stdlib_only": true
+  },
+  "personalize_emails_ai": {
+    "script": "personalize_emails_ai.py",
+    "imports": [
+      "argparse",
+      "csv",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "read_sheet": {
+    "script": "read_sheet.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "gspread",
+      "json",
+      "os",
+      "pickle",
+      "sys"
+    ],
+    "packages": [
+      "google-auth",
+      "google-auth-oauthlib",
+      "gspread",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "GOOGLE_APPLICATION_CREDENTIALS"
+    ],
+    "stdlib_only": false
+  },
+  "recreate_thumbnails": {
+    "script": "recreate_thumbnails.py",
+    "imports": [
+      "PIL",
+      "argparse",
+      "base64",
+      "cv2",
+      "datetime",
+      "dotenv",
+      "google",
+      "io",
+      "math",
+      "mediapipe",
+      "numpy",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys",
+      "tempfile"
+    ],
+    "packages": [
+      "Pillow",
+      "google-auth",
+      "mediapipe",
+      "numpy",
+      "opencv-python",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "NANO_BANANA_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "remind_contract_renewal": {
+    "script": "remind_contract_renewal.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "repurpose_podcast": {
+    "script": "repurpose_podcast.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "research_company_offer": {
+    "script": "research_company_offer.py",
+    "imports": [
+      "argparse",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "requests",
+      "time"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "research_market_deep": {
+    "script": "research_market_deep.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "research_prospect_deep": {
+    "script": "research_prospect_deep.py",
+    "imports": [
+      "argparse",
+      "csv",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "schedule_demo": {
+    "script": "schedule_demo.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "schedule_social_media": {
+    "script": "schedule_social_media.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [],
+    "env_vars": [],
+    "stdlib_only": true
+  },
+  "score_leads_ai": {
+    "script": "score_leads_ai.py",
+    "imports": [
+      "argparse",
+      "csv",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys",
+      "typing"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "scrape_apify": {
+    "script": "scrape_apify.py",
+    "imports": [
+      "apify_client",
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "sys"
+    ],
+    "packages": [
+      "apify-client",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "APIFY_API_TOKEN"
+    ],
+    "stdlib_only": false
+  },
+  "scrape_apify_parallel": {
+    "script": "scrape_apify_parallel.py",
+    "imports": [
+      "apify_client",
+      "argparse",
+      "concurrent",
+      "datetime",
+      "dotenv",
+      "hashlib",
+      "json",
+      "os",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "apify-client",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "APIFY_API_TOKEN"
+    ],
+    "stdlib_only": false
+  },
+  "scrape_cross_niche_outliers": {
+    "script": "scrape_cross_niche_outliers.py",
+    "imports": [
+      "anthropic",
+      "apify_client",
+      "argparse",
+      "concurrent",
+      "datetime",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "gspread",
+      "json",
+      "os",
+      "re",
+      "subprocess",
+      "sys",
+      "time",
+      "youtube_transcript_api"
+    ],
+    "packages": [
+      "anthropic",
+      "apify-client",
+      "google-auth",
+      "google-auth-oauthlib",
+      "gspread",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "ANTHROPIC_API_KEY",
+      "APIFY_API_TOKEN",
+      "GOOGLE_APPLICATION_CREDENTIALS"
+    ],
+    "stdlib_only": false
+  },
+  "scrape_cross_niche_tubelab": {
+    "script": "scrape_cross_niche_tubelab.py",
+    "imports": [
+      "anthropic",
+      "apify_client",
+      "argparse",
+      "concurrent",
+      "datetime",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "gspread",
+      "json",
+      "os",
+      "re",
+      "requests",
+      "sys",
+      "time",
+      "youtube_transcript_api"
+    ],
+    "packages": [
+      "anthropic",
+      "apify-client",
+      "google-auth",
+      "google-auth-oauthlib",
+      "gspread",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "ANTHROPIC_API_KEY",
+      "APIFY_API_TOKEN",
+      "GOOGLE_APPLICATION_CREDENTIALS",
+      "TUBELAB_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "scrape_crunchbase": {
+    "script": "scrape_crunchbase.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "scrape_google_maps": {
+    "script": "scrape_google_maps.py",
+    "imports": [
+      "apify_client",
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "sys"
+    ],
+    "packages": [
+      "apify-client",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "APIFY_API_TOKEN"
+    ],
+    "stdlib_only": false
+  },
+  "scrape_leads_apify": {
+    "script": "scrape_leads_apify.py",
+    "imports": [
+      "apify_client",
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "apify-client",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "APIFY_API_TOKEN"
+    ],
+    "stdlib_only": false
+  },
+  "scrape_linkedin_apify": {
+    "script": "scrape_linkedin_apify.py",
+    "imports": [
+      "apify_client",
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "apify-client",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "APIFY_API_TOKEN",
+      "APIFY_TOKEN"
+    ],
+    "stdlib_only": false
+  },
+  "scrape_linkedin_posts_personalize": {
+    "script": "scrape_linkedin_posts_personalize.py",
+    "imports": [
+      "apify_client",
+      "argparse",
+      "datetime",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "apify-client",
+      "openai"
+    ],
+    "env_vars": [
+      "APIFY_API_TOKEN",
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "scrape_serp": {
+    "script": "scrape_serp.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "SERPAPI_KEY",
+      "SERP_API_KEY",
+      "VALUESERP_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "scrape_website_contacts": {
+    "script": "scrape_website_contacts.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "pathlib",
+      "re",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "scrape_yelp_reviews": {
+    "script": "scrape_yelp_reviews.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "scrape_youtube_channels": {
+    "script": "scrape_youtube_channels.py",
+    "imports": [
+      "argparse",
+      "csv",
+      "datetime",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "googleapiclient",
+      "json",
+      "os",
+      "pathlib",
+      "pickle",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "google-api-python-client",
+      "google-auth",
+      "google-auth-oauthlib",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "SERPAPI_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "send_payment_reminder": {
+    "script": "send_payment_reminder.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "send_review_request": {
+    "script": "send_review_request.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "send_slack_notification": {
+    "script": "send_slack_notification.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "requests"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "SLACK_WEBHOOK_URL"
+    ],
+    "stdlib_only": false
+  },
+  "simple_video_edit": {
+    "script": "simple_video_edit.py",
+    "imports": [
+      "anthropic",
+      "argparse",
+      "dotenv",
+      "faster_whisper",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "subprocess",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "anthropic",
+      "faster_whisper",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "ANTHROPIC_API_KEY",
+      "AUPHONIC_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "stripe_client_onboarding": {
+    "script": "stripe_client_onboarding.py",
+    "imports": [
+      "argparse",
+      "base64",
+      "create_formatted_google_doc",
+      "datetime",
+      "dotenv",
+      "email",
+      "google",
+      "google_auth_oauthlib",
+      "googleapiclient",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "requests",
+      "stripe",
+      "sys"
+    ],
+    "packages": [
+      "google-api-python-client",
+      "google-auth",
+      "google-auth-oauthlib",
+      "openai",
+      "python-dotenv",
+      "requests",
+      "stripe"
+    ],
+    "env_vars": [
+      "FATHOM_API_KEY",
+      "GMAIL_SENDER",
+      "GOOGLE_DRIVE_FOLDER_ID",
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY",
+      "SLACK_BOT_TOKEN",
+      "SLACK_CONTENT_CHANNEL_ID",
+      "SLACK_OWNER_USER_ID",
+      "SLACK_WORKSPACE_ID",
+      "STRIPE_API_KEY",
+      "STRIPE_WEBHOOK_SECRET"
+    ],
+    "stdlib_only": false
+  },
+  "summarize_sales_call": {
+    "script": "summarize_sales_call.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "track_funding_rounds": {
+    "script": "track_funding_rounds.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "track_project_milestones": {
+    "script": "track_project_milestones.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "json",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [],
+    "env_vars": [],
+    "stdlib_only": true
+  },
+  "transcribe_video": {
+    "script": "transcribe_video.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "translate_content": {
+    "script": "translate_content.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "triage_tickets": {
+    "script": "triage_tickets.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "update_sheet": {
+    "script": "update_sheet.py",
+    "imports": [
+      "argparse",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "gspread",
+      "json",
+      "os",
+      "pandas",
+      "sys"
+    ],
+    "packages": [
+      "google-auth",
+      "google-auth-oauthlib",
+      "gspread",
+      "pandas",
+      "python-dotenv"
+    ],
+    "env_vars": [
+      "GOOGLE_APPLICATION_CREDENTIALS",
+      "USER_EMAIL"
+    ],
+    "stdlib_only": false
+  },
+  "upload_leads_instantly": {
+    "script": "upload_leads_instantly.py",
+    "imports": [
+      "argparse",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "requests",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "INSTANTLY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "upwork_apify_scraper": {
+    "script": "upwork_apify_scraper.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "requests",
+      "time"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "APIFY_API_TOKEN"
+    ],
+    "stdlib_only": false
+  },
+  "upwork_proposal_generator": {
+    "script": "upwork_proposal_generator.py",
+    "imports": [
+      "anthropic",
+      "argparse",
+      "concurrent",
+      "datetime",
+      "dotenv",
+      "google",
+      "googleapiclient",
+      "json",
+      "re",
+      "threading",
+      "time"
+    ],
+    "packages": [
+      "anthropic",
+      "google-api-python-client",
+      "google-auth",
+      "python-dotenv"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "upwork_scraper": {
+    "script": "upwork_scraper.py",
+    "imports": [
+      "argparse",
+      "json",
+      "playwright",
+      "re",
+      "time"
+    ],
+    "packages": [
+      "playwright"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "validate_directive_metadata": {
+    "script": "validate_directive_metadata.py",
+    "imports": [
+      "argparse",
+      "pathlib",
+      "re",
+      "sys",
+      "typing",
+      "yaml"
+    ],
+    "packages": [
+      "PyYAML"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "validate_emails": {
+    "script": "validate_emails.py",
+    "imports": [
+      "argparse",
+      "csv",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "HUNTER_API_KEY",
+      "ZEROBOUNCE_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "welcome_client_emails": {
+    "script": "welcome_client_emails.py",
+    "imports": [
+      "argparse",
+      "base64",
+      "email",
+      "google",
+      "googleapiclient",
+      "json",
+      "logging",
+      "os",
+      "pathlib",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "google-api-python-client",
+      "google-auth"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  },
+  "write_cold_emails": {
+    "script": "write_cold_emails.py",
+    "imports": [
+      "argparse",
+      "csv",
+      "datetime",
+      "dotenv",
+      "json",
+      "openai",
+      "os",
+      "pathlib",
+      "requests",
+      "sys"
+    ],
+    "packages": [
+      "openai",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "OPENROUTER_API_KEY",
+      "PERPLEXITY_API_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "x_keyword_youtube_content": {
+    "script": "x_keyword_youtube_content.py",
+    "imports": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "requests",
+      "subprocess",
+      "sys",
+      "time",
+      "traceback"
+    ],
+    "packages": [
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "OPENROUTER_API_KEY",
+      "SLACK_WEBHOOK_URL"
+    ],
+    "stdlib_only": false
+  },
+  "youtube_knowledge_miner": {
+    "script": "youtube_knowledge_miner.py",
+    "imports": [
+      "argparse",
+      "concurrent",
+      "datetime",
+      "dotenv",
+      "google",
+      "google_auth_oauthlib",
+      "googleapiclient",
+      "http",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "sys",
+      "time",
+      "youtube_transcript_api"
+    ],
+    "packages": [
+      "google-api-python-client",
+      "google-auth",
+      "google-auth-oauthlib",
+      "python-dotenv",
+      "requests"
+    ],
+    "env_vars": [
+      "GOOGLE_API_KEY",
+      "OPENROUTER_API_KEY",
+      "SUPADATA_API_KEY",
+      "TRANSCRIPTAPI_KEY"
+    ],
+    "stdlib_only": false
+  },
+  "youtube_to_campaign_pipeline": {
+    "script": "youtube_to_campaign_pipeline.py",
+    "imports": [
+      "argparse",
+      "concurrent",
+      "datetime",
+      "dotenv",
+      "full_campaign_pipeline",
+      "json",
+      "os",
+      "pathlib",
+      "subprocess",
+      "sys",
+      "time"
+    ],
+    "packages": [
+      "python-dotenv"
+    ],
+    "env_vars": [],
+    "stdlib_only": false
+  }
+}

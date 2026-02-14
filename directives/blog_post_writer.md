@@ -1,3 +1,21 @@
+---
+id: blog_post_writer
+name: SEO Blog Post Writer
+version: 1.0.0
+category: Content Creation
+type: manual
+description: This workflow generates long-form, SEO-optimized blog posts with proper
+  keyword targeting, structure, and CTAs ready for publication.
+execution_scripts:
+- generate_blog_post.py
+env_vars:
+- OPENAI_API_KEY
+- SEMRUSH_API_KEY
+integrations:
+- anthropic
+- openai
+---
+
 # SEO Blog Post Writer
 
 ## What This Workflow Is

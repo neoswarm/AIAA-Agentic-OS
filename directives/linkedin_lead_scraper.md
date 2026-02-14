@@ -1,3 +1,26 @@
+---
+id: linkedin_lead_scraper
+name: LinkedIn Lead Scraper + Email Finder
+version: 1.0.0
+category: Lead Generation
+type: manual
+description: This workflow automates the process of finding B2B leads on LinkedIn
+  by scraping public profile data based on your targeting criteria, then enriching
+  those leads with verified email addresses for cold outreach campaigns.
+execution_scripts:
+- scrape_linkedin_apify.py
+- enrich_emails.py
+- update_sheet.py
+env_vars:
+- APIFY_API_TOKEN
+- APOLLO_API_KEY
+- GOOGLE_APPLICATION_CREDENTIALS
+- HUNTER_API_KEY
+integrations:
+- apify
+- google_sheets
+---
+
 # LinkedIn Lead Scraper + Email Finder
 
 ## What This Workflow Is

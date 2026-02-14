@@ -1,3 +1,19 @@
+---
+id: ai_image_generator
+name: AI Image Generator
+version: 1.0.0
+category: Content Creation
+type: manual
+description: This workflow generates custom images using DALL-E or other AI models
+  for use in content, ads, and social media.
+execution_scripts:
+- generate_image_prompt.py
+env_vars:
+- OPENAI_API_KEY
+integrations:
+- openai
+---
+
 # AI Image Generator
 
 ## What This Workflow Is
