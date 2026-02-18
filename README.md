@@ -1,14 +1,14 @@
 # AIAA Agentic OS
 
-An AI-powered agency operating system that runs inside Claude Code. Just paste prompts and Claude handles everything - from VSL funnels to cold emails to market research. Includes a web dashboard for monitoring workflows, 120 automated enforcement hooks, and a complete DOE architecture.
+An AI-powered agency operating system that runs inside Claude Code. Just ask for what you need — from VSL funnels to cold emails to market research — and Claude finds the right skill from 133 available and handles everything. Includes a modular web dashboard with SQLite persistence, 35 automated enforcement hooks, and a skills-first DOE architecture.
 
-**Version:** 3.0 | **150 Workflows** | **120 Hooks** | **Last Updated:** February 2026
+**Version:** 5.0 | **133 Native Skills** | **35 Active Hooks** | **Last Updated:** February 18, 2026
 
 ---
 
-## System Architecture (DOE Pattern)
+## System Architecture (Skills-First DOE)
 
-This system uses a **Directive-Orchestration-Execution (DOE)** architecture:
+This system uses a **Skills-First Directive-Orchestration-Execution (DOE)** architecture. Skills are the primary entry point — each one is a self-contained folder with a workflow definition (`SKILL.md`) and a Python execution script bundled together.
 
 ```
                          USER REQUEST
@@ -16,26 +16,39 @@ This system uses a **Directive-Orchestration-Execution (DOE)** architecture:
                               |
                               v
               +-------------------------------+
-              |  DIRECTIVE (What to do)       |
-              |  directives/*.md              |
-              |  Natural language SOPs with   |
-              |  inputs, steps, quality gates |
+              |  1. SKILLS (Primary)          |
+              |  .claude/skills/ — 133 skills |
+              |  Self-contained packages:     |
+              |  SKILL.md + Python script     |
+              |  Context loading, execution,  |
+              |  and quality gates built in.  |
+              +-------------------------------+
+                              |
+                     (no matching skill?)
+                              |
+                              v
+              +-------------------------------+
+              |  2. DIRECTIVES (Fallback)     |
+              |  directives/*.md — 150+ SOPs  |
+              |  Legacy reference material.   |
+              |  Load directive, then run     |
+              |  the matching script.         |
               +-------------------------------+
                               |
                               v
               +-------------------------------+
-              |  ORCHESTRATION (Claude Code)  |
-              |  Reads directives, loads      |
-              |  skill bibles, calls scripts  |
-              |  Hooks enforce compliance     |
+              |  3. SUBAGENTS (Delegation)    |
+              |  .claude/agents/ — 5 agents   |
+              |  Research, Review, QA,        |
+              |  Content Writing, Deploy      |
               +-------------------------------+
                               |
                               v
               +-------------------------------+
-              |  EXECUTION (Python scripts)   |
-              |  execution/*.py               |
-              |  Deterministic API calls and  |
-              |  data processing              |
+              |  4. HOOKS (Guardrails)        |
+              |  .claude/hooks/ — 35 active   |
+              |  Safety, quality, deployment, |
+              |  and analytics enforcement    |
               +-------------------------------+
                               |
                               v
@@ -43,77 +56,91 @@ This system uses a **Directive-Orchestration-Execution (DOE)** architecture:
               Local files, Google Docs, Slack
 ```
 
-**Why DOE:** LLMs are probabilistic (90% accuracy = 59% over 5 steps). Push deterministic work into Python scripts. The orchestrator focuses on decision-making. Hooks enforce the pattern automatically.
+**Why Skills-First:** LLMs are probabilistic (90% accuracy = 59% over 5 steps). Skills bundle deterministic Python scripts with contextual intelligence into self-contained packages. The orchestrator focuses on decisions. Hooks enforce the pattern automatically.
 
 ---
 
 ## Directory Structure
 
 ```
-AIAA-Agentic-OS/
+Agentic OS/
 |
-|-- .claude/                    # Claude Code configuration
-|   |-- hooks/                  # 120 enforcement hooks (Python)
-|   `-- settings.local.json     # Hook registrations (126 entries)
+|-- .claude/                        # Claude Code configuration
+|   |-- skills/                     # 133 native skills (PRIMARY)
+|   |   |-- cold-email-campaign/    #   Each skill is a self-contained folder:
+|   |   |   |-- SKILL.md            #     Workflow definition, args, quality gates
+|   |   |   `-- write_cold_emails.py #    Execution script
+|   |   |-- vsl-funnel/
+|   |   |-- blog-post/
+|   |   `-- ... (133 total)
+|   |-- agents/                     # 5 subagent definitions
+|   |   |-- research.md
+|   |   |-- reviewer.md
+|   |   |-- qa.md
+|   |   |-- content-writer.md
+|   |   `-- deployer.md
+|   |-- rules/                      # 9 rule files (loaded at session start)
+|   |-- hooks/                      # 35 active enforcement hooks
+|   |   |-- _archived/              # 93 archived hooks (restorable)
+|   |   `-- HOOK_MANIFEST.md        # Full hook documentation
+|   `-- settings.local.json         # Hook registrations
 |
-|-- .env                        # API keys (never committed)
-|-- .tmp/                       # Intermediate outputs (gitignored)
-|-- credentials.json            # Google OAuth credentials
-|-- token.pickle                # Google OAuth token
+|-- .env                            # API keys (never committed)
+|-- .tmp/                           # Intermediate outputs (gitignored)
+|-- credentials.json                # Google OAuth credentials
+|-- token.pickle                    # Google OAuth token
 |
-|-- context/                    # AGENCY CONTEXT - Who you are
-|   |-- agency.md               # Agency info, services, positioning
-|   |-- owner.md                # Owner profile, background, expertise
-|   |-- brand_voice.md          # Tone, style, communication preferences
-|   `-- services.md             # Service offerings, pricing, packages
+|-- context/                        # AGENCY CONTEXT - Who you are
+|   |-- agency.md                   # Agency info, services, positioning
+|   |-- owner.md                    # Owner profile, background, expertise
+|   |-- brand_voice.md              # Tone, style, communication preferences
+|   `-- services.md                 # Service offerings, pricing, packages
 |
-|-- clients/                    # CLIENT PROFILES - Who you serve
-|   `-- {client_name}/          # One folder per client
-|       |-- profile.md          # Client info, business, goals
-|       |-- rules.md            # Specific rules for this client
-|       |-- preferences.md      # Style, tone, do's and don'ts
-|       `-- history.md          # Past work, context, outcomes
+|-- clients/                        # CLIENT PROFILES - Who you serve
+|   `-- {client_name}/              # One folder per client
+|       |-- profile.md              # Client info, business, goals
+|       |-- rules.md                # Specific rules for this client
+|       |-- preferences.md          # Style, tone, do's and don'ts
+|       `-- history.md              # Past work, context, outcomes
 |
-|-- directives/                 # SOPs - What to do (150 files)
+|-- directives/                     # 150+ SOPs (REFERENCE material)
 |   |-- vsl_funnel_orchestrator.md
-|   |-- company_market_research.md
 |   `-- ...
 |
-|-- execution/                  # Python scripts - Doing (151 files)
-|   |-- generate_vsl_funnel.py
-|   |-- create_google_doc.py
+|-- execution/                      # Utility scripts + originals (reference)
+|   |-- deploy_to_railway.py
 |   `-- ...
 |
-|-- skills/                     # Domain expertise (286 skill bibles)
+|-- skills/                         # 286 skill bibles (domain expertise)
 |   |-- SKILL_BIBLE_*.md
 |   `-- ...
 |
-|-- railway_apps/               # Dashboard deployment
-|   `-- aiaa_dashboard/         # Flask dashboard app
+|-- railway_apps/                   # Dashboard deployment
+|   `-- aiaa_dashboard/             # Flask dashboard app
 |       |-- app.py
 |       |-- Procfile
 |       `-- requirements.txt
 |
-|-- AGENTS.md                   # Full agent instructions
-|-- CLAUDE.md                   # Mirrored instructions for Claude Code
-|-- QUICKSTART_PROMPT.md        # Setup prompt for new users
-`-- requirements.txt            # Python dependencies
+|-- AGENTS.md                       # Full agent reference + skill catalog
+|-- CLAUDE.md                       # System brain (slim version)
+|-- QUICKSTART_PROMPT.md            # Setup prompt for new users
+`-- requirements.txt                # Python dependencies
 ```
 
 ---
 
 ## Quick Start
 
-**Prerequisites:** You just need TWO accounts - Claude will auto-install all tools!
-- **GitHub account** - Sign up at https://github.com
-- **Railway account** - Sign up at https://railway.app
+**Prerequisites:** You just need TWO accounts — Claude will auto-install all tools!
+- **GitHub account** — Sign up at https://github.com
+- **Railway account** — Sign up at https://railway.app
 
 Claude will automatically install: Homebrew, Python, Git, Node.js, Railway CLI, and the Railway skill.
 
 **Open Claude Code and paste this entire prompt to get started:**
 
 ```
-I want to set up AIAA Agentic OS v3.0. Please help me through the entire process interactively, asking me ONE question at a time and waiting for my response before moving on.
+I want to set up AIAA Agentic OS v4.1. Please help me through the entire process interactively, asking me ONE question at a time and waiting for my response before moving on.
 
 ## Prerequisites Check (Do This FIRST)
 
@@ -325,7 +352,7 @@ Say: "Now let me test the Google integration..."
 
 Then RUN this command:
 
-python3 execution/create_google_doc.py --test
+python3 .claude/skills/google-doc-delivery/create_google_doc.py --test
 
 Tell me: "A browser window should open asking you to sign in to Google. Please:
 1. Select your Google account
@@ -380,7 +407,7 @@ Ask me TWO questions (one at a time):
 
 After I provide the password, say "Let me generate the secure password hash..."
 
-Then RUN this command to generate the hash (using heredoc to avoid escape issues):
+Then RUN this command to generate the hash:
 
 python3 << 'PYHASH'
 import hashlib
@@ -447,7 +474,7 @@ RUN (using the domain from above):
 
 curl -s "https://[THE_GENERATED_DOMAIN]/health"
 
-Check if it returns: {"status": "ok", "version": "3.0", "workflows": 150}
+Check if it returns: {"status": "ok", "version": "4.1", "skills": 133}
 
 If successful, tell me "Dashboard is live!" If it fails, wait 30 seconds and try again (deployment may still be starting).
 
@@ -458,7 +485,7 @@ Once everything is deployed, give me:
 - Password (the one I chose)
 - Remind me to bookmark it!
 
-Tell me: "Your AIAA Dashboard is now live! You can monitor all 150 workflows, manage environment variables, and track webhook events."
+Tell me: "Your AIAA Dashboard is now live! You can monitor all 133 skills, manage environment variables, and track webhook events."
 
 ## Step 6: Test the System
 
@@ -467,46 +494,52 @@ Say: "Let's test the system with a quick workflow!"
 Ask me: "What type of agency/business are you? (marketing/content/design/other)"
 
 Based on my answer, RUN one of these test commands:
-- If marketing: `python3 execution/write_cold_emails.py --sender "Test" --company "TestCo" --offer "Marketing services" --target "Small businesses"`
-- If content: `python3 execution/generate_blog_post.py --topic "Getting started with AI" --length 500`
+- If marketing: `python3 .claude/skills/cold-email-campaign/write_cold_emails.py --sender "Test" --company "TestCo" --offer "Marketing services" --target "Small businesses"`
+- If content: `python3 .claude/skills/blog-post/generate_blog_post.py --topic "Getting started with AI" --length 500`
 - If design: Ask for a sample project to research
-- If other: `python3 execution/research_company_offer.py --company "Apple" --website "https://apple.com"`
+- If other: `python3 .claude/skills/company-research/research_company_offer.py --company "Apple" --website "https://apple.com"`
 
 Show me the output file location and tell me if it was successful.
 
 ## Step 7: Show What's Available
 
-Give me a quick tour of the 150 workflows:
+Give me a quick tour of the 133 native skills organized by category:
 
-**Content Creation (25+ workflows):**
-- Blog posts, LinkedIn posts, Twitter threads
-- YouTube scripts, Instagram Reels
-- Email newsletters, Content calendars
+**Content & Copy (18 skills):**
+VSL funnels, sales pages, blog posts, YouTube scripts, Instagram Reels, LinkedIn posts, Twitter threads, carousel posts, landing pages, case studies, newsletters, press releases, and more.
 
-**Sales & Funnels (30+ workflows):**
-- VSL scripts, Sales pages, Landing pages
-- Cold email sequences, Follow-up automation
-- Webinar funnels, Lead magnets
+**Email & Outreach (14 skills):**
+Cold email campaigns, AI personalization, LinkedIn-personalized emails, mass cold emails, email sequences, follow-up automation, e-commerce emails, email validation, and deliverability management.
 
-**Research & Intelligence (20+ workflows):**
-- Company research, Competitor monitoring
-- Prospect research, Market analysis
-- Niche validation, Pricing strategy
+**Research & Analysis (12 skills):**
+Company research, prospect research, market research, niche research, competitor monitoring, CRO analysis, SEO audits, A/B test analysis, and YouTube knowledge mining.
 
-**Lead Generation (15+ workflows):**
-- Google Maps scraping, LinkedIn scraping
-- Email enrichment, Lead scoring
-- CRM automation, Prospecting pipelines
+**Advertising (7 skills):**
+Meta ads campaigns, Google Ads, ad creative generation, Reddit ad scripts, static ads, video ad scripts, and FB Ad Library analysis.
 
-**Paid Advertising (15+ workflows):**
-- Meta ad campaigns, Google Ads
-- Ad creative generation, FB Ad Library analysis
-- Video ad scripts, Static ad generation
+**Lead Generation (16 skills):**
+Google Maps scraping, LinkedIn scraping, lead scoring, lead list building, deduplication, lead magnets, SERP scraping, Crunchbase leads, Yelp scraping, and more.
 
-**Client Management (20+ workflows):**
-- Onboarding automation, QBR generation
-- Churn risk alerts, Health scores
-- Invoice generation, Testimonial requests
+**Sales & Client Management (16 skills):**
+Proposals, sales call summaries, objection handling, client onboarding, client reports, QBR generation, invoicing, pricing strategy, meeting prep, and sales dashboards.
+
+**Campaign & Funnel (7 skills):**
+Campaign reports, campaign launching, end-to-end campaigns, funnel strategy, webinar funnels, content calendars, and more.
+
+**Video & Media (9 skills):**
+Video transcription, smart editing, shorts extraction, jump cuts, 3D pan transitions, thumbnail generation, AI image generation, and product photography.
+
+**Automation & Ops (14 skills):**
+FAQ chatbots, ticket triage, WhatsApp bots, social scheduling, CRM automation, task assignment, milestone tracking, n8n conversion, UTM generation, and churn alerts.
+
+**Deployment & Infrastructure (5 skills):**
+Google Doc delivery, Modal deploy, Railway deploy, dashboard deploy, and agency dashboard management.
+
+**Platform-Specific (9 skills):**
+Upwork scraping, HubSpot enrichment, GoHighLevel prospecting, Dream100 Instagram, LinkedIn profile tracking, YouTube channel finding, and more.
+
+**Strategy & Planning (6 skills):**
+Automation building, hiring systems, payment reminders, funding tracking, brand monitoring, and Slack notifications.
 
 ## Important Instructions for Claude
 
@@ -522,7 +555,7 @@ Give me a quick tour of the 150 workflows:
 - Generate hashes, secrets, and execute all commands for me
 - Only ask me for input when you absolutely need it (username, password, API keys, confirming interactive prompts)
 - Save any important values (URLs, hashes, passwords) so you can reuse them later in the setup
-- Upon completion of all setup, Read agents.md and assume the role of Orchestrator as described
+- Upon completion of all setup, Read AGENTS.md and assume the role of Orchestrator as described
 
 Let's start! Begin with the Prerequisites Check.
 ```
@@ -531,15 +564,15 @@ Let's start! Begin with the Prerequisites Check.
 
 ## What This Does
 
-When you paste this prompt, Claude Code becomes your personal setup assistant:
+When you paste the prompt above, Claude Code becomes your personal setup assistant:
 
-1. **Downloads & installs** - Clones repo and installs dependencies
-2. **Configures API keys** - One-by-one walkthrough with detailed instructions
-3. **Sets up Google integration** - Drive, Docs & Sheets for auto-documents and exports
-4. **Creates agency profile** - Your brand voice and services
-5. **Deploys dashboard to Railway** - Fully automated deployment with environment config
-6. **Tests the system** - Verifies everything works
-7. **Shows capabilities** - Tour of all 150 workflows
+1. **Downloads & installs** — Clones repo and installs dependencies
+2. **Configures API keys** — One-by-one walkthrough with detailed instructions
+3. **Sets up Google integration** — Drive, Docs & Sheets for auto-documents and exports
+4. **Creates agency profile** — Your brand voice and services
+5. **Deploys dashboard to Railway** — Fully automated deployment with environment config
+6. **Tests the system** — Verifies everything works
+7. **Shows capabilities** — Tour of all 133 native skills
 
 ---
 
@@ -547,246 +580,189 @@ When you paste this prompt, Claude Code becomes your personal setup assistant:
 
 | Resource | Count | Location |
 |----------|-------|----------|
-| Workflow Directives | 150 | `directives/` |
-| Execution Scripts | 151 | `execution/` |
+| **Native Skills** | 133 | `.claude/skills/` (each with SKILL.md + script) |
+| **Shared Utilities** | 4 | `.claude/skills/_shared/` |
+| Subagents | 5 | `.claude/agents/` |
+| Rules | 9 | `.claude/rules/` |
+| Active Hooks | 35 | `.claude/hooks/` |
+| Archived Hooks | 93 | `.claude/hooks/_archived/` |
+| Directives (reference) | 150+ | `directives/` |
 | Skill Bibles | 286 | `skills/` |
-| Enforcement Hooks | 120 | `.claude/hooks/` |
-| Hook Registrations | 126 | `.claude/settings.local.json` |
+| Agency Context | 4 files | `context/` |
 
 ---
 
-## Claude Code Hooks (Automated Enforcement)
+## How Skills Work
 
-The hook system is the enforcement layer of the DOE architecture. Every time Claude uses a tool (reading files, writing code, running commands), the relevant hooks fire automatically to enforce compliance, prevent mistakes, and track system health.
-
-### How Hooks Work
+Each skill is a self-contained folder in `.claude/skills/{name}/`:
 
 ```
-Claude decides to use a tool
-            |
-            v
-  +-------------------------+
-  |  PreToolUse Hooks       |  <-- BEFORE the tool runs
-  |  (52 registrations)     |
-  |                         |
-  |  Can BLOCK the action   |
-  |  Can WARN the agent     |
-  |  Can silently log       |
-  +-------------------------+
-            |
-            v
-     Tool executes
-     (if not blocked)
-            |
-            v
-  +-------------------------+
-  |  PostToolUse Hooks      |  <-- AFTER the tool runs
-  |  (74 registrations)     |
-  |                         |
-  |  Can REJECT the result  |
-  |  Can flag quality       |
-  |  Can track metrics      |
-  +-------------------------+
-            |
-            v
-  Claude continues with task
+.claude/skills/cold-email-campaign/
+├── SKILL.md                  # Workflow definition, args, quality gates
+└── write_cold_emails.py      # The execution script
 ```
 
-Hooks are Python scripts that receive tool call data via stdin and respond with exit codes (PreToolUse) or JSON decisions (PostToolUse). They use only Python standard library -- no pip dependencies.
+Just ask for what you need. "Write cold emails for Acme Corp" → triggers the `cold-email-campaign` skill. The SKILL.md tells Claude the exact command, required inputs, and quality checklist. The Python script handles all deterministic work (API calls, data processing, formatting).
 
-### 15 Tiers of Enforcement
-
-The 120 hooks are organized into 15 tiers, each targeting a specific layer of system reliability:
-
-| Tier | Name | Hooks | Purpose |
-|------|------|-------|---------|
-| 1 | System Stability | 1-10 | Prevent dangerous operations, guard secrets, validate API keys |
-| 2 | DOE Enforcement | 11-20 | Enforce DOE pattern, context loading, directive compliance |
-| 3 | Quality Gates | 21-30 | Output validation, content length, markdown formatting |
-| 4 | Operations | 31-40 | API cost tracking, rate limits, execution logging |
-| 5 | Workflow Intelligence | 41-50 | VSL/cold email SOP compliance, funnel completeness |
-| 6 | Pre-Execution Safety | 51-60 | Script validation, argument checking, dependency chains |
-| 7 | Output Validation | 61-65 | JSON validation, Google Docs formatting, delivery pipeline |
-| 8 | Railway & Deployment | 66-70 | Deploy guards, env var completeness, cron validation |
-| 9 | Analytics | 71-75 | Session tracking, productivity scoring, word counts |
-| 10 | Monitoring | 76-80 | Hook health, self-anneal tracking, daily summaries |
-| 11 | DOE Structural Integrity | 81-90 | Directive completeness, phase ordering, SOP compliance |
-| 12 | Content Intelligence | 91-100 | Brand voice, CTA validation, SEO, tone consistency |
-| 13 | Execution Safety | 101-105 | API response validation, retry loops, path traversal |
-| 14 | Client & Delivery | 106-115 | Client isolation, SLA monitoring, deliverable tracking |
-| 15 | System Optimization | 116-120 | Bottleneck detection, quality trends, health reporting |
-
-### Hook Behavior Summary
-
-| Behavior | Count | What It Does |
-|----------|-------|--------------|
-| Hard Block | 14 | Stops dangerous actions (secrets in code, path traversal, command injection) |
-| Warn / Info | 62 | Alerts on quality issues, missing context, SOP deviations |
-| Silent Tracking | 44 | Logs metrics, patterns, and usage data for system improvement |
-
-### Key Use Cases
-
-**DOE Pattern Enforcement**
-
-The `doe_enforcer` and `context_loader_enforcer` hooks ensure Claude follows the Directive-Orchestration-Execution pattern. If Claude tries to generate content without first loading `context/agency.md` or the relevant client profile, the hook warns. If a directive exists for the task but Claude skips it, the hook catches that too.
-
-**Secret Protection**
-
-The `secrets_guard` hook scans every file write for API keys, tokens, webhook URLs, and credentials. If Claude writes a hardcoded secret into a file, the hook blocks the write before it reaches disk. The `pii_detection_guard` does the same for personally identifiable information.
-
-**Quality Gates on Output**
-
-When Claude writes deliverables to `.tmp/`, hooks like `output_quality_gate`, `content_length_enforcer`, and `brand_voice_compliance` validate the output meets minimum standards. Sales copy gets checked for CTAs (`cta_validation`). Blog posts get checked for SEO keywords (`seo_keyword_validator`). Everything gets checked against the brand voice defined in `context/brand_voice.md`.
-
-**Client Data Isolation**
-
-The `multi_client_context_isolation` and `client_data_isolation_guard` hooks prevent cross-contamination between clients. If Claude is working on a deliverable for Client A and accidentally loads context from Client B, the hook catches it. The `client_rules_enforcer` makes sure client-specific rules from `clients/{name}/rules.md` are being followed.
-
-**Workflow SOP Compliance**
-
-Workflow-specific hooks like `vsl_workflow_enforcer` and `cold_email_workflow_enforcer` ensure Claude follows the step-by-step process defined in each directive. If the directive says "research first, then write," and Claude tries to skip research, the hook intervenes.
-
-**Execution Safety**
-
-Before running any Python script, hooks validate that the script exists (`script_exists_guard`), has valid arguments (`script_argument_validator`), and won't exceed resource limits (`memory_usage_estimator`). The `retry_loop_detector` catches infinite retry loops. The `command_injection_guard` blocks shell injection patterns.
-
-**Self-Annealing Support**
-
-After every task, hooks like `self_anneal_reminder` track whether Claude updated directives and skill bibles with what it learned. The `workflow_completion_tracker` and `error_categorizer` log patterns so the system improves over time. The `quality_trend_analyzer` identifies declining output quality before it becomes a problem.
-
-### Hook State & Debugging
-
-All hook state persists in `.tmp/hooks/*.json`. Every hook supports CLI flags:
-
-```bash
-# Check what a hook is tracking
-python3 .claude/hooks/secrets_guard.py --status
-
-# Reset a hook's state
-python3 .claude/hooks/workflow_completion_tracker.py --reset
-
-# Check system-wide hook health
-python3 .claude/hooks/system_health_reporter.py --status
-```
+Browse all 133 skills: `ls .claude/skills/`
 
 ---
 
 ## What You Can Do
 
-Once set up, just tell Claude what you need. Here are example prompts:
+Once set up, just tell Claude what you need. It will find the right skill from 133 available and handle everything:
 
 ### Sales Copy
-
-**VSL Funnel:**
 ```
 Create a complete VSL funnel for [COMPANY NAME]. Their website is [WEBSITE] and they sell [PRODUCT/SERVICE] to [TARGET AUDIENCE].
 ```
-
-**Sales Page:**
+```
+Write a cold email sequence for my [SERVICE] targeting [INDUSTRY]. I'm [YOUR NAME] from [YOUR COMPANY]. Focus on [PAIN POINT].
+```
 ```
 Write a long-form sales page for [PRODUCT]. Price point is [PRICE]. Target audience is [AUDIENCE]. Focus on [MAIN BENEFIT].
 ```
 
-**Cold Emails:**
-```
-Write a cold email sequence for my [SERVICE] targeting [INDUSTRY]. I'm [YOUR NAME] from [YOUR COMPANY]. Focus on [PAIN POINT].
-```
-
 ### Content Creation
-
-**Blog Post:**
 ```
 Write a 1500-word blog post about [TOPIC] for [TARGET AUDIENCE]. Tone should be [PROFESSIONAL/CASUAL/etc].
 ```
-
-**LinkedIn Post:**
 ```
 Write a LinkedIn post about [TOPIC]. Style: [STORY/EDUCATIONAL/LISTICLE]. Make it engaging and end with a call to action.
 ```
-
-**YouTube Script:**
 ```
 Write a YouTube script about [TOPIC]. Target length: [X] minutes. Style: [EDUCATIONAL/TUTORIAL/STORY].
 ```
 
 ### Research
-
-**Company Research:**
 ```
 Research [COMPANY NAME]. Their website is [WEBSITE]. I need to understand their business model, target audience, competitors, and positioning.
 ```
-
-**Market Research:**
 ```
 Research the [INDUSTRY] market. I need to understand key players, trends, opportunities, and challenges.
 ```
 
 ### Ad Creatives
-
-**Meta Ads Campaign (with AI images):**
 ```
 Generate a Meta ads campaign for [PRODUCT] targeting [AUDIENCE]. Generate images for the ads.
 ```
 
-**Static Ad Creatives:**
-```
-Create static ad creatives for [PRODUCT] on [PLATFORM]. Generate the actual images.
-```
-
 ### Lead Generation
-
-**Google Maps Leads:**
 ```
 Find [BUSINESS TYPE] in [LOCATION]. I need their name, address, phone, website, and reviews.
 ```
-
-**LinkedIn Scraping:**
 ```
 Find [JOB TITLES] at companies in [INDUSTRY] located in [LOCATION].
 ```
 
 ### Landing Pages
-
-**AI Landing Page:**
 ```
 Generate a landing page for [PRODUCT] targeting [AUDIENCE]. Style: [modern-gradient/neo-noir/editorial-luxury]. Deploy to Cloudflare.
 ```
 
 ### Client Work
-
-**Add a New Client:**
 ```
 Help me add a new client: [CLIENT NAME]. Their website is [WEBSITE]. They're in the [INDUSTRY] industry and sell [PRODUCTS/SERVICES] to [AUDIENCE].
 ```
-
-**Monthly Report:**
 ```
 Create a monthly report for [CLIENT NAME]. Key metrics: [LIST METRICS]. Highlights: [ACHIEVEMENTS].
 ```
 
 ---
 
+## Execution Flow (8 Phases)
+
+Every task follows the same 8-phase flow:
+
+| Phase | What Happens |
+|-------|-------------|
+| 1. **Parse** | Extract intent from your request |
+| 2. **Plan** | For complex tasks: plan first, build second |
+| 3. **Skill Check** | Find matching skill from 133 in `.claude/skills/` |
+| 4. **Capability Check** | Fallback: check directives + execution scripts |
+| 5. **Context Load** | Load agency context, client profiles, skill bibles |
+| 6. **Execute** | Run the skill's Python script |
+| 7. **Quality** | Validate output against quality gates |
+| 8. **Deliver** | Save locally → Google Docs → Slack notification |
+
+---
+
+## Subagents (5)
+
+Specialized workers Claude can delegate to for focused tasks:
+
+| Agent | Purpose |
+|-------|---------|
+| `research` | Market research, company analysis, competitive intelligence |
+| `reviewer` | Fresh-eyes quality check on code and content |
+| `qa` | Test generation and validation for execution scripts |
+| `content-writer` | Marketing content following brand voice |
+| `deployer` | Railway and Modal deployment operations |
+
+---
+
+## Claude Code Hooks (35 Active)
+
+Hooks fire automatically on every tool call to enforce compliance, prevent mistakes, and track system health. Organized into 4 tiers:
+
+| Tier | Name | Hooks | Purpose |
+|------|------|-------|---------|
+| 1 | **Safety Critical** | 15 | Hard blockers: secrets guard, PII detection, path traversal, command injection, file size limits, context budget |
+| 2 | **Quality & Workflow** | 10 | Warnings: DOE enforcement, output quality, content length, brand voice, client context |
+| 3 | **Deployment Safety** | 5 | Deploy guards: Railway pre-deploy checklist, Modal deploy safety, production warnings |
+| 4 | **Analytics** | 5 | Silent tracking: API costs, session activity, workflow patterns, system health |
+
+93 additional hooks are archived in `.claude/hooks/_archived/` and can be restored as needed. Full documentation in `.claude/hooks/HOOK_MANIFEST.md`.
+
+### Hook Debugging
+
+```bash
+python3 .claude/hooks/<hook_name>.py --status   # Check status
+python3 .claude/hooks/<hook_name>.py --reset     # Reset state
+rm -rf .tmp/hooks/*.json                         # Reset ALL hook state
+```
+
+---
+
 ## AIAA Dashboard
 
-A web dashboard for monitoring and managing your AIAA system. Deploy to Railway in minutes.
+**v5.0 Modular Architecture** — A production-grade Flask application with SQLite persistence, refactored from a 5,362-line monolith into clean, maintainable components.
 
-### Dashboard Features
+### Architecture Highlights
 
-- **150 Documented Workflows** - Full descriptions, prerequisites, how-to-run instructions
-- **Active Workflow Management** - Run Now, Schedule Editor, Cron Toggle
-- **Webhook Workflows** - Register, test, toggle, and delete webhooks with optional HTTP forwarding to standalone services
-- **Project-Wide Shared Variables** - Set API keys once, all services inherit them automatically
-- **Light/Dark Mode** - Toggle with localStorage persistence
-- **Environment Variables** - View and set API keys from the UI (sets project-wide shared variables)
-- **Real-time Logs** - See all workflow executions and webhook events
-- **Mobile Responsive** - Works on phones and tablets
-- **Password Protected** - Secure SHA-256 hashed login
+**Modular Structure:**
+- `app.py` — Flask entry point
+- `routes/` — API endpoints (`api.py`) and UI views (`views.py`)
+- `services/` — Business logic (deployment, Railway API, webhooks)
+- `models.py` — Data models for events, executions, deployments, webhook logs
+- `database.py` — SQLite persistence (replaces in-memory storage)
+- `templates/` — Jinja2 templates with component architecture
+- `static/` — Design system with dark/light theme
+
+**SQLite Persistence:**
+All data persists across restarts:
+- Execution history with timeline view
+- Deployment records with status tracking
+- Webhook logs with retry attempts
+- Event stream for real-time monitoring
+
+### Key Features
+
+- **133 Native Skills** — Full catalog with descriptions, args, and examples
+- **One-Click Deploy** — Deploy any skill to Railway from the UI
+- **Visual Cron Builder** — Interactive cron schedule editor
+- **Webhook Management** — Register, test, retry, and monitor webhooks with full logs
+- **API Authentication** — Secure API access with key-based auth
+- **Execution Timeline** — Visual history with filtering and search
+- **Dark/Light Theme** — Design system with localStorage persistence
+- **Mobile Responsive** — Works on all devices
+- **Password Protected** — SHA-256 hashed authentication
 
 ### Deploy to Railway
 
 **Prerequisites:**
 - Railway account (https://railway.app)
-- Railway CLI installed: `npm install -g @railway/cli`
+- Railway CLI: `npm install -g @railway/cli`
 
 ```bash
 railway login
@@ -794,6 +770,12 @@ cd railway_apps/aiaa_dashboard
 railway init       # Select "Empty Project"
 railway up         # Deploy
 railway domain     # Generate public URL
+```
+
+**Run Locally:**
+```bash
+cd railway_apps/aiaa_dashboard
+python3 app.py     # Runs on http://localhost:5000
 ```
 
 **Required Environment Variables (Dashboard Service):**
@@ -818,28 +800,6 @@ railway domain     # Generate public URL
 | `CALENDLY_API_KEY` | Calendly integration |
 | `INSTANTLY_API_KEY` | Email outreach |
 
-Shared variables are set via the dashboard's Environment page (which calls the Railway API internally) or via the `/api/shared-variables/sync` endpoint. New services automatically inherit all shared variables.
-
-### Deploy Workflows
-
-All workflows are deployed via a single unified script:
-
-```bash
-# Cron workflow (runs on schedule)
-python3 execution/deploy_to_railway.py --directive x_keyword_youtube_content --type cron --schedule "0 */3 * * *" --auto
-
-# Webhook workflow (triggered by external events)
-python3 execution/deploy_to_railway.py --directive calendly_meeting_prep --type webhook --slug calendly --slack-notify --auto
-
-# Web service (always-on)
-python3 execution/deploy_to_railway.py --directive ai_news_digest --type web --auto
-
-# List deployable directives
-python3 execution/deploy_to_railway.py --list
-```
-
-Every workflow deploys as a standalone Railway service. API keys are synced as project-level shared variables (not duplicated per service). The deploy script handles scaffolding, deployment, env var sync, cron configuration, webhook registration, and dashboard config updates.
-
 **Generate password hash:**
 ```bash
 python3 << 'PYHASH'
@@ -849,21 +809,24 @@ print(hashlib.sha256(password.encode()).hexdigest())
 PYHASH
 ```
 
+**Database Initialization:**
+SQLite database is automatically created on first run at `railway_apps/aiaa_dashboard/aiaa.db`. No manual setup required.
+
 ---
 
 ## Context System
 
 ### Your Agency (`context/` folder)
-- `agency.md` - Your agency name, positioning, mission
-- `brand_voice.md` - Your tone and style guidelines
-- `services.md` - What you offer
-- `owner.md` - Owner profile and background
+- `agency.md` — Your agency name, positioning, mission
+- `brand_voice.md` — Your tone and style guidelines
+- `services.md` — What you offer
+- `owner.md` — Owner profile and background
 
 ### Your Clients (`clients/{name}/` folders)
-- `profile.md` - Client business info, goals, audience
-- `rules.md` - Content rules and compliance requirements
-- `preferences.md` - Their style preferences
-- `history.md` - Past work and outcomes
+- `profile.md` — Client business info, goals, audience
+- `rules.md` — Content rules and compliance requirements
+- `preferences.md` — Their style preferences
+- `history.md` — Past work and outcomes
 
 Context is loaded automatically by Claude before generating any content. Hooks enforce that this loading happens.
 
@@ -886,13 +849,13 @@ Context is loaded automatically by Claude before generating any content. Hooks e
 
 | Content Type | Target Length |
 |--------------|---------------|
-| VSL Script | 2,500-3,000 words (16-20 min video) |
-| Sales Page | 1,500-3,000 words |
-| Blog Post | 1,500-2,500 words |
-| Email | 300-500 words each |
+| VSL Script | 2,500–3,000 words (16–20 min video) |
+| Sales Page | 1,500–3,000 words |
+| Blog Post | 1,500–2,500 words |
+| Email | 300–500 words each |
 
 ---
 
 ## License
 
-Private repository - Client Ascension internal use.
+Private repository — Client Ascension internal use.

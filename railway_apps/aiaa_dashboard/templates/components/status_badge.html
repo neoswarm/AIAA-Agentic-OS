@@ -1,0 +1,7 @@
+{# Status Badge Component - Displays health status with colored indicator #}
+{% macro status_badge(status) %}
+<span class="status-badge status-{{ status }}">
+    <span class="status-dot"></span>
+    {{ status | capitalize }}
+</span>
+{% endmacro %}

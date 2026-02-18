@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+
+{% block title %}Execution History — AIAA Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    padding: 0.75rem 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.875rem;
+    min-width: 150px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.date-filter {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.date-input {
+    padding: 0.75rem 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.875rem;
+}
+
+.timeline {
+    position: relative;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+}
+
+.timeline-day {
+    margin-bottom: 2rem;
+}
+
+.day-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    padding-left: 60px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.execution-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    margin-left: 60px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+}
+
+.execution-row::before {
+    content: '';
+    position: absolute;
+    left: -36px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--bg-base);
+    z-index: 1;
+}
+
+.execution-row.success::before {
+    background: var(--success);
+}
+
+.execution-row.error::before {
+    background: var(--error);
+}
+
+.execution-row.running::before {
+    background: var(--accent);
+    animation: pulse 2s infinite;
+}
+
+.execution-row:hover {
+    background: var(--bg-elevated);
+    border-color: var(--accent);
+}
+
+.execution-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.execution-icon.success {
+    background: var(--success-muted);
+    color: var(--success);
+}
+
+.execution-icon.error {
+    background: var(--error-muted);
+    color: var(--error);
+}
+
+.execution-icon.running {
+    background: var(--accent-muted);
+    color: var(--accent);
+}
+
+.execution-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.execution-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.execution-workflow {
+    font-weight: 600;
+    font-size: 0.9375rem;
+}
+
+.execution-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.execution-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.execution-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.execution-row.expanded .execution-details {
+    max-height: 500px;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.execution-output {
+    background: var(--bg-elevated);
+    border-radius: 6px;
+    padding: 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8125rem;
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.execution-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.btn-retry {
+    background: var(--accent-muted);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@media (max-width: 768px) {
+    .timeline::before {
+        left: 16px;
+    }
+    
+    .execution-row {
+        margin-left: 40px;
+    }
+    
+    .execution-row::before {
+        left: -24px;
+    }
+    
+    .day-label {
+        padding-left: 40px;
+    }
+    
+    .filter-bar {
+        flex-direction: column;
+    }
+    
+    .filter-select {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Execution History</h1>
+        <p class="page-subtitle">{{ total_executions }} execution{{ 's' if total_executions != 1 }} in the last 30 days</p>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <select class="filter-select" id="workflow-filter" onchange="filterExecutions()">
+        <option value="all">All Workflows</option>
+        {% for workflow in workflows %}
+        <option value="{{ workflow }}">{{ workflow }}</option>
+        {% endfor %}
+    </select>
+    
+    <select class="filter-select" id="status-filter" onchange="filterExecutions()">
+        <option value="all">All Statuses</option>
+        <option value="success">Success</option>
+        <option value="error">Error</option>
+        <option value="running">Running</option>
+    </select>
+    
+    <div class="date-filter">
+        <span class="text-muted">From:</span>
+        <input type="date" class="date-input" id="date-from" onchange="filterExecutions()">
+        <span class="text-muted">To:</span>
+        <input type="date" class="date-input" id="date-to" onchange="filterExecutions()">
+    </div>
+</div>
+
+{% if executions_by_day and executions_by_day|length > 0 %}
+<div class="timeline">
+    {% for day, executions in executions_by_day.items() %}
+    <div class="timeline-day">
+        <div class="day-label">{{ day }}</div>
+        {% for execution in executions %}
+        <div class="execution-row {{ execution.status }}" 
+             data-execution-id="{{ execution.id }}"
+             data-workflow="{{ execution.workflow }}"
+             data-status="{{ execution.status }}"
+             data-date="{{ execution.date }}"
+             onclick="toggleExecutionDetails(this)">
+            
+            <div class="execution-icon {{ execution.status }}">
+                {% if execution.status == 'success' %}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                {% elif execution.status == 'error' %}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+                {% elif execution.status == 'running' %}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                {% endif %}
+            </div>
+            
+            <div class="execution-content">
+                <div class="execution-header">
+                    <div>
+                        <div class="execution-workflow">{{ execution.workflow }}</div>
+                        <div class="execution-time">{{ execution.time }}</div>
+                    </div>
+                    <span class="badge badge-{{ 'success' if execution.status == 'success' else 'error' if execution.status == 'error' else 'info' }}">
+                        {{ execution.status }}
+                    </span>
+                </div>
+                
+                <div class="execution-meta">
+                    <div class="meta-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                        <span>{{ execution.trigger }}</span>
+                    </div>
+                    {% if execution.duration %}
+                    <div class="meta-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <span>{{ execution.duration }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="execution-details">
+                    {% if execution.output %}
+                    <div class="execution-output">{{ execution.output }}</div>
+                    {% endif %}
+                    
+                    {% if execution.error %}
+                    <div class="execution-output" style="color: var(--error);">
+                        <strong>Error:</strong> {{ execution.error }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="execution-actions">
+                        {% if execution.status == 'error' %}
+                        <button class="btn btn-retry" onclick="retryExecution('{{ execution.id }}'); event.stopPropagation();">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                            </svg>
+                            Retry
+                        </button>
+                        {% endif %}
+                        <button class="btn btn-secondary" onclick="viewLogs('{{ execution.id }}'); event.stopPropagation();">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            View Logs
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+{% from "components/empty_state.html" import empty_state %}
+{{ empty_state('execution', 'No executions yet', 'Execution history will appear here once workflows run.') }}
+{% endif %}
+
+<script>
+function toggleExecutionDetails(row) {
+    row.classList.toggle('expanded');
+}
+
+function filterExecutions() {
+    const workflowFilter = document.getElementById('workflow-filter').value;
+    const statusFilter = document.getElementById('status-filter').value;
+    const dateFrom = document.getElementById('date-from').value;
+    const dateTo = document.getElementById('date-to').value;
+    
+    const rows = document.querySelectorAll('.execution-row');
+    
+    rows.forEach(row => {
+        const workflow = row.getAttribute('data-workflow');
+        const status = row.getAttribute('data-status');
+        const date = row.getAttribute('data-date');
+        
+        const matchesWorkflow = workflowFilter === 'all' || workflow === workflowFilter;
+        const matchesStatus = statusFilter === 'all' || status === statusFilter;
+        const matchesDateFrom = !dateFrom || date >= dateFrom;
+        const matchesDateTo = !dateTo || date <= dateTo;
+        
+        if (matchesWorkflow && matchesStatus && matchesDateFrom && matchesDateTo) {
+            row.style.display = 'flex';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // Hide empty day sections
+    document.querySelectorAll('.timeline-day').forEach(day => {
+        const visibleRows = day.querySelectorAll('.execution-row[style="display: flex;"], .execution-row:not([style*="display"])');
+        if (visibleRows.length === 0) {
+            day.style.display = 'none';
+        } else {
+            day.style.display = 'block';
+        }
+    });
+}
+
+async function retryExecution(executionId) {
+    try {
+        const response = await fetch(`/api/executions/${executionId}/retry`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            alert('Execution retried successfully');
+            window.location.reload();
+        } else {
+            alert('Failed to retry execution');
+        }
+    } catch (error) {
+        console.error('Error retrying execution:', error);
+        alert('Error retrying execution: ' + error.message);
+    }
+}
+
+function viewLogs(executionId) {
+    window.open(`/executions/${executionId}/logs`, '_blank');
+}
+</script>
+{% endblock %}

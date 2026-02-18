@@ -1,6 +1,6 @@
 # AIAA Agentic OS - Interactive Setup Guide
 
-**Version 2.3** | **139 Workflows** | **Complete Agency Operating System**
+**Version 4.1** | **133 Native Skills** | **Skills-First Agency Operating System**
 
 Paste this entire prompt into Claude Code to get a fully interactive setup experience. Claude will clone the system, configure your APIs, set up your agency profile, **deploy your dashboard to Railway automatically**, and walk you through everything step by step.
 
@@ -43,7 +43,7 @@ Claude will automatically check for and install these if missing:
 ## The Prompt (Copy Everything Below)
 
 ```
-I want to set up AIAA Agentic OS v2.3. Please help me through the entire process interactively, asking me ONE question at a time and waiting for my response before moving on.
+I want to set up AIAA Agentic OS v4.1. Please help me through the entire process interactively, asking me ONE question at a time and waiting for my response before moving on.
 
 ## Prerequisites Check (Do This FIRST)
 
@@ -127,7 +127,7 @@ Wait for my response before continuing.
 
 ## Step 1: Clone & Install
 
-Say: "Great! Let me download and install AIAA Agentic OS for you..."
+Say: "Great! Let me download and install AIAA Agentic OS v4.1 for you..."
 
 Then RUN these commands automatically:
 
@@ -161,7 +161,7 @@ Create my .env file with API keys. Ask me for each one individually, and walk me
 
 ### PERPLEXITY_API_KEY (Recommended - Deep research & prospect intel)
 
-**What it does:** Powers all research workflows - company research, market analysis, prospect intelligence, competitor monitoring.
+**What it does:** Powers all research skills - company research, market analysis, prospect intelligence, competitor monitoring.
 
 **How to get it:**
 1. Go to https://perplexity.ai
@@ -177,7 +177,7 @@ Create my .env file with API keys. Ask me for each one individually, and walk me
 
 ### SLACK_WEBHOOK_URL (Recommended - Notifications & alerts)
 
-**What it does:** Sends notifications when workflows complete, meetings are booked, leads are found, etc.
+**What it does:** Sends notifications when skills complete, meetings are booked, leads are found, etc.
 
 **How to get it:**
 1. Go to https://api.slack.com/apps
@@ -252,9 +252,9 @@ This enables automatic document creation, lead exports to Sheets, and file manag
 
 ### Why This Matters
 
-Google integration powers these workflows:
+Google integration powers these skills:
 - **Auto-create Google Docs** from generated content (VSL scripts, sales pages, emails)
-- **Export leads to Sheets** from scraping workflows
+- **Export leads to Sheets** from scraping skills
 - **Meeting prep documents** created automatically from Calendly webhooks
 - **Client deliverables** formatted and shared via Google Drive
 
@@ -265,7 +265,7 @@ Google integration powers these workflows:
 1. Go to https://console.cloud.google.com
 2. Click the project dropdown (top left, next to "Google Cloud")
 3. Click "NEW PROJECT" (top right of popup)
-4. Name it "AIAA Agentic OS" 
+4. Name it "AIAA Agentic OS"
 5. Click "CREATE"
 6. Wait for project creation (takes 10-30 seconds)
 7. Make sure the new project is selected in the dropdown
@@ -329,8 +329,10 @@ For each API:
    ```
    AIAA-Agentic-OS/
    ├── credentials.json    ← Place it here
+   ├── .claude/
+   │   └── skills/         ← 133 native skills
+   ├── context/
    ├── directives/
-   ├── execution/
    └── ...
    ```
 
@@ -342,7 +344,7 @@ Say: "Now let me test the Google integration..."
 
 Then RUN this command:
 
-python3 execution/create_google_doc.py --test
+python3 .claude/skills/google-doc-delivery/create_google_doc.py --test
 
 Tell me: "A browser window should open asking you to sign in to Google. Please:
 1. Select your Google account
@@ -502,7 +504,7 @@ Then RUN (using the domain from Step 6e):
 
 curl -s "https://[THE_GENERATED_DOMAIN]/health"
 
-Check if it returns: {"status": "ok", "version": "2.3.0", "workflows": 139}
+Check if it returns: {"status": "ok", "version": "4.1.0", "skills": 133}
 
 If successful, tell me "Dashboard is live!" If it fails, wait 30 seconds and try again (deployment may still be starting).
 
@@ -513,55 +515,90 @@ Once everything is deployed, give me:
 - Password (the one I chose)
 - Remind me to bookmark it!
 
-Tell me: "Your AIAA Dashboard is now live! You can monitor all 139 workflows, manage environment variables, and track webhook events."
+Tell me: "Your AIAA Dashboard is now live! You can monitor all 133 native skills across 12 categories, manage environment variables, and track webhook events."
 
 ## Step 7: Test the System
 
-Say: "Let's test the system with a quick workflow!"
+Say: "Let's test the system with a quick skill!"
 
 Ask me: "What type of agency/business are you? (marketing/content/design/other)"
 
 Based on my answer, RUN one of these test commands:
-- If marketing: `python3 execution/write_cold_emails.py --sender "Test" --company "TestCo" --offer "Marketing services" --target "Small businesses"`
-- If content: `python3 execution/generate_blog_post.py --topic "Getting started with AI" --length 500`
+- If marketing: `python3 .claude/skills/cold-email-campaign/write_cold_emails.py --sender "Test" --company "TestCo" --offer "Marketing services" --target "Small businesses"`
+- If content: `python3 .claude/skills/blog-post/generate_blog_post.py --topic "Getting started with AI" --length 500`
 - If design: Ask for a sample project to research
-- If other: `python3 execution/research_company_offer.py --company "Apple" --website "https://apple.com"`
+- If other: `python3 .claude/skills/company-research/research_company_offer.py --company "Apple" --website "https://apple.com"`
 
 Show me the output file location and tell me if it was successful.
 
 ## Step 8: Show What's Available
 
-Give me a quick tour of the 139 workflows:
+Give me a quick tour of the 133 native skills across 12 categories:
 
-**Content Creation (25+ workflows):**
-- Blog posts, LinkedIn posts, Twitter threads
-- YouTube scripts, Instagram Reels
-- Email newsletters, Content calendars
+**Content & Copy (18 skills):**
+- VSL funnels, VSL scripts, blog posts, sales pages
+- YouTube scripts, Instagram Reels, Twitter threads
+- Carousel posts, newsletters, landing pages, case studies
+- Podcast repurposing, RSS content, content translation
 
-**Sales & Funnels (30+ workflows):**
-- VSL scripts, Sales pages, Landing pages
-- Cold email sequences, Follow-up automation
-- Webinar funnels, Lead magnets
+**Email & Outreach (14 skills):**
+- Cold email campaigns, AI personalization, LinkedIn-sourced emails
+- Mass cold email at scale, email sequences, follow-up automation
+- E-commerce emails, email calendars, reply classification
+- Auto-reply, validation, deliverability, LinkedIn outreach & content
 
-**Research & Intelligence (20+ workflows):**
-- Company research, Competitor monitoring
-- Prospect research, Market analysis
-- Niche validation, Pricing strategy
+**Research & Analysis (12 skills):**
+- Company research, prospect research, market research
+- Niche research, competitor monitoring, SEO audits
+- A/B test analysis, landing page CRO, niche outlier finder
+- Win/loss analysis, AI news digests, YouTube knowledge mining
 
-**Lead Generation (15+ workflows):**
-- Google Maps scraping, LinkedIn scraping
-- Email enrichment, Lead scoring
-- CRM automation, Prospecting pipelines
+**Advertising (7 skills):**
+- Meta ads campaigns, Google Ads campaigns, ad creative
+- Reddit ad scripts, static ads, video ad scripts, FB Ad Library
 
-**Paid Advertising (15+ workflows):**
-- Meta ad campaigns, Google Ads
-- Ad creative generation, FB Ad Library analysis
-- Video ad scripts, Static ad generation
+**Lead Generation & Scraping (16 skills):**
+- Lead scraping, lead scoring, lead list building
+- Google Maps leads, SERP scraping, Crunchbase leads
+- LinkedIn lead/group scraping, job board leads
+- Yelp scraping, website scraping, deduplication, notifications
 
-**Client Management (20+ workflows):**
-- Onboarding automation, QBR generation
-- Churn risk alerts, Health scores
-- Invoice generation, Testimonial requests
+**Sales & Client Management (16 skills):**
+- Proposals, sales call summaries, objection handling
+- Client onboarding (+ Stripe), client reports, feedback, health scores
+- QBR generation, monthly reports, invoices, pricing strategy
+- Demo scheduling, meeting prep, meeting alerts, sales dashboards
+
+**Campaign & Funnel (7 skills):**
+- Campaign reports, campaign launching, full campaign orchestration
+- Funnel strategy, webinar funnels, webinar follow-up, content calendars
+
+**Video & Media (9 skills):**
+- Video transcription, smart editing, shorts extraction
+- Jump cut editing, 3D pan transitions, thumbnail generation
+- Thumbnail recreation, AI image generation, product photoshoots
+
+**Automation & Ops (14 skills):**
+- FAQ chatbot, ticket response, ticket triage, WhatsApp bot
+- Social scheduling, CRM automation, task assignment
+- Milestone tracking, n8n conversion, UTM generation
+- Review collection, testimonial requests, churn alerts, contract renewal
+
+**Deployment & Infrastructure (5 skills):**
+- Google Doc delivery, Modal deploy, Railway deploy
+- Dashboard deploy, agency dashboard management
+
+**Platform-Specific (9 skills):**
+- Upwork scraper, HubSpot enrichment, GoHighLevel prospecting
+- Dream 100 Instagram, LinkedIn profile tracker
+- X/YouTube content, YouTube channel finder, YouTube-to-campaign
+- Zoom content repurposing
+
+**Strategy & Planning (6 skills):**
+- Automation builder, hiring system, payment reminders
+- Funding tracker, brand monitor, Slack notifications
+
+Each skill is self-contained in `.claude/skills/{name}/` with its own SKILL.md instructions and Python script.
 
 ## Important Instructions for Claude
 
@@ -577,6 +614,7 @@ Give me a quick tour of the 139 workflows:
 - Generate hashes, secrets, and execute all commands for me
 - Only ask me for input when you absolutely need it (username, password, API keys, confirming interactive prompts)
 - Save any important values (URLs, hashes, passwords) so you can reuse them later in the setup
+- After setup is complete, read AGENTS.md to understand your role as a skills-first orchestrator with the full 8-phase execution flow
 
 ## CRITICAL: Publishing Workflows After Setup
 
@@ -599,21 +637,21 @@ Every workflow deployment MUST include setting all environment variables from `.
 railway variables set OPENROUTER_API_KEY="<value>"
 railway variables set SLACK_WEBHOOK_URL="<value>"
 railway variables set PERPLEXITY_API_KEY="<value>"
-# Check directive for required keys
+# Check skill's SKILL.md for required keys
 ```
 
-### 3. Update Dashboard Active Workflows Section
-After deploying a scheduled workflow, ALWAYS update `railway_apps/aiaa_dashboard/app.py`:
+### 3. Update Dashboard Active Skills Section
+After deploying a scheduled skill, ALWAYS update `railway_apps/aiaa_dashboard/app.py`:
 - Find the `workflow_page()` function
-- Add the new workflow to the `active_workflows` list
+- Add the new skill to the `active_workflows` list
 - Redeploy the dashboard with `railway up`
 
 ### Publishing Checklist (Complete ALL Steps Every Time)
 - [ ] Deploy to SAME Railway project as dashboard
 - [ ] Set ALL required environment variables
-- [ ] Add workflow to dashboard's Active Workflows UI
+- [ ] Add skill to dashboard's Active Workflows UI
 - [ ] Redeploy dashboard
-- [ ] Verify workflow appears in dashboard
+- [ ] Verify skill appears in dashboard
 
 Let's start! Begin with the Prerequisites Check.
 ```
@@ -636,24 +674,41 @@ When you paste this prompt, Claude Code becomes your personal setup assistant:
    - Generates public domain
    - Verifies deployment
    - Provides login credentials
-7. **Tests the system** - Verifies everything works
-8. **Shows capabilities** - Tour of all 139 workflows
+7. **Tests the system** - Runs a skill to verify everything works
+8. **Shows capabilities** - Tour of all 133 native skills across 12 categories
 
 **Time to complete:** 15-30 minutes depending on options chosen
 
 ---
 
-## Dashboard Features (v2.3)
+## System Overview (v4.1)
+
+| Component | Count | Location |
+|-----------|-------|----------|
+| **Native Skills** | 133 | `.claude/skills/` (each with SKILL.md + script) |
+| Subagents | 5 | `.claude/agents/` |
+| Rules | 9 | `.claude/rules/` |
+| Active Hooks | 35 | `.claude/hooks/` |
+| Archived Hooks | 93 | `.claude/hooks/_archived/` |
+| Directives (reference) | 150+ | `directives/` |
+| Skill Bibles | 286 | `skills/SKILL_BIBLE_*.md` |
+| Agency Context | 4 files | `context/` |
+| Dashboard | Railway | `railway_apps/aiaa_dashboard/` |
+
+---
+
+## Dashboard Features (v4.1)
 
 Once deployed, your dashboard includes:
 
 | Feature | Description |
 |---------|-------------|
-| **139 Workflows** | Full documentation with prerequisites, how-to-run, and process steps |
+| **133 Native Skills** | Full documentation across 12 categories with prerequisites, how-to-run, and process steps |
+| **Skills-First Architecture** | Skills are primary, directives are reference — each skill is self-contained |
 | **Light/Dark Mode** | Toggle with localStorage persistence |
 | **Environment Variables** | View and set API keys from the UI |
 | **Webhook Monitoring** | Track incoming webhooks and events |
-| **Real-time Logs** | See all workflow executions |
+| **Real-time Logs** | See all skill executions |
 | **Mobile Responsive** | Works on phones and tablets |
 | **Password Protected** | Secure SHA-256 hashed login |
 
@@ -743,5 +798,5 @@ railway logs
 ## Support
 
 - **GitHub Issues:** https://github.com/stopmoclay/AIAA-Agentic-OS/issues
-- **Documentation:** See `CLAUDE.md` for full system documentation
-- **Workflows:** Browse all 139 in your deployed dashboard
+- **Documentation:** See `CLAUDE.md` and `AGENTS.md` for full system documentation
+- **Skills:** Browse all 133 native skills with `ls .claude/skills/`
