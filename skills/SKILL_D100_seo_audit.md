@@ -2,7 +2,7 @@
 
 ## METADATA
 - **Skill Name**: Dream 100 SEO Audit
-- **Version**: 1.0
+- **Version**: 2.0
 - **Category**: SEO Analysis
 - **API Requirements**: OpenAI GPT-4, OpenRouter (Gemini Flash 2.0)
 - **Parent Skill**: SKILL_D100_orchestrator
@@ -137,25 +137,11 @@ open "https://www.semrush.com/analytics/overview/?searchType=domain&q={website_u
 
 ---
 
-### STEP 2: PAUSE WORKFLOW
+### STEP 2: OPTIONAL - ANALYZE BRIGHTLOCAL AUDIT (v2.0 - NO PAUSE)
 
-**Save workflow state:**
-```json
-{
-  "status": "paused",
-  "awaiting": ["brightlocal_pdf", "semrush_csv"],
-  "keywords_generated": true,
-  "timestamp": "ISO-8601"
-}
-```
+**v2.0 Change:** This step is now OPTIONAL. If BrightLocal PDF is provided in the initial input, analyze it. If not provided, SKIP and continue. DO NOT pause the workflow.
 
-**Return control to orchestrator** with status: `PAUSED_FOR_SEO_DATA`
-
----
-
-### STEP 3: RESUME - ANALYZE BRIGHTLOCAL AUDIT
-
-**Trigger:** User provides `brightlocal_pdf_path`
+**Trigger:** `brightlocal_pdf_path` provided in initial input (or skip)
 
 **Validate PDF:**
 - File exists and is readable
@@ -281,9 +267,11 @@ curl -X POST "https://api.openai.com/v1/chat/completions" \
 
 ---
 
-### STEP 4: ANALYZE SEMRUSH DATA
+### STEP 3: OPTIONAL - ANALYZE SEMRUSH DATA (v2.0 - NO PAUSE)
 
-**Trigger:** User provides `semrush_csv_path`
+**v2.0 Change:** This step is now OPTIONAL. If SEMrush CSV is provided in the initial input, analyze it. If not provided, SKIP and continue. DO NOT pause the workflow.
+
+**Trigger:** `semrush_csv_path` provided in initial input (or skip)
 
 **Validate CSV:**
 - File exists and is readable

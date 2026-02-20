@@ -9,6 +9,7 @@
     "@anthropic-ai/sdk": "^0.32.1",
     "@mendable/firecrawl": "^4.12.1",
     "googleapis": "^144.0.0",
+    "puppeteer": "^24.37.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {

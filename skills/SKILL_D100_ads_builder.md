@@ -2,7 +2,7 @@
 
 ## METADATA
 - **Skill Name**: Dream 100 Google Ads Campaign Builder
-- **Version**: 1.0
+- **Version**: 2.0
 - **Category**: Paid Media Asset Generation
 - **API Requirements**: OpenRouter (Gemini 2.0 Flash Thinking)
 - **Parent Skill**: SKILL_D100_orchestrator
@@ -97,26 +97,25 @@ if (adsContext.membership_available) {
 }
 ```
 
-**If annual value unknown, prompt:**
+**Auto-compute annual value (v2.0 - NO user prompt):**
+```javascript
+// Parse pricing from structured_json.pricing.prices.value
+// Look for monthly membership amounts → multiply × 12
+// Look for per-session prices → estimate 2x/month × 12
+// Fallback: $5000 default
+
+if (adsContext.membership_details) {
+  // Extract highest monthly amount from membership details
+  const monthlyMatch = adsContext.membership_details.match(/\$(\d+)\/month/);
+  if (monthlyMatch) annualValue = parseInt(monthlyMatch[1]) * 12;
+}
+if (!annualValue) annualValue = 5000; // Safe default
 ```
-═══════════════════════════════════════════════════════════
-GOOGLE ADS CONFIGURATION
-═══════════════════════════════════════════════════════════
 
-To optimize ad copy for your highest-value offer, please provide:
-
-1. What is your primary offer? (detected: {primaryOffer})
-   [Confirm or enter different offer]
-
-2. Estimated annual customer value (LTV):
-   [Enter dollar amount, e.g., 5000]
-
-3. Geographic targeting:
-   Primary: {primary_city}
-   Additional: {adjacent_cities}
-   [Confirm or modify]
-
-═══════════════════════════════════════════════════════════
+**Auto-detect geographic targeting:**
+```javascript
+const primary_city = structured_json.seo_intel.location_modifiers.value[0];
+const adjacent_cities = structured_json.seo_intel.location_modifiers.value.slice(1, 4);
 ```
 
 ---

@@ -1,0 +1,23 @@
+{
+  "extracted_from": "https://practicalhealingcenter.com (live CSS via Puppeteer)",
+  "extraction_method": "window.getComputedStyle all DOM elements",
+  "primary": "#567575",
+  "primary_rgb": "rgb(86, 117, 117)",
+  "primary_usage": "Nav bar, section backgrounds (261 instances - dominant brand teal/sage)",
+  "primary_dark": "#3A5354",
+  "primary_dark_rgb": "rgb(58, 83, 84)",
+  "primary_dark_usage": "CTA text, link text, dark brand sections (105 instances)",
+  "primary_medium": "#5C7B7B",
+  "primary_medium_rgb": "rgb(92, 123, 123)",
+  "primary_medium_usage": "Link colors (110 instances)",
+  "primary_light": "#DBE4E8",
+  "primary_light_rgb": "rgb(219, 228, 232)",
+  "primary_light_usage": "Light section backgrounds, button backgrounds",
+  "accent_teal": "#779C9C",
+  "accent_teal_rgb": "rgb(119, 156, 156)",
+  "white": "#FFFFFF",
+  "text_dark": "#424242",
+  "text_dark_rgb": "rgb(66, 66, 66)",
+  "background": "#FFFFFF",
+  "notes": "Muted sage-teal palette. Primary #567575, dark accent #3A5354, light bg #DBE4E8. Earthy, natural healthcare aesthetic."
+}

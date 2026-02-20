@@ -1,0 +1,2573 @@
+{
+  "run_metadata": {
+    "run_id": "amh_20260217_110000",
+    "website_url": "https://alignedmodernhealth.com/",
+    "started_at": "2026-02-17T11:00:00Z",
+    "finished_at": "2026-02-17T11:00:00Z",
+    "crawl_depth": 2,
+    "pages_visited": [
+      "https://alignedmodernhealth.com/",
+      "https://alignedmodernhealth.com/services/",
+      "https://alignedmodernhealth.com/services/functional-medicine/",
+      "https://alignedmodernhealth.com/services/hormone-health/",
+      "https://alignedmodernhealth.com/services/chiropractic-physical-medicine/",
+      "https://alignedmodernhealth.com/services/acupuncture/",
+      "https://alignedmodernhealth.com/services/massage-therapy/",
+      "https://alignedmodernhealth.com/people/",
+      "https://alignedmodernhealth.com/locations/",
+      "https://alignedmodernhealth.com/insurance-payments/",
+      "https://alignedmodernhealth.com/patient-resources/",
+      "https://alignedmodernhealth.com/about/",
+      "https://alignedmodernhealth.com/iv-vitamin-therapy/",
+      "https://alignedmodernhealth.com/blog/chiropractic-physical-medicine/"
+    ]
+  },
+  "practice": {
+    "legal_name": {
+      "value": "Aligned Modern Health",
+      "verbatim": "Aligned Modern Health",
+      "sources": ["https://alignedmodernhealth.com/"],
+      "confidence": "high"
+    },
+    "brand_name": {
+      "value": "Aligned Modern Health",
+      "verbatim": "Aligned Modern Health",
+      "sources": ["https://alignedmodernhealth.com/"],
+      "confidence": "high"
+    },
+    "tagline": {
+      "value": "Healthcare Designed For You\u2122",
+      "verbatim": "Healthcare Designed For You\u2122",
+      "sources": ["https://alignedmodernhealth.com/"],
+      "confidence": "high"
+    },
+    "specialty": {
+      "value": "Integrative and Functional Medicine (Functional Medicine, Hormone Health, Chiropractic Physical Medicine, Acupuncture, Massage Therapy, IV Vitamin Therapy)",
+      "verbatim": "Explore expert care in Functional Medicine, Hormone Health, Chiropractic, Acupuncture, and Massage across Chicago and via Telemedicine.",
+      "sources": ["https://alignedmodernhealth.com/services/"],
+      "confidence": "high"
+    },
+    "practice_type": {
+      "value": "Multi-location integrative healthcare practice",
+      "verbatim": "collaborative team of over 100 expert doctors, nurse practitioners, and clinicians",
+      "sources": ["https://alignedmodernhealth.com/", "https://alignedmodernhealth.com/locations/"],
+      "confidence": "high"
+    },
+    "ownership": {
+      "value": "Private (Co-Founded by Brian Carey, Co-Founder and Board Member)",
+      "verbatim": null,
+      "sources": [],
+      "confidence": "medium"
+    }
+  },
+  "locations": [
+    {
+      "type": "primary",
+      "address": {
+        "value": "Andersonville, Chicago, IL",
+        "verbatim": "Andersonville",
+        "sources": ["https://alignedmodernhealth.com/locations/andersonville"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": "Our care team can help 8AM to 8PM CST",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Lincoln Park, Chicago, IL",
+        "verbatim": "Lincoln Park",
+        "sources": ["https://alignedmodernhealth.com/locations/lincoln-park-at-diversey"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": "Our care team can help 8AM to 8PM CST",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Lincoln Square, Chicago, IL",
+        "verbatim": "Lincoln Square",
+        "sources": ["https://alignedmodernhealth.com/locations/lincoln-square"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Logan Square, Chicago, IL",
+        "verbatim": "Logan Square",
+        "sources": ["https://alignedmodernhealth.com/locations/logan-square"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "River North, Chicago, IL",
+        "verbatim": "River North",
+        "sources": ["https://alignedmodernhealth.com/locations/river-north"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "South Loop, Chicago, IL",
+        "verbatim": "South Loop",
+        "sources": ["https://alignedmodernhealth.com/locations/south-loop"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Streeterville, Chicago, IL",
+        "verbatim": "Streeterville",
+        "sources": ["https://alignedmodernhealth.com/locations/streeterville"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Wicker Park, Chicago, IL",
+        "verbatim": "Wicker Park",
+        "sources": ["https://alignedmodernhealth.com/locations/wicker-park"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Deerfield, IL",
+        "verbatim": "Deerfield",
+        "sources": ["https://alignedmodernhealth.com/locations/deerfield"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Elmhurst, IL",
+        "verbatim": "Elmhurst",
+        "sources": ["https://alignedmodernhealth.com/locations/elmhurst"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Evanston, IL",
+        "verbatim": "Evanston",
+        "sources": ["https://alignedmodernhealth.com/locations/evanston"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Kildeer, IL",
+        "verbatim": "Kildeer",
+        "sources": ["https://alignedmodernhealth.com/locations/kildeer"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Mt. Prospect, IL",
+        "verbatim": "Mt. Prospect",
+        "sources": ["https://alignedmodernhealth.com/locations/mt-prospect"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Orland Park, IL",
+        "verbatim": "Orland Park",
+        "sources": ["https://alignedmodernhealth.com/locations/orland-park"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Park Ridge, IL",
+        "verbatim": "Park Ridge",
+        "sources": ["https://alignedmodernhealth.com/locations/park-ridge"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Vernon Hills, IL",
+        "verbatim": "Vernon Hills",
+        "sources": ["https://alignedmodernhealth.com/locations/vernon-hills"],
+        "confidence": "medium"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Nashville, TN (mentioned on homepage)",
+        "verbatim": "Nashville",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "low"
+      },
+      "phone": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Miami, FL (mentioned on homepage)",
+        "verbatim": "Miami",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "low"
+      },
+      "phone": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "type": "additional",
+      "address": {
+        "value": "Virtual Care - available in 21 states: Arizona, Colorado, Florida, Georgia, Idaho, Illinois, Indiana, Iowa, Kansas, Maine, Minnesota, Missouri, Montana, Nebraska, North Carolina, Ohio, Pennsylvania, Tennessee, Utah, Virginia, Wisconsin",
+        "verbatim": "Arizona, Colorado, Florida, Georgia, Idaho, Illinois, Indiana, Iowa, Kansas, Maine, Minnesota, Missouri, Montana, Nebraska, North Carolina, Ohio, Pennsylvania, Tennessee, Utah, Virginia, Wisconsin",
+        "sources": ["https://alignedmodernhealth.com/locations/"],
+        "confidence": "high"
+      },
+      "phone": {
+        "value": "773-598-4387",
+        "verbatim": "773-598-4387",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": "8AM to 8PM CST, 7 days a week",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      },
+      "accessibility": {
+        "value": "Telehealth via secure video visits; mail-in diagnostic kits for remote patients",
+        "verbatim": "Through our partnerships with national laboratories and the use of mail-in diagnostic kits, functional medicine testing can be completed from anywhere.",
+        "sources": ["https://alignedmodernhealth.com/locations/", "https://alignedmodernhealth.com/about/"],
+        "confidence": "high"
+      }
+    }
+  ],
+  "contact": {
+    "contact_form_url": {
+      "value": "https://alignedmodernhealth.com/ (embedded form on every page)",
+      "sources": ["https://alignedmodernhealth.com/"],
+      "confidence": "high"
+    },
+    "booking_url": {
+      "value": "https://alignedmodernhealth.com/services/#schedule",
+      "sources": ["https://alignedmodernhealth.com/", "https://alignedmodernhealth.com/services/"],
+      "confidence": "high"
+    },
+    "patient_portal_url": {
+      "value": "Referenced in sitewide navigation but URL not captured",
+      "sources": ["https://alignedmodernhealth.com/"],
+      "confidence": "medium"
+    }
+  },
+  "providers": [
+    {
+      "name": {
+        "value": "Dr. Delilah Renegar, DC",
+        "verbatim": "Dr. Delilah Renegar, DC",
+        "sources": ["https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+        "confidence": "high"
+      },
+      "role": {
+        "value": "Director of Functional Medicine and Clinical Nutrition",
+        "verbatim": "Director of Functional Medicine and Clinical Nutrition Dr. Delilah Renegar, DC",
+        "sources": ["https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+        "confidence": "high"
+      },
+      "credentials": {
+        "value": "DC (Doctor of Chiropractic)",
+        "verbatim": "DC",
+        "sources": ["https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+        "confidence": "high"
+      },
+      "specialty": {
+        "value": "Functional Medicine, Clinical Nutrition, IV Vitamin Therapy",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+        "confidence": "medium"
+      },
+      "conditions_treated": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "services_performed": {
+        "value": ["Functional Medicine", "Clinical Nutrition", "IV Vitamin Therapy"],
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+        "confidence": "medium"
+      },
+      "education": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "certifications": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "languages": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "years_experience": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "bio_summary": {
+        "value": "Director of Functional Medicine and Clinical Nutrition at Aligned Modern Health. Leads IV Vitamin Therapy webinar programming and functional medicine initiatives.",
+        "sources": ["https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+        "confidence": "medium"
+      },
+      "headshot_url": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "name": {
+        "value": "Dr. Anna Butler, DC",
+        "verbatim": "Dr. Anna Butler, DC",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "role": {
+        "value": "Chiropractic Physician",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "credentials": {
+        "value": "DC (Doctor of Chiropractic)",
+        "verbatim": "DC",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "specialty": {
+        "value": "Chiropractic Physical Medicine",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "conditions_treated": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "services_performed": {
+        "value": ["Chiropractic Physical Medicine"],
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "education": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "certifications": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "languages": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "years_experience": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "bio_summary": {
+        "value": "Chiropractic physician at Aligned Modern Health; contributor to chiropractic physical medicine blog content.",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "low"
+      },
+      "headshot_url": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "name": {
+        "value": "Dr. Ashley Lederman, DC, MS",
+        "verbatim": "Dr. Ashley Lederman, DC, MS",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "role": {
+        "value": "Chiropractic Physician",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "credentials": {
+        "value": "DC (Doctor of Chiropractic), MS (Master of Science)",
+        "verbatim": "DC, MS",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "specialty": {
+        "value": "Chiropractic Physical Medicine",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "conditions_treated": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "services_performed": {
+        "value": ["Chiropractic Physical Medicine"],
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "education": {
+        "value": "MS degree",
+        "verbatim": "MS",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "certifications": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "languages": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "years_experience": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "bio_summary": {
+        "value": "Chiropractic physician with a Master of Science degree at Aligned Modern Health; contributor to chiropractic blog content.",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "low"
+      },
+      "headshot_url": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "name": {
+        "value": "Dr. Shannen Boyd, DC",
+        "verbatim": "Dr. Shannen Boyd, DC",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "role": {
+        "value": "Chiropractic Physician",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "credentials": {
+        "value": "DC (Doctor of Chiropractic)",
+        "verbatim": "DC",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "specialty": {
+        "value": "Chiropractic Physical Medicine",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "conditions_treated": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "services_performed": {
+        "value": ["Chiropractic Physical Medicine"],
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "education": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "certifications": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "languages": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "years_experience": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "bio_summary": {
+        "value": "Chiropractic physician at Aligned Modern Health; featured in stretch routine video content.",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "low"
+      },
+      "headshot_url": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "name": {
+        "value": "Dr. Nadrine Omar, DC",
+        "verbatim": "Dr. Nadrine Omar, DC",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "role": {
+        "value": "Chiropractic Physician",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "credentials": {
+        "value": "DC (Doctor of Chiropractic)",
+        "verbatim": "DC",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "specialty": {
+        "value": "Chiropractic Physical Medicine",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "conditions_treated": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "services_performed": {
+        "value": ["Chiropractic Physical Medicine"],
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "education": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "certifications": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "languages": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "years_experience": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "bio_summary": {
+        "value": "Chiropractic physician at Aligned Modern Health; featured in workout video content.",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "low"
+      },
+      "headshot_url": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "name": {
+        "value": "Dr. Adam Altman, DC",
+        "verbatim": "Dr. Adam Altman, DC",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "role": {
+        "value": "Chiropractic Physician",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "credentials": {
+        "value": "DC (Doctor of Chiropractic)",
+        "verbatim": "DC",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "specialty": {
+        "value": "Chiropractic Physical Medicine",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "conditions_treated": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "services_performed": {
+        "value": ["Chiropractic Physical Medicine"],
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "medium"
+      },
+      "education": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "certifications": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "languages": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "years_experience": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "bio_summary": {
+        "value": "Chiropractic physician at Aligned Modern Health; mentioned in marathon tips blog content.",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "low"
+      },
+      "headshot_url": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    {
+      "name": {
+        "value": "Brian Carey",
+        "verbatim": "Brian Carey",
+        "sources": [],
+        "confidence": "medium"
+      },
+      "role": {
+        "value": "CEO, Co-Founder, Board Member",
+        "verbatim": "Co-Founder, and Board Member",
+        "sources": [],
+        "confidence": "medium"
+      },
+      "credentials": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "specialty": {
+        "value": "Executive Leadership",
+        "verbatim": null,
+        "sources": [],
+        "confidence": "medium"
+      },
+      "conditions_treated": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "services_performed": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "education": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "certifications": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "languages": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "years_experience": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "bio_summary": {
+        "value": "CEO, Co-Founder, and Board Member of Aligned Modern Health.",
+        "sources": [],
+        "confidence": "medium"
+      },
+      "headshot_url": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    }
+  ],
+  "services": [
+    {
+      "name": {
+        "value": "Functional Medicine",
+        "verbatim": "Functional Medicine",
+        "sources": ["https://alignedmodernhealth.com/services/", "https://alignedmodernhealth.com/services/functional-medicine/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Integrative Medicine",
+        "sources": ["https://alignedmodernhealth.com/services/"],
+        "confidence": "high"
+      },
+      "target_audience": {
+        "value": "Patients seeking root cause resolution for chronic symptoms, gut health, hormone imbalances, and metabolic dysfunction",
+        "verbatim": "Patients come to us when they are looking for a more complete picture of their health.",
+        "sources": ["https://alignedmodernhealth.com/services/", "https://alignedmodernhealth.com/people/"],
+        "confidence": "high"
+      },
+      "deliverables": {
+        "value": "Root cause evaluation, comprehensive testing (blood, hormone, stool, food sensitivity, nutrient, environmental), personalized treatment plans, virtual consultations in 21 states, mail-in diagnostic kits",
+        "sources": ["https://alignedmodernhealth.com/services/", "https://alignedmodernhealth.com/about/", "https://alignedmodernhealth.com/locations/"],
+        "confidence": "high"
+      },
+      "cta": {
+        "value": "Book Now",
+        "verbatim": "Book Now",
+        "sources": ["https://alignedmodernhealth.com/services/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Hormone Health / Hormone Replacement Therapy (HRT)",
+        "verbatim": "Hormone Health",
+        "sources": ["https://alignedmodernhealth.com/services/hormone-health/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Hormone Therapy",
+        "sources": ["https://alignedmodernhealth.com/services/hormone-health/"],
+        "confidence": "high"
+      },
+      "target_audience": {
+        "value": "Adults with hormonal imbalances, menopause symptoms, thyroid issues, metabolic dysfunction",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/hormone-health/"],
+        "confidence": "medium"
+      },
+      "deliverables": {
+        "value": "Hormone analysis (blood, saliva, or urine), personalized HRT plans, team-based care by MDs, DCs, and NPs, virtual appointments available in 21 states",
+        "sources": ["https://alignedmodernhealth.com/services/hormone-health/", "https://alignedmodernhealth.com/about/"],
+        "confidence": "high"
+      },
+      "cta": {
+        "value": "Book Now",
+        "verbatim": "Book Now",
+        "sources": ["https://alignedmodernhealth.com/services/hormone-health/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Chiropractic Physical Medicine",
+        "verbatim": "Chiropractic Physical Medicine",
+        "sources": ["https://alignedmodernhealth.com/services/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Physical Medicine / Musculoskeletal",
+        "sources": ["https://alignedmodernhealth.com/services/"],
+        "confidence": "high"
+      },
+      "target_audience": {
+        "value": "Athletes, active individuals, desk workers, prenatal patients, people with chronic pain seeking non-invasive, drug-free treatment",
+        "verbatim": "Our Physical Medicine experts specialize in Chicago's best non-invasive, non-surgical and drug-free health care.",
+        "sources": ["https://alignedmodernhealth.com/services/"],
+        "confidence": "high"
+      },
+      "deliverables": {
+        "value": "Chiropractic adjustments, physical rehabilitation, non-invasive and non-surgical pain treatment, posture correction, sports injury recovery",
+        "sources": ["https://alignedmodernhealth.com/services/", "https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "cta": {
+        "value": "Book Now",
+        "verbatim": "Book Now",
+        "sources": ["https://alignedmodernhealth.com/services/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Acupuncture",
+        "verbatim": "Acupuncture",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Traditional Chinese Medicine / Integrative Therapy",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "target_audience": {
+        "value": "Patients with pain, fertility issues, emotional health concerns, digestive disorders, allergies, and chronic conditions seeking evidence-based Traditional Chinese Medicine",
+        "verbatim": "Our team of Chicago acupuncturist blend the best of modern medicine with traditional modalities for evidence-based therapy that treats a wide range of health concerns",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "deliverables": {
+        "value": "Acupuncture needling, Chinese Herbal Medicine, Cupping, Moxibustion, Gua Sha, Infrared Heat Therapy, Electro-stimulation, free 15-minute consultation",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "cta": {
+        "value": "Book Now",
+        "verbatim": "Book Now",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Massage Therapy",
+        "verbatim": "Massage Therapy",
+        "sources": ["https://alignedmodernhealth.com/services/massage-therapy/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Bodywork / Manual Therapy",
+        "sources": ["https://alignedmodernhealth.com/services/massage-therapy/"],
+        "confidence": "high"
+      },
+      "target_audience": {
+        "value": "Patients with chronic pain, muscle tension, sports injuries, prenatal discomfort, stress, and those seeking wellness maintenance",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/services/massage-therapy/"],
+        "confidence": "high"
+      },
+      "deliverables": {
+        "value": "Clinical Massage Therapy, Wellness Massage Therapy, Prenatal Massage; techniques include Swedish, deep tissue, sports, prenatal, cross-fiber friction, trigger point, muscle energy; 30-, 60-, or 90-minute sessions; Massage Wellness Plan ($85/month)",
+        "sources": ["https://alignedmodernhealth.com/services/massage-therapy/"],
+        "confidence": "high"
+      },
+      "cta": {
+        "value": "Book Now",
+        "verbatim": "Book Now",
+        "sources": ["https://alignedmodernhealth.com/services/massage-therapy/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "IV Vitamin Therapy",
+        "verbatim": "IV Vitamin Therapy",
+        "sources": ["https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Nutritional / Infusion Therapy",
+        "sources": ["https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+        "confidence": "high"
+      },
+      "target_audience": {
+        "value": "Athletes, individuals with digestive issues limiting nutrient absorption, patients seeking immune support, hydration, cognitive enhancement, and beauty/anti-aging benefits",
+        "verbatim": "IV Vitamin Therapy for Winter, for Athletes, and for YOU",
+        "sources": ["https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+        "confidence": "high"
+      },
+      "deliverables": {
+        "value": "IV nutrient infusions delivering essential nutrients directly to bloodstream with up to 99% absorption; targets immune system, digestive function, metabolic system, cognitive function, athletic performance, hydration, sleep, stress, beauty",
+        "sources": ["https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+        "confidence": "high"
+      },
+      "cta": {
+        "value": "Book Now",
+        "verbatim": "Book Now",
+        "sources": ["https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Comprehensive Functional Medicine Testing",
+        "verbatim": "Comprehensive Functional Medicine Testing",
+        "sources": ["https://alignedmodernhealth.com/about/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Diagnostic Testing",
+        "sources": ["https://alignedmodernhealth.com/about/"],
+        "confidence": "high"
+      },
+      "target_audience": {
+        "value": "Patients seeking deeper diagnostics beyond standard labs to identify root causes",
+        "verbatim": "We go deeper than standard labs\u2014analyzing gut health, inflammation, nutrient markers, and metabolic function to identify the root cause.",
+        "sources": ["https://alignedmodernhealth.com/", "https://alignedmodernhealth.com/about/"],
+        "confidence": "high"
+      },
+      "deliverables": {
+        "value": "Comprehensive Blood Tests, Comprehensive Hormone Analysis (blood/saliva/urine), Food Sensitivity Testing, Comprehensive Stool Analysis, Nutrient Panels, Environmental Exposure Testing (heavy metals, mold); mail-in kits available nationwide",
+        "sources": ["https://alignedmodernhealth.com/about/"],
+        "confidence": "high"
+      },
+      "cta": {
+        "value": "Book Now",
+        "verbatim": "Book Now",
+        "sources": ["https://alignedmodernhealth.com/about/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Virtual Care (Telehealth)",
+        "verbatim": "Virtual Care",
+        "sources": ["https://alignedmodernhealth.com/locations/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Telehealth",
+        "sources": ["https://alignedmodernhealth.com/locations/"],
+        "confidence": "high"
+      },
+      "target_audience": {
+        "value": "Patients in 21 states seeking Functional Medicine or Hormone Health via telehealth",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/locations/"],
+        "confidence": "high"
+      },
+      "deliverables": {
+        "value": "Secure telehealth video visits for Functional Medicine and Hormone Health; mail-in diagnostic kits for lab testing",
+        "sources": ["https://alignedmodernhealth.com/locations/"],
+        "confidence": "high"
+      },
+      "cta": {
+        "value": "Book Now",
+        "verbatim": "Book Now",
+        "sources": ["https://alignedmodernhealth.com/locations/"],
+        "confidence": "high"
+      }
+    }
+  ],
+  "conditions": [
+    {
+      "name": {
+        "value": "Gut Health & Food Intolerance",
+        "verbatim": "Gut Health & Food Intolerance",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Gastrointestinal / Digestive",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Hormone & Metabolic Health",
+        "verbatim": "Hormone & Metabolic Health",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Endocrine / Metabolic",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Reproductive Health",
+        "verbatim": "Reproductive Health",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Reproductive / Fertility",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Immune & Autoimmune Conditions",
+        "verbatim": "Immune & Autoimmune Conditions",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Immunology / Autoimmune",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Pain, Movement & Recovery",
+        "verbatim": "Pain, Movement & Recovery",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Musculoskeletal / Pain Management",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Full Family Wellness",
+        "verbatim": "Full Family Wellness",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Family Medicine / Wellness",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Whole-Body Wellness & Prevention",
+        "verbatim": "Whole-Body Wellness & Prevention",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Preventive Medicine",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Chronic Conditions & Unresolved Symptoms",
+        "verbatim": "Chronic Conditions & Unresolved Symptoms",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Chronic Disease Management",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Anxiety",
+        "verbatim": "Anxiety",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Emotional Health",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Depression",
+        "verbatim": "Depression",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Emotional Health",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Insomnia",
+        "verbatim": "Insomnia",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Emotional Health / Sleep",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Stress",
+        "verbatim": "Stress",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Emotional Health",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Post-traumatic Stress Disorder",
+        "verbatim": "Post-traumatic Stress Disorder",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Emotional Health",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Constipation",
+        "verbatim": "Constipation",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Gastrointestinal / Digestive",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Irritable Bowel Syndrome",
+        "verbatim": "Irritable Bowel Syndrome",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Gastrointestinal / Digestive",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Gastritis",
+        "verbatim": "Gastritis",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Gastrointestinal / Digestive",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Acid Reflux",
+        "verbatim": "Acid Reflux",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Gastrointestinal / Digestive",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Colds and Flu",
+        "verbatim": "Colds and Flu",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Eyes, Ears, Nose & Throat",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Sinus Problems",
+        "verbatim": "Sinus Problems",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Eyes, Ears, Nose & Throat",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Allergies",
+        "verbatim": "Allergies",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Eyes, Ears, Nose & Throat / Immune",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Asthma",
+        "verbatim": "Asthma",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Respiratory",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Dizziness and Vertigo",
+        "verbatim": "Dizziness and Vertigo",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Neurological",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Joint and Muscle Pain",
+        "verbatim": "Joint and Muscle Pain",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Musculoskeletal / Neurological",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Arthritis",
+        "verbatim": "Arthritis",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/", "https://alignedmodernhealth.com/services/massage-therapy/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Musculoskeletal",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Headaches and Migraines",
+        "verbatim": "Headaches and Migraines",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/", "https://alignedmodernhealth.com/services/massage-therapy/", "https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Neurological / Pain",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Tendonitis",
+        "verbatim": "Tendonitis",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Musculoskeletal",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Carpal Tunnel Syndrome",
+        "verbatim": "Carpal Tunnel Syndrome",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Musculoskeletal / Neurological",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Diabetes",
+        "verbatim": "Diabetes",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Metabolic / Endocrine",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Dermatological Conditions",
+        "verbatim": "Dermatological conditions",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Dermatology",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Weight Control",
+        "verbatim": "Weight control",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Metabolic / Wellness",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "High Blood Pressure",
+        "verbatim": "High blood pressure",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Cardiovascular",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Addiction",
+        "verbatim": "Addiction",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Behavioral Health",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Side Effects of Chemotherapy and Radiation",
+        "verbatim": "Side Effects of Chemotherapy and Radiation",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Oncology Support",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Menopause Related Symptoms",
+        "verbatim": "Menopause related symptoms",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Reproductive / Endocrine",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Low Libido",
+        "verbatim": "Low Libido",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Reproductive / Sexual Health",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Fertility (Male and Female)",
+        "verbatim": "Fertility (male and female)",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Reproductive / Fertility",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "PCOS",
+        "verbatim": "PCOS",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Reproductive / Endocrine",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Endometriosis",
+        "verbatim": "Endometriosis",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Reproductive",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Irregular or Painful Menstruation",
+        "verbatim": "Irregular or Painful Menstruation",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Reproductive",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Urinary Tract Infections",
+        "verbatim": "Urinary Tract Infections",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Genitourinary",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Impotence",
+        "verbatim": "Impotence",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Reproductive / Sexual Health",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Pregnancy-Related Symptoms",
+        "verbatim": "Pregnancy-Related Symptoms",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Prenatal / Reproductive",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Back Pain",
+        "verbatim": "Back Pain",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Musculoskeletal / Pain",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Neck Pain",
+        "verbatim": "Neck Pain",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Musculoskeletal / Pain",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "TMJ",
+        "verbatim": "TMJ",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Musculoskeletal / Pain",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Plantar Fasciitis",
+        "verbatim": "Plantar Fasciitis",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Musculoskeletal / Pain",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Scoliosis",
+        "verbatim": "Scoliosis",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Musculoskeletal / Structural",
+        "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      }
+    },
+    {
+      "name": {
+        "value": "Fibromyalgia",
+        "verbatim": "Fibromyalgia",
+        "sources": ["https://alignedmodernhealth.com/services/massage-therapy/"],
+        "confidence": "high"
+      },
+      "category": {
+        "value": "Chronic Pain / Musculoskeletal",
+        "sources": ["https://alignedmodernhealth.com/services/massage-therapy/"],
+        "confidence": "high"
+      }
+    }
+  ],
+  "ideal_patient": {
+    "who_they_serve": {
+      "value": [
+        "Patients seeking root cause medicine vs. symptom masking",
+        "People with chronic or unresolved symptoms who have not gotten real answers elsewhere",
+        "Active individuals and athletes (running, marathon, CrossFit, golf, swimming, pickleball)",
+        "Expectant and new mothers (prenatal care across chiropractic, acupuncture, massage)",
+        "Full families (pediatric through adult)",
+        "Virtual care patients across 21 states",
+        "People with gastrointestinal and digestive conditions",
+        "Those proactively investing in long-term health and prevention"
+      ],
+      "verbatim": "Whether you're managing symptoms, recovering from pain, or proactively investing in your long-term health",
+      "sources": ["https://alignedmodernhealth.com/", "https://alignedmodernhealth.com/people/", "https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+      "confidence": "high"
+    },
+    "demographics": {
+      "value": "Adults, families (pediatric through adult), athletes, prenatal patients, Chicago metro area and 21 virtual care states nationwide",
+      "verbatim": null,
+      "sources": ["https://alignedmodernhealth.com/", "https://alignedmodernhealth.com/locations/"],
+      "confidence": "medium"
+    },
+    "situations": {
+      "value": [
+        "Years of not getting real answers from conventional medicine",
+        "Chronic unresolved symptoms",
+        "Seeking a more complete picture of health",
+        "Ready for a big change or needing a slower approach",
+        "Managing pain or recovering from injury",
+        "Proactively investing in long-term wellness",
+        "Seeking non-invasive, drug-free treatment options"
+      ],
+      "verbatim": "Many of our patients come to us after years of not getting real answers, never getting the time or attention they needed to explore the root of their symptoms.",
+      "sources": ["https://alignedmodernhealth.com/", "https://alignedmodernhealth.com/people/"],
+      "confidence": "high"
+    },
+    "exclusions": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "referral_requirements": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    }
+  },
+  "clinical_approach": {
+    "differentiators": {
+      "value": [
+        "Clinical Care Team: collaborative team of doctors, clinicians, NPs, and clinical care coordinators",
+        "Comprehensive Testing: deeper than standard labs, analyzing gut health, inflammation, nutrient markers, and metabolic function",
+        "Personalized Treatment: care plans tailored to symptoms, history, lifestyle, and goals",
+        "Whole-Body Wellness: holistic support for nutrition, stress, sleep, and movement",
+        "Time and attention, not rushed care: deeper evaluations, longer appointments",
+        "Expert interpretation, not just information: doctors translate lab insights into clear action",
+        "Continuity: same provider across visits, tracking patterns and progress",
+        "Connected care, not fragmented episodes: clinical team works across specialties",
+        "100+ expert providers across 16+ locations plus virtual care in 21 states"
+      ],
+      "verbatim": "We go beyond symptoms to find answers.",
+      "sources": ["https://alignedmodernhealth.com/", "https://alignedmodernhealth.com/people/"],
+      "confidence": "high"
+    },
+    "philosophy": {
+      "value": "Root cause, integrative, evidence-based medicine. Instead of masking symptoms, the goal is to restore optimal function throughout the body using science-based medicine combined with traditional modalities. Healthcare is personalized, team-based, and designed for the whole person.",
+      "verbatim": "Instead of looking for ways to mask your symptoms, our goal is to restore optimal function throughout your body.",
+      "sources": ["https://alignedmodernhealth.com/", "https://alignedmodernhealth.com/services/"],
+      "confidence": "high"
+    },
+    "diagnostic_methods": {
+      "value": [
+        "Comprehensive Blood Tests (inflammation, metabolic function, cardiovascular risk, nutrient status)",
+        "Comprehensive Hormone Analysis (blood, saliva, or urine - cortisol, thyroid, estrogen, progesterone, testosterone)",
+        "Food Sensitivity Testing",
+        "Comprehensive Stool Analysis (gut microbiome, digestion, inflammation, infections)",
+        "Nutrient Panels (micronutrient levels)",
+        "Environmental Exposure Testing (heavy metals, mold-related toxins)",
+        "Functional ranges interpretation (identifying imbalances before formal diagnosis)"
+      ],
+      "sources": ["https://alignedmodernhealth.com/about/"],
+      "confidence": "high"
+    },
+    "technology": {
+      "value": [
+        "Secure telehealth video platform",
+        "Mail-in diagnostic kits for remote patients",
+        "National laboratory partnerships",
+        "Patient Portal",
+        "Online scheduling system"
+      ],
+      "verbatim": "Through our partnerships with national laboratories and the use of mail-in diagnostic kits, functional medicine testing can be completed from anywhere.",
+      "sources": ["https://alignedmodernhealth.com/locations/", "https://alignedmodernhealth.com/about/"],
+      "confidence": "high"
+    },
+    "modalities": {
+      "value": [
+        "Functional Medicine",
+        "Hormone Replacement Therapy (HRT)",
+        "Chiropractic adjustments and physical rehabilitation",
+        "Acupuncture",
+        "Chinese Herbal Medicine",
+        "Cupping",
+        "Moxibustion (Ai Ye / mugwort)",
+        "Gua Sha (scraping)",
+        "Infrared Heat Therapy",
+        "Electro-stimulation",
+        "Clinical Massage Therapy",
+        "Wellness Massage Therapy",
+        "Prenatal Massage",
+        "Swedish massage",
+        "Deep tissue massage",
+        "Sports massage",
+        "Cross-fiber friction",
+        "Trigger point therapy",
+        "Muscle energy technique",
+        "IV Vitamin Therapy",
+        "Nutraceuticals and compound prescriptions"
+      ],
+      "sources": ["https://alignedmodernhealth.com/services/", "https://alignedmodernhealth.com/services/acupuncture/", "https://alignedmodernhealth.com/services/massage-therapy/", "https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+      "confidence": "high"
+    },
+    "claims": {
+      "value": [
+        "Chicago's top-rated holistic healthcare provider",
+        "Chicago's best non-invasive, non-surgical and drug-free health care",
+        "The highest standard of evidence-based, patient centered care",
+        "Acupuncture has been scientifically proven effective for pain, allergies, insomnia",
+        "IV Vitamin Therapy provides up to 99% absorption",
+        "Functional medicine testing uses functional ranges to identify imbalances before disease is formally diagnosed",
+        "Benefits of acupuncture are often felt immediately after the first treatment"
+      ],
+      "verbatim": "The highest standard of evidence-based, patient centered care that restores your body's ability to function, naturally.",
+      "sources": ["https://alignedmodernhealth.com/", "https://alignedmodernhealth.com/services/acupuncture/", "https://alignedmodernhealth.com/iv-vitamin-therapy/", "https://alignedmodernhealth.com/about/"],
+      "confidence": "high"
+    }
+  },
+  "patient_journey": {
+    "first_step_cta": {
+      "value": "Book Now / Schedule an Appointment",
+      "verbatim": "Book Now",
+      "sources": ["https://alignedmodernhealth.com/"],
+      "confidence": "high"
+    },
+    "new_patient_steps": {
+      "value": [
+        "Schedule via phone (773-598-4387), online booking, or contact form",
+        "Benefits verification by care team (at no charge)",
+        "Copays collected prior to appointment when required",
+        "Initial consultation/evaluation (deeper evaluations, longer appointments)",
+        "Comprehensive testing ordered based on symptoms, history, and goals",
+        "Results interpreted by functional medicine doctors using functional ranges",
+        "Personalized care plan designed for symptoms, history, lifestyle, and goals",
+        "Ongoing care with same provider continuity, supported by clinical care coordinator"
+      ],
+      "sources": ["https://alignedmodernhealth.com/", "https://alignedmodernhealth.com/insurance-payments/", "https://alignedmodernhealth.com/people/", "https://alignedmodernhealth.com/about/"],
+      "confidence": "high"
+    },
+    "discovery_call": {
+      "offered": true,
+      "description": {
+        "value": "Free 15-minute consultation for acupuncture patients to assess individual situation and suggest course of treatment",
+        "verbatim": "Our practitioners are happy to meet with you for a free 15-minute consultation to assess your individual situation and offer a suggested course of treatment.",
+        "sources": ["https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    },
+    "intake_forms": {
+      "available": false,
+      "links": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "consult_expectations": {
+      "value": "Deeper evaluations with longer appointments than typical practices. Care plans evolve with patient's life. Doctors spend time both before and after visits interpreting test results and devising next steps. Same provider across visits for continuity.",
+      "verbatim": "We offer deeper evaluations, longer appointments, and care plans that evolve with your life.",
+      "sources": ["https://alignedmodernhealth.com/people/"],
+      "confidence": "high"
+    },
+    "follow_up": {
+      "value": "Ongoing care managed by clinical care coordinator who handles logistics, appointments, and communication. Doctors interpret results and devise next steps after each visit. Treatment frequency depends on nature and severity of condition. Acupuncture benefits are cumulative. Massage patients may benefit from weekly or monthly sessions.",
+      "verbatim": "Your care doesn't stop when the visit ends. Behind the scenes, our doctors spend time both before and after your visit interpreting your test results and devising your next step.",
+      "sources": ["https://alignedmodernhealth.com/people/", "https://alignedmodernhealth.com/services/acupuncture/", "https://alignedmodernhealth.com/services/massage-therapy/"],
+      "confidence": "high"
+    },
+    "memberships": {
+      "available": true,
+      "details": {
+        "value": "Massage Wellness Plan: $85/month for one 55-minute massage (normally $110, $25 savings per visit), roll over up to 3 sessions. IV Vitamin Therapy Membership: $150/1x per month or $275/2x per month (base price $179 per session).",
+        "verbatim": "$85/month for one 55-minute massage per month (normally $110, a $25 savings per visit). Roll over up to three sessions with no penalty.",
+        "sources": ["https://alignedmodernhealth.com/services/massage-therapy/", "https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+        "confidence": "high"
+      }
+    }
+  },
+  "pricing": {
+    "transparency": "PARTIAL",
+    "prices": {
+      "value": [
+        "IV Vitamin Therapy: $179 per session",
+        "IV Vitamin Therapy Membership: $150/month (1x) or $275/month (2x)",
+        "Massage Wellness Plan: $85/month (one 55-minute massage, normally $110)",
+        "Standard massage session: $110 (implied from wellness plan savings)"
+      ],
+      "verbatim": "$85/month for one 55-minute massage per month (normally $110, a $25 savings per visit)",
+      "sources": ["https://alignedmodernhealth.com/services/massage-therapy/", "https://alignedmodernhealth.com/iv-vitamin-therapy/"],
+      "confidence": "high"
+    },
+    "insurance_accepted": {
+      "value": [
+        "Blue Cross Blue Shield (acupuncture - in-network)",
+        "Aetna (acupuncture - in-network)",
+        "Major insurance plans accepted (general statement)",
+        "All major health insurance plans (massage therapy)"
+      ],
+      "verbatim": "We work with many major insurance plans",
+      "sources": ["https://alignedmodernhealth.com/insurance-payments/", "https://alignedmodernhealth.com/services/acupuncture/", "https://alignedmodernhealth.com/services/massage-therapy/"],
+      "confidence": "high"
+    },
+    "medicare_medicaid": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "self_pay": {
+      "available": true,
+      "details": {
+        "value": "Self-pay options available for patients not using insurance. Wellness packages priced to be cost effective and affordable. Self-pay packages and monthly memberships available for many services.",
+        "verbatim": "priced to be cost effective and affordable",
+        "sources": ["https://alignedmodernhealth.com/insurance-payments/"],
+        "confidence": "high"
+      }
+    },
+    "superbills": {
+      "available": true,
+      "details": {
+        "value": "Out-of-network documentation provided for reimbursement",
+        "verbatim": null,
+        "sources": ["https://alignedmodernhealth.com/insurance-payments/"],
+        "confidence": "medium"
+      }
+    },
+    "payment_plans": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "hsa_fsa": {
+      "available": true,
+      "details": {
+        "value": "Most services eligible for FSA, HSA, and HRA funds",
+        "verbatim": "Our services are eligible expenses for most Flexible Spending Accounts (FSA), Health Savings Accounts (HSA), and Health Reimbursement Arrangements (HRA).",
+        "sources": ["https://alignedmodernhealth.com/insurance-payments/", "https://alignedmodernhealth.com/services/massage-therapy/", "https://alignedmodernhealth.com/services/acupuncture/"],
+        "confidence": "high"
+      }
+    }
+  },
+  "trust_signals": {
+    "testimonials": {
+      "present": true,
+      "location": {
+        "value": "Homepage ('Meet Our Patients' section) and Reviews page linked in navigation",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "high"
+      },
+      "themes": {
+        "value": "Top-rated holistic healthcare provider in Chicago; specific testimonial text not captured in scrape",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "low"
+      }
+    },
+    "case_studies": {
+      "present": false,
+      "urls": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "awards": {
+      "value": ["Chicago's top-rated holistic healthcare provider (self-claimed positioning)"],
+      "verbatim": "Chicago's top-rated holistic, healthcare provider",
+      "sources": ["https://alignedmodernhealth.com/"],
+      "confidence": "medium"
+    },
+    "associations": {
+      "value": [
+        "BirthFit (partnership for expanded support for moms)",
+        "Fleet Feet (Fit ID Process)",
+        "HoopsLink (dynamic basketball warmup)",
+        "9Round KickBoxing (workout feature)",
+        "National laboratory partners (for mail-in diagnostic kits)"
+      ],
+      "verbatim": null,
+      "sources": ["https://alignedmodernhealth.com/services/chiropractic-physical-medicine/", "https://alignedmodernhealth.com/about/"],
+      "confidence": "medium"
+    },
+    "research_citations": {
+      "present": false,
+      "urls": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "disclaimers": {
+      "present": true,
+      "verbatim": {
+        "value": "Cookie consent banner detected on multiple pages with analytics and marketing cookies mentioned",
+        "sources": ["https://alignedmodernhealth.com/"],
+        "confidence": "medium"
+      }
+    }
+  },
+  "seo_intel": {
+    "primary_keywords": {
+      "value": [
+        "functional medicine",
+        "hormone health",
+        "hormone replacement therapy",
+        "chiropractic physical medicine",
+        "acupuncture",
+        "massage therapy",
+        "IV vitamin therapy",
+        "Chicago acupuncture",
+        "Chicago massage therapists",
+        "holistic healthcare",
+        "integrative medicine",
+        "root cause medicine",
+        "comprehensive testing",
+        "functional medicine doctors",
+        "healthcare designed for you"
+      ],
+      "sources": ["https://alignedmodernhealth.com/", "https://alignedmodernhealth.com/services/", "https://alignedmodernhealth.com/services/acupuncture/", "https://alignedmodernhealth.com/services/massage-therapy/"],
+      "confidence": "high"
+    },
+    "location_modifiers": {
+      "value": [
+        "Chicago",
+        "Chicagoland",
+        "Andersonville",
+        "Lincoln Park",
+        "Lincoln Square",
+        "Logan Square",
+        "River North",
+        "South Loop",
+        "Streeterville",
+        "Wicker Park",
+        "Deerfield",
+        "Elmhurst",
+        "Evanston",
+        "Kildeer",
+        "Mt. Prospect",
+        "Orland Park",
+        "Park Ridge",
+        "Vernon Hills",
+        "Nashville",
+        "Miami"
+      ],
+      "sources": ["https://alignedmodernhealth.com/locations/"],
+      "confidence": "high"
+    },
+    "conversion_ctas": {
+      "value": [
+        "Book Now",
+        "Schedule securely in under 3 minutes",
+        "Fill out the form below and our team will get back to you as soon as possible",
+        "For immediate assistance, please call 773-598-4387",
+        "Sign up for our free newsletter"
+      ],
+      "verbatim": "Book Now",
+      "sources": ["https://alignedmodernhealth.com/", "https://alignedmodernhealth.com/services/acupuncture/"],
+      "confidence": "high"
+    },
+    "lead_magnets": {
+      "present": true,
+      "urls": {
+        "value": [
+          "Newsletter signup (sitewide)",
+          "Free 15-minute acupuncture consultation",
+          "Webinars (IV Vitamin Therapy, Workstation Ergonomics, Pain Management, Migraines)"
+        ],
+        "sources": ["https://alignedmodernhealth.com/", "https://alignedmodernhealth.com/services/acupuncture/", "https://alignedmodernhealth.com/services/chiropractic-physical-medicine/"],
+        "confidence": "high"
+      }
+    },
+    "forms": {
+      "value": [
+        "Contact form (embedded on every page)",
+        "Online scheduling form (https://alignedmodernhealth.com/services/#schedule)",
+        "Newsletter signup form"
+      ],
+      "sources": ["https://alignedmodernhealth.com/", "https://alignedmodernhealth.com/services/"],
+      "confidence": "high"
+    },
+    "tech_stack": {
+      "value": [
+        "Cookie consent management",
+        "Analytics and marketing cookies",
+        "Patient Portal platform",
+        "Online scheduling system",
+        "Blog/CMS platform",
+        "YouTube channel integration",
+        "Online shop/e-commerce"
+      ],
+      "sources": ["https://alignedmodernhealth.com/"],
+      "confidence": "medium"
+    }
+  },
+  "missing": [
+    {
+      "field": "practice.legal_name",
+      "reason": "Could not confirm if legal entity name differs from brand name (e.g., LLC, Inc., PC); only brand name found on site",
+      "impact": "minor"
+    },
+    {
+      "field": "locations[*].address",
+      "reason": "Full street addresses not scraped for any of the 16 clinic locations; only neighborhood/city names captured from location index page",
+      "impact": "critical"
+    },
+    {
+      "field": "locations[*].email",
+      "reason": "No email addresses found on site for any location",
+      "impact": "moderate"
+    },
+    {
+      "field": "locations[*].hours",
+      "reason": "Only general care team hours (8AM-8PM CST) found; individual location hours may vary but were not scraped",
+      "impact": "moderate"
+    },
+    {
+      "field": "locations[*].accessibility",
+      "reason": "No ADA accessibility or physical accessibility information found on site",
+      "impact": "minor"
+    },
+    {
+      "field": "contact.patient_portal_url",
+      "reason": "Patient Portal mentioned in navigation but direct URL not captured in scrape",
+      "impact": "moderate"
+    },
+    {
+      "field": "providers",
+      "reason": "Only 6 named clinical providers plus CEO found; site states 100+ providers but individual provider bio pages were not scraped. Provider details (education, certifications, languages, experience, headshots) largely unavailable.",
+      "impact": "critical"
+    },
+    {
+      "field": "ideal_patient.exclusions",
+      "reason": "No explicit exclusion criteria or contraindications listed on site",
+      "impact": "moderate"
+    },
+    {
+      "field": "ideal_patient.referral_requirements",
+      "reason": "No referral requirements mentioned on site",
+      "impact": "minor"
+    },
+    {
+      "field": "pricing.medicare_medicaid",
+      "reason": "No mention of Medicare or Medicaid acceptance found on site",
+      "impact": "moderate"
+    },
+    {
+      "field": "pricing.payment_plans",
+      "reason": "No formal payment plan options mentioned beyond memberships",
+      "impact": "minor"
+    },
+    {
+      "field": "trust_signals.testimonials.themes",
+      "reason": "Reviews page exists but specific testimonial text was not captured in the scrape",
+      "impact": "moderate"
+    },
+    {
+      "field": "trust_signals.case_studies",
+      "reason": "No case studies found on site",
+      "impact": "minor"
+    },
+    {
+      "field": "trust_signals.research_citations",
+      "reason": "No specific research citations or study links found; evidence-based claims made without linked citations",
+      "impact": "moderate"
+    },
+    {
+      "field": "patient_journey.intake_forms",
+      "reason": "Patient resources page returned 404 error; intake forms may exist behind Patient Portal but were not accessible",
+      "impact": "moderate"
+    },
+    {
+      "field": "seo_intel.tech_stack",
+      "reason": "Detailed tech stack (CMS, analytics platform, scheduling vendor, etc.) not captured by Puppeteer scrape; only cookie consent and general platform categories inferred",
+      "impact": "minor"
+    }
+  ]
+}

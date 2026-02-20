@@ -2,9 +2,9 @@
 
 ## METADATA
 - **Skill Name**: Dream 100 Website Scraper
-- **Version**: 1.0
+- **Version**: 2.0
 - **Category**: Data Collection
-- **API Requirements**: OpenRouter (Perplexity Sonar)
+- **API Requirements**: Firecrawl CLI (primary), Puppeteer (fallback), OpenRouter (Perplexity Sonar - legacy fallback)
 - **Parent Skill**: SKILL_D100_orchestrator
 
 ---

@@ -2,7 +2,7 @@
 
 ## METADATA
 - **Skill Name**: Dream 100 Email Sequence Builder
-- **Version**: 1.0
+- **Version**: 2.0
 - **Category**: Email Marketing Asset Generation
 - **API Requirements**: OpenAI GPT-4o (via OpenRouter for cost optimization)
 - **Parent Skill**: SKILL_D100_orchestrator

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Assessment | Practical Healing Center</title>
+<style>
+  :root {
+    --sage: #567575;
+    --sage-dark: #3A5354;
+    --sage-med: #5C7B7B;
+    --sage-light: #DBE4E8;
+    --sage-xlight: #EEF4F4;
+    --navy: #294755;
+    --white: #FFFFFF;
+    --text: #424242;
+    --text-light: #6b7280;
+    --border: #C8D8DB;
+    --success: #4a9e7a;
+    --warning: #d97706;
+    --bg: #f5f9f9;
+    --shadow: 0 4px 20px rgba(58,83,84,0.10);
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; }
+
+  .site-header { background: var(--sage-dark); padding: 14px 24px; display: flex; align-items: center; gap: 14px; }
+  .logo-mark { width: 38px; height: 38px; background: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+  .site-header h1 { color: var(--white); font-size: 1.05rem; font-weight: 700; }
+  .site-header p { color: rgba(255,255,255,0.75); font-size: 0.73rem; }
+
+  .progress-wrap { background: var(--sage-light); height: 4px; }
+  .progress-fill { background: var(--sage); height: 4px; transition: width 0.4s ease; }
+
+  .app-container { max-width: 680px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  .step-badge-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .step-badge { background: var(--sage-xlight); color: var(--sage-dark); font-size: 0.7rem; font-weight: 700; padding: 2px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .step-title { font-size: 1.4rem; font-weight: 700; color: var(--sage-dark); margin-bottom: 6px; line-height: 1.3; }
+  .step-sub { color: var(--text-light); font-size: 0.88rem; margin-bottom: 22px; }
+
+  .options-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 10px; margin-bottom: 22px; }
+  .options-grid.two-col { grid-template-columns: 1fr 1fr; }
+  .option-card { border: 2px solid var(--border); border-radius: var(--radius); padding: 14px 16px; cursor: pointer; background: var(--white); transition: all 0.18s; text-align: left; width: 100%; }
+  .option-card:hover { border-color: var(--sage); background: var(--sage-xlight); transform: translateY(-1px); box-shadow: var(--shadow); }
+  .option-card.selected { border-color: var(--sage); background: var(--sage-xlight); box-shadow: 0 0 0 3px rgba(86,117,117,0.15); }
+  .card-icon { font-size: 1.4rem; margin-bottom: 6px; }
+  .card-label { font-weight: 600; font-size: 0.88rem; color: var(--sage-dark); }
+  .card-sub { font-size: 0.76rem; color: var(--text-light); margin-top: 2px; }
+
+  .chip-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+  .chip { border: 2px solid var(--border); border-radius: 22px; padding: 5px 15px; cursor: pointer; background: var(--white); font-size: 0.83rem; font-weight: 500; color: var(--text); transition: all 0.15s; }
+  .chip:hover { border-color: var(--sage); background: var(--sage-xlight); }
+  .chip.selected { border-color: var(--sage); background: var(--sage); color: var(--white); }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-weight: 600; font-size: 0.83rem; color: var(--sage-dark); margin-bottom: 5px; }
+  .form-group input, .form-group textarea, .form-group select { width: 100%; border: 2px solid var(--border); border-radius: 8px; padding: 10px 13px; font-size: 0.93rem; color: var(--text); background: var(--white); outline: none; transition: border-color 0.15s; }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--sage); }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .slider-wrap { margin-bottom: 22px; }
+  .slider-val { text-align: center; font-size: 1.6rem; font-weight: 700; color: var(--sage); margin: 6px 0 2px; }
+  input[type=range] { width: 100%; height: 6px; accent-color: var(--sage); cursor: pointer; }
+  .slider-labels { display: flex; justify-content: space-between; font-size: 0.76rem; color: var(--text-light); margin-top: 4px; }
+
+  .btn-primary { background: var(--sage-dark); color: var(--white); border: none; border-radius: 8px; padding: 13px 30px; font-size: 0.97rem; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.1s; display: inline-flex; align-items: center; gap: 7px; }
+  .btn-primary:hover { background: var(--sage); transform: translateY(-1px); }
+  .btn-secondary { background: transparent; color: var(--sage); border: 2px solid var(--sage); border-radius: 8px; padding: 11px 26px; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-secondary:hover { background: var(--sage-xlight); }
+  .btn-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+
+  .welcome-card { background: var(--white); border-radius: 16px; padding: 30px; box-shadow: var(--shadow); text-align: center; border-top: 5px solid var(--sage); margin-bottom: 22px; }
+  .welcome-icon { font-size: 2.8rem; margin-bottom: 14px; }
+  .welcome-card h2 { color: var(--sage-dark); font-size: 1.4rem; margin-bottom: 10px; }
+  .welcome-card p { color: var(--text-light); font-size: 0.9rem; max-width: 480px; margin: 0 auto 18px; }
+  .feature-pills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 22px; }
+  .feature-pill { background: var(--sage-xlight); color: var(--sage-dark); border-radius: 20px; padding: 4px 13px; font-size: 0.77rem; font-weight: 600; }
+  .disclaimer-mini { font-size: 0.71rem; color: var(--text-light); text-align: center; padding: 10px; background: #fffbeb; border-radius: 8px; border-left: 3px solid var(--warning); margin-top: 14px; }
+
+  .review-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 14px 18px; margin-bottom: 9px; }
+  .review-card h4 { font-size: 0.75rem; text-transform: uppercase; color: var(--text-light); margin-bottom: 3px; letter-spacing: 0.05em; }
+  .review-card p { font-size: 0.9rem; color: var(--sage-dark); font-weight: 500; }
+  .review-edit { color: var(--sage); font-size: 0.78rem; cursor: pointer; text-decoration: underline; float: right; }
+
+  .results-hero { background: linear-gradient(135deg, var(--sage-dark) 0%, var(--sage) 100%); border-radius: 14px; padding: 26px; color: var(--white); text-align: center; margin-bottom: 18px; }
+  .score-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.18); border-radius: 22px; padding: 5px 16px; font-size: 0.82rem; font-weight: 600; margin-bottom: 11px; }
+  .results-hero h2 { font-size: 1.4rem; margin-bottom: 7px; }
+  .results-hero p { opacity: 0.88; font-size: 0.88rem; }
+
+  .rec-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px 18px; margin-bottom: 9px; }
+  .rec-hdr { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 7px; }
+  .rec-ico { font-size: 1.4rem; flex-shrink: 0; }
+  .rec-match { font-size: 0.72rem; color: var(--sage); font-weight: 600; background: var(--sage-xlight); padding: 1px 8px; border-radius: 10px; display: inline-block; margin-bottom: 3px; }
+  .rec-title { font-weight: 700; color: var(--sage-dark); font-size: 0.95rem; }
+  .rec-body { font-size: 0.83rem; color: var(--text-light); padding-left: 36px; }
+
+  .cta-section { background: var(--sage-dark); border-radius: 14px; padding: 26px; text-align: center; color: var(--white); margin-top: 22px; }
+  .cta-section h3 { font-size: 1.15rem; margin-bottom: 7px; }
+  .cta-section p { opacity: 0.8; font-size: 0.86rem; margin-bottom: 18px; }
+  .cta-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .cta-main { background: var(--sage); color: var(--white); border: none; border-radius: 8px; padding: 13px 26px; font-size: 0.93rem; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; }
+  .cta-main:hover { background: var(--sage-med); }
+  .cta-alt { background: transparent; color: var(--white); border: 2px solid rgba(255,255,255,0.45); border-radius: 8px; padding: 11px 22px; font-size: 0.88rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: border-color 0.2s; }
+  .cta-alt:hover { border-color: white; }
+
+  .action-bar { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+  .action-btn { background: var(--sage-xlight); color: var(--sage-dark); border: 1px solid var(--border); border-radius: 6px; padding: 7px 13px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: background 0.15s; }
+  .action-btn:hover { background: var(--sage-light); }
+
+  .info-box { background: var(--sage-xlight); border-left: 4px solid var(--sage); border-radius: 0 8px 8px 0; padding: 11px 15px; font-size: 0.83rem; color: var(--text); margin-bottom: 18px; }
+
+  .step-panel { animation: fadeIn 0.28s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+
+  @media(max-width:480px) {
+    .options-grid, .options-grid.two-col { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .cta-btns { flex-direction: column; }
+    .app-container { padding: 14px 10px 48px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <div class="logo-mark">🌿</div>
+  <div>
+    <h1>Practical Healing Center</h1>
+    <p>Functional Medicine + Direct Primary Care Health Assessment</p>
+  </div>
+</div>
+<div class="progress-wrap"><div class="progress-fill" id="progressBar" style="width:0%"></div></div>
+
+<div class="app-container"><div id="appRoot"></div></div>
+
+<script>
+const TOTAL = 12;
+const state = {
+  step: 0,
+  a: {
+    contact: { firstName:'', lastName:'', email:'', phone:'', age:'' },
+    primaryConcern: '',
+    symptoms: [],
+    duration: '',
+    severity: 5,
+    priorCare: [],
+    model: '',
+    goals: [],
+    howHeard: '',
+    notes: ''
+  }
+};
+
+const concerns = [
+  {id:'chronic_symptoms', icon:'🔍', label:'Chronic Undiagnosed Symptoms', sub:'"Labs are normal" but feel terrible'},
+  {id:'hormones', icon:'⚖️', label:'Hormone Imbalance', sub:'Thyroid, estrogen, testosterone'},
+  {id:'gut', icon:'🌿', label:'Gut Health / Digestion', sub:'IBS, bloating, food sensitivities'},
+  {id:'fatigue', icon:'⚡', label:'Fatigue / Low Energy', sub:'Exhausted despite rest'},
+  {id:'weight', icon:'📊', label:'Weight Management', sub:'Metabolic health, body composition'},
+  {id:'autoimmune', icon:'🛡️', label:'Autoimmune / Inflammation', sub:'Chronic inflammation, AI conditions'},
+  {id:'primary_care', icon:'🏠', label:'Primary Care Home', sub:'Reliable, relationship-based DPC'},
+  {id:'prevention', icon:'🎯', label:'Prevention & Optimization', sub:'Proactive longevity approach'},
+  {id:'mental_health', icon:'🧠', label:'Anxiety / Mental Health', sub:'Stress, burnout, mood'},
+  {id:'other', icon:'💬', label:'Other / Not Sure', sub:'Tell us your story'}
+];
+
+const symptoms = [
+  'Fatigue / low energy','Hormonal symptoms','Bloating / digestive issues','Brain fog','Weight gain / difficulty losing',
+  'Anxiety / depression','Sleep disturbances','Joint pain / inflammation','Skin issues','Hair loss / thinning',
+  'Hot flashes / night sweats','Low libido','Food sensitivities','Frequent illness','Headaches / migraines',
+  'Blood sugar issues','Heart palpitations','Muscle weakness','Mood swings','Post-COVID symptoms',
+  'PMS / period problems','Chronic pain','Numbness / tingling','High cholesterol / blood pressure'
+];
+
+const durations = [
+  {id:'under6m', icon:'🌱', label:'Under 6 months', sub:'Recent onset'},
+  {id:'6to18m', icon:'🌿', label:'6–18 months', sub:'Several months to a year'},
+  {id:'1to5y', icon:'🌳', label:'1–5 years', sub:'Ongoing struggle'},
+  {id:'over5y', icon:'🗓️', label:'5+ years', sub:'Long-term chronic issue'}
+];
+
+const priorCare = [
+  'Primary care (conventional)','Specialist (endocrinologist, GI, etc.)','Functional medicine (other practice)',
+  'Naturopath / integrative MD','Chiropractic care','Nutritionist / dietitian','Mental health therapy',
+  'Tried elimination diets','Supplements on my own','Nothing yet — starting fresh'
+];
+
+const models = [
+  {id:'fm_only', icon:'🔬', label:'Functional Medicine', sub:'Root-cause, comprehensive approach ($399 initial)'},
+  {id:'dpc_only', icon:'🏠', label:'Direct Primary Care', sub:'Membership medical home ($99/month)'},
+  {id:'dpc_fm', icon:'⭐', label:'DPC + Functional Medicine', sub:'Best of both ($219/month, all-inclusive)'},
+  {id:'unsure', icon:'❓', label:'Not Sure Yet', sub:'Help me figure out the right fit'}
+];
+
+const goals = [
+  {id:'root_cause', icon:'🔍', label:'Find root cause', sub:'Understand what\'s really happening'},
+  {id:'symptom_relief', icon:'✨', label:'Symptom relief', sub:'Feel better day-to-day'},
+  {id:'long_term', icon:'🌟', label:'Long-term healing', sub:'Sustainable, lasting change'},
+  {id:'natural', icon:'🌿', label:'Natural / integrative approach', sub:'Minimize or avoid pharmaceuticals'},
+  {id:'medical_home', icon:'🏠', label:'Reliable medical home', sub:'Trusted provider relationship'},
+  {id:'optimize', icon:'🎯', label:'Optimize & prevent', sub:'Peak health + longevity'}
+];
+
+const howHeard = ['Google search','Instagram','Facebook','Word of mouth / referral','Cleveland Clinic (provider referral)','Marigold Wellness','Other'];
+
+// Recommendation engine
+function recs(a) {
+  const r = [];
+  r.push({icon:'📞', title:'Free Curiosity Call', match:'Best first step', body:'A complimentary call with a provider of your choice — no obligation. They\'ll answer your questions, understand your situation, and help you find the right fit at Practical Healing.'});
+  const c = a.primaryConcern;
+  const m = a.model;
+  if (m === 'dpc_fm' || m === 'unsure' || ['chronic_symptoms','hormones','gut','fatigue','autoimmune'].includes(c)) {
+    r.push({icon:'🔬', title:'Initial Functional Medicine Consultation ($399)', match:'Highly recommended', body:'60-minute in-depth visit. Comprehensive medical history review, InBody body composition scan, timeline analysis, core clinical imbalances assessment. Results in a personalized treatment plan.'});
+  }
+  if (m === 'dpc_only' || m === 'dpc_fm' || c === 'primary_care') {
+    r.push({icon:'🏠', title:'Direct Primary Care Membership ($99–$219/month)', match:'Great fit', body:'Annual wellness exam, acute care, telemedicine, same/next-day messaging, medication management — all for $99/month. Add Functional Medicine for $219/month to get comprehensive integrative care.'});
+  }
+  if (['fatigue','chronic_symptoms','prevention','optimization'].includes(c) || a.symptoms.includes('Fatigue / low energy')) {
+    r.push({icon:'💉', title:'IV Therapy & NAD+ ($99–$375)', match:'Supportive care', body:'IV nutrient therapy for hydration, energy, immune support, and recovery. NAD+ therapy for cellular energy and longevity. Quick 60-min sessions — available at our Wadsworth location.'});
+  }
+  if (['weight','hormones'].includes(c) || a.symptoms.some(s => s.includes('Weight') || s.includes('Hormone'))) {
+    r.push({icon:'📊', title:'ReShape 12-Week Weight Loss Program', match:'Targeted solution', body:'High-accountability 12-week program for women. Practitioner + dietitian supported. Weekly check-ins, virtual/in-person support groups. Address weight from a root-cause perspective.'});
+  }
+  if (['mental_health','chronic_symptoms','fatigue'].includes(c)) {
+    r.push({icon:'🧠', title:'Mental Health Counseling', match:'Whole-person care', body:'Licensed counselors for anxiety, burnout, life transitions, and chronic stress. Mental and emotional health are core to the Practical Healing whole-person approach.'});
+  }
+  r.push({icon:'🌿', title:'RESET Challenge ($49–$99)', match:'Great starting point', body:'21-day or 10-day elimination diet to remove gluten, dairy, and added sugar. Designed by dietitian Lindsay Malone, RD. A powerful, affordable first step to reset your metabolism and discover food sensitivities.'});
+  return r;
+}
+
+const root = document.getElementById('appRoot');
+
+function go(n) {
+  state.step = n;
+  updateProgress(n);
+  save();
+  switch(n) {
+    case 0: renderWelcome(); break;
+    case 1: renderContact(); break;
+    case 2: renderConcern(); break;
+    case 3: renderSymptoms(); break;
+    case 4: renderDuration(); break;
+    case 5: renderSeverity(); break;
+    case 6: renderPriorCare(); break;
+    case 7: renderModel(); break;
+    case 8: renderGoals(); break;
+    case 9: renderHowHeard(); break;
+    case 10: renderReview(); break;
+    case 11: renderResults(); break;
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function updateProgress(n) {
+  document.getElementById('progressBar').style.width = Math.round(n/TOTAL*100)+'%';
+}
+
+function badge(n) { return `<div class="step-badge-row"><span class="step-badge">Step ${n} of ${TOTAL}</span></div>`; }
+
+function renderWelcome() {
+  root.innerHTML = `<div class="step-panel">
+    <div class="welcome-card">
+      <div class="welcome-icon">🌿</div>
+      <h2>Find Your Path Toward Health and Healing</h2>
+      <p>This 5-minute assessment helps us understand your health story and match you with the right care at Practical Healing Center — so your first conversation counts.</p>
+      <div class="feature-pills">
+        <span class="feature-pill">✓ Free Curiosity Call</span>
+        <span class="feature-pill">✓ IFM-Certified Practitioners</span>
+        <span class="feature-pill">✓ 3 Locations: OH + PA</span>
+        <span class="feature-pill">✓ Root-Cause Medicine</span>
+        <span class="feature-pill">✓ DPC + Functional Medicine</span>
+      </div>
+      <button class="btn-primary" onclick="go(1)" style="font-size:1rem;padding:15px 36px;">Begin Assessment →</button>
+      <div class="disclaimer-mini">⚠️ This assessment is informational only — not medical advice. For emergencies, call 911 or 988.</div>
+    </div>
+  </div>`;
+}
+
+function renderContact() {
+  const c = state.a.contact;
+  root.innerHTML = `<div class="step-panel">
+    ${badge(1)}
+    <h2 class="step-title">Tell us a little about yourself</h2>
+    <p class="step-sub">We use this to personalize your results and reach out if you'd like to book a curiosity call.</p>
+    <div class="form-row">
+      <div class="form-group"><label>First Name *</label><input id="fn" value="${c.firstName}" placeholder="Jane" /></div>
+      <div class="form-group"><label>Last Name</label><input id="ln" value="${c.lastName}" placeholder="Smith" /></div>
+    </div>
+    <div class="form-group"><label>Email *</label><input id="em" type="email" value="${c.email}" placeholder="jane@email.com" /></div>
+    <div class="form-row">
+      <div class="form-group"><label>Phone (optional)</label><input id="ph" type="tel" value="${c.phone}" placeholder="(330) 555-1234" /></div>
+      <div class="form-group"><label>Your Age *</label><input id="ag" value="${c.age}" placeholder="e.g. 38" /></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="saveContact()">Continue →</button>
+      <button class="btn-secondary" onclick="go(0)">← Back</button>
+    </div>
+  </div>`;
+}
+function saveContact() {
+  const fn=document.getElementById('fn').value.trim(), em=document.getElementById('em').value.trim(), ag=document.getElementById('ag').value.trim();
+  if(!fn||!em||!ag){alert('Please fill in First Name, Email, and Age.');return;}
+  state.a.contact={firstName:fn,lastName:document.getElementById('ln').value.trim(),email:em,phone:document.getElementById('ph').value.trim(),age:ag};
+  go(2);
+}
+
+function renderConcern() {
+  root.innerHTML = `<div class="step-panel">
+    ${badge(2)}
+    <h2 class="step-title">What brings you to Practical Healing today?</h2>
+    <p class="step-sub">Select the option that best describes your primary reason for seeking care.</p>
+    <div class="options-grid two-col">
+      ${concerns.map(o=>`<button class="option-card ${state.a.primaryConcern===o.id?'selected':''}" onclick="sel('primaryConcern','${o.id}',this)">
+        <div class="card-icon">${o.icon}</div><div class="card-label">${o.label}</div><div class="card-sub">${o.sub}</div>
+      </button>`).join('')}
+    </div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="if(state.a.primaryConcern){go(3)}else{alert('Please select an option.')}">Continue →</button>
+      <button class="btn-secondary" onclick="go(1)">← Back</button>
+    </div>
+  </div>`;
+}
+
+function renderSymptoms() {
+  root.innerHTML = `<div class="step-panel">
+    ${badge(3)}
+    <h2 class="step-title">Which symptoms are you experiencing?</h2>
+    <p class="step-sub">Select all that apply. This helps us understand your full health picture.</p>
+    <div class="chip-grid">
+      ${symptoms.map(s=>`<button class="chip ${state.a.symptoms.includes(s)?'selected':''}" onclick="toggleChip('symptoms','${s}',this)">${s}</button>`).join('')}
+    </div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="go(4)">Continue →</button>
+      <button class="btn-secondary" onclick="go(2)">← Back</button>
+    </div>
+  </div>`;
+}
+
+function renderDuration() {
+  root.innerHTML = `<div class="step-panel">
+    ${badge(4)}
+    <h2 class="step-title">How long have you been dealing with these concerns?</h2>
+    <p class="step-sub">Duration helps us understand the depth of investigation needed.</p>
+    <div class="options-grid two-col">
+      ${durations.map(o=>`<button class="option-card ${state.a.duration===o.id?'selected':''}" onclick="sel('duration','${o.id}',this)">
+        <div class="card-icon">${o.icon}</div><div class="card-label">${o.label}</div><div class="card-sub">${o.sub}</div>
+      </button>`).join('')}
+    </div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="if(state.a.duration){go(5)}else{alert('Please select an option.')}">Continue →</button>
+      <button class="btn-secondary" onclick="go(3)">← Back</button>
+    </div>
+  </div>`;
+}
+
+function renderSeverity() {
+  root.innerHTML = `<div class="step-panel">
+    ${badge(5)}
+    <h2 class="step-title">How much are these symptoms affecting your daily life?</h2>
+    <p class="step-sub">Rate from 1 (mild) to 10 (severely limiting).</p>
+    <div class="slider-wrap">
+      <div class="slider-val" id="sevVal">${state.a.severity}</div>
+      <input type="range" min="1" max="10" value="${state.a.severity}" id="sevSlider"
+        oninput="state.a.severity=this.value;document.getElementById('sevVal').textContent=this.value;updateSevMsg()"/>
+      <div class="slider-labels"><span>1 — Mild</span><span>5 — Moderate</span><span>10 — Severe</span></div>
+    </div>
+    <div id="sevMsg" class="info-box"></div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="go(6)">Continue →</button>
+      <button class="btn-secondary" onclick="go(4)">← Back</button>
+    </div>
+  </div>`;
+  updateSevMsg();
+}
+function updateSevMsg() {
+  const v=parseInt(state.a.severity), el=document.getElementById('sevMsg'); if(!el)return;
+  if(v<=3) el.textContent='💙 Mild impact — a great time to start functional medicine proactively, before symptoms escalate.';
+  else if(v<=6) el.textContent='💛 Moderate impact — many patients at this level see significant improvement within 3-6 months of care.';
+  else if(v<=8) el.textContent='🧡 Significant impact — our root-cause approach is designed exactly for this: deeper answers beyond "your labs are normal."';
+  else el.textContent='❤️ We hear you. When symptoms are this disruptive, it\'s time for a different approach. You deserve real answers — and we\'re here to find them.';
+}
+
+function renderPriorCare() {
+  root.innerHTML = `<div class="step-panel">
+    ${badge(6)}
+    <h2 class="step-title">What types of care have you already tried?</h2>
+    <p class="step-sub">Select all that apply. Our team is experienced working with patients who\'ve been through multiple providers.</p>
+    <div class="chip-grid">
+      ${priorCare.map(t=>`<button class="chip ${state.a.priorCare.includes(t)?'selected':''}" onclick="toggleChip('priorCare','${t}',this)">${t}</button>`).join('')}
+    </div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="go(7)">Continue →</button>
+      <button class="btn-secondary" onclick="go(5)">← Back</button>
+    </div>
+  </div>`;
+}
+
+function renderModel() {
+  root.innerHTML = `<div class="step-panel">
+    ${badge(7)}
+    <h2 class="step-title">Which care model sounds right for you?</h2>
+    <p class="step-sub">All options start with a free curiosity call — no commitment needed.</p>
+    <div class="options-grid two-col">
+      ${models.map(o=>`<button class="option-card ${state.a.model===o.id?'selected':''}" onclick="sel('model','${o.id}',this)">
+        <div class="card-icon">${o.icon}</div><div class="card-label">${o.label}</div><div class="card-sub">${o.sub}</div>
+      </button>`).join('')}
+    </div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="if(state.a.model){go(8)}else{alert('Please select an option.')}">Continue →</button>
+      <button class="btn-secondary" onclick="go(6)">← Back</button>
+    </div>
+  </div>`;
+}
+
+function renderGoals() {
+  root.innerHTML = `<div class="step-panel">
+    ${badge(8)}
+    <h2 class="step-title">What are your most important health goals?</h2>
+    <p class="step-sub">Select your top priorities.</p>
+    <div class="options-grid two-col">
+      ${goals.map(o=>`<button class="option-card ${state.a.goals.includes(o.id)?'selected':''}" onclick="toggleCard('goals','${o.id}',this)">
+        <div class="card-icon">${o.icon}</div><div class="card-label">${o.label}</div><div class="card-sub">${o.sub}</div>
+      </button>`).join('')}
+    </div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="if(state.a.goals.length>0){go(9)}else{alert('Please select at least one goal.')}">Continue →</button>
+      <button class="btn-secondary" onclick="go(7)">← Back</button>
+    </div>
+  </div>`;
+}
+
+function renderHowHeard() {
+  root.innerHTML = `<div class="step-panel">
+    ${badge(9)}
+    <h2 class="step-title">How did you hear about Practical Healing?</h2>
+    <p class="step-sub">Helps us reach more people who need this care.</p>
+    <div class="options-grid two-col">
+      ${howHeard.map(h=>`<button class="option-card ${state.a.howHeard===h?'selected':''}" onclick="sel('howHeard',${JSON.stringify(h)},this)">
+        <div class="card-label">${h}</div>
+      </button>`).join('')}
+    </div>
+    <div class="form-group" style="margin-top:16px;">
+      <label>Anything else you'd like us to know? (optional)</label>
+      <textarea id="notesField" placeholder="Your health story, questions, or concerns...">${state.a.notes}</textarea>
+    </div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="state.a.notes=document.getElementById('notesField').value;go(10)">Continue →</button>
+      <button class="btn-secondary" onclick="go(8)">← Back</button>
+    </div>
+  </div>`;
+}
+
+function renderReview() {
+  const a=state.a, c=a.contact;
+  const con=concerns.find(o=>o.id===a.primaryConcern), dur=durations.find(o=>o.id===a.duration), mod=models.find(o=>o.id===a.model);
+  root.innerHTML = `<div class="step-panel">
+    ${badge(10)}
+    <h2 class="step-title">Review your assessment</h2>
+    <p class="step-sub">Confirm before we generate your personalized care recommendations.</p>
+    <div class="review-card"><span class="review-edit" onclick="go(1)">Edit</span><h4>Your Info</h4><p>${c.firstName} ${c.lastName}, Age ${c.age} | ${c.email}</p></div>
+    <div class="review-card"><span class="review-edit" onclick="go(2)">Edit</span><h4>Primary Concern</h4><p>${con?con.icon+' '+con.label:'Not selected'}</p></div>
+    <div class="review-card"><span class="review-edit" onclick="go(3)">Edit</span><h4>Symptoms (${a.symptoms.length})</h4><p>${a.symptoms.length?a.symptoms.join(', '):'None selected'}</p></div>
+    <div class="review-card"><span class="review-edit" onclick="go(4)">Edit</span><h4>Duration / Severity</h4><p>${dur?dur.label:'—'} | ${a.severity}/10</p></div>
+    <div class="review-card"><span class="review-edit" onclick="go(7)">Edit</span><h4>Care Model Interest</h4><p>${mod?mod.icon+' '+mod.label:'—'}</p></div>
+    <div class="review-card"><span class="review-edit" onclick="go(8)">Edit</span><h4>Goals</h4><p>${a.goals.map(g=>goals.find(o=>o.id===g)?.label).filter(Boolean).join(', ')||'None'}</p></div>
+    <div class="btn-group" style="margin-top:18px;">
+      <button class="btn-primary" onclick="go(11)" style="background:#4a9e7a;">✓ Get My Recommendations</button>
+      <button class="btn-secondary" onclick="go(9)">← Back</button>
+    </div>
+  </div>`;
+}
+
+function renderResults() {
+  updateProgress(TOTAL);
+  const a=state.a, c=a.contact, rs=recs(a);
+  root.innerHTML = `<div class="step-panel">
+    <div class="results-hero">
+      <div class="score-badge">✓ Assessment Complete</div>
+      <h2>Hi ${c.firstName} — here are your recommendations</h2>
+      <p>Based on your health story, we've identified ${rs.length} personalized recommendations to guide your next step.</p>
+    </div>
+    <div class="action-bar">
+      <button class="action-btn" onclick="copyResults()">📋 Copy Summary</button>
+      <button class="action-btn" onclick="window.print()">🖨️ Print</button>
+      <button class="action-btn" onclick="exportJSON()">⬇️ Export</button>
+      <button class="action-btn" onclick="startOver()">🔄 Start Over</button>
+    </div>
+    <h3 style="color:var(--sage-dark);margin-bottom:11px;font-size:0.97rem;">Your Personalized Care Recommendations</h3>
+    ${rs.map(r=>`<div class="rec-card">
+      <div class="rec-hdr"><div class="rec-ico">${r.icon}</div><div><div class="rec-match">${r.match}</div><div class="rec-title">${r.title}</div></div></div>
+      <div class="rec-body">${r.body}</div>
+    </div>`).join('')}
+    <div class="cta-section">
+      <h3>Ready to feel and function better?</h3>
+      <p>Start with a free, no-obligation Curiosity Call with a Practical Healing provider. They'll answer your questions and help you find the right fit.</p>
+      <div class="cta-btns">
+        <a href="https://practicalhealingcenter.com/scheduling-make-an-appointment/" target="_blank" class="cta-main">📅 Schedule Free Curiosity Call</a>
+        <a href="tel:3305912444" class="cta-alt">📞 Call (330) 591-2444</a>
+      </div>
+      <p style="margin-top:12px;font-size:0.76rem;opacity:0.6;">info@practicalhealingcenter.com | Wadsworth OH · Willoughby OH · Sewickley PA</p>
+    </div>
+    <div class="disclaimer-mini" style="margin-top:14px;">This assessment is for informational purposes only and does not constitute medical advice or diagnosis. Always consult a qualified healthcare provider. For emergencies call 911.</div>
+  </div>`;
+}
+
+// Helpers
+function sel(field, val, el) {
+  state.a[field]=val;
+  el.closest('.options-grid').querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function toggleCard(field, val, el) {
+  const arr=state.a[field], i=arr.indexOf(val);
+  if(i>=0){arr.splice(i,1);el.classList.remove('selected');}else{arr.push(val);el.classList.add('selected');}
+}
+function toggleChip(field, val, el) {
+  const arr=state.a[field], i=arr.indexOf(val);
+  if(i>=0){arr.splice(i,1);el.classList.remove('selected');}else{arr.push(val);el.classList.add('selected');}
+}
+function save() { try{localStorage.setItem('phc_assessment',JSON.stringify(state));}catch(e){} }
+function load() { try{const s=localStorage.getItem('phc_assessment');if(s){const d=JSON.parse(s);if(d.a)Object.assign(state.a,d.a);}}catch(e){} }
+function copyResults() {
+  const a=state.a,c=a.contact;
+  const txt=`Practical Healing Center – Health Assessment\nName: ${c.firstName} ${c.lastName}, Age ${c.age}\nEmail: ${c.email}\nConcern: ${a.primaryConcern}\nSymptoms: ${a.symptoms.join(', ')}\nDuration: ${a.duration} | Severity: ${a.severity}/10\nModel: ${a.model} | Goals: ${a.goals.join(', ')}\nSchedule: https://practicalhealingcenter.com/scheduling-make-an-appointment/\nPhone: (330) 591-2444`;
+  navigator.clipboard.writeText(txt).then(()=>alert('Copied!')).catch(()=>alert('Use Print instead.'));
+}
+function exportJSON() {
+  const blob=new Blob([JSON.stringify({assessment:state.a,generated:new Date().toISOString(),practice:'Practical Healing Center'},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`phc-assessment-${state.a.contact.firstName||'results'}.json`;a.click();
+}
+function startOver() {
+  if(!confirm('Start over? Your current progress will be cleared.'))return;
+  state.a={contact:{firstName:'',lastName:'',email:'',phone:'',age:''},primaryConcern:'',symptoms:[],duration:'',severity:5,priorCare:[],model:'',goals:[],howHeard:'',notes:''};
+  try{localStorage.removeItem('phc_assessment');}catch(e){}
+  go(0);
+}
+
+load(); go(state.step);
+</script>
+</body>
+</html>

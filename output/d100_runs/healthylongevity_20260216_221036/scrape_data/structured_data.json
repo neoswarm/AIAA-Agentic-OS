@@ -1,0 +1,206 @@
+{
+  "practice": {
+    "brand_name": { "value": "Healthy Longevity Clinic", "confidence": "high" },
+    "legal_name": { "value": "Healthy Longevity Clinic", "confidence": "high" },
+    "tagline": { "value": "First-Class Longevity", "confidence": "high" },
+    "website": "https://www.healthylongevity.clinic/",
+    "booking_url": "https://www.healthylongevity.clinic/contact",
+    "phone": "+1 561-961-0340",
+    "founder": "Petr Sramek",
+    "founder_title": "CEO / Founder",
+    "description": "Premium longevity clinic offering personalized programs to extend healthspan and reduce biological age. Combines cutting-edge diagnostics, advanced therapies, and expert-led protocols to help clients live longer, stronger, and healthier lives."
+  },
+  "locations": [
+    {
+      "city": "Boca Raton",
+      "state": "Florida",
+      "country": "United States",
+      "primary": true,
+      "description": "Best longevity clinic in South Florida"
+    },
+    {
+      "city": "Miami",
+      "state": "Florida",
+      "country": "United States",
+      "primary": false,
+      "description": "Longevity Lounge at The Moore, Miami's Design District"
+    },
+    {
+      "city": "Prague",
+      "country": "Czech Republic",
+      "primary": false,
+      "description": "European location"
+    }
+  ],
+  "services": [
+    {
+      "name": "360 Optimization",
+      "category": "longevity_program",
+      "description": "Comprehensive assessments and personalized interventions for overall lifespan and healthspan enhancement. Advanced diagnostics, lifestyle modifications, nutritional guidance, cutting-edge therapies.",
+      "highlight": true
+    },
+    {
+      "name": "Weight Loss",
+      "category": "longevity_program",
+      "description": "Holistic approach to healthy weight achievement with customized nutrition, exercise, and behavioral strategies."
+    },
+    {
+      "name": "Hormone Balance",
+      "category": "longevity_program",
+      "description": "Bioidentical hormone replacement therapy, detailed hormonal assessments, lifestyle changes, nutritional support."
+    },
+    {
+      "name": "Regenerative Medicine",
+      "category": "longevity_program",
+      "description": "Stem cell therapy, PRP, and mFAT treatments to enhance natural healing processes.",
+      "highlight": true
+    },
+    {
+      "name": "Heart Health",
+      "category": "longevity_program",
+      "description": "Advanced cardiovascular testing, lifestyle modifications, and medical treatments to optimize heart function."
+    },
+    {
+      "name": "Brain Health",
+      "category": "longevity_program",
+      "description": "Advanced neuroimaging, cognitive testing, and therapies to support mental acuity and prevent cognitive decline."
+    },
+    {
+      "name": "Women's Health",
+      "category": "longevity_program",
+      "description": "Comprehensive care for hormonal balance, reproductive health, bone density at all life stages."
+    },
+    {
+      "name": "Men's Health",
+      "category": "longevity_program",
+      "description": "Hormonal health, cardiovascular health, sexual function with personalized care plans."
+    },
+    {
+      "name": "Sexual Health",
+      "category": "longevity_program",
+      "description": "Improving sexual function and well-being through hormone therapy, regenerative treatments, lifestyle changes."
+    },
+    {
+      "name": "Sleep Improvement",
+      "category": "longevity_program",
+      "description": "Addresses sleep disorders with behavioral therapy, lifestyle modifications, and medical interventions."
+    }
+  ],
+  "diagnostics": [
+    "Comprehensive Longevity Bloodwork Panels (23 panels)",
+    "Genetic Health Predispositions (DNA testing)",
+    "Body Composition Testing",
+    "Cardiopulmonary Exercise Testing",
+    "DEXA Bone Health Testing",
+    "Advanced Hormone Analysis",
+    "Brain MRI (BrainKey AI)",
+    "Cognitive Health Assessment (Creyos)",
+    "Gut Microbiome Analysis",
+    "Telomere Length Measurement",
+    "Biological Age Test (epigenetic)",
+    "Mitochondrial Health Test",
+    "Cancer Screening (50+ cancer types)",
+    "Advanced Cardiovascular Health Testing (AI-powered)",
+    "Whole Body MRI",
+    "Continuous Glucose Monitoring",
+    "Heavy Metals Testing"
+  ],
+  "treatments": [
+    "Therapeutic Plasma Exchange (TPE)",
+    "Regenerative Medicine / Cell Therapy",
+    "Hormone Replacement Therapy (bioidentical)",
+    "Targeted Supplementation",
+    "Peptide Therapy",
+    "Personalized Longevity Protocols",
+    "Hyperconcentrated PRP",
+    "IV Therapy (customized nutrient blends)",
+    "Pharmaceuticals (FDA-approved longevity drugs)",
+    "Sexual Wellness Therapy",
+    "Dermapen Microneedling",
+    "Botox / Dysport",
+    "Nutritional & Health Coaching"
+  ],
+  "conditions_treated": [
+    "Biological aging",
+    "Hormonal imbalances",
+    "Cardiovascular disease risk",
+    "Cognitive decline",
+    "Metabolic dysfunction",
+    "Weight management",
+    "Sleep disorders",
+    "Sexual dysfunction",
+    "Cancer screening",
+    "Mitochondrial dysfunction",
+    "Inflammatory conditions",
+    "Bone density loss",
+    "Gut microbiome imbalance"
+  ],
+  "ideal_patient": {
+    "demographics": "High-net-worth individuals aged 40-70, health-conscious executives, athletes, and entrepreneurs",
+    "psychographics": "Performance-oriented, proactive about longevity, willing to invest significantly in health optimization",
+    "budget": "$10,000 - $25,000 per year for annual programs",
+    "geography": "South Florida (Boca Raton, Miami), global clients willing to travel"
+  },
+  "business_metrics": {
+    "clients": "900+ total visits, 200+ active clients",
+    "mrr": "$300,000 estimated",
+    "staff": "36 longevity professionals",
+    "scientific_partners": "18 leading scientific institutions",
+    "authority_score": 34,
+    "organic_traffic": "18,900/month",
+    "organic_keywords": 2600,
+    "backlinks": 1100,
+    "ref_domains": 230,
+    "ai_visibility": 16,
+    "ai_mentions": 34
+  },
+  "differentiators": [
+    "36 longevity professionals on staff",
+    "18 scientific institution partnerships",
+    "Biological age improvement of 5-15 years with science",
+    "23 comprehensive diagnostic panels",
+    "15 advanced treatment modalities",
+    "BrainKey AI-powered brain MRI analysis with 3D brain prints",
+    "Multi-cancer early detection (50+ cancer types)",
+    "Longevity Roadmap mobile app for 24/7 client access",
+    "Dual US-Europe presence (Boca Raton, Miami, Prague)",
+    "Elite athlete clientele (UFC champion, Olympic champion)"
+  ],
+  "social_proof": [
+    {
+      "name": "Jiri Prochazka",
+      "title": "Czech Mixed Martial Artist, UFC Champion",
+      "quote": "I greatly appreciate the connection with the Healthy Longevity Clinic as it allows me to delve deeper into gathering information about my physical condition, obtaining comprehensive genetic data, and conducting blood analyses."
+    },
+    {
+      "name": "Lukas Krpalek",
+      "title": "Czech Olympic Champion in Judo",
+      "quote": "I underwent a complete health analysis to learn more about my body. I would definitely recommend it to anyone who wants to achieve higher performance."
+    },
+    {
+      "name": "Roman Sebrle",
+      "title": "World's Greatest Athlete — Wall Street Journal",
+      "quote": "As a decathlete, I have always believed in versatility, which is why I underwent a comprehensive examination at HealthyLongevity.clinic to develop an optimal program of regeneration and lifestyle management."
+    }
+  ],
+  "brand_colors": {
+    "primary": "#13141F",
+    "secondary": "#1E2130",
+    "accent": "#7CC06B",
+    "accent_blue": "#0048FF",
+    "card_bg": "#34394D",
+    "light_bg": "#F2F3FA",
+    "light_card": "#E4E7F5",
+    "text_light": "#FFFFFF",
+    "text_dark": "#13141F"
+  },
+  "semrush_top_keywords": [
+    { "keyword": "longevity", "position": 1, "volume": 40500, "cpc": 3.09 },
+    { "keyword": "longevity definition", "position": 1, "volume": 12100, "cpc": 0.04 },
+    { "keyword": "iv therapy", "position": 4, "volume": 27100, "cpc": 3.29 },
+    { "keyword": "longevity meaning", "position": 4, "volume": 9900, "cpc": 0.04 },
+    { "keyword": "healthy longevity clinic", "position": 1, "volume": 140, "cpc": 3.01 },
+    { "keyword": "intravenous drip therapy", "position": 1, "volume": 1600, "cpc": 2.60 },
+    { "keyword": "chronological age", "position": 4, "volume": 3600, "cpc": 1.70 }
+  ]
+}

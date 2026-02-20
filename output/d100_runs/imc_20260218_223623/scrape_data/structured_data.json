@@ -1,0 +1,202 @@
+{
+  "practice": {
+    "brand_name": {"value": "Integrative Medical Clinic of North Carolina", "confidence": "high"},
+    "legal_name": {"value": "Integrative Medical Clinic of North Carolina, PLLC", "confidence": "high"},
+    "abbreviation": {"value": "IMCNC", "confidence": "high"},
+    "tagline": {"value": "Holistic Medicine between Chapel Hill & Durham, North Carolina", "confidence": "high"},
+    "specialty": {"value": "Integrative and Functional Medicine", "confidence": "high"},
+    "founded": {"value": null, "confidence": "low"},
+    "ownership": {"value": "Physician-owned; Julie McGregor MD and Will Pendergraft MD PhD, co-founders", "confidence": "high"},
+    "model": {"value": "Cash-pay only; non-insurance practice (no insurance for office visits)", "confidence": "high"},
+    "website": {"value": "https://imcnorthcarolina.com", "confidence": "high"},
+    "email": {"value": "hello@imcnorthcarolina.com", "confidence": "high"},
+    "unique_distinction": {"value": "Only Low Dose Allergy (LDA) program in North Carolina. One of few integrative clinics serving Chapel Hill-Durham metro with full MedSpa. May be the only medical clinic in the country that also serves as an art gallery.", "confidence": "high"}
+  },
+  "contact": {
+    "phone": {"value": "(984) 999-0902", "confidence": "high"},
+    "medspa_phone": {"value": "(984) 999-9558", "confidence": "high"},
+    "infusion_nurse_phone": {"value": "(984) 207-4861", "confidence": "high"},
+    "new_patient_coordinator_phone": {"value": "(984) 280-3509", "confidence": "high"},
+    "new_patient_coordinator_email": {"value": "demarcus@imcnorthcarolina.com", "confidence": "high"},
+    "social": {"value": ["Facebook", "LinkedIn", "Instagram"], "confidence": "high"}
+  },
+  "locations": [
+    {
+      "name": {"value": "Integrative Medical Clinic of North Carolina", "confidence": "high"},
+      "address": {"value": "5915 Farrington Rd STE 106, Chapel Hill, NC 27517", "confidence": "high"},
+      "type": {"value": "Primary clinic + MedSpa", "confidence": "high"},
+      "hours": {"value": "Mon-Thu: 8am-12pm, 1pm-5pm; Fri-Sun: Closed", "confidence": "high"},
+      "telehealth": {"value": true, "confidence": "high"}
+    }
+  ],
+  "providers": [
+    {
+      "name": {"value": "Julie McGregor, MD", "confidence": "high"},
+      "role": {"value": "Physician and Co-Founder", "confidence": "high"},
+      "credentials": {"value": "MD", "confidence": "high"}
+    },
+    {
+      "name": {"value": "Will Pendergraft, MD, PhD", "confidence": "high"},
+      "role": {"value": "Co-Founder", "confidence": "high"},
+      "credentials": {"value": "MD, PhD; Board-certified internal medicine and nephrology; specialized training in autoimmune and difficult-to-diagnose diseases", "confidence": "high"}
+    },
+    {
+      "name": {"value": "Karen Saylor, FNP-BC", "confidence": "high"},
+      "role": {"value": "Family Nurse Practitioner; facilitates the only LDA program in NC", "confidence": "high"},
+      "credentials": {"value": "FNP-BC", "confidence": "high"}
+    },
+    {
+      "name": {"value": "Addie Skow, AGNP-C, MSN, RN", "confidence": "high"},
+      "role": {"value": "Adult Gerontology Nurse Practitioner", "confidence": "high"},
+      "credentials": {"value": "AGNP-C, MSN, RN", "confidence": "high"}
+    },
+    {
+      "name": {"value": "Christine Phillips, BSN, RN, FMCHC", "confidence": "high"},
+      "role": {"value": "Registered Nurse / Functional Medicine Health Coach", "confidence": "high"},
+      "credentials": {"value": "BSN, RN, FMCHC", "confidence": "high"}
+    },
+    {
+      "name": {"value": "Jessica Mollmark, BSN, BS, RN-BC", "confidence": "high"},
+      "role": {"value": "Clinical Nurse Lead", "confidence": "high"},
+      "credentials": {"value": "BSN, BS, RN-BC", "confidence": "high"}
+    },
+    {
+      "name": {"value": "Meredith Lauerman, BSN, RN", "confidence": "high"},
+      "role": {"value": "Infusion Nurse", "confidence": "high"},
+      "credentials": {"value": "BSN, RN", "confidence": "high"}
+    }
+  ],
+  "services": [
+    {"name": {"value": "Functional Medicine / Integrative Primary Care", "confidence": "high"}, "description": {"value": "Whole-person, root-cause medicine. Board-certified physicians with integrative training.", "confidence": "high"}},
+    {"name": {"value": "Hormone Imbalance & Bioidentical HRT", "confidence": "high"}, "description": {"value": "Bioidentical Hormone Replacement Therapy for hormonal imbalances including perimenopause and menopause.", "confidence": "high"}},
+    {"name": {"value": "Gut Health", "confidence": "high"}, "description": {"value": "Comprehensive gut health diagnosis and treatment.", "confidence": "high"}},
+    {"name": {"value": "Lyme Disease & Tick-Borne Illness", "confidence": "high"}, "description": {"value": "Lyme disease and other tick-borne illness diagnosis and treatment.", "confidence": "high"}},
+    {"name": {"value": "Mold / Mycotoxin Illness", "confidence": "high"}, "description": {"value": "Mycotoxin illness and mold exposure treatment.", "confidence": "high"}},
+    {"name": {"value": "Autoimmune Disease", "confidence": "high"}, "description": {"value": "Comprehensive autoimmune disease management.", "confidence": "high"}},
+    {"name": {"value": "Weight Loss Management", "confidence": "high"}, "description": {"value": "Including GLP-1/Tirzepatide therapy.", "confidence": "high"}},
+    {"name": {"value": "Low Dose Allergen (LDA) Immunotherapy", "confidence": "high"}, "description": {"value": "Only LDA program in North Carolina, facilitated by Karen Saylor FNP-BC.", "confidence": "high"}},
+    {"name": {"value": "Labs & Specialty Testing", "confidence": "high"}, "description": {"value": "Comprehensive and specialty testing beyond traditional labs.", "confidence": "high"}},
+    {"name": {"value": "Functional Medicine Health Coaching", "confidence": "high"}, "description": {"value": "60-min ($125) and 90-min ($180) coaching sessions.", "confidence": "high"}},
+    {"name": {"value": "IV Vitamin Therapy / Infusion Clinic", "confidence": "high"}, "description": {"value": "Myers' Cocktail, NAD+, High-Dose Vitamin C, Glutathione, Energy Boost, Immunity, custom drips. First-visit specials $99/$149.", "confidence": "high"}},
+    {"name": {"value": "SoftWave TRT", "confidence": "high"}, "description": {"value": "SoftWave Tissue Regeneration Therapy for healing.", "confidence": "high"}},
+    {"name": {"value": "Red Light Therapy (JOOVV)", "confidence": "high"}, "description": {"value": "JOOVV Red Light Therapy. $80/month unlimited membership.", "confidence": "high"}},
+    {"name": {"value": "Clear Light Sauna", "confidence": "high"}, "description": {"value": "Clear Light infrared sauna. $100/month unlimited membership.", "confidence": "high"}},
+    {"name": {"value": "Intramuscular Injections", "confidence": "high"}, "description": {"value": "Fat Burner Plus ($50), B12 ($35), Vitamin D ($35), Glutathione ($35), GLP-1 ($50+).", "confidence": "high"}},
+    {"name": {"value": "Nephrology", "confidence": "high"}, "description": {"value": "Nephrology services (Will Pendergraft MD PhD board-certified).", "confidence": "high"}}
+  ],
+  "conditions": [
+    {"name": {"value": "Gut Health / Digestive Issues", "confidence": "high"}},
+    {"name": {"value": "Fatigue / Chronic Fatigue", "confidence": "high"}},
+    {"name": {"value": "Inflammation", "confidence": "high"}},
+    {"name": {"value": "Mold / Mycotoxin Illness", "confidence": "high"}},
+    {"name": {"value": "Lyme Disease", "confidence": "high"}},
+    {"name": {"value": "Tick-Borne Illness", "confidence": "high"}},
+    {"name": {"value": "Epstein-Barr Virus (EBV)", "confidence": "high"}},
+    {"name": {"value": "Candidiasis / Chronic Infections", "confidence": "high"}},
+    {"name": {"value": "Nutrient Deficiencies", "confidence": "high"}},
+    {"name": {"value": "Hypermobility / EDS (Ehlers-Danlos Syndrome)", "confidence": "high"}},
+    {"name": {"value": "Metal Toxicity / Heavy Metals", "confidence": "high"}},
+    {"name": {"value": "Thyroid Issues", "confidence": "high"}},
+    {"name": {"value": "Diabetes / Blood Sugar Issues", "confidence": "high"}},
+    {"name": {"value": "Adrenal Fatigue", "confidence": "high"}},
+    {"name": {"value": "Hormone Imbalance", "confidence": "high"}},
+    {"name": {"value": "Perimenopause / Menopause", "confidence": "high"}},
+    {"name": {"value": "Bioidentical Hormone Replacement", "confidence": "high"}},
+    {"name": {"value": "Food Sensitivities / Allergies", "confidence": "high"}},
+    {"name": {"value": "Low Dose Allergen Immunotherapy", "confidence": "high"}},
+    {"name": {"value": "Autoimmune Diseases", "confidence": "high"}},
+    {"name": {"value": "Mast Cell Activation Syndrome (MCAS)", "confidence": "high"}},
+    {"name": {"value": "Weight Management / Obesity", "confidence": "high"}},
+    {"name": {"value": "Nephrology / Kidney Issues", "confidence": "high"}},
+    {"name": {"value": "Environmental Illness", "confidence": "high"}},
+    {"name": {"value": "Migraines / Headaches", "confidence": "high"}},
+    {"name": {"value": "Anxiety / Mood Issues", "confidence": "medium"}},
+    {"name": {"value": "Insomnia / Sleep Issues", "confidence": "medium"}},
+    {"name": {"value": "Post-COVID / Long COVID", "confidence": "medium"}}
+  ],
+  "ideal_patient": {
+    "who_they_serve": {"value": "Adults (and some children) who have been failed by conventional medicine. Patients with complex, chronic, difficult-to-diagnose conditions who want a whole-person, root-cause approach. Health-conscious individuals who are cash-pay and value personalized, investigative medicine. Patients traveling from outside Chapel Hill/Durham due to specialty expertise (Lyme, mold, LDA, MCAS).", "confidence": "high"},
+    "demographics": {"value": "Adults 30-65+, predominantly women; senior citizens welcomed; some pediatric; telemedicine available", "confidence": "medium"},
+    "psychographic": {"value": "Frustrated with conventional medicine, proactive health seekers, willing to invest in root-cause solutions, health-literate, open to integrative/holistic approaches", "confidence": "high"}
+  },
+  "clinical_approach": {
+    "philosophy": {"value": "H.E.A.L. framework: Holistic, Effective, Agents of Change, Lifelong Learners. Whole-person care. Root cause investigation over symptom masking. Combines alternative/non-pharmaceutical with conventional when needed.", "confidence": "high"},
+    "testing": {"value": "Comprehensive specialty testing beyond traditional labs. Two-visit model: first visit assessment + testing, second visit lab review + treatment plan.", "confidence": "high"},
+    "team_approach": {"value": "Multi-disciplinary team of physicians, NPs, RN health coach, infusion nurses, SoftWave therapist", "confidence": "high"}
+  },
+  "patient_journey": {
+    "first_contact": {"value": "Self-schedule online via 'Book An Appointment' button or select-provider page", "confidence": "high"},
+    "new_patient_process": {"value": "1. Self-schedule online. 2. Call from New Patient Coordinator DeMarcus Taylor. 3. Credit card on file required (5 days). 4. Pay in advance. 5. First visit: history, assessment, testing options. 6. Second visit: lab review, treatment plan.", "confidence": "high"},
+    "memberships": {
+      "available": true,
+      "plans": [
+        {"name": "Red Light Therapy Unlimited", "price": "$80/month"},
+        {"name": "Clear Light Sauna Unlimited", "price": "$100/month"},
+        {"name": "Red Light + Sauna Unlimited", "price": "$180/month"}
+      ]
+    },
+    "booking_urls": {
+      "provider": "https://imcnorthcarolina.com/select-provider",
+      "medspa": "https://imcnc.as.me/schedule/62f6f8b9"
+    }
+  },
+  "pricing": {
+    "model": {"value": "Cash-pay only. No insurance accepted for office visits. Insurance applies to labs, imaging, prescriptions. OON claims filed via Reimbursify.", "confidence": "high"},
+    "insurance_accepted": {"value": "None for office visits. Lab/imaging/Rx covered by patient's insurance. Reimbursify partnership for OON filing.", "confidence": "high"},
+    "hsa_fsa": {"value": "Not specified", "confidence": "low"},
+    "prices": {
+      "new_patient_visit": "$400",
+      "established_patient_visit": "$290",
+      "annual_physical": "$290",
+      "coaching_60min": "$125",
+      "coaching_90min": "$180",
+      "nurse_visit": "$50",
+      "glp1_injection": "$50+",
+      "b12_injection": "$35",
+      "vitamin_d_injection": "$35",
+      "fat_burner_injection": "$50",
+      "iv_first_visit_special_1": "$99",
+      "iv_first_visit_special_2": "$149",
+      "myers_cocktail": "$175",
+      "nad_100g": "$175",
+      "high_dose_vitamin_c": "$150",
+      "red_light_membership": "$80/month",
+      "sauna_membership": "$100/month",
+      "red_light_plus_sauna_membership": "$180/month",
+      "low_dose_allergy_injections": "$250"
+    }
+  },
+  "trust_signals": {
+    "credentials": {"value": "Board-certified internal medicine and nephrology physicians; specialized training in autoimmune and difficult-to-diagnose diseases; FMCHC-certified health coach", "confidence": "high"},
+    "distinctions": {"value": "Only LDA program in North Carolina; multi-disciplinary team of 10; telemedicine available; art gallery clinic", "confidence": "high"},
+    "patient_testimonials": {
+      "count": 3,
+      "themes": ["holistic approach", "best in area", "flew across the country", "exceptional physicians", "found answers after decades of searching", "seniors welcomed"]
+    },
+    "social_proof": {"value": "Patients travel from out of state; decades-long patient relationships", "confidence": "high"}
+  },
+  "seo_intel": {
+    "primary_keywords": {"value": ["integrative medicine Chapel Hill", "functional medicine Chapel Hill", "integrative medicine North Carolina", "holistic medicine Durham NC", "Lyme disease treatment NC", "mold illness treatment NC", "IV therapy Chapel Hill", "bioidentical hormone therapy NC", "low dose allergen immunotherapy NC"], "confidence": "high"},
+    "location_modifiers": {"value": ["Chapel Hill", "Durham", "North Carolina", "Raleigh", "Cary", "Carrboro", "Pittsboro", "Research Triangle"], "confidence": "high"},
+    "conversion_ctas": {"value": ["Book an Appointment", "Schedule Now", "Select Provider", "Book Online"], "confidence": "high"},
+    "competitive_differentiators": {"value": ["Only LDA program in NC", "Physician-founded and led", "Board-certified internal medicine + nephrology", "Multi-disciplinary team", "Full MedSpa on-site", "Art gallery clinic", "Cash-pay transparency", "Telemedicine available"], "confidence": "high"}
+  },
+  "brand_colors": {
+    "primary": "#4EC4CF",
+    "primary_name": "Teal/Turquoise",
+    "secondary": "#231F20",
+    "secondary_name": "Near Black / Dark Charcoal",
+    "body_text": "#333333",
+    "background": "#FEFFFF",
+    "accent": "#4EC4CF",
+    "note": "Extracted from live CSS - rgb(78, 196, 207) is the dominant brand teal used for all links and CTAs"
+  },
+  "missing_fields": [
+    "Google review count/rating",
+    "Year founded",
+    "HSA/FSA acceptance details",
+    "Exact provider bio details",
+    "Blog content",
+    "Specific telemedicine states served"
+  ]
+}

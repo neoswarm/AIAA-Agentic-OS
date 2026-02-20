@@ -2,9 +2,9 @@
 
 ## METADATA
 - **Skill Name**: Dream 100 Health Assessment App Builder
-- **Version**: 1.0
+- **Version**: 2.0
 - **Category**: Interactive Asset Generation
-- **API Requirements**: Claude Opus 4.6 (native Claude Code)
+- **API Requirements**: Claude Sonnet 4.6 (latest) (native Claude Code)
 - **Parent Skill**: SKILL_D100_orchestrator
 
 ---
@@ -57,83 +57,43 @@ const context = {
 
 ---
 
-### STEP 2: ASK MISSING QUESTIONS
+### STEP 2: AUTO-COMPUTE ALL CONFIG (v2.0 - NO user questions)
 
-**Only ask questions NOT answerable from JSON:**
+**All 12 configuration values are computed from structured JSON:**
 
-```
-═══════════════════════════════════════════════════════════
-HEALTH ASSESSMENT APP - Configuration Required
-═══════════════════════════════════════════════════════════
+```javascript
+const appConfig = {
+  // A) CONVERSION & BOOKING INTENT
+  primary_objective: "New patient consultation",  // Default for all healthcare
+  geographic_constraints: structured_json.locations.length > 1 ? "Multiple locations" : "Single location",
+  social_proof: structured_json.trust_signals.testimonials.present ? "Yes" : "No",
 
-I need to ask a few questions to build the health assessment app.
-(Answering from JSON where possible - only asking what's missing)
+  // B) ASSESSMENT DEPTH & STRUCTURE
+  assessment_depth: "Standard",  // Default: 10-12 min, ~25 questions
+  required_fields: ["name", "email", "phone"],  // Standard default
 
-A) CONVERSION & BOOKING INTENT
-1. Primary booking objective:
-   [ ] New patient consultation
-   [ ] Specific service booking
-   [ ] General appointment
+  // C) BOOKING PAYLOAD RULES
+  redirect_method: "Copy-to-clipboard + redirect",  // Most reliable
+  payload_fields: ["name", "email", "phone", "primary_concern", "symptoms", "duration", "severity"],
+  payload_char_limit: 500,  // Default
 
-2. Geographic/location constraints to surface?
-   [Text input or "None"]
+  // D) END-STATE BEHAVIOR
+  end_state: "All of the above",  // Review + recommendations + next steps
+  booking_routing: "One link for all services",  // Use booking_url
 
-3. Social proof allowed?
-   [ ] Yes (paste exact copy below)
-   [ ] No
-
-B) ASSESSMENT DEPTH & STRUCTURE
-4. Desired assessment depth:
-   [ ] Quick (5-7 min, ~15 questions)
-   [ ] Standard (10-12 min, ~25 questions)
-   [ ] Comprehensive (15-20 min, ~40 questions)
-
-5. Required vs optional fields:
-   Required: Name, Email, Phone (default)
-   Additional required: [User specifies or "None"]
-
-C) BOOKING PAYLOAD RULES
-6. Redirect method:
-   [ ] URL query parameters (e.g., ?name=John&email=...)
-   [ ] Single encoded summary parameter (e.g., ?summary=base64...)
-   [ ] Copy-to-clipboard + redirect
-
-7. Fields allowed in booking payload:
-   [Default: name, email, phone, primary_concern]
-   [User can add: symptoms, medications, insurance, etc.]
-
-8. Character limit for booking payload:
-   [Default: 500 characters]
-
-D) END-STATE BEHAVIOR
-9. What should users see before redirect?
-   [ ] Review & edit their responses
-   [ ] Next steps + urgency notice
-   [ ] Service recommendation
-   [ ] All of the above
-
-10. Booking routing:
-    [ ] One link for all services
-    [ ] Conditional routing per service/condition
-
-E) BRANDING & LEGAL
-11. Brand colors: ✓ Already extracted
-12. Mandatory legal/privacy text:
-    [Paste verbatim OR "Use standard healthcare disclaimer"]
-
-═══════════════════════════════════════════════════════════
+  // E) BRANDING & LEGAL
+  brand_colors: brand_colors,  // From extraction
+  legal_text: "Use standard healthcare disclaimer"  // Default
+};
 ```
 
-**Wait for user responses. Validate each answer before proceeding.**
-
-**Store responses in:**
-`{output_directory}/app/config.json`
+**Save computed config to:** `{output_directory}/app/config.json`
 
 ---
 
-### STEP 3: BUILD APP WITH CLAUDE OPUS 4.6
+### STEP 3: BUILD APP WITH CLAUDE (NATIVE)
 
-**Use:** Native Claude Code model (Claude Opus 4.6)
+**Use:** Native Claude Code model (Claude Opus 4.6 (latest))
 
 **Prompt:**
 
@@ -409,7 +369,7 @@ NEXT STEPS:
 ## VERSION HISTORY
 
 **1.0** - Initial release
-- Claude Opus 4.6 single-file HTML generation
+- Claude Opus 4.6 (latest) single-file HTML generation
 - WCAG-compliant, mobile-first design
 - Multi-select chip interactions
 - Booking redirect with configurable payload
