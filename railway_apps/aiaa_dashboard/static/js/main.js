@@ -64,6 +64,61 @@ function showToast(message, type = 'info', duration = 3000) {
     }, duration);
 }
 
+/**
+ * Show a toast notification with a retry button
+ * @param {string} message - Message to display
+ * @param {Function} retryFn - Function to call on retry
+ * @param {number} duration - Duration in ms (default: 10000)
+ */
+function showToastWithRetry(message, retryFn, duration = 10000) {
+    // Remove existing toasts
+    const existingToast = document.querySelector('.toast-notification');
+    if (existingToast) existingToast.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification toast-error';
+
+    toast.innerHTML = `
+        <div class="toast-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </div>
+        <div class="toast-content">
+            <div class="toast-message">${message}</div>
+            <button class="toast-retry-btn" onclick="this.textContent='Retrying...';this.disabled=true;">
+                Retry
+            </button>
+        </div>
+        <button class="toast-close" onclick="this.closest('.toast-notification').remove()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+    `;
+
+    // Wire up retry button
+    const retryBtn = toast.querySelector('.toast-retry-btn');
+    retryBtn.addEventListener('click', function() {
+        toast.remove();
+        if (typeof retryFn === 'function') retryFn();
+    });
+
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('toast-show'), 10);
+
+    // Auto remove after longer duration (user may need time to retry)
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.classList.remove('toast-show');
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, duration);
+}
+
 
 // ==============================================================================
 // Confirmation Modal
@@ -135,30 +190,95 @@ function closeConfirmModal(result) {
 // ==============================================================================
 
 /**
- * Fetch API wrapper with error handling
+ * Fetch API wrapper with error handling, timeout detection, and auto-toast
  * @param {string} url - URL to fetch
- * @param {Object} options - Fetch options
+ * @param {Object} options - Fetch options plus custom options:
+ *   - timeout {number} - Request timeout in ms (default: 15000)
+ *   - showError {boolean} - Auto-show toast on error (default: true)
+ *   - retryable {boolean} - Show retry button for network errors (default: true)
  * @returns {Promise<any>} - Response data
  */
 async function fetchAPI(url, options = {}) {
+    // Extract custom options
+    const {
+        timeout = 15000,
+        showError = true,
+        retryable = true,
+        ...fetchOptions
+    } = options;
+
+    // Set up timeout via AbortController
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
     try {
         const response = await fetch(url, {
             headers: {
                 'Content-Type': 'application/json',
-                ...options.headers
+                ...fetchOptions.headers
             },
-            ...options
+            signal: controller.signal,
+            ...fetchOptions
         });
-        
+
+        clearTimeout(timeoutId);
         const data = await response.json();
-        
+
         if (!response.ok) {
-            throw new Error(data.error || `HTTP ${response.status}`);
+            // Parse structured error format from API v2: {status, message, errors}
+            const errorMessage = data.message || data.error || `Request failed (${response.status})`;
+            const error = new Error(errorMessage);
+            error.status = response.status;
+            error.data = data;
+            error.fieldErrors = data.errors || null;
+
+            if (showError) {
+                showToast(errorMessage, 'error', 5000);
+            }
+            throw error;
         }
-        
+
         return data;
     } catch (error) {
-        console.error('API Error:', error);
+        clearTimeout(timeoutId);
+
+        // Network timeout (AbortError from AbortController)
+        if (error.name === 'AbortError') {
+            const msg = 'Request timed out. Check your connection and try again.';
+            if (showError) {
+                showToastWithRetry(msg, function() {
+                    return fetchAPI(url, options);
+                });
+            }
+            const timeoutError = new Error(msg);
+            timeoutError.isTimeout = true;
+            throw timeoutError;
+        }
+
+        // Network error (fetch failed entirely -- no internet, DNS, CORS)
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+            const msg = 'Network error. Check your connection and try again.';
+            if (showError && retryable) {
+                showToastWithRetry(msg, function() {
+                    return fetchAPI(url, options);
+                });
+            } else if (showError) {
+                showToast(msg, 'error', 5000);
+            }
+            const netError = new Error(msg);
+            netError.isNetworkError = true;
+            throw netError;
+        }
+
+        // Already handled API errors (from !response.ok above) -- don't double-toast
+        if (error.status) {
+            throw error;
+        }
+
+        // Unexpected errors
+        if (showError) {
+            showToast(error.message || 'Something went wrong', 'error');
+        }
         throw error;
     }
 }
@@ -404,6 +524,7 @@ function debounce(func, wait = 300) {
 // ==============================================================================
 
 window.showToast = showToast;
+window.showToastWithRetry = showToastWithRetry;
 window.confirmAction = confirmAction;
 window.fetchAPI = fetchAPI;
 window.formatDate = formatDate;

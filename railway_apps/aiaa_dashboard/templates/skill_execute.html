@@ -861,17 +861,6 @@
         }
     };
 
-    // Toast helper
-    function showToast(message, type) {
-        var toast = document.createElement('div');
-        toast.className = 'toast-notification toast-' + (type || 'info');
-        toast.innerHTML = '<span class="toast-message">' + escapeHtml(message) + '</span>'
-            + '<button class="toast-close" onclick="this.parentElement.remove()">&times;</button>';
-        document.body.appendChild(toast);
-        requestAnimationFrame(function() { toast.classList.add('toast-show'); });
-        setTimeout(function() { toast.remove(); }, 5000);
-    }
-
     function escapeHtml(str) {
         var div = document.createElement('div');
         div.appendChild(document.createTextNode(str));
