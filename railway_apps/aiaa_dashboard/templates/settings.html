@@ -1,0 +1,772 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - AIAA Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Settings Tabs */
+    .settings-tabs {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 2rem;
+    }
+
+    .settings-tab {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s;
+    }
+
+    .settings-tab:hover {
+        color: var(--text-primary);
+    }
+
+    .settings-tab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+    }
+
+    .settings-panel {
+        display: none;
+    }
+
+    .settings-panel.active {
+        display: block;
+    }
+
+    /* API Key Row */
+    .api-key-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .api-key-item {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 1.25rem;
+    }
+
+    .api-key-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .api-key-name {
+        font-size: 0.9375rem;
+        font-weight: 500;
+    }
+
+    .api-key-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.25rem 0.625rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .api-key-status.valid {
+        background: var(--success-muted);
+        color: var(--success);
+    }
+
+    .api-key-status.missing {
+        background: var(--bg-elevated);
+        color: var(--text-muted);
+    }
+
+    .api-key-status.invalid {
+        background: var(--error-muted);
+        color: var(--error);
+    }
+
+    .api-key-status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .api-key-input-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .api-key-input-row .form-input {
+        flex: 1;
+        font-family: 'DM Mono', monospace;
+        font-size: 0.8125rem;
+    }
+
+    .api-key-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.8125rem;
+        border-radius: 6px;
+    }
+
+    .api-key-help {
+        margin-top: 0.75rem;
+    }
+
+    .api-key-help-toggle {
+        font-size: 0.8125rem;
+        color: var(--accent);
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        padding: 0;
+    }
+
+    .api-key-help-toggle:hover {
+        text-decoration: underline;
+    }
+
+    .api-key-help-content {
+        display: none;
+        margin-top: 0.5rem;
+        padding: 0.75rem;
+        background: var(--bg-elevated);
+        border-radius: 8px;
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .api-key-help-content.visible {
+        display: block;
+    }
+
+    .api-key-help-content a {
+        color: var(--accent);
+        text-decoration: none;
+    }
+
+    .api-key-help-content a:hover {
+        text-decoration: underline;
+    }
+
+    /* Preferences */
+    .pref-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+    }
+
+    .pref-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pref-item .form-label {
+        margin-bottom: 0.375rem;
+    }
+
+    /* Toggle Switch */
+    .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .toggle-row:last-child {
+        border-bottom: none;
+    }
+
+    .toggle-label-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .toggle-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .toggle-desc {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.125rem;
+    }
+
+    .toggle-switch {
+        position: relative;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .toggle-slider::before {
+        content: '';
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        left: 2px;
+        bottom: 2px;
+        background: var(--text-muted);
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background: var(--accent-muted);
+        border-color: var(--accent);
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+        background: var(--accent);
+        transform: translateX(20px);
+    }
+
+    /* Profile */
+    .profile-form {
+        max-width: 480px;
+    }
+
+    .settings-save-row {
+        margin-top: 2rem;
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .save-status {
+        font-size: 0.8125rem;
+        color: var(--success);
+        display: none;
+    }
+
+    .save-status.visible {
+        display: inline;
+    }
+
+    /* Inline key format errors */
+    .key-format-error {
+        display: none;
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        color: var(--error);
+    }
+
+    .key-format-error.visible {
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .pref-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .api-key-input-row {
+            flex-direction: column;
+        }
+
+        .api-key-input-row .form-input {
+            width: 100%;
+        }
+
+        .api-key-actions {
+            width: 100%;
+        }
+
+        .api-key-actions .btn-sm {
+            flex: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Settings</h1>
+        <p class="page-subtitle">Manage your API connections, preferences, and profile</p>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="settings-tabs" id="settingsTabs">
+    <button class="settings-tab active" data-tab="api-keys">API Keys</button>
+    <button class="settings-tab" data-tab="preferences">Preferences</button>
+    <button class="settings-tab" data-tab="profile">Profile</button>
+</div>
+
+<!-- API Keys Panel -->
+<div class="settings-panel active" id="panel-api-keys">
+    <div class="api-key-list" id="apiKeyList">
+
+        <div class="api-key-item" data-key="openrouter">
+            <div class="api-key-header">
+                <span class="api-key-name">OpenRouter API Key</span>
+                <span class="api-key-status missing" id="status-openrouter">
+                    <span class="api-key-status-dot"></span>
+                    <span class="api-key-status-text">Not configured</span>
+                </span>
+            </div>
+            <div class="api-key-input-row">
+                <input type="password" class="form-input" id="input-openrouter" placeholder="sk-or-v1-..." autocomplete="off">
+                <div class="api-key-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="testApiKey('openrouter')">Test</button>
+                    <button class="btn btn-sm" onclick="saveApiKey('openrouter')">Save</button>
+                </div>
+            </div>
+            <span class="key-format-error" id="error-openrouter"></span>
+            <div class="api-key-help">
+                <button class="api-key-help-toggle" onclick="toggleHelp(this)">What is this?</button>
+                <div class="api-key-help-content">
+                    OpenRouter gives you access to AI models like Claude and GPT. It powers all content generation in Agentic OS.<br><br>
+                    <strong>Where to get it:</strong> Sign up at openrouter.ai, click your profile icon, go to Keys, and create a new key.
+                </div>
+            </div>
+        </div>
+
+        <div class="api-key-item" data-key="perplexity">
+            <div class="api-key-header">
+                <span class="api-key-name">Perplexity API Key</span>
+                <span class="api-key-status missing" id="status-perplexity">
+                    <span class="api-key-status-dot"></span>
+                    <span class="api-key-status-text">Not configured</span>
+                </span>
+            </div>
+            <div class="api-key-input-row">
+                <input type="password" class="form-input" id="input-perplexity" placeholder="pplx-..." autocomplete="off">
+                <div class="api-key-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="testApiKey('perplexity')">Test</button>
+                    <button class="btn btn-sm" onclick="saveApiKey('perplexity')">Save</button>
+                </div>
+            </div>
+            <span class="key-format-error" id="error-perplexity"></span>
+            <div class="api-key-help">
+                <button class="api-key-help-toggle" onclick="toggleHelp(this)">What is this?</button>
+                <div class="api-key-help-content">
+                    Perplexity is used for market research and company analysis tasks. It searches the web and provides sourced answers.<br><br>
+                    <strong>Where to get it:</strong> Sign up at perplexity.ai, go to Settings, then API, and generate a key.
+                </div>
+            </div>
+        </div>
+
+        <div class="api-key-item" data-key="slack">
+            <div class="api-key-header">
+                <span class="api-key-name">Slack Webhook URL</span>
+                <span class="api-key-status missing" id="status-slack">
+                    <span class="api-key-status-dot"></span>
+                    <span class="api-key-status-text">Not configured</span>
+                </span>
+            </div>
+            <div class="api-key-input-row">
+                <input type="password" class="form-input" id="input-slack" placeholder="https://hooks.slack.com/services/..." autocomplete="off">
+                <div class="api-key-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="testApiKey('slack')">Test</button>
+                    <button class="btn btn-sm" onclick="saveApiKey('slack')">Save</button>
+                </div>
+            </div>
+            <span class="key-format-error" id="error-slack"></span>
+            <div class="api-key-help">
+                <button class="api-key-help-toggle" onclick="toggleHelp(this)">What is this?</button>
+                <div class="api-key-help-content">
+                    Slack Webhook lets Agentic OS send you notifications when tasks complete, like deliverables or reports.<br><br>
+                    <strong>Where to get it:</strong> In Slack, go to Apps, search for "Incoming Webhooks", add to a channel, and copy the webhook URL.
+                </div>
+            </div>
+        </div>
+
+        <div class="api-key-item" data-key="google">
+            <div class="api-key-header">
+                <span class="api-key-name">Google Docs</span>
+                <span class="api-key-status missing" id="status-google">
+                    <span class="api-key-status-dot"></span>
+                    <span class="api-key-status-text">Not configured</span>
+                </span>
+            </div>
+            <div class="api-key-input-row">
+                <p style="font-size: 0.875rem; color: var(--text-secondary);">Google Docs integration requires a credentials file. This is set up on the server.</p>
+            </div>
+            <div class="api-key-help">
+                <button class="api-key-help-toggle" onclick="toggleHelp(this)">Setup guide</button>
+                <div class="api-key-help-content">
+                    Google Docs integration lets deliverables be automatically formatted and uploaded as Google Docs.<br><br>
+                    <strong>Setup:</strong> Place your <code>credentials.json</code> file from Google Cloud Console in the project root. The first time you run a delivery, you'll be prompted to authorize access.
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Preferences Panel -->
+<div class="settings-panel" id="panel-preferences">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Content Defaults</span>
+        </div>
+        <div class="card-body">
+            <div class="pref-grid">
+                <div class="pref-item">
+                    <label class="form-label" for="pref-tone">Default tone</label>
+                    <select class="form-select" id="pref-tone">
+                        <option value="professional">Professional</option>
+                        <option value="casual">Casual</option>
+                        <option value="friendly">Friendly</option>
+                        <option value="authoritative">Authoritative</option>
+                        <option value="conversational">Conversational</option>
+                    </select>
+                    <span class="form-hint">Sets the default writing style for all content</span>
+                </div>
+                <div class="pref-item">
+                    <label class="form-label" for="pref-length">Default length</label>
+                    <select class="form-select" id="pref-length">
+                        <option value="short">Short</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="long">Long</option>
+                    </select>
+                    <span class="form-hint">Controls how detailed outputs are by default</span>
+                </div>
+                <div class="pref-item">
+                    <label class="form-label" for="pref-format">Output format</label>
+                    <select class="form-select" id="pref-format">
+                        <option value="markdown" selected>Markdown</option>
+                        <option value="html">HTML</option>
+                        <option value="plain">Plain Text</option>
+                    </select>
+                    <span class="form-hint">Default file format for generated content</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Integrations</span>
+        </div>
+        <div class="card-body">
+            <div class="toggle-row">
+                <div class="toggle-label-group">
+                    <span class="toggle-label">Auto-deliver to Google Docs</span>
+                    <span class="toggle-desc">Automatically upload finished content to Google Docs</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="pref-auto-gdocs">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-label-group">
+                    <span class="toggle-label">Slack notifications</span>
+                    <span class="toggle-desc">Get notified in Slack when tasks complete</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="pref-slack-notify">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-save-row">
+        <button class="btn" id="savePrefsBtn" onclick="savePreferences()">Save Preferences</button>
+        <span class="save-status" id="prefsSaveStatus">Preferences saved</span>
+    </div>
+</div>
+
+<!-- Profile Panel -->
+<div class="settings-panel" id="panel-profile">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Your Profile</span>
+        </div>
+        <div class="card-body">
+            <div class="profile-form">
+                <div class="form-group">
+                    <label class="form-label" for="profile-name">Name</label>
+                    <input type="text" class="form-input" id="profile-name" placeholder="Your name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="profile-company">Company</label>
+                    <input type="text" class="form-input" id="profile-company" placeholder="Your company name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="profile-industry">Industry</label>
+                    <select class="form-select" id="profile-industry">
+                        <option value="">Select your industry</option>
+                        <option value="marketing">Marketing Agency</option>
+                        <option value="saas">SaaS / Software</option>
+                        <option value="ecommerce">E-commerce</option>
+                        <option value="consulting">Consulting</option>
+                        <option value="real-estate">Real Estate</option>
+                        <option value="finance">Finance</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="education">Education</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-save-row">
+        <button class="btn" id="saveProfileBtn" onclick="saveProfile()">Save Profile</button>
+        <span class="save-status" id="profileSaveStatus">Profile saved</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Tab switching
+    document.querySelectorAll('.settings-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.settings-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.settings-panel').forEach(function(p) { p.classList.remove('active'); });
+            tab.classList.add('active');
+            document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+        });
+    });
+
+    // Toggle help text
+    function toggleHelp(btn) {
+        var content = btn.nextElementSibling;
+        content.classList.toggle('visible');
+        btn.textContent = content.classList.contains('visible') ? 'Hide' : (btn.textContent.includes('guide') ? 'Setup guide' : 'What is this?');
+    }
+
+    // API key prefix definitions (mirrors server-side _KEY_PREFIXES in api_v2.py)
+    var KEY_PREFIXES = {
+        'openrouter': { prefix: 'sk-or-', label: 'OpenRouter API Key', hint: 'OpenRouter key should start with sk-or-' },
+        'perplexity': { prefix: 'pplx-', label: 'Perplexity API Key', hint: 'Perplexity key should start with pplx-' },
+        'anthropic':  { prefix: 'sk-ant-', label: 'Anthropic API Key', hint: 'Anthropic key should start with sk-ant-' },
+        'openai':     { prefix: 'sk-', label: 'OpenAI API Key', hint: 'OpenAI key should start with sk-' },
+        'slack':      { prefix: 'https://hooks.slack.com/', label: 'Slack Webhook URL', hint: 'Slack webhook should start with https://hooks.slack.com/' },
+        'fal':        { prefix: '', label: 'fal.ai Key', hint: '' }
+    };
+
+    // Show/hide key format error
+    function showKeyError(keyName, message) {
+        var errorEl = document.getElementById('error-' + keyName);
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.classList.add('visible');
+        }
+    }
+
+    function clearKeyError(keyName) {
+        var errorEl = document.getElementById('error-' + keyName);
+        if (errorEl) {
+            errorEl.classList.remove('visible');
+        }
+    }
+
+    // Attach input listeners to clear errors when user types
+    ['openrouter', 'perplexity', 'slack'].forEach(function(keyName) {
+        var input = document.getElementById('input-' + keyName);
+        if (input) {
+            input.addEventListener('input', function() {
+                clearKeyError(keyName);
+            });
+        }
+    });
+
+    // Save API key with client-side prefix validation
+    function saveApiKey(keyName) {
+        var input = document.getElementById('input-' + keyName);
+        var value = input.value.trim();
+
+        // Clear previous error
+        clearKeyError(keyName);
+
+        // Empty check
+        if (!value) {
+            showKeyError(keyName, 'Please enter an API key');
+            return;
+        }
+
+        // Prefix validation (skip for keys with no prefix requirement like fal)
+        var keyConfig = KEY_PREFIXES[keyName];
+        if (keyConfig && keyConfig.prefix && !value.startsWith(keyConfig.prefix)) {
+            showKeyError(keyName, keyConfig.hint);
+            return;
+        }
+
+        var btn = input.closest('.api-key-item').querySelector('.btn:not(.btn-secondary)');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        fetch('/api/v2/settings/api-keys', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key_name: keyName, value: value })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            btn.textContent = 'Save';
+            btn.disabled = false;
+            if (data.success) {
+                clearKeyError(keyName);
+                updateKeyStatus(keyName, 'valid', 'Connected');
+                input.value = '';
+                input.placeholder = 'Key saved — enter new value to update';
+            } else {
+                // Show server-side error inline if it's a format error
+                var msg = data.message || data.error || 'Save failed';
+                if (msg.indexOf('Invalid key format') !== -1 || msg.indexOf('prefix') !== -1) {
+                    showKeyError(keyName, msg);
+                }
+                updateKeyStatus(keyName, 'invalid', data.error || 'Save failed');
+            }
+        })
+        .catch(function() {
+            btn.textContent = 'Save';
+            btn.disabled = false;
+            updateKeyStatus(keyName, 'invalid', 'Save failed');
+        });
+    }
+
+    // Test API key
+    function testApiKey(keyName) {
+        var input = document.getElementById('input-' + keyName);
+        var statusEl = document.getElementById('status-' + keyName);
+        var btn = input.closest('.api-key-item').querySelector('.btn-secondary');
+        btn.disabled = true;
+        btn.textContent = 'Testing...';
+
+        fetch('/api/v2/settings/api-keys/status')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            btn.textContent = 'Test';
+            btn.disabled = false;
+            var keyData = data[keyName];
+            if (keyData && keyData.configured) {
+                updateKeyStatus(keyName, 'valid', 'Connected');
+            } else {
+                updateKeyStatus(keyName, 'missing', 'Not configured');
+            }
+        })
+        .catch(function() {
+            btn.textContent = 'Test';
+            btn.disabled = false;
+        });
+    }
+
+    function updateKeyStatus(keyName, status, text) {
+        var el = document.getElementById('status-' + keyName);
+        el.className = 'api-key-status ' + status;
+        el.querySelector('.api-key-status-text').textContent = text;
+    }
+
+    // Save preferences
+    function savePreferences() {
+        var btn = document.getElementById('savePrefsBtn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        var prefs = {
+            tone: document.getElementById('pref-tone').value,
+            length: document.getElementById('pref-length').value,
+            format: document.getElementById('pref-format').value,
+            auto_gdocs: document.getElementById('pref-auto-gdocs').checked,
+            slack_notify: document.getElementById('pref-slack-notify').checked
+        };
+
+        fetch('/api/v2/settings/preferences', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(prefs)
+        })
+        .then(function() {
+            btn.disabled = false;
+            btn.textContent = 'Save Preferences';
+            var status = document.getElementById('prefsSaveStatus');
+            status.classList.add('visible');
+            setTimeout(function() { status.classList.remove('visible'); }, 2000);
+        })
+        .catch(function() {
+            btn.disabled = false;
+            btn.textContent = 'Save Preferences';
+        });
+    }
+
+    // Save profile
+    function saveProfile() {
+        var btn = document.getElementById('saveProfileBtn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        var profile = {
+            name: document.getElementById('profile-name').value,
+            company: document.getElementById('profile-company').value,
+            industry: document.getElementById('profile-industry').value
+        };
+
+        fetch('/api/v2/settings/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(profile)
+        })
+        .then(function() {
+            btn.disabled = false;
+            btn.textContent = 'Save Profile';
+            var status = document.getElementById('profileSaveStatus');
+            status.classList.add('visible');
+            setTimeout(function() { status.classList.remove('visible'); }, 2000);
+        })
+        .catch(function() {
+            btn.disabled = false;
+            btn.textContent = 'Save Profile';
+        });
+    }
+
+    // Load current status on page load
+    (function() {
+        fetch('/api/v2/settings/api-keys/status')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            Object.keys(data).forEach(function(key) {
+                if (data[key] && data[key].configured) {
+                    updateKeyStatus(key, 'valid', 'Connected');
+                }
+            });
+        })
+        .catch(function() {});
+    })();
+</script>
+{% endblock %}
