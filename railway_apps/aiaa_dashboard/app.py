@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AIAA Agentic OS Dashboard - Modular Application v3.0
+AIAA Agentic OS Dashboard - Modular Application v5.0
 
 A clean, modular Flask application for managing workflows, executions, and deployments.
 Features password-protected auth, REST API, webhook management, and Railway integration.
@@ -12,7 +12,7 @@ import hmac
 from functools import wraps
 from pathlib import Path
 
-from flask import Flask, session, redirect, url_for
+from flask import Flask, session, redirect, url_for, render_template
 
 # Import configuration and database
 from config import get_config
@@ -20,7 +20,9 @@ import database
 import models
 
 # Import blueprints
-from routes import api_bp, views_bp
+from routes import api_bp, views_bp, api_v2_bp
+
+VERSION = "5.0"
 
 
 # =============================================================================
@@ -66,10 +68,38 @@ def create_app(config_class=None):
     # Register blueprints
     app.register_blueprint(api_bp)
     app.register_blueprint(views_bp)
-    
+    app.register_blueprint(api_v2_bp)
+
     print(f"✅ Registered API blueprint at /api")
+    print(f"✅ Registered API v2 blueprint at /api/v2")
     print(f"✅ Registered views blueprint at /")
-    
+
+    # App-level error handlers
+    @app.errorhandler(404)
+    def page_not_found(e):
+        if session.get('logged_in'):
+            username = session.get('username', 'Admin')
+            return render_template(
+                'error_v2.html',
+                username=username,
+                active_page=None,
+                error_code=404,
+            ), 404
+        return redirect(url_for('views.login'))
+
+    @app.errorhandler(500)
+    def internal_error(e):
+        if session.get('logged_in'):
+            username = session.get('username', 'Admin')
+            return render_template(
+                'error_v2.html',
+                username=username,
+                active_page=None,
+                error_code=500,
+                error_message=str(e) if app.debug else None,
+            ), 500
+        return redirect(url_for('views.login'))
+
     return app
 
 
@@ -123,6 +153,12 @@ def login_required(f):
 
 # Create app instance
 app = create_app()
+
+
+@app.context_processor
+def inject_version():
+    return dict(version=VERSION)
+
 
 # Make helper functions available to routes
 app.check_password = check_password
@@ -201,7 +237,7 @@ if __name__ == '__main__':
     
     # Print startup info
     print("\n" + "=" * 60)
-    print("AIAA Agentic OS Dashboard v3.0")
+    print("AIAA Agentic OS Dashboard v5.0")
     print("=" * 60)
     print(f"Environment: {os.getenv('FLASK_ENV', 'production')}")
     print(f"Host: {Config.HOST}:{Config.PORT}")
