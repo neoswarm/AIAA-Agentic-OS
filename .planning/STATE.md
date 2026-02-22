@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 3 of 10 (Error Handling)
-Plan: 1 of 3 in current phase
-Status: In progress -- 03-01 complete (toast consolidation + fetchAPI enhancement)
-Last activity: 2026-02-22 -- Completed 03-01-PLAN.md (toast & fetchAPI error handling)
+Plan: 2 of 3 in current phase
+Status: In progress -- 03-02 complete (skill execution error handling)
+Last activity: 2026-02-22 -- Completed 03-02-PLAN.md (skill execution structured errors + recovery guidance)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 2.6 min
-- Total execution time: 0.22 hours
+- Total plans completed: 6
+- Average duration: 2.3 min
+- Total execution time: 0.23 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [█████░░░░░] 50%
 |-------|-------|-------|----------|
 | 01-regression-baseline | 1 | 3 min | 3 min |
 | 02-input-validation | 3 | 9 min | 3 min |
-| 03-error-handling | 1 | 2 min | 2 min |
+| 03-error-handling | 2 | 4 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 3min, 2min, 3min, 4min, 2min
+- Last 5 plans: 2min, 3min, 4min, 2min, 2min
 - Trend: consistent fast execution
 
 *Updated after each plan completion*
@@ -63,6 +63,9 @@ Recent decisions affecting current work:
 - fetchAPI showError defaults to true -- all callers auto-toast on failure
 - 15s default timeout via AbortController in fetchAPI
 - Retry button uses callback pattern for network/timeout errors
+- Error panel below form (not modal) so users see input and error together
+- API key provider detection via keyword matching in error messages
+- classifyError() pattern for structured error display with recovery guidance
 
 ### Pending Todos
 
@@ -74,6 +77,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-22T23:35:04Z
-Stopped at: Completed 03-01-PLAN.md (toast consolidation + fetchAPI error handling)
+Last session: 2026-02-22T23:39:24Z
+Stopped at: Completed 03-02-PLAN.md (skill execution structured errors + recovery guidance)
 Resume file: None
