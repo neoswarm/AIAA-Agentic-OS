@@ -84,12 +84,12 @@ Plans:
   4. All buttons show a loading spinner and disable during async operations (no double-clicks)
   5. Dashboard recent activity shows "No activity yet" guidance when empty
   6. Search results display "No skills match -- try different keywords" when empty
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: Skeleton loading states for catalog and list views
-- [ ] 04-02: Empty states with CTAs for all list/history pages
-- [ ] 04-03: Button loading spinners and double-click prevention
+- [ ] 04-01-PLAN.md -- Skeleton loading states with CSS pulse animation for dashboard and catalog views (UX-01)
+- [ ] 04-02-PLAN.md -- Empty states with CTAs for execution history, dashboard activity, and search results (UX-02, UX-03, UX-05, UX-06)
+- [ ] 04-03-PLAN.md -- Button loading spinners with double-click prevention across all async operations (UX-04)
 
 ### Phase 5: Help & Guidance
 **Goal**: New users can understand every field, feature, and workflow without external help
