@@ -124,7 +124,7 @@
 | MOB-02 | Phase 9 | Pending |
 | MOB-03 | Phase 9 | Pending |
 | MOB-04 | Phase 9 | Pending |
-| TEST-01 | Phase 1 | Pending |
+| TEST-01 | Phase 1 | Complete |
 | TEST-02 | Phase 10 | Pending |
 | TEST-03 | Phase 10 | Pending |
-| TEST-04 | Phase 1 | Pending |
+| TEST-04 | Phase 1 | Complete |

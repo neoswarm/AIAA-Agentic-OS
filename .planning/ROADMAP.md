@@ -12,7 +12,7 @@ This roadmap hardens the existing Agentic OS dashboard for non-technical users. 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Regression Baseline** - Verify all existing functionality works before making changes
+- [x] **Phase 1: Regression Baseline** - Verify all existing functionality works before making changes ✓
 - [ ] **Phase 2: Input Validation** - All forms validate input with clear inline feedback
 - [ ] **Phase 3: Error Handling** - Every failure shows a user-friendly message with recovery actions
 - [ ] **Phase 4: Loading & Empty States** - Visual feedback for all async operations and empty data views
@@ -198,7 +198,7 @@ Phase 1 first, then Phases 2-9 in any order (parallelizable), then Phase 10 last
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Regression Baseline | 0/1 | Planned | - |
+| 1. Regression Baseline | 1/1 | Complete ✓ | 2026-02-22 |
 | 2. Input Validation | 0/2 | Not started | - |
 | 3. Error Handling | 0/3 | Not started | - |
 | 4. Loading & Empty States | 0/3 | Not started | - |
