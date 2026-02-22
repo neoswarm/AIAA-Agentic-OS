@@ -48,11 +48,12 @@ Plans:
   3. User sees format validation on API key fields before save is attempted
   4. API endpoints return structured JSON errors with field-level messages on bad input
   5. Search input is debounced and sanitized (no excessive API calls on rapid typing)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: Client-side validation for skill execution, client, and settings forms
-- [ ] 02-02: Server-side API validation with structured error responses
+- [ ] 02-01-PLAN.md -- Client-side inline validation for skill execution, client, and settings forms (VAL-01, VAL-02, VAL-03)
+- [ ] 02-02-PLAN.md -- Server-side API validation with structured field-level error responses (VAL-04)
+- [ ] 02-03-PLAN.md -- Search debounce standardization and XSS sanitization (VAL-05)
 
 ### Phase 3: Error Handling
 **Goal**: When something fails, users understand what happened and know exactly how to fix it
@@ -199,7 +200,7 @@ Phase 1 first, then Phases 2-9 in any order (parallelizable), then Phase 10 last
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Regression Baseline | 1/1 | Complete ✓ | 2026-02-22 |
-| 2. Input Validation | 0/2 | Not started | - |
+| 2. Input Validation | 0/3 | Planned | - |
 | 3. Error Handling | 0/3 | Not started | - |
 | 4. Loading & Empty States | 0/3 | Not started | - |
 | 5. Help & Guidance | 0/2 | Not started | - |
