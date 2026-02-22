@@ -85,11 +85,11 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VAL-01 | Phase 2 | Pending |
-| VAL-02 | Phase 2 | Pending |
-| VAL-03 | Phase 2 | Pending |
-| VAL-04 | Phase 2 | Pending |
-| VAL-05 | Phase 2 | Pending |
+| VAL-01 | Phase 2 | Complete |
+| VAL-02 | Phase 2 | Complete |
+| VAL-03 | Phase 2 | Complete |
+| VAL-04 | Phase 2 | Complete |
+| VAL-05 | Phase 2 | Complete |
 | ERR-01 | Phase 3 | Pending |
 | ERR-02 | Phase 3 | Pending |
 | ERR-03 | Phase 3 | Pending |
