@@ -306,8 +306,37 @@ async function executeSkill(skillName) {
             setButtonLoading(executeBtn, false);
         }
     } catch (error) {
-        showToast(`Failed to start skill: ${error.message}`, 'error');
         setButtonLoading(executeBtn, false);
+
+        // If the error has structured data (from enhanced fetchAPI), use it
+        if (error.data && error.data.errors) {
+            // Show field-level errors
+            const form = document.getElementById('skill-execute-form');
+            if (form) {
+                for (const [field, msg] of Object.entries(error.data.errors)) {
+                    const input = form.querySelector(`[name="${field}"]`);
+                    if (input) {
+                        const group = input.closest('.form-group');
+                        if (group) {
+                            group.classList.add('has-error');
+                            let errEl = group.querySelector('.field-error');
+                            if (!errEl) {
+                                errEl = document.createElement('span');
+                                errEl.className = 'field-error';
+                                group.appendChild(errEl);
+                            }
+                            errEl.textContent = msg;
+                            errEl.style.display = 'block';
+                        }
+                    }
+                }
+            }
+            showToast(error.data.message || 'Please fix the highlighted fields.', 'error', 5000);
+        } else if (error.status === 401 || (error.message && error.message.toLowerCase().includes('api key'))) {
+            showToast('API key required. Go to Settings to configure.', 'error', 5000);
+        } else {
+            showToast(`Skill failed: ${error.message}`, 'error', 5000);
+        }
     }
 }
 
