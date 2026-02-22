@@ -33,10 +33,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. All existing test suites pass without modification
   2. Every dashboard page loads without JavaScript console errors
   3. A baseline test report exists documenting current state
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 01-01: Run and document all existing tests, audit pages for JS errors
+- [ ] 01-01-PLAN.md -- Run existing test suite, audit all routes and API endpoints, compile baseline report
 
 ### Phase 2: Input Validation
 **Goal**: Users receive immediate, clear feedback when they enter invalid data in any form
@@ -198,7 +198,7 @@ Phase 1 first, then Phases 2-9 in any order (parallelizable), then Phase 10 last
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Regression Baseline | 0/1 | Not started | - |
+| 1. Regression Baseline | 0/1 | Planned | - |
 | 2. Input Validation | 0/2 | Not started | - |
 | 3. Error Handling | 0/3 | Not started | - |
 | 4. Loading & Empty States | 0/3 | Not started | - |
