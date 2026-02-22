@@ -506,7 +506,9 @@
                 });
             }
         })
-        .catch(function() {});
+        .catch(function() {
+            showToast('Failed to load client details', 'error');
+        });
     }
 
     // Field error helpers
@@ -612,6 +614,7 @@
         .catch(function() {
             btn.disabled = false;
             btn.textContent = 'Save Client';
+            showToast('Failed to save client', 'error');
         });
     }
 
@@ -626,6 +629,7 @@
         .catch(function() {
             clients = [];
             renderClients();
+            showToast('Failed to load clients', 'error');
         });
     }
 

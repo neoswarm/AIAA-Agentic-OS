@@ -42,6 +42,7 @@ async function toggleFavorite(workflowName) {
         }
     } catch (error) {
         console.error('Error toggling favorite:', error);
+        showToast('Failed to update favorite', 'error');
     }
 }
 
@@ -66,5 +67,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     } catch (error) {
         console.error('Error loading favorites:', error);
+        showToast('Failed to load favorites', 'error');
     }
 });

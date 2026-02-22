@@ -202,6 +202,7 @@ class DeployWizard {
             }
         } catch (error) {
             console.error('Error checking env vars:', error);
+            showToast('Failed to check environment variables', 'error');
         }
     }
 
@@ -344,7 +345,7 @@ class DeployWizard {
     }
 
     showError(message) {
-        alert(`Deployment failed: ${message}`);
+        showToast(`Deployment failed: ${message}`, 'error');
         document.getElementById('wizard-deploy-btn').disabled = false;
     }
 }
