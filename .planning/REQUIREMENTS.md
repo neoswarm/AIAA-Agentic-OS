@@ -83,14 +83,48 @@
 
 ## Traceability
 
-| Requirement | Phase |
-|-------------|-------|
-| VAL-01..05 | TBD |
-| ERR-01..06 | TBD |
-| UX-01..06 | TBD |
-| HELP-01..05 | TBD |
-| A11Y-01..04 | TBD |
-| MOB-01..04 | TBD |
-| FLOW-01..05 | TBD |
-| DISC-01..04 | TBD |
-| TEST-01..04 | TBD |
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| VAL-01 | Phase 2 | Pending |
+| VAL-02 | Phase 2 | Pending |
+| VAL-03 | Phase 2 | Pending |
+| VAL-04 | Phase 2 | Pending |
+| VAL-05 | Phase 2 | Pending |
+| ERR-01 | Phase 3 | Pending |
+| ERR-02 | Phase 3 | Pending |
+| ERR-03 | Phase 3 | Pending |
+| ERR-04 | Phase 3 | Pending |
+| ERR-05 | Phase 3 | Pending |
+| ERR-06 | Phase 3 | Pending |
+| UX-01 | Phase 4 | Pending |
+| UX-02 | Phase 4 | Pending |
+| UX-03 | Phase 4 | Pending |
+| UX-04 | Phase 4 | Pending |
+| UX-05 | Phase 4 | Pending |
+| UX-06 | Phase 4 | Pending |
+| HELP-01 | Phase 5 | Pending |
+| HELP-02 | Phase 5 | Pending |
+| HELP-03 | Phase 5 | Pending |
+| HELP-04 | Phase 5 | Pending |
+| HELP-05 | Phase 5 | Pending |
+| FLOW-01 | Phase 6 | Pending |
+| FLOW-02 | Phase 6 | Pending |
+| FLOW-03 | Phase 6 | Pending |
+| FLOW-04 | Phase 6 | Pending |
+| FLOW-05 | Phase 6 | Pending |
+| DISC-01 | Phase 7 | Pending |
+| DISC-02 | Phase 7 | Pending |
+| DISC-03 | Phase 7 | Pending |
+| DISC-04 | Phase 7 | Pending |
+| A11Y-01 | Phase 8 | Pending |
+| A11Y-02 | Phase 8 | Pending |
+| A11Y-03 | Phase 8 | Pending |
+| A11Y-04 | Phase 8 | Pending |
+| MOB-01 | Phase 9 | Pending |
+| MOB-02 | Phase 9 | Pending |
+| MOB-03 | Phase 9 | Pending |
+| MOB-04 | Phase 9 | Pending |
+| TEST-01 | Phase 1 | Pending |
+| TEST-02 | Phase 10 | Pending |
+| TEST-03 | Phase 10 | Pending |
+| TEST-04 | Phase 1 | Pending |
