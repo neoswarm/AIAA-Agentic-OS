@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Regression Baseline** - Verify all existing functionality works before making changes ✓
 - [x] **Phase 2: Input Validation** - All forms validate input with clear inline feedback ✓
-- [ ] **Phase 3: Error Handling** - Every failure shows a user-friendly message with recovery actions
+- [x] **Phase 3: Error Handling** - Every failure shows a user-friendly message with recovery actions ✓
 - [ ] **Phase 4: Loading & Empty States** - Visual feedback for all async operations and empty data views
 - [ ] **Phase 5: Help & Guidance** - Contextual help, tooltips, and onboarding improvements
 - [ ] **Phase 6: Workflow Streamlining** - Reduce clicks and friction in common user paths
@@ -66,12 +66,12 @@ Plans:
   4. Missing API key errors link directly to Settings with the relevant key section highlighted
   5. 404 and 500 pages use the v2 error template with contextual recovery actions
   6. Failed form submissions preserve all user input (form is never cleared on error)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: Toast notification system and JS error handling wrappers
-- [ ] 03-02: Skill execution error display and recovery guidance
-- [ ] 03-03: Error pages, missing key linking, and form preservation
+- [ ] 03-01-PLAN.md -- Consolidate toast system, enhance fetchAPI with timeout/retry and auto-toast on failure (ERR-01, ERR-02)
+- [ ] 03-02-PLAN.md -- Skill execution error display with classified errors, recovery steps, and missing key detection (ERR-03, ERR-04)
+- [ ] 03-03-PLAN.md -- Error pages using v2 template, Settings API key deep-linking, form preservation audit (ERR-05, ERR-06)
 
 ### Phase 4: Loading & Empty States
 **Goal**: Users always see visual feedback during loading and helpful guidance when views have no data
@@ -201,7 +201,7 @@ Phase 1 first, then Phases 2-9 in any order (parallelizable), then Phase 10 last
 |-------|----------------|--------|-----------|
 | 1. Regression Baseline | 1/1 | Complete ✓ | 2026-02-22 |
 | 2. Input Validation | 3/3 | Complete ✓ | 2026-02-22 |
-| 3. Error Handling | 0/3 | Not started | - |
+| 3. Error Handling | 3/3 | Complete ✓ | 2026-02-22 |
 | 4. Loading & Empty States | 0/3 | Not started | - |
 | 5. Help & Guidance | 0/2 | Not started | - |
 | 6. Workflow Streamlining | 0/2 | Not started | - |
