@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Non-technical users can discover, configure, execute, and receive output from any of 133 AI skills through the web dashboard without ever touching a terminal, and when something goes wrong, they understand exactly what happened and how to fix it.
-**Current focus:** Phase 1 - Regression Baseline
+**Current focus:** Phase 1 - Regression Baseline (Complete)
 
 ## Current Position
 
 Phase: 1 of 10 (Regression Baseline)
-Plan: 0 of 1 in current phase
-Status: Ready to plan
-Last activity: 2026-02-22 -- Roadmap created with 10 phases, 43 requirements mapped
+Plan: 1 of 1 in current phase
+Status: Phase complete
+Last activity: 2026-02-22 -- Completed 01-01-PLAN.md (regression baseline audit)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 5%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 3 min
+- Total execution time: 0.05 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01-regression-baseline | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: -
-- Trend: -
+- Last 5 plans: 3min
+- Trend: baseline established
 
 *Updated after each plan completion*
 
@@ -46,17 +46,19 @@ Recent decisions affecting current work:
 - Vanilla JS stack (no React/Vue migration)
 - SQLite (no Postgres migration)
 - Phases 2-9 are parallelizable after Phase 1 baseline
+- API v1 session key mismatch (authenticated vs logged_in) documented as pre-existing issue, not fixed in baseline phase
+- /setup redirect when password configured is expected behavior, not a bug
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
-None yet.
+- API v1 protected endpoints return 401 for session-authenticated users due to session key mismatch (api.py checks `session['authenticated']`, login sets `session['logged_in']`). Should be addressed in a future hardening phase.
 
 ## Session Continuity
 
-Last session: 2026-02-22
-Stopped at: Roadmap created, ready to plan Phase 1
+Last session: 2026-02-22T22:34:32Z
+Stopped at: Completed 01-01-PLAN.md (regression baseline)
 Resume file: None
