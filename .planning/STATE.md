@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 
 ## Current Position
 
-Phase: 2 of 10 (Input Validation)
-Plan: 3 of 3 in current phase
-Status: Phase 2 verified (gap fixed: settings.html API key save wiring), ready for Phases 3-9
-Last activity: 2026-02-22 -- Phase 2 verified with orchestrator gap fix
+Phase: 3 of 10 (Error Handling)
+Plan: 1 of 3 in current phase
+Status: In progress -- 03-01 complete (toast consolidation + fetchAPI enhancement)
+Last activity: 2026-02-22 -- Completed 03-01-PLAN.md (toast & fetchAPI error handling)
 
-Progress: [████░░░░░░] 40%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 2.8 min
-- Total execution time: 0.18 hours
+- Total plans completed: 5
+- Average duration: 2.6 min
+- Total execution time: 0.22 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [████░░░░░░] 40%
 |-------|-------|-------|----------|
 | 01-regression-baseline | 1 | 3 min | 3 min |
 | 02-input-validation | 3 | 9 min | 3 min |
+| 03-error-handling | 1 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 3min, 2min, 3min, 4min
+- Last 5 plans: 3min, 2min, 3min, 4min, 2min
 - Trend: consistent fast execution
 
 *Updated after each plan completion*
@@ -58,6 +59,10 @@ Recent decisions affecting current work:
 - 300ms debounce for API-backed searches, 200ms for local DOM filtering
 - IIFE debounce pattern for pages without main.js loaded
 - All search output rendering uses escapeHtml() -- no raw innerHTML with user input
+- main.js loaded globally via base.html script tag (single toast source of truth)
+- fetchAPI showError defaults to true -- all callers auto-toast on failure
+- 15s default timeout via AbortController in fetchAPI
+- Retry button uses callback pattern for network/timeout errors
 
 ### Pending Todos
 
@@ -69,6 +74,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-22T22:56:46Z
-Stopped at: Completed 02-03-PLAN.md (search debounce and XSS sanitization) -- Phase 2 complete
+Last session: 2026-02-22T23:35:04Z
+Stopped at: Completed 03-01-PLAN.md (toast consolidation + fetchAPI error handling)
 Resume file: None
