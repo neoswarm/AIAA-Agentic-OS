@@ -293,6 +293,17 @@
         display: block;
     }
 
+    /* API key highlight animation (for deep-linking from error pages) */
+    .api-key-highlighted {
+        animation: keyHighlightPulse 2s ease-in-out 2;
+        box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    @keyframes keyHighlightPulse {
+        0%, 100% { box-shadow: 0 0 0 2px var(--accent); }
+        50% { box-shadow: 0 0 0 4px var(--accent), 0 0 12px rgba(99, 102, 241, 0.3); }
+    }
+
     @media (max-width: 768px) {
         .pref-grid {
             grid-template-columns: 1fr;
@@ -654,10 +665,14 @@
                 updateKeyStatus(keyName, 'invalid', data.error || 'Save failed');
             }
         })
-        .catch(function() {
+        .catch(function(err) {
             btn.textContent = 'Save';
             btn.disabled = false;
             updateKeyStatus(keyName, 'invalid', 'Save failed');
+            // Show toast for network errors (the old code silently failed)
+            if (typeof showToast === 'function') {
+                showToast('Failed to save API key. Check your connection.', 'error');
+            }
         });
     }
 
@@ -722,6 +737,9 @@
         .catch(function() {
             btn.disabled = false;
             btn.textContent = 'Save Preferences';
+            if (typeof showToast === 'function') {
+                showToast('Failed to save preferences. Please try again.', 'error');
+            }
         });
     }
 
@@ -752,6 +770,9 @@
         .catch(function() {
             btn.disabled = false;
             btn.textContent = 'Save Profile';
+            if (typeof showToast === 'function') {
+                showToast('Failed to save profile. Please try again.', 'error');
+            }
         });
     }
 
@@ -767,6 +788,48 @@
             });
         })
         .catch(function() {});
+    })();
+
+    // Deep-link: highlight a specific API key if ?highlight=keyname is present
+    (function() {
+        var params = new URLSearchParams(window.location.search);
+        var highlight = params.get('highlight');
+        var tab = params.get('tab');
+
+        // Switch to specified tab if present
+        if (tab) {
+            document.querySelectorAll('.settings-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.settings-panel').forEach(function(p) { p.classList.remove('active'); });
+            var targetTab = document.querySelector('.settings-tab[data-tab="' + tab + '"]');
+            var targetPanel = document.getElementById('panel-' + tab);
+            if (targetTab) targetTab.classList.add('active');
+            if (targetPanel) targetPanel.classList.add('active');
+        }
+
+        // Highlight specific API key
+        if (highlight) {
+            var keyItem = document.querySelector('.api-key-item[data-key="' + highlight + '"]');
+            if (keyItem) {
+                // Scroll into view
+                setTimeout(function() {
+                    keyItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 200);
+
+                // Add highlight animation
+                keyItem.classList.add('api-key-highlighted');
+
+                // Focus the input field
+                var input = keyItem.querySelector('input');
+                if (input) {
+                    setTimeout(function() { input.focus(); }, 500);
+                }
+
+                // Remove highlight after animation
+                setTimeout(function() {
+                    keyItem.classList.remove('api-key-highlighted');
+                }, 4000);
+            }
+        }
     })();
 </script>
 {% endblock %}
