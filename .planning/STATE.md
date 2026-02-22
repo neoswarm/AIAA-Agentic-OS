@@ -9,29 +9,30 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 
 ## Current Position
 
-Phase: 1 of 10 (Regression Baseline)
-Plan: 1 of 1 in current phase
-Status: Phase 1 verified (5/5 must-haves), ready for Phases 2-9
-Last activity: 2026-02-22 -- Phase 1 verified, all checks passed
+Phase: 2 of 10 (Input Validation)
+Plan: 2 of 3 in current phase
+Status: In progress -- 02-02 complete, 02-01 and 02-03 remaining
+Last activity: 2026-02-22 -- Completed 02-02-PLAN.md (server-side API validation)
 
-Progress: [█░░░░░░░░░] 10%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 3 min
-- Total execution time: 0.05 hours
+- Total plans completed: 2
+- Average duration: 2.5 min
+- Total execution time: 0.08 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-regression-baseline | 1 | 3 min | 3 min |
+| 02-input-validation | 1 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 3min
-- Trend: baseline established
+- Last 5 plans: 3min, 2min
+- Trend: consistent fast execution
 
 *Updated after each plan completion*
 
@@ -48,6 +49,9 @@ Recent decisions affecting current work:
 - Phases 2-9 are parallelizable after Phase 1 baseline
 - API v1 session key mismatch (authenticated vs logged_in) documented as pre-existing issue, not fixed in baseline phase
 - /setup redirect when password configured is expected behavior, not a bug
+- validation_error() helper centralizes structured error format for all API v2 endpoints
+- Collect all field errors before returning (user sees all problems at once)
+- Skill execute validates required params from parsed SKILL.md metadata dynamically
 
 ### Pending Todos
 
@@ -59,6 +63,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-22T22:34:32Z
-Stopped at: Completed 01-01-PLAN.md (regression baseline)
+Last session: 2026-02-22T22:54:32Z
+Stopped at: Completed 02-02-PLAN.md (server-side API validation)
 Resume file: None
