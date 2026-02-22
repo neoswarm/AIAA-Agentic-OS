@@ -11,27 +11,27 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 
 Phase: 2 of 10 (Input Validation)
 Plan: 2 of 3 in current phase
-Status: In progress -- 02-02 complete, 02-01 and 02-03 remaining
-Last activity: 2026-02-22 -- Completed 02-02-PLAN.md (server-side API validation)
+Status: In progress -- 02-01 and 02-02 complete, 02-03 remaining
+Last activity: 2026-02-22 -- Completed 02-01-PLAN.md (inline form validation)
 
-Progress: [██░░░░░░░░] 20%
+Progress: [███░░░░░░░] 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 2.5 min
-- Total execution time: 0.08 hours
+- Total plans completed: 3
+- Average duration: 2.7 min
+- Total execution time: 0.13 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-regression-baseline | 1 | 3 min | 3 min |
-| 02-input-validation | 1 | 2 min | 2 min |
+| 02-input-validation | 2 | 5 min | 2.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 3min, 2min
+- Last 5 plans: 3min, 2min, 3min
 - Trend: consistent fast execution
 
 *Updated after each plan completion*
@@ -52,6 +52,9 @@ Recent decisions affecting current work:
 - validation_error() helper centralizes structured error format for all API v2 endpoints
 - Collect all field errors before returning (user sees all problems at once)
 - Skill execute validates required params from parsed SKILL.md metadata dynamically
+- Layered inline validation on top of browser-native checkValidity (not replacing it)
+- Error messages derived from field labels dynamically for skill form
+- Client-side KEY_PREFIXES mirrors server-side _KEY_PREFIXES for consistent validation
 
 ### Pending Todos
 
@@ -63,6 +66,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-22T22:54:32Z
-Stopped at: Completed 02-02-PLAN.md (server-side API validation)
+Last session: 2026-02-22T22:55:40Z
+Stopped at: Completed 02-01-PLAN.md (inline form validation)
 Resume file: None
