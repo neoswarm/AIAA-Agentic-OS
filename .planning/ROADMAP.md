@@ -134,11 +134,11 @@ Plans:
   2. Skill cards display estimated run time and complexity indicator
   3. Dashboard highlights popular/recommended skills based on user role
   4. Skill detail page shows example output preview or description of generated output
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 07-01: Fuzzy search with synonyms and partial matching
-- [ ] 07-02: Skill metadata (run time, complexity, examples) and role-based recommendations
+- [ ] 07-01-PLAN.md -- Backend: synonym search, metadata enrichment (time/complexity), output example parsing, role-based recommendations endpoint (DISC-01, DISC-02, DISC-03, DISC-04 backend)
+- [ ] 07-02-PLAN.md -- Frontend: API-backed search with synonyms, time/complexity badges, recommended section, output preview on detail page (DISC-01, DISC-02, DISC-03, DISC-04 frontend)
 
 ### Phase 8: Accessibility
 **Goal**: The dashboard is fully usable via keyboard and meets WCAG AA contrast standards
