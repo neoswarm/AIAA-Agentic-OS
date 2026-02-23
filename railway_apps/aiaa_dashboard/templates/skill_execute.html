@@ -609,11 +609,24 @@
             }
 
             buildForm(skillMeta.inputs || []);
+            prefillFromQueryParams();
         } catch (e) {
             document.getElementById('skill-title').textContent = formatSkillName(skillName);
             document.getElementById('form-loading').innerHTML = '<span style="color:var(--text-muted);">Could not load skill details. You can still run it with default settings.</span>';
             document.getElementById('btn-run').disabled = false;
         }
+    }
+
+    function prefillFromQueryParams() {
+        var params = getQueryParams();
+        Object.keys(params).forEach(function(key) {
+            var field = document.getElementById('field-' + key);
+            if (field) {
+                field.value = params[key];
+                // Trigger change event so any validation listeners update
+                field.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
     }
 
     function buildForm(inputs) {

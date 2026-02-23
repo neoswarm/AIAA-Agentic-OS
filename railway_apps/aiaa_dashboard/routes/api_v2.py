@@ -242,6 +242,8 @@ def api_execution_output(execution_id):
             "status": "ok",
             "execution_id": execution_id,
             "execution_status": execution.get("status"),
+            "skill_name": execution.get("skill_name"),
+            "params": execution.get("params"),
             "output_path": output_path,
             "output_content": output_content,
             "output_preview": execution.get("output_preview"),

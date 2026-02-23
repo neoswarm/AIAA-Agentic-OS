@@ -600,8 +600,18 @@
             document.getElementById('detail-cost').textContent = data.cost_estimate ? '$' + data.cost_estimate.toFixed(2) : 'N/A';
             document.getElementById('detail-files').textContent = data.output_path || '-';
 
-            // Set re-run link
-            document.getElementById('btn-rerun').href = '/skills/' + encodeURIComponent(data.skill_name || skillName) + '/execute';
+            // Set re-run link with pre-fill params
+            var rerunUrl = '/skills/' + encodeURIComponent(data.skill_name || skillName) + '/run';
+            if (data.params) {
+                try {
+                    var params = typeof data.params === 'string' ? JSON.parse(data.params) : data.params;
+                    var qs = new URLSearchParams(params).toString();
+                    if (qs) rerunUrl += '?' + qs;
+                } catch (e) {
+                    // If params can't be parsed, just navigate without pre-fill
+                }
+            }
+            document.getElementById('btn-rerun').href = rerunUrl;
 
             // Show content
             document.getElementById('output-loading').style.display = 'none';
