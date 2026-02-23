@@ -119,11 +119,11 @@ Note: HELP-02 (API key expandable help) is already satisfied by existing setting
   3. Dashboard category links go directly to a filtered catalog view
   4. After onboarding, user lands on the dashboard with first-run guidance
   5. Skill execution page has a client selector dropdown for client-specific runs
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: Run Again pre-fill and client selector on execution page
-- [ ] 06-02: Favorite skills, category deep links, and post-onboarding landing
+- [ ] 06-01-PLAN.md -- Run Again pre-fill via query params and client selector dropdown on execution page (FLOW-01, FLOW-05)
+- [ ] 06-02-PLAN.md -- Favorite skill toggling on dashboard, category link fix to /skills, post-onboarding redirect (FLOW-02, FLOW-03, FLOW-04)
 
 ### Phase 7: Skill Discovery
 **Goal**: Users can quickly find the right skill among 133 options through better search and browsing
