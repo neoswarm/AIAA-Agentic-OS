@@ -331,6 +331,82 @@
     font-size: 0.8125rem;
 }
 
+/* Welcome Banner */
+.welcome-banner {
+    background: var(--accent-muted);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.welcome-banner-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+.welcome-banner-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+.welcome-banner-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+.welcome-banner-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    flex-shrink: 0;
+}
+.welcome-banner-close:hover {
+    color: var(--text-primary);
+}
+.welcome-banner-steps {
+    display: flex;
+    gap: 0.75rem;
+}
+.welcome-step {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition: border-color 0.15s;
+}
+.welcome-step:hover {
+    border-color: var(--accent);
+}
+.welcome-step-num {
+    width: 24px;
+    height: 24px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+@media (max-width: 600px) {
+    .welcome-banner-steps {
+        flex-direction: column;
+    }
+}
+
 /* Responsive */
 @media (max-width: 900px) {
     .home-grid {
@@ -356,6 +432,33 @@
 {% endblock %}
 
 {% block content %}
+<!-- Welcome Banner (first-time visitors) -->
+<div class="welcome-banner" id="welcomeBanner" style="display: none;">
+    <div class="welcome-banner-content">
+        <div class="welcome-banner-text">
+            <h2 class="welcome-banner-title">Welcome to Agentic OS</h2>
+            <p class="welcome-banner-desc">Your AI-powered agency assistant with 133 ready-to-use skills. Here's how to get started:</p>
+        </div>
+        <button class="welcome-banner-close" id="welcomeBannerClose" title="Dismiss">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+    </div>
+    <div class="welcome-banner-steps">
+        <a href="/settings?tab=api-keys" class="welcome-step">
+            <span class="welcome-step-num">1</span>
+            <span class="welcome-step-text">Set up your API key</span>
+        </a>
+        <a href="/workflows" class="welcome-step">
+            <span class="welcome-step-num">2</span>
+            <span class="welcome-step-text">Browse 133 skills</span>
+        </a>
+        <a href="/help" class="welcome-step">
+            <span class="welcome-step-num">3</span>
+            <span class="welcome-step-text">Read the FAQ</span>
+        </a>
+    </div>
+</div>
+
 <div class="page-header">
     <div>
         <h1 class="page-title">Welcome back{{ ', ' + username if username else '' }}</h1>
@@ -514,6 +617,19 @@
 
 {% block extra_js %}
 <script>
+// Welcome banner -- show for first-time visitors
+(function() {
+    var banner = document.getElementById('welcomeBanner');
+    var closeBtn = document.getElementById('welcomeBannerClose');
+    if (!localStorage.getItem('welcome_banner_dismissed')) {
+        banner.style.display = 'block';
+    }
+    closeBtn.addEventListener('click', function() {
+        banner.style.display = 'none';
+        localStorage.setItem('welcome_banner_dismissed', '1');
+    });
+})();
+
 (function() {
     const searchInput = document.getElementById('skill-search');
     const searchResults = document.getElementById('search-results');
