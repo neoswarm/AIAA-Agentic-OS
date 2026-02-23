@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 5 of 10 (Help & Guidance)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-23 -- Completed 05-01-PLAN.md
+Plan: 2 of 2 in current phase
+Status: Phase 5 complete
+Last activity: 2026-02-23 -- Completed 05-02-PLAN.md
 
-Progress: [████████░░] 83%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 2.3 min
-- Total execution time: 0.38 hours
+- Total plans completed: 12
+- Average duration: 2.2 min
+- Total execution time: 0.41 hours
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [████████░░] 83%
 | 02-input-validation | 3 | 9 min | 3 min |
 | 03-error-handling | 3 | 6 min | 2 min |
 | 04-loading-empty-states | 3 | 6 min | 2 min |
-| 05-help-guidance | 1 | 1 min | 1 min |
+| 05-help-guidance | 2 | 3 min | 1.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 2min, 2min, 2min, 3min, 1min
+- Last 5 plans: 2min, 2min, 3min, 1min, 2min
 - Trend: consistent fast execution
 
 *Updated after each plan completion*
@@ -86,6 +86,9 @@ Recent decisions affecting current work:
 - Tooltip text assembled from description + example/placeholder with pre-line whitespace
 - Placeholders under 60 chars used as example fallback when no explicit example exists
 - Progress text placed below dots (not inside onboarding-card) for visual hierarchy
+- FAQ search uses 200ms debounce (local DOM filtering, consistent with existing pattern)
+- Welcome banner dismissal stored in localStorage (consistent with favorites pattern)
+- Welcome banner JS is a separate IIFE (not nested inside existing main IIFE)
 
 ### Pending Todos
 
@@ -97,6 +100,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-23T00:29:51Z
-Stopped at: Completed 05-01-PLAN.md (tooltips + onboarding progress)
+Last session: 2026-02-23T00:30:39Z
+Stopped at: Completed 05-02-PLAN.md (searchable FAQ + welcome banner) -- Phase 5 complete
 Resume file: None
