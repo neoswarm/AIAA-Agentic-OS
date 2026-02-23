@@ -1885,3 +1885,114 @@
         max-width: 800px;
     }
 }
+
+
+/* -----------------------------------------------------------------------------
+   p. Skeleton Loading Placeholders
+   ----------------------------------------------------------------------------- */
+
+/* Skeleton card — matches .quick-start-card dimensions */
+.skeleton-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 1.25rem 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    height: 100px;
+}
+
+/* Pulse shimmer animation */
+.skeleton-pulse {
+    background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-elevated) 50%, var(--bg-surface) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Skeleton text line placeholder */
+.skeleton-line {
+    height: 12px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-elevated) 50%, var(--bg-surface) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+    width: 100%;
+}
+
+.skeleton-line--short {
+    width: 60%;
+}
+
+.skeleton-line--long {
+    width: 90%;
+}
+
+/* Skeleton circle — icon placeholder */
+.skeleton-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-elevated) 50%, var(--bg-surface) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+/* Skeleton chip — matches .category-chip dimensions */
+.skeleton-chip {
+    display: inline-block;
+    height: 32px;
+    width: 80px;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-elevated) 50%, var(--bg-surface) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+/* Skeleton grid — matches dashboard .quick-start-grid layout */
+.skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+/* Skeleton workflows grid — matches .workflows-grid layout */
+.skeleton-workflows-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Skeleton workflow card — matches .workflow-card dimensions */
+.skeleton-workflow-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 1.25rem;
+    height: 160px;
+}
+
+@media (max-width: 768px) {
+    .skeleton-workflows-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .skeleton-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
