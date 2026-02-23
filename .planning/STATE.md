@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 7 of 10 (Skill Discovery)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-23 -- Completed 07-01-PLAN.md
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-02-23 -- Completed 07-02-PLAN.md
 
-Progress: [███████████░] 94%
+Progress: [████████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
+- Total plans completed: 16
 - Average duration: 2.1 min
-- Total execution time: 0.52 hours
+- Total execution time: 0.55 hours
 
 **By Phase:**
 
@@ -33,10 +33,10 @@ Progress: [███████████░] 94%
 | 04-loading-empty-states | 3 | 6 min | 2 min |
 | 05-help-guidance | 2 | 3 min | 1.5 min |
 | 06-workflow-streamlining | 2 | 4 min | 2 min |
-| 07-skill-discovery | 1 | 3 min | 3 min |
+| 07-skill-discovery | 2 | 5 min | 2.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 1min, 2min, 2min, 2min, 3min
+- Last 5 plans: 2min, 2min, 2min, 3min, 2min
 - Trend: consistent fast execution
 
 *Updated after each plan completion*
@@ -103,6 +103,10 @@ Recent decisions affecting current work:
 - estimated_minutes = max(step_count // 2, 1) as simple heuristic
 - /skills/recommended route placed before /skills/<skill_name> to avoid Flask parameter capture
 - /skills/recommended falls back to pref.role from DB then curated popular list when no role param
+- Dashboard search replaced from client-side .includes() to API-backed /api/v2/skills/search for synonym expansion
+- Output preview uses textContent (not innerHTML) for XSS safety
+- Recommended section hidden by default, shown only when API returns results
+- Skill detail computes complexity client-side from process_steps + prerequisites + required_inputs
 
 ### Pending Todos
 
@@ -114,6 +118,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-23T02:55:05Z
-Stopped at: Completed 07-01-PLAN.md (synonym search, metadata, recommendations backend)
+Last session: 2026-02-23T02:59:15Z
+Stopped at: Completed 07-02-PLAN.md (Phase 07 complete - all skill discovery UI wired)
 Resume file: None
