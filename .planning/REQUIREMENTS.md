@@ -112,10 +112,10 @@
 | FLOW-03 | Phase 6 | Complete |
 | FLOW-04 | Phase 6 | Complete |
 | FLOW-05 | Phase 6 | Complete |
-| DISC-01 | Phase 7 | Pending |
-| DISC-02 | Phase 7 | Pending |
-| DISC-03 | Phase 7 | Pending |
-| DISC-04 | Phase 7 | Pending |
+| DISC-01 | Phase 7 | Complete |
+| DISC-02 | Phase 7 | Complete |
+| DISC-03 | Phase 7 | Complete |
+| DISC-04 | Phase 7 | Complete |
 | A11Y-01 | Phase 8 | Pending |
 | A11Y-02 | Phase 8 | Pending |
 | A11Y-03 | Phase 8 | Pending |
