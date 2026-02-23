@@ -475,6 +475,100 @@
     border-bottom: none;
 }
 
+/* Output Preview */
+.output-preview {
+    margin-top: 1.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.output-preview-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.output-preview-header svg {
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+}
+
+.output-preview-body {
+    padding: 1rem 1.25rem;
+}
+
+.output-preview-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.output-preview-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.375rem 0;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.output-preview-list li::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 0.4375rem;
+    flex-shrink: 0;
+}
+
+/* Skill Meta Bar */
+.skill-meta-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.skill-meta-bar .complexity-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+}
+.complexity-simple {
+    background: var(--success-muted, #dcfce7);
+    color: var(--success, #16a34a);
+}
+.complexity-moderate {
+    background: var(--warning-muted, #fef3c7);
+    color: var(--warning, #d97706);
+}
+.complexity-advanced {
+    background: var(--error-muted, #fef2f2);
+    color: var(--error, #dc2626);
+}
+.skill-time-estimate {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .skill-header {
@@ -582,6 +676,19 @@
         </div>
     </div>
 </div>
+
+<!-- Output Preview -->
+<div class="output-preview" id="output-preview" style="display: none;">
+    <div class="output-preview-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        Expected Output
+    </div>
+    <div class="output-preview-body">
+        <ul class="output-preview-list" id="output-preview-list"></ul>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -618,6 +725,44 @@
                 var badge = document.getElementById('skill-category');
                 badge.textContent = skillMeta.category;
                 badge.style.display = 'inline-block';
+            }
+
+            // Show skill meta (time + complexity)
+            var metaBar = document.createElement('div');
+            metaBar.className = 'skill-meta-bar';
+            if (skillMeta.process_steps && skillMeta.process_steps.length > 0) {
+                var steps = skillMeta.process_steps.length;
+                var mins = Math.max(Math.floor(steps / 2), 1);
+                metaBar.innerHTML += '<span class="skill-time-estimate">' + mins + ' min estimated</span>';
+            }
+            // Compute complexity client-side from full skill detail
+            var stepsCount = (skillMeta.process_steps || []).length;
+            var prereqCount = (skillMeta.prerequisites || []).length;
+            var reqInputs = (skillMeta.inputs || []).filter(function(i) { return i.required; }).length;
+            var cScore = stepsCount + prereqCount + reqInputs;
+            var complexity = cScore <= 5 ? 'simple' : (cScore <= 10 ? 'moderate' : 'advanced');
+            metaBar.innerHTML += '<span class="complexity-badge complexity-' + complexity + '">' + complexity + '</span>';
+            document.getElementById('skill-category').parentNode.appendChild(metaBar);
+
+            // Render output preview
+            var outputExamples = skillMeta.output_examples || [];
+            if (outputExamples.length > 0) {
+                var previewList = document.getElementById('output-preview-list');
+                previewList.innerHTML = '';
+                outputExamples.forEach(function(line) {
+                    var li = document.createElement('li');
+                    li.textContent = line;
+                    previewList.appendChild(li);
+                });
+                document.getElementById('output-preview').style.display = 'block';
+            } else if (skillMeta.goal) {
+                // Fallback: use the goal as a description of what gets generated
+                var previewList = document.getElementById('output-preview-list');
+                previewList.innerHTML = '';
+                var li = document.createElement('li');
+                li.textContent = skillMeta.goal;
+                previewList.appendChild(li);
+                document.getElementById('output-preview').style.display = 'block';
             }
 
             buildForm(skillMeta.inputs || []);
