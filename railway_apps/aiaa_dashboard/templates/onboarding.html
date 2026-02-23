@@ -636,7 +636,7 @@
                 <p class="step-subtitle">Welcome to Agentic OS. Here's what you can do next.</p>
 
                 <div class="next-steps">
-                    <a href="/workflows" class="next-step-link">
+                    <a href="/skills" class="next-step-link">
                         <span>Explore 133 Skills</span>
                         <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
@@ -650,7 +650,7 @@
                     </a>
                 </div>
 
-                <button class="btn" style="margin-top: 1.5rem;" onclick="window.location.href='/'">Go to Dashboard</button>
+                <button class="btn" style="margin-top: 1.5rem;" onclick="completeOnboarding()">Go to Dashboard</button>
             </div>
         </div>
     </div>
@@ -658,6 +658,13 @@
     <script>
         var selectedRole = '';
         var selectedTask = '';
+
+        function completeOnboarding() {
+            localStorage.setItem('onboarding_completed', '1');
+            // Ensure welcome banner shows on first dashboard visit
+            localStorage.removeItem('welcome_banner_dismissed');
+            window.location.href = '/home';
+        }
 
         function selectRole(card) {
             document.querySelectorAll('.role-card').forEach(function(c) { c.classList.remove('selected'); });
