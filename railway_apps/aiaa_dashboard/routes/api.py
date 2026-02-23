@@ -14,6 +14,7 @@ import sys
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import models
+import requests as http_requests
 from services.deployment_service import DeploymentService, check_required_env_vars
 
 
@@ -627,6 +628,107 @@ def api_unregister_webhook():
         return jsonify({
             "status": "error",
             "message": f"Failed to unregister webhook: {str(e)}"
+        }), 500
+
+
+@api_bp.route('/webhook-workflows/toggle', methods=['POST'])
+@require_auth('write')
+def api_toggle_webhook():
+    """
+    Toggle a webhook between enabled (active) and disabled (paused).
+
+    Request body:
+    {
+        "slug": "my-webhook"
+    }
+    """
+    try:
+        data = request.get_json(silent=True) or {}
+        slug = (data.get('slug') or '').strip()
+
+        if not slug:
+            return jsonify({
+                "status": "error",
+                "message": "slug is required"
+            }), 400
+
+        workflow = models.get_workflow_by_slug(slug)
+        if not workflow:
+            return jsonify({
+                "status": "error",
+                "message": f"Webhook '{slug}' not found"
+            }), 404
+
+        new_status = 'paused' if workflow.get('status') == 'active' else 'active'
+        models.update_workflow_status(slug, new_status)
+
+        return jsonify({
+            "slug": slug,
+            "enabled": new_status == 'active',
+            "name": workflow['name']
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Failed to toggle webhook: {str(e)}"
+        }), 500
+
+
+@api_bp.route('/webhook-workflows/test', methods=['POST'])
+@require_auth('write')
+def api_test_webhook():
+    """
+    Test a webhook by sending a test payload to its URL.
+
+    Request body:
+    {
+        "slug": "my-webhook"
+    }
+    """
+    try:
+        data = request.get_json(silent=True) or {}
+        slug = (data.get('slug') or '').strip()
+
+        if not slug:
+            return jsonify({
+                "status": "error",
+                "message": "slug is required"
+            }), 400
+
+        workflow = models.get_workflow_by_slug(slug)
+        if not workflow:
+            return jsonify({
+                "status": "error",
+                "message": f"Webhook '{slug}' not found"
+            }), 404
+
+        test_url = f"{request.host_url.rstrip('/')}/webhook/{slug}"
+        test_payload = {
+            "test": True,
+            "source": "dashboard-test",
+            "timestamp": datetime.utcnow().isoformat(),
+            "webhook_name": workflow['name']
+        }
+
+        try:
+            resp = http_requests.post(test_url, json=test_payload, timeout=10)
+            return jsonify({
+                "slug": slug,
+                "test_status": "success" if resp.ok else "failed",
+                "status_code": resp.status_code,
+                "response": resp.text[:500]
+            })
+        except http_requests.RequestException as e:
+            return jsonify({
+                "slug": slug,
+                "test_status": "error",
+                "status_code": 0,
+                "response": str(e)
+            })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Failed to test webhook: {str(e)}"
         }), 500
 
 
