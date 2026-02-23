@@ -164,11 +164,11 @@ Plans:
   2. Sidebar collapses to a hamburger menu on mobile
   3. Skill execution forms are fully usable on mobile (no horizontal scrolling)
   4. All buttons and links have minimum 44x44px touch targets
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 09-01: Responsive layout fixes (card stacking, sidebar collapse, form layout)
-- [ ] 09-02: Touch target sizing and mobile interaction polish
+- [ ] 09-01-PLAN.md -- Hamburger menu, sidebar overlay, card stacking, form adaptation, mobile layout (MOB-01, MOB-02, MOB-03)
+- [ ] 09-02-PLAN.md -- Touch target enforcement (44px minimum) and iOS zoom prevention (MOB-04)
 
 ### Phase 10: End-to-End Verification
 **Goal**: The fully hardened dashboard passes integration tests covering all critical user workflows
