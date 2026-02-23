@@ -13,6 +13,7 @@ import sys
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
+import models
 from services.deployment_service import DeploymentService, check_required_env_vars
 
 
@@ -35,7 +36,7 @@ def require_auth(permission='read'):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             # Check session auth
-            if session.get('authenticated'):
+            if session.get('logged_in'):
                 return f(*args, **kwargs)
             
             # Check API key auth
@@ -418,36 +419,57 @@ def api_list_deployments():
 def api_toggle_favorite():
     """
     Toggle favorite status for a workflow.
-    
+
     Request body:
     {
         "workflow_name": "cold-email-campaign"
     }
-    
+
     Response:
     {
-        "status": "success",
-        "workflow": "cold-email-campaign",
-        "is_favorite": true
+        "status": "ok",
+        "favorite": true/false
     }
     """
-    data = request.get_json()
-    workflow_name = data.get('workflow_name')
-    
-    if not workflow_name:
+    try:
+        data = request.get_json(silent=True) or {}
+        workflow_name = (data.get('workflow_name') or '').strip()
+
+        if not workflow_name:
+            return jsonify({
+                "status": "error",
+                "message": "workflow_name required"
+            }), 400
+
+        if models.is_favorite(workflow_name):
+            models.remove_favorite(workflow_name)
+            return jsonify({"status": "ok", "favorite": False})
+        else:
+            models.add_favorite(workflow_name)
+            return jsonify({"status": "ok", "favorite": True})
+    except Exception as e:
         return jsonify({
             "status": "error",
-            "message": "workflow_name is required"
-        }), 400
-    
-    # This would save to a database or user preferences file
-    # For now, return a placeholder
-    return jsonify({
-        "status": "success",
-        "workflow": workflow_name,
-        "is_favorite": True,
-        "message": "Favorites feature not yet implemented"
-    })
+            "message": f"Failed to toggle favorite: {str(e)}"
+        }), 500
+
+
+@api_bp.route('/favorites', methods=['GET'])
+@require_auth('read')
+def api_get_favorites():
+    """
+    List all favorited workflow names.
+
+    Response: plain JSON array of strings, e.g. ["cold-email-campaign", "blog-post"]
+    """
+    try:
+        favorites = models.get_favorites()
+        return jsonify(favorites)
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Failed to load favorites: {str(e)}"
+        }), 500
 
 
 # =============================================================================
