@@ -1072,6 +1072,26 @@ body {
         min-width: 44px;
         min-height: 44px;
     }
+
+    /* ---- iOS Zoom Prevention: 16px form inputs ---- */
+    /* iOS Safari auto-zooms viewport when focusing inputs with font-size < 16px.
+       Current codebase uses 0.9375rem (15px) and 0.875rem (14px) on form fields. */
+
+    .form-input,
+    .form-select,
+    .form-textarea,
+    .field-input,
+    .field-select,
+    .field-textarea,
+    .nl-textarea,
+    .cron-select,
+    .cron-input,
+    .cron-input-full,
+    .search-bar__input,
+    .search-hero-input input {
+        font-size: 16px;
+        min-height: 44px;
+    }
 }
 
 /* =============================================================================
