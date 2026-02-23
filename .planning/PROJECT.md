@@ -19,20 +19,22 @@ The Agentic OS is a production-grade AI agency operating system with 133 skills,
 - New navigation structure (Home, Run Skill, My Outputs, Clients, Settings, Help)
 - 10 hook files rewritten with user-friendly error messages
 
+Shipped v1.0 with 33,252 LOC across Python/HTML/JS/CSS. 12 phases, 24 plans, 43 requirements. 4 P3 tech debt items deferred.
+
 ## The Problem
 
 The UX overhaul created the foundation, but it was built quickly by an agent team. It needs hardening:
 
-1. **Input validation is minimal** — forms accept bad data, no client-side validation
-2. **Error recovery is weak** — when things fail, users don't know what happened or how to fix it
-3. **Help/tooltips are sparse** — new users don't understand what fields mean
-4. **Loading states are basic** — no skeleton screens, no graceful degradation
-5. **Edge cases aren't handled** — empty states, network errors, timeout scenarios
-6. **Accessibility is poor** — no ARIA labels, keyboard nav incomplete
-7. **Mobile experience is untested** — responsive CSS exists but may have gaps
-8. **Workflow friction** — too many clicks for common tasks, unclear next steps
-9. **API key setup is confusing** — users don't know where to get keys or why they need them
-10. **Skill discovery is weak** — 133 skills but hard to find the right one
+1. **Input validation is minimal** -- forms accept bad data, no client-side validation
+2. **Error recovery is weak** -- when things fail, users don't know what happened or how to fix it
+3. **Help/tooltips are sparse** -- new users don't understand what fields mean
+4. **Loading states are basic** -- no skeleton screens, no graceful degradation
+5. **Edge cases aren't handled** -- empty states, network errors, timeout scenarios
+6. **Accessibility is poor** -- no ARIA labels, keyboard nav incomplete
+7. **Mobile experience is untested** -- responsive CSS exists but may have gaps
+8. **Workflow friction** -- too many clicks for common tasks, unclear next steps
+9. **API key setup is confusing** -- users don't know where to get keys or why they need them
+10. **Skill discovery is weak** -- 133 skills but hard to find the right one
 
 ## Core Value
 
@@ -69,46 +71,52 @@ A non-technical user can:
 | Keep vanilla JS (no framework) | Simplicity, no build step, fast deploys | Confirmed |
 | SQLite (no migration) | Sufficient for single-user/small-team dashboard | Confirmed |
 | Harden existing code, not rewrite | UX overhaul foundation is solid, needs polish not replacement | Confirmed |
-| Focus on common paths first | 80/20 rule — make the top 10 workflows flawless | Confirmed |
+| Focus on common paths first | 80/20 rule -- make the top 10 workflows flawless | Confirmed |
+| Phases 2-9 parallelizable | All depend only on Phase 1 baseline | Enabled flexible execution order |
+| fetchAPI as single HTTP utility | Centralized timeout, retry, toast, error handling | Adopted globally via main.js |
+| trapFocus utility in main.js | Reusable across all modals and overlays | Used by confirm, webhooks, deploy |
+| Touch targets 44px minimum | WCAG/Apple HIG standard | Applied via CSS min-height/min-width |
+| 4 P3 items accepted as tech debt | No user-facing impact, cleanup only | Deferred to future milestone |
 
 ## Requirements
 
 ### Validated
 
-- ✓ Dashboard home with search and categories — existing
-- ✓ Skill execution forms from SKILL.md — existing
-- ✓ Execution progress with live output — existing
-- ✓ Output viewer with actions — existing
-- ✓ Settings page (API keys, preferences, profile) — existing
-- ✓ Client management CRUD — existing
-- ✓ Onboarding wizard — existing
-- ✓ Improved error pages — existing
-- ✓ New navigation structure — existing
-- ✓ Hook messages in plain English — existing
+- ✓ Dashboard home with search and categories -- existing
+- ✓ Skill execution forms from SKILL.md -- existing
+- ✓ Execution progress with live output -- existing
+- ✓ Output viewer with actions -- existing
+- ✓ Settings page (API keys, preferences, profile) -- existing
+- ✓ Client management CRUD -- existing
+- ✓ Onboarding wizard -- existing
+- ✓ Improved error pages -- existing
+- ✓ New navigation structure -- existing
+- ✓ Hook messages in plain English -- existing
+- ✓ Input validation on all forms (client-side + server-side) -- v1.0
+- ✓ Loading states and skeleton screens -- v1.0
+- ✓ Empty states for all list views -- v1.0
+- ✓ Error recovery with actionable guidance -- v1.0
+- ✓ Tooltips and contextual help -- v1.0
+- ✓ Keyboard accessibility (ARIA, focus management) -- v1.0
+- ✓ Mobile responsiveness polish -- v1.0
+- ✓ Workflow streamlining (reduce clicks) -- v1.0
+- ✓ Skill search improvements (better fuzzy matching, suggestions) -- v1.0
+- ✓ API key setup guidance (inline help, validation feedback) -- v1.0
+- ✓ Toast notifications for all async operations -- v1.0
+- ✓ Graceful degradation (offline, API down, missing keys) -- v1.0
+- ✓ End-to-end testing of all user flows -- v1.0
 
 ### Active
 
-- [ ] Input validation on all forms (client-side + server-side)
-- [ ] Loading states and skeleton screens
-- [ ] Empty states for all list views
-- [ ] Error recovery with actionable guidance
-- [ ] Tooltips and contextual help
-- [ ] Keyboard accessibility (ARIA, focus management)
-- [ ] Mobile responsiveness polish
-- [ ] Workflow streamlining (reduce clicks)
-- [ ] Skill search improvements (better fuzzy matching, suggestions)
-- [ ] API key setup guidance (inline help, validation feedback)
-- [ ] Toast notifications for all async operations
-- [ ] Graceful degradation (offline, API down, missing keys)
-- [ ] End-to-end testing of all user flows
+No active requirements. Next milestone not yet planned.
 
 ### Out of Scope
 
-- Framework migration (React, Vue, etc.) — too much complexity for current needs
-- Database migration (Postgres) — SQLite sufficient
-- Multi-user/auth system overhaul — current single-user login is fine
-- New skill creation — existing 133 skills are sufficient
-- CI/CD pipeline — manual Railway deploys work
+- Framework migration (React, Vue, etc.) -- too much complexity for current needs
+- Database migration (Postgres) -- SQLite sufficient
+- Multi-user/auth system overhaul -- current single-user login is fine
+- New skill creation -- existing 133 skills are sufficient
+- CI/CD pipeline -- manual Railway deploys work
 
 ---
-*Last updated: 2026-02-22 after initialization*
+*Last updated: 2026-02-23 after v1.0 milestone*
