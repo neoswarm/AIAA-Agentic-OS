@@ -101,11 +101,13 @@ Plans:
   3. Onboarding wizard clearly shows progress (current step X of Y)
   4. Help page has a searchable FAQ covering the top 10 user questions
   5. First-time dashboard visit shows a welcome banner with quick orientation
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: Tooltip component and skill form field tooltips
-- [ ] 05-02: API key guidance, onboarding progress, FAQ page, and welcome banner
+- [ ] 05-01-PLAN.md -- Enhance skill form tooltips with example values, add Step X of Y to onboarding (HELP-01, HELP-03)
+- [ ] 05-02-PLAN.md -- Searchable FAQ with 10 questions, first-time dashboard welcome banner (HELP-04, HELP-05)
+
+Note: HELP-02 (API key expandable help) is already satisfied by existing settings.html implementation.
 
 ### Phase 6: Workflow Streamlining
 **Goal**: Common user paths require fewer clicks and less guesswork
