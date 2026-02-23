@@ -154,7 +154,7 @@
     font-weight: 400;
     white-space: nowrap;
     max-width: 280px;
-    white-space: normal;
+    white-space: pre-line;
     z-index: 10;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
@@ -663,8 +663,14 @@
         if (input.required) {
             label.innerHTML += ' <span class="required-mark">*</span>';
         }
-        if (input.description) {
-            label.innerHTML += ' <span class="field-tooltip" data-tip="' + escapeAttr(input.description) + '">?</span>';
+        var tipText = input.description || '';
+        if (input.example) {
+            tipText += (tipText ? '\n\nExample: ' : 'Example: ') + input.example;
+        } else if (input.placeholder && input.placeholder.length < 60) {
+            tipText += (tipText ? '\n\nExample: ' : 'Example: ') + input.placeholder;
+        }
+        if (tipText) {
+            label.innerHTML += ' <span class="field-tooltip" data-tip="' + escapeAttr(tipText) + '">?</span>';
         }
         group.appendChild(label);
 
