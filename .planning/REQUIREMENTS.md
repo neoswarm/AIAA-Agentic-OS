@@ -120,10 +120,10 @@
 | A11Y-02 | Phase 8 | Complete |
 | A11Y-03 | Phase 8 | Complete |
 | A11Y-04 | Phase 8 | Complete |
-| MOB-01 | Phase 9 | Pending |
-| MOB-02 | Phase 9 | Pending |
-| MOB-03 | Phase 9 | Pending |
-| MOB-04 | Phase 9 | Pending |
+| MOB-01 | Phase 9 | Complete |
+| MOB-02 | Phase 9 | Complete |
+| MOB-03 | Phase 9 | Complete |
+| MOB-04 | Phase 9 | Complete |
 | TEST-01 | Phase 1 | Complete |
 | TEST-02 | Phase 10 | Pending |
 | TEST-03 | Phase 10 | Pending |
