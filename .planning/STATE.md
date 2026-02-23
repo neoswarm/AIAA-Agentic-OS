@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Non-technical users can discover, configure, execute, and receive output from any of 133 AI skills through the web dashboard without ever touching a terminal, and when something goes wrong, they understand exactly what happened and how to fix it.
-**Current focus:** Gap closure phases 11-12 (pre-existing tech debt fixes from milestone audit)
+**Current focus:** All 12 phases complete. UX hardening project finished.
 
 ## Current Position
 
 Phase: 12 of 12 (API v1 Auth + Feature Wiring)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-23 -- Completed 12-01-PLAN.md (session auth fix, favorites API, Google Docs delivery)
+Plan: 2 of 2 in current phase
+Status: Complete
+Last activity: 2026-02-23 -- Completed 12-02-PLAN.md (webhook management API endpoints)
 
-Progress: [███████████████████████████████████████░] 97% (23/24 plans, 11.5/12 phases)
+Progress: [████████████████████████████████████████] 100% (24/24 plans, 12/12 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 23
+- Total plans completed: 24
 - Average duration: 2.7 min
-- Total execution time: 1.07 hours
+- Total execution time: 1.1 hours
 
 **By Phase:**
 
@@ -38,10 +38,10 @@ Progress: [███████████████████████
 | 09-mobile-polish | 2 | 3 min | 1.5 min |
 | 10-end-to-end-verification | 1 | 3 min | 3 min |
 | 11-quick-fixes | 1 | 1.4 min | 1.4 min |
-| 12-api-v1-auth-feature-wiring | 1 | 1.6 min | 1.6 min |
+| 12-api-v1-auth-feature-wiring | 2 | 3.4 min | 1.7 min |
 
 **Recent Trend:**
-- Last 5 plans: 1min, 3min, 1.4min, 1.6min
+- Last 5 plans: 3min, 1.4min, 1.6min, 1.8min
 - Trend: Consistent fast execution
 
 *Updated after each plan completion*
@@ -136,6 +136,9 @@ Recent decisions affecting current work:
 - GET /api/favorites returns plain JSON array (not wrapped object) to match forEach pattern
 - Google Docs delivery uses subprocess to call existing skill script (DOE pattern)
 - session.get('logged_in') is the single session auth key across all API routes (api.py now matches api_v2.py)
+- import requests as http_requests alias avoids collision with flask.request in api.py
+- Webhook list endpoint combines active+paused queries to show all webhooks regardless of status
+- Soft-delete via models.delete_workflow(slug) for webhook unregister (consistent with existing pattern)
 
 ### Pending Todos
 
@@ -143,10 +146,10 @@ None.
 
 ### Blockers/Concerns
 
-None. (API v1 session key mismatch resolved in 12-01.)
+None. All 12 phases complete.
 
 ## Session Continuity
 
-Last session: 2026-02-23T16:34:44Z
-Stopped at: Completed 12-01-PLAN.md (session auth fix, favorites API, Google Docs delivery)
+Last session: 2026-02-23T16:38:29Z
+Stopped at: Completed 12-02-PLAN.md (webhook management API endpoints) -- PROJECT COMPLETE
 Resume file: None
