@@ -6,6 +6,7 @@ Skill execution, client management, and settings endpoints.
 
 import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 from functools import wraps
@@ -274,6 +275,67 @@ def api_execution_output(execution_id):
             "output_content": output_content,
             "output_preview": execution.get("output_preview"),
         })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@api_v2_bp.route('/executions/<execution_id>/deliver/gdocs', methods=['POST'])
+@login_required
+def api_deliver_gdocs(execution_id):
+    """Send execution output to Google Docs via the google-doc-delivery skill."""
+    try:
+        execution = get_execution_status(execution_id)
+        if execution is None:
+            return jsonify({"status": "error", "message": "Execution not found"}), 404
+
+        output_path = execution.get("output_path")
+        if not output_path:
+            return jsonify({"status": "error", "message": "No output file for this execution"}), 400
+
+        # Resolve relative paths to project root (same pattern as api_execution_output)
+        full_path = Path(output_path)
+        if not full_path.is_absolute():
+            project_root = SKILLS_DIR.parent.parent
+            full_path = project_root / output_path
+
+        if not full_path.exists():
+            return jsonify({"status": "error", "message": "Output file not found"}), 404
+
+        # Call the Google Docs delivery skill
+        skill_script = SKILLS_DIR / "google-doc-delivery" / "create_google_doc.py"
+        skill_name = execution.get("skill_name", "output")
+        result = subprocess.run(
+            [sys.executable, str(skill_script),
+             "--file", str(full_path),
+             "--title", f"{skill_name} - {execution_id[:8]}"],
+            capture_output=True, text=True, timeout=60
+        )
+
+        if result.returncode != 0:
+            return jsonify({
+                "status": "error",
+                "message": "Google Docs delivery failed",
+                "detail": result.stderr[:500],
+            }), 500
+
+        # Extract Google Docs URL from stdout
+        url = None
+        for line in result.stdout.splitlines():
+            if 'docs.google.com' in line:
+                url = line.strip()
+                break
+
+        return jsonify({
+            "status": "ok",
+            "message": "Delivered to Google Docs",
+            "url": url,
+        })
+
+    except subprocess.TimeoutExpired:
+        return jsonify({
+            "status": "error",
+            "message": "Google Docs delivery timed out",
+        }), 504
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
