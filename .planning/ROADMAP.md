@@ -23,6 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 9: Mobile Polish** - Responsive layout fixes, touch targets, mobile-specific UX ✓
 - [x] **Phase 10: End-to-End Verification** - Integration tests confirming the hardened system works as a whole ✓
 - [x] **Phase 11: Quick Fixes (Gap Closure)** - Fix onboarding API key save, skill output viewer, dead navigation links ✓
+- [x] **Phase 12: API v1 Auth & Feature Wiring (Gap Closure)** - Fix session auth, favorites API, Google Docs delivery, webhook routes ✓
 
 ## Phase Details
 
@@ -243,4 +244,4 @@ Phase 1 first, then Phases 2-9 in any order (parallelizable), then Phase 10 last
 | 9. Mobile Polish | 2/2 | Complete ✓ | 2026-02-23 |
 | 10. End-to-End Verification | 1/1 | Complete ✓ | 2026-02-23 |
 | 11. Quick Fixes (Gap Closure) | 1/1 | Complete ✓ | 2026-02-23 |
-| 12. API v1 Auth & Feature Wiring | 0/2 | Not started | - |
+| 12. API v1 Auth & Feature Wiring | 2/2 | Complete ✓ | 2026-02-23 |
