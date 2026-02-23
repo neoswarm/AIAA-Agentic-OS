@@ -3,6 +3,16 @@
  * Shared JavaScript functions used across all pages
  */
 
+// Inject spinner keyframes if not already present
+(function() {
+    if (!document.getElementById('aiaa-spinner-styles')) {
+        var style = document.createElement('style');
+        style.id = 'aiaa-spinner-styles';
+        style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+        document.head.appendChild(style);
+    }
+})();
+
 // ==============================================================================
 // Toast Notifications
 // ==============================================================================
@@ -473,25 +483,43 @@ function updateQueryParams(params) {
 // ==============================================================================
 
 /**
- * Show loading state on button
+ * Show loading state on button with proper spinner SVG
  * @param {HTMLElement} button - Button element
  * @param {boolean} loading - Loading state
  * @param {string} loadingText - Text to show while loading
  */
-function setButtonLoading(button, loading, loadingText = 'Loading...') {
+function setButtonLoading(button, loading, loadingText) {
+    if (!button) return;
     if (loading) {
+        // Store original state for restoration
+        button.dataset.originalHTML = button.innerHTML;
+        button.dataset.originalDisabled = button.disabled;
         button.disabled = true;
-        button.dataset.originalText = button.textContent;
-        button.innerHTML = `
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin" style="margin-right: 0.5rem;">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 6v6l4 2"/>
-            </svg>
-            ${loadingText}
-        `;
+        var text = loadingText || button.dataset.loadingText || 'Loading...';
+        button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 0.8s linear infinite; margin-right: 0.5rem; flex-shrink: 0;"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"/></svg>' + text;
     } else {
-        button.disabled = false;
-        button.textContent = button.dataset.originalText || 'Submit';
+        button.disabled = button.dataset.originalDisabled === 'true';
+        button.innerHTML = button.dataset.originalHTML || button.textContent;
+        delete button.dataset.originalHTML;
+        delete button.dataset.originalDisabled;
+    }
+}
+
+/**
+ * Wrap an async operation with automatic button loading state management
+ * Prevents double-clicks (checks button.disabled) and handles errors (finally block)
+ * @param {HTMLElement} button - Button element
+ * @param {Function} asyncFn - Async function to execute
+ * @param {string} loadingText - Text to show while loading
+ * @returns {Promise<any>} - Result of asyncFn
+ */
+async function withButtonLoading(button, asyncFn, loadingText) {
+    if (!button || button.disabled) return;
+    setButtonLoading(button, true, loadingText);
+    try {
+        return await asyncFn();
+    } finally {
+        setButtonLoading(button, false);
     }
 }
 
@@ -535,4 +563,5 @@ window.setFormData = setFormData;
 window.getQueryParams = getQueryParams;
 window.updateQueryParams = updateQueryParams;
 window.setButtonLoading = setButtonLoading;
+window.withButtonLoading = withButtonLoading;
 window.debounce = debounce;
