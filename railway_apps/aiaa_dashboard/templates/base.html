@@ -11,6 +11,15 @@
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
+    <!-- Mobile hamburger menu -->
+    <button class="hamburger-btn" onclick="toggleMobileNav()" aria-label="Open navigation menu" aria-expanded="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+    </button>
+
     <!-- Sidebar -->
     <aside class="sidebar" aria-label="Sidebar">
         <div class="sidebar-brand">
@@ -137,6 +146,9 @@
         </div>
     </aside>
 
+    <!-- Mobile sidebar backdrop -->
+    <div class="sidebar-backdrop" onclick="toggleMobileNav()"></div>
+
     <!-- Main Content -->
     <main class="main" id="main-content" tabindex="-1">
         {% block content %}{% endblock %}
@@ -144,6 +156,36 @@
 
     <!-- Toast Notification Area -->
     <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Mobile Navigation Toggle -->
+    <script>
+        function toggleMobileNav() {
+            var sidebar = document.querySelector('.sidebar');
+            var backdrop = document.querySelector('.sidebar-backdrop');
+            var btn = document.querySelector('.hamburger-btn');
+            var isOpen = sidebar.classList.contains('open');
+
+            sidebar.classList.toggle('open');
+            backdrop.classList.toggle('visible');
+            btn.setAttribute('aria-expanded', String(!isOpen));
+            document.body.style.overflow = isOpen ? '' : 'hidden';
+
+            if (!isOpen) {
+                var firstLink = sidebar.querySelector('.nav-item');
+                if (firstLink) firstLink.focus();
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                var sidebar = document.querySelector('.sidebar');
+                if (sidebar && sidebar.classList.contains('open')) {
+                    toggleMobileNav();
+                    document.querySelector('.hamburger-btn').focus();
+                }
+            }
+        });
+    </script>
 
     <!-- Theme Toggle Script -->
     <script>
