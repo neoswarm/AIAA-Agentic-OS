@@ -349,3 +349,81 @@ def test_execution_stats(auth_client):
     data = resp.get_json()
     assert data["status"] == "ok"
     assert "stats" in data
+
+
+# =============================================================================
+# E2E Smoke Test
+# =============================================================================
+
+def test_e2e_smoke(app):
+    """End-to-end smoke test: login -> API key -> browse -> execute -> check status.
+
+    Uses a fresh test_client (not the shared fixtures) to simulate a real
+    user session from login through skill execution.
+    """
+    client = app.test_client()
+
+    # Step 1 - Login with form credentials
+    resp = client.post("/login", data={
+        "username": "testadmin",
+        "password": "testpass123",
+    }, follow_redirects=False)
+    assert resp.status_code == 302, f"Login should redirect, got {resp.status_code}"
+
+    # Step 2 - Save an API key
+    resp = client.post("/api/v2/settings/api-keys", json={
+        "key_name": "openrouter",
+        "key_value": "sk-or-test-1234567890abcdef",
+    })
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["status"] == "ok"
+
+    # Step 3 - Browse skills
+    resp = client.get("/api/v2/skills")
+    data = resp.get_json()
+    assert data["status"] == "ok"
+    assert data["total"] > 0
+    skill_name = data["skills"][0]["name"]
+
+    # Step 4 - View skill detail
+    resp = client.get(f"/api/v2/skills/{skill_name}")
+    data = resp.get_json()
+    assert data["status"] == "ok"
+    assert "skill" in data
+
+    # Step 5 - Execute a skill (or validate required params)
+    # Build dummy params from required inputs if any
+    skill_meta = data["skill"]
+    required_inputs = [i for i in (skill_meta.get("inputs") or []) if i.get("required")]
+    params = {}
+    for inp in required_inputs:
+        field = inp.get("name", "")
+        if field:
+            params[field] = "test-value"
+
+    resp = client.post(f"/api/v2/skills/{skill_name}/execute", json={"params": params})
+    # Accept 202 (execution started) or 400 (validation error -- still proves the layer works)
+    assert resp.status_code in (202, 400), f"Execute returned unexpected {resp.status_code}"
+    data = resp.get_json()
+    if resp.status_code == 202:
+        assert data["status"] == "ok"
+        assert "execution_id" in data
+    else:
+        # 400 means validation caught missing/invalid params -- structured error shape
+        assert data["status"] == "error"
+        assert "errors" in data or "message" in data
+
+    # Step 6 - Check executions list
+    resp = client.get("/api/v2/executions")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["status"] == "ok"
+    assert "executions" in data
+
+    # Step 7 - Check API key status
+    resp = client.get("/api/v2/settings/api-keys/status")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["status"] == "ok"
+    assert "keys" in data
