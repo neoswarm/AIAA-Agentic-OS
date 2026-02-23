@@ -178,10 +178,10 @@ Plans:
   1. New API endpoints have validation tests that pass
   2. End-to-end smoke test passes: onboarding -> API key setup -> run skill -> view output
   3. All regression tests from Phase 1 still pass after all hardening changes
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 10-01: API validation tests and end-to-end smoke test suite
+- [ ] 10-01-PLAN.md -- API v2 validation tests for all endpoints + E2E smoke test covering full user journey (TEST-02, TEST-03)
 
 ## Parallelization Notes
 
