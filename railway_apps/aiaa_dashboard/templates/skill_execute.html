@@ -509,6 +509,18 @@
     </div>
 </div>
 
+<!-- Client Selector -->
+<div class="field-group" id="client-selector-group" style="display: none; margin-bottom: 1.5rem;">
+    <label class="field-label">
+        Client
+        <span class="field-tooltip" data-tip="Select a client to apply their profile settings to this skill run">?</span>
+    </label>
+    <select class="field-select" id="client-selector" name="client">
+        <option value="">No client (general)</option>
+    </select>
+    <span class="field-hint">Optional: select a client to customize the output for their brand.</span>
+</div>
+
 <!-- Mode Tabs -->
 <div class="mode-tabs">
     <button class="mode-tab active" id="tab-form" onclick="switchMode('form')">Form</button>
@@ -614,6 +626,32 @@
             document.getElementById('skill-title').textContent = formatSkillName(skillName);
             document.getElementById('form-loading').innerHTML = '<span style="color:var(--text-muted);">Could not load skill details. You can still run it with default settings.</span>';
             document.getElementById('btn-run').disabled = false;
+        }
+    }
+
+    async function loadClientSelector() {
+        try {
+            var data = await fetchAPI('/api/v2/clients');
+            var clients = data.clients || [];
+            if (clients.length === 0) return; // Hide selector if no clients
+
+            var select = document.getElementById('client-selector');
+            clients.forEach(function(client) {
+                var opt = document.createElement('option');
+                opt.value = client.slug;
+                opt.textContent = client.name;
+                select.appendChild(opt);
+            });
+            document.getElementById('client-selector-group').style.display = 'block';
+
+            // Pre-fill from query params if present (for re-run with client)
+            var params = getQueryParams();
+            if (params.client) {
+                select.value = params.client;
+            }
+        } catch (e) {
+            // Silently fail -- client selector is optional enhancement
+            console.warn('Could not load clients:', e);
         }
     }
 
@@ -787,6 +825,12 @@
                 }
             });
         });
+
+        // Include client selector value if selected
+        var clientSelect = document.getElementById('client-selector');
+        if (clientSelect && clientSelect.value) {
+            data.client = clientSelect.value;
+        }
 
         return data;
     }
@@ -1147,6 +1191,7 @@
     };
 
     loadSkill();
+    loadClientSelector();
 })();
 </script>
 {% endblock %}
