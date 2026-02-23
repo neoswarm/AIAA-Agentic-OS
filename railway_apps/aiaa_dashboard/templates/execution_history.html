@@ -371,7 +371,7 @@
 </div>
 {% else %}
 {% from "components/empty_state.html" import empty_state %}
-{{ empty_state('execution', 'No executions yet', 'Execution history will appear here once workflows run.') }}
+{{ empty_state('skill', 'No executions yet', 'Run your first skill to see execution history here.', '/skills', 'Run Your First Skill') }}
 {% endif %}
 
 <script>

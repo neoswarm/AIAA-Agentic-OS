@@ -483,7 +483,16 @@
             </div>
             <div class="card-body" style="padding: 0.5rem 1rem;">
                 <div class="activity-list" id="recent-activity">
-                    <div class="empty-hint">No recent activity yet. Run a skill to get started!</div>
+                    <div class="empty-hint" id="activity-empty-state">
+                        <div style="margin-bottom: 0.5rem;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--text-muted);">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            </svg>
+                        </div>
+                        <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 0.25rem;">No activity yet</div>
+                        <div>Your recent skill executions will appear here.</div>
+                        <a href="/skills" class="btn" style="margin-top: 0.75rem; font-size: 0.75rem; padding: 0.5rem 1rem;">Run a Skill</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -637,7 +646,7 @@
             }).slice(0, 8);
 
             if (matches.length === 0) {
-                searchResults.innerHTML = '<div style="padding: 1rem; color: var(--text-muted); font-size: 0.875rem; text-align: center;">No matching skills found</div>';
+                searchResults.innerHTML = '<div style="padding: 1.25rem; text-align: center;"><div style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.25rem;">No skills match your search</div><div style="color: var(--text-muted); font-size: 0.75rem;">Try different keywords or <a href="/workflows" style="color: var(--accent);">browse all skills</a></div></div>';
             } else {
                 searchResults.innerHTML = '';
                 matches.forEach(function(s, i) {
