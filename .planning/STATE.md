@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Non-technical users can discover, configure, execute, and receive output from any of 133 AI skills through the web dashboard without ever touching a terminal, and when something goes wrong, they understand exactly what happened and how to fix it.
-**Current focus:** Phases 2-9 (parallelizable after Phase 1 baseline verified)
+**Current focus:** PROJECT COMPLETE -- all 10 phases finished
 
 ## Current Position
 
-Phase: 9 of 10 (Mobile Polish)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-02-23 -- Completed 09-02-PLAN.md
+Phase: 10 of 10 (End-to-End Verification)
+Plan: 1 of 1 in current phase
+Status: PROJECT COMPLETE
+Last activity: 2026-02-23 -- Completed 10-01-PLAN.md
 
-Progress: [████████████████████████████████████████] 100% (20/20 plans, phases 1-9 complete)
+Progress: [████████████████████████████████████████] 100% (21/21 plans, all 10 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
+- Total plans completed: 21
 - Average duration: 2.9 min
-- Total execution time: 0.97 hours
+- Total execution time: 1.02 hours
 
 **By Phase:**
 
@@ -36,10 +36,11 @@ Progress: [███████████████████████
 | 07-skill-discovery | 2 | 5 min | 2.5 min |
 | 08-accessibility | 2 | 22 min | 11 min |
 | 09-mobile-polish | 2 | 3 min | 1.5 min |
+| 10-end-to-end-verification | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 14min, 8min, 2min, 1min
-- Trend: Fast execution with single-file CSS changes
+- Last 5 plans: 8min, 2min, 1min, 3min
+- Trend: Consistent fast execution
 
 *Updated after each plan completion*
 
@@ -126,6 +127,9 @@ Recent decisions affecting current work:
 - Icon buttons get both min-width AND min-height since they are square targets
 - font-size: 16px uses px (not rem) for iOS Safari zoom prevention threshold
 - Form inputs get both 16px font-size and 44px min-height in a single combined rule
+- Module-level env vars before imports in test files to prevent cached-import pitfall
+- E2E skill execution accepts 202 OR 400 as both prove the HTTP layer works
+- auth_client uses session_transaction() to inject logged_in=True directly
 
 ### Pending Todos
 
@@ -137,6 +141,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-23T05:01:32Z
-Stopped at: Completed 09-02-PLAN.md (touch targets, iOS zoom prevention) -- Phase 9 complete
+Last session: 2026-02-23T05:29:20Z
+Stopped at: Completed 10-01-PLAN.md (integration tests + E2E smoke test) -- PROJECT COMPLETE
 Resume file: None
