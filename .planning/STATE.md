@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 6 of 10 (Workflow Streamlining)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-23 -- Completed 06-01-PLAN.md
+Plan: 2 of 2 in current phase
+Status: Phase 6 complete
+Last activity: 2026-02-23 -- Completed 06-02-PLAN.md
 
-Progress: [█████████░] 89%
+Progress: [██████████░] 93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
-- Average duration: 2.2 min
-- Total execution time: 0.44 hours
+- Total plans completed: 14
+- Average duration: 2.1 min
+- Total execution time: 0.47 hours
 
 **By Phase:**
 
@@ -32,10 +32,10 @@ Progress: [█████████░] 89%
 | 03-error-handling | 3 | 6 min | 2 min |
 | 04-loading-empty-states | 3 | 6 min | 2 min |
 | 05-help-guidance | 2 | 3 min | 1.5 min |
-| 06-workflow-streamlining | 1 | 2 min | 2 min |
+| 06-workflow-streamlining | 2 | 4 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 2min, 3min, 1min, 2min, 2min
+- Last 5 plans: 3min, 1min, 2min, 2min, 2min
 - Trend: consistent fast execution
 
 *Updated after each plan completion*
@@ -83,7 +83,7 @@ Recent decisions affecting current work:
 - Empty states include actionable CTAs guiding users to next logical step
 - Verified clients.html already satisfies UX-03 (no changes needed)
 - Dashboard activity empty state uses inline styles matching existing empty-hint pattern
-- Search empty state includes 'browse all skills' link to /workflows for discoverability
+- Search empty state includes 'browse all skills' link to /skills for discoverability
 - Tooltip text assembled from description + example/placeholder with pre-line whitespace
 - Placeholders under 60 chars used as example fallback when no explicit example exists
 - Progress text placed below dots (not inside onboarding-card) for visual hierarchy
@@ -94,6 +94,9 @@ Recent decisions affecting current work:
 - Client selector degrades silently (hidden when no clients, console.warn on API failure)
 - Re-run URL uses /skills/{name}/run route (not the broken /execute route)
 - loadClientSelector() runs in parallel with loadSkill() for faster page load
+- toggleFavorite exposed on window for onclick access from IIFE scope
+- All /workflows links replaced with /skills across dashboard and onboarding
+- welcome_banner_dismissed cleared on onboarding completion for first-run banner
 
 ### Pending Todos
 
@@ -105,6 +108,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-23T01:09:57Z
-Stopped at: Completed 06-01-PLAN.md (Run Again pre-fill + client selector)
+Last session: 2026-02-23T01:08:00Z
+Stopped at: Completed 06-02-PLAN.md (favorites toggle, category links, onboarding flow) -- Phase 6 complete
 Resume file: None
