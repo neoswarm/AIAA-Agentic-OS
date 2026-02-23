@@ -149,11 +149,11 @@ Plans:
   2. Focus moves correctly through form flows and modals (no focus traps, logical tab order)
   3. Color contrast meets WCAG AA in both dark and light themes
   4. All forms are fully keyboard-navigable (tab order, enter to submit, escape to cancel)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 08-01: ARIA labels, roles, and focus management audit and fixes
-- [ ] 08-02: Color contrast fixes and keyboard navigation implementation
+- [ ] 08-01-PLAN.md -- ARIA labels, roles, live regions, and focus management across all templates and main.js (A11Y-01, A11Y-02)
+- [ ] 08-02-PLAN.md -- WCAG AA color contrast fixes and full keyboard navigation implementation (A11Y-03, A11Y-04)
 
 ### Phase 9: Mobile Polish
 **Goal**: The dashboard is fully usable on mobile devices without layout issues or unusable touch targets
