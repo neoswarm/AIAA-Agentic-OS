@@ -579,7 +579,7 @@
             if (!res.ok) throw new Error('Failed to load output');
             var data = await res.json();
 
-            rawContent = data.content || data.output || data.output_preview || '';
+            rawContent = data.output_content || data.output_preview || '';
             var wordCount = countWords(rawContent);
 
             // Set header info
