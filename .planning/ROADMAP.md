@@ -208,10 +208,11 @@ Plans:
   2. Favorites API has working toggle and list endpoints (replacing stub)
   3. Google Docs delivery endpoint exists and accepts requests
   4. Webhook management routes migrated from app_legacy.py and functional
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 12-01-PLAN.md -- Fix api.py session key mismatch, implement favorites API, add Google Docs delivery endpoint, migrate webhook routes
+- [ ] 12-01-PLAN.md -- Fix api.py session key mismatch, implement favorites API, add Google Docs delivery endpoint
+- [ ] 12-02-PLAN.md -- Migrate webhook management routes (list, register, unregister, toggle, test) from app_legacy.py
 
 ## Parallelization Notes
 
@@ -242,4 +243,4 @@ Phase 1 first, then Phases 2-9 in any order (parallelizable), then Phase 10 last
 | 9. Mobile Polish | 2/2 | Complete ✓ | 2026-02-23 |
 | 10. End-to-End Verification | 1/1 | Complete ✓ | 2026-02-23 |
 | 11. Quick Fixes (Gap Closure) | 1/1 | Complete ✓ | 2026-02-23 |
-| 12. API v1 Auth & Feature Wiring | 0/1 | Not started | - |
+| 12. API v1 Auth & Feature Wiring | 0/2 | Not started | - |
