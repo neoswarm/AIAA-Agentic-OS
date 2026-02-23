@@ -1037,6 +1037,41 @@ body {
         display: block;
         overflow-x: auto;
     }
+
+    /* ---- Touch Targets: 44px minimum ---- */
+
+    /* Navigation items */
+    .nav-item {
+        min-height: 44px;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    /* Buttons, tabs, chips */
+    .btn,
+    .btn-secondary,
+    .btn-run,
+    .btn-estimate,
+    .mode-tab,
+    .settings-tab,
+    .tab,
+    .theme-toggle,
+    .logout-btn,
+    .category-chip,
+    .category-pill {
+        min-height: 44px;
+    }
+
+    /* Icon buttons and close buttons -- need both width and height */
+    .modal-close,
+    .toast-close,
+    .toast__close,
+    .qs-star,
+    .welcome-banner-close,
+    .search-bar__clear {
+        min-width: 44px;
+        min-height: 44px;
+    }
 }
 
 /* =============================================================================
