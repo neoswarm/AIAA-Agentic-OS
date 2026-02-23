@@ -188,14 +188,19 @@ function showEditWebhookModal(webhook) {
  */
 function createWebhookModal(options) {
     const { title, submitText, webhook = {}, onSubmit } = options;
-    
+    var webhookModalTrigger = document.activeElement;
+    var webhookModalFocusCleanup = null;
+
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'webhook-modal-title');
     overlay.innerHTML = `
         <div class="modal">
             <div class="modal-header">
-                <span class="modal-title">${title}</span>
-                <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+                <span class="modal-title" id="webhook-modal-title">${title}</span>
+                <button class="modal-close" aria-label="Close dialog" onclick="this.closest('.modal-overlay').remove()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"/>
                         <line x1="6" y1="6" x2="18" y2="18"/>
@@ -285,10 +290,34 @@ function createWebhookModal(options) {
     // Close on overlay click
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) {
+            if (webhookModalFocusCleanup) webhookModalFocusCleanup();
             overlay.remove();
+            if (webhookModalTrigger) webhookModalTrigger.focus();
         }
     });
-    
+
+    // Trap focus and handle Escape
+    if (typeof trapFocus === 'function') {
+        // Defer to next frame so overlay is in the DOM
+        setTimeout(function() {
+            webhookModalFocusCleanup = trapFocus(overlay);
+        }, 0);
+    }
+
+    overlay.addEventListener('modal-escape', function() {
+        if (webhookModalFocusCleanup) webhookModalFocusCleanup();
+        overlay.remove();
+        if (webhookModalTrigger) webhookModalTrigger.focus();
+    });
+
+    // Also clean up focus on successful submit (overlay.remove in submit handler)
+    var origRemove = overlay.remove.bind(overlay);
+    overlay.remove = function() {
+        if (webhookModalFocusCleanup) webhookModalFocusCleanup();
+        origRemove();
+        if (webhookModalTrigger) webhookModalTrigger.focus();
+    };
+
     return overlay;
 }
 

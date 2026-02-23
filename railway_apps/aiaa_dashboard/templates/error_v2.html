@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Something went wrong - AIAA Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 4rem);
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .error-icon {
+        width: 72px;
+        height: 72px;
+        background: var(--error-muted);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .error-icon svg {
+        width: 36px;
+        height: 36px;
+        stroke: var(--error);
+        fill: none;
+        stroke-width: 2;
+    }
+
+    .error-icon.warning-icon {
+        background: var(--warning-muted);
+    }
+
+    .error-icon.warning-icon svg {
+        stroke: var(--warning);
+    }
+
+    .error-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .error-message {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        max-width: 480px;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .error-code {
+        display: inline-block;
+        padding: 0.25rem 0.625rem;
+        background: var(--bg-elevated);
+        border-radius: 4px;
+        font-family: 'DM Mono', monospace;
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 2.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .error-actions .btn {
+        min-width: 140px;
+    }
+
+    .error-causes {
+        max-width: 480px;
+        width: 100%;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: left;
+    }
+
+    .error-causes-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .error-cause-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.625rem 0;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .error-cause-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .error-cause-item:first-child {
+        padding-top: 0;
+    }
+
+    .error-cause-bullet {
+        width: 6px;
+        height: 6px;
+        background: var(--text-muted);
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-top: 0.5rem;
+    }
+
+    .error-cause-text {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    .error-cause-text strong {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .error-actions {
+            flex-direction: column;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .error-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-page">
+
+    {% if error_code == 404 %}
+    <div class="error-icon warning-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <h1 class="error-title">Page not found</h1>
+    <p class="error-message">
+        We couldn't find the page you're looking for. It may have been moved or doesn't exist.
+    </p>
+    <span class="error-code">Error 404</span>
+
+    <div class="error-actions">
+        <a href="/" class="btn">Go to Dashboard</a>
+        <a href="/help" class="btn btn-secondary">Get Help</a>
+    </div>
+
+    <div class="error-causes">
+        <div class="error-causes-title">Common reasons this happens</div>
+        <div class="error-cause-item">
+            <span class="error-cause-bullet"></span>
+            <span class="error-cause-text"><strong>Mistyped URL</strong> — Check the address bar for typos</span>
+        </div>
+        <div class="error-cause-item">
+            <span class="error-cause-bullet"></span>
+            <span class="error-cause-text"><strong>Outdated bookmark</strong> — The page may have been moved to a new location</span>
+        </div>
+        <div class="error-cause-item">
+            <span class="error-cause-bullet"></span>
+            <span class="error-cause-text"><strong>Removed content</strong> — This resource may no longer be available</span>
+        </div>
+    </div>
+
+    {% elif error_code == 403 %}
+    <div class="error-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h1 class="error-title">Access denied</h1>
+    <p class="error-message">
+        You don't have permission to view this page. You may need to sign in with a different account.
+    </p>
+    <span class="error-code">Error 403</span>
+
+    <div class="error-actions">
+        <a href="/login" class="btn">Sign In</a>
+        <a href="/" class="btn btn-secondary">Go to Dashboard</a>
+    </div>
+
+    <div class="error-causes">
+        <div class="error-causes-title">Common reasons this happens</div>
+        <div class="error-cause-item">
+            <span class="error-cause-bullet"></span>
+            <span class="error-cause-text"><strong>Session expired</strong> — Try signing in again</span>
+        </div>
+        <div class="error-cause-item">
+            <span class="error-cause-bullet"></span>
+            <span class="error-cause-text"><strong>Wrong account</strong> — Make sure you're using the right credentials</span>
+        </div>
+    </div>
+
+    {% elif error_code == 500 %}
+    <div class="error-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <h1 class="error-title">Something went wrong</h1>
+    <p class="error-message">
+        {{ error_message or "An unexpected error occurred. Our team has been notified. Please try again in a moment." }}
+    </p>
+    <span class="error-code">Error 500</span>
+
+    <div class="error-actions">
+        <button class="btn" onclick="window.location.reload()">Try Again</button>
+        <a href="/" class="btn btn-secondary">Go to Dashboard</a>
+        <a href="/help" class="btn btn-secondary">Get Help</a>
+    </div>
+
+    <div class="error-causes">
+        <div class="error-causes-title">Common reasons this happens</div>
+        <div class="error-cause-item">
+            <span class="error-cause-bullet"></span>
+            <span class="error-cause-text"><strong>Temporary issue</strong> — The server may be busy. Wait a moment and try again.</span>
+        </div>
+        <div class="error-cause-item">
+            <span class="error-cause-bullet"></span>
+            <span class="error-cause-text"><strong>API key issue</strong> — An API key may be expired or missing. Check your <a href="/settings" style="color: var(--accent);">Settings</a>.</span>
+        </div>
+        <div class="error-cause-item">
+            <span class="error-cause-bullet"></span>
+            <span class="error-cause-text"><strong>Service outage</strong> — An external service (OpenRouter, Perplexity) may be down.</span>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="error-icon warning-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <h1 class="error-title">{{ error_title or "Something didn't go as planned" }}</h1>
+    <p class="error-message">
+        {{ error_message or "An error occurred while processing your request. Please try again." }}
+    </p>
+    {% if error_code %}
+    <span class="error-code">Error {{ error_code }}</span>
+    {% endif %}
+
+    <div class="error-actions">
+        <button class="btn" onclick="window.location.reload()">Try Again</button>
+        <a href="/" class="btn btn-secondary">Go to Dashboard</a>
+        <a href="/help" class="btn btn-secondary">Get Help</a>
+    </div>
+
+    {% if error_causes %}
+    <div class="error-causes">
+        <div class="error-causes-title">What you can try</div>
+        {% for cause in error_causes %}
+        <div class="error-cause-item">
+            <span class="error-cause-bullet"></span>
+            <span class="error-cause-text">{{ cause }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -284,24 +284,29 @@
     <div class="timeline-day">
         <div class="day-label">{{ day }}</div>
         {% for execution in executions %}
-        <div class="execution-row {{ execution.status }}" 
+        <div class="execution-row {{ execution.status }}"
              data-execution-id="{{ execution.id }}"
              data-workflow="{{ execution.workflow }}"
              data-status="{{ execution.status }}"
              data-date="{{ execution.date }}"
-             onclick="toggleExecutionDetails(this)">
+             role="button"
+             tabindex="0"
+             aria-expanded="false"
+             onclick="toggleExecutionDetails(this)"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleExecutionDetails(this)}"
+             >
             
             <div class="execution-icon {{ execution.status }}">
                 {% if execution.status == 'success' %}
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12"/>
                 </svg>
                 {% elif execution.status == 'error' %}
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
                 {% elif execution.status == 'running' %}
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                 </svg>
                 {% endif %}
@@ -320,14 +325,14 @@
                 
                 <div class="execution-meta">
                     <div class="meta-item">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                         </svg>
                         <span>{{ execution.trigger }}</span>
                     </div>
                     {% if execution.duration %}
                     <div class="meta-item">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                         </svg>
                         <span>{{ execution.duration }}</span>
@@ -377,6 +382,8 @@
 <script>
 function toggleExecutionDetails(row) {
     row.classList.toggle('expanded');
+    var isExpanded = row.classList.contains('expanded');
+    row.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
 }
 
 function filterExecutions() {

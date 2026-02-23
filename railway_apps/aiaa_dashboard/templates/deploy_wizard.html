@@ -1,9 +1,9 @@
 {# Deploy Wizard Modal - 3-step deployment wizard #}
-<div id="deploy-wizard-overlay" class="modal-overlay hidden">
+<div id="deploy-wizard-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="deploy-wizard-title">
     <div class="modal deploy-wizard-modal">
         <div class="modal-header">
-            <h2 class="modal-title">Deploy Workflow</h2>
-            <button class="modal-close" onclick="closeDeployWizard()">
+            <h2 class="modal-title" id="deploy-wizard-title">Deploy Workflow</h2>
+            <button class="modal-close" onclick="closeDeployWizard()" aria-label="Close dialog">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
@@ -79,7 +79,7 @@
                 
                 {# Workflow Name #}
                 <div class="form-group">
-                    <label class="form-label">Workflow Name</label>
+                    <label class="form-label" for="workflow-name-input">Workflow Name</label>
                     <input type="text" id="workflow-name-input" class="form-input" placeholder="Enter workflow name">
                 </div>
 
@@ -92,12 +92,12 @@
                 {# Webhook Configuration #}
                 <div id="webhook-config" class="config-section hidden">
                     <div class="form-group">
-                        <label class="form-label">Webhook Slug</label>
+                        <label class="form-label" for="webhook-slug-input">Webhook Slug</label>
                         <input type="text" id="webhook-slug-input" class="form-input" placeholder="my-webhook">
                         <small class="form-hint">URL will be: /webhook/<span id="slug-preview">my-webhook</span></small>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Forward URL (Optional)</label>
+                        <label class="form-label" for="forward-url-input">Forward URL (Optional)</label>
                         <input type="text" id="forward-url-input" class="form-input" placeholder="https://api.example.com/webhook">
                     </div>
                     <div class="form-group">
@@ -111,11 +111,11 @@
                 {# Web Service Configuration #}
                 <div id="web-config" class="config-section hidden">
                     <div class="form-group">
-                        <label class="form-label">Port</label>
+                        <label class="form-label" for="web-port-input">Port</label>
                         <input type="number" id="web-port-input" class="form-input" value="8080" min="1" max="65535">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Health Check Path</label>
+                        <label class="form-label" for="health-path-input">Health Check Path</label>
                         <input type="text" id="health-path-input" class="form-input" value="/health">
                     </div>
                 </div>

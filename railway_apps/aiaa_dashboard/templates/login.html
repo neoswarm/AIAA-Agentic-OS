@@ -65,7 +65,7 @@
             align-items: center;
             justify-content: center;
             gap: 0.75rem;
-            margin-bottom: 2rem;
+            margin-bottom: 0.5rem;
         }
 
         .brand-icon {
@@ -82,6 +82,14 @@
             font-size: 1.5rem;
             font-weight: 600;
             color: var(--text-primary);
+        }
+
+        .brand-tagline {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.01em;
         }
 
         .login-title {
@@ -204,8 +212,8 @@
     </style>
 </head>
 <body>
-    <button class="theme-toggle" onclick="toggleTheme()">
-        <svg class="theme-icon-sun" viewBox="0 0 24 24">
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark and light theme">
+        <svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="12" cy="12" r="5"/>
             <line x1="12" y1="1" x2="12" y2="3"/>
             <line x1="12" y1="21" x2="12" y2="23"/>
@@ -216,7 +224,7 @@
             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
         </svg>
-        <svg class="theme-icon-moon" viewBox="0 0 24 24" style="display: none;">
+        <svg class="theme-icon-moon" viewBox="0 0 24 24" style="display: none;" aria-hidden="true">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>
     </button>
@@ -225,19 +233,20 @@
         <div class="login-card">
             <div class="brand">
                 <div class="brand-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" aria-hidden="true">
                         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                     </svg>
                 </div>
                 <h1>AIAA Dashboard</h1>
             </div>
+            <p class="brand-tagline">Your AI agency command center. 133 skills at your fingertips.</p>
 
             <h2 class="login-title">Welcome Back</h2>
             <p class="login-subtitle">Sign in to manage your workflows</p>
 
             {% if error %}
-            <div class="error-message">
-                ⚠️ {{ error }}
+            <div class="error-message" role="alert">
+                {{ error }}
             </div>
             {% endif %}
 
@@ -269,10 +278,15 @@
 
                 <button type="submit" class="btn">Sign In</button>
             </form>
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <a href="/setup" style="font-size: 0.8125rem; color: var(--text-muted); text-decoration: none;">
+                    First time? <span style="color: var(--primary); text-decoration: underline;">Run setup wizard</span>
+                </a>
+            </div>
         </div>
 
         <div class="footer">
-            <p>AIAA Agentic OS Dashboard v3.0</p>
+            <p>AIAA Agentic OS Dashboard v5.0</p>
         </div>
     </div>
 

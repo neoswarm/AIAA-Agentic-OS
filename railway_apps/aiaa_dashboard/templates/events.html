@@ -23,8 +23,8 @@
     <div class="card-body" style="padding: 1rem 1.25rem;">
         <form method="GET" style="display: flex; gap: 1rem; align-items: center;">
             <div style="flex: 1;">
-                <label class="form-label" style="margin-bottom: 0.5rem;">Filter by Type</label>
-                <select name="type" class="form-input" onchange="this.form.submit()">
+                <label class="form-label" style="margin-bottom: 0.5rem;" for="event-type-filter">Filter by Type</label>
+                <select name="type" id="event-type-filter" class="form-input" onchange="this.form.submit()">
                     <option value="">All Types</option>
                     <option value="auth">Authentication</option>
                     <option value="deploy">Deployment</option>
@@ -35,8 +35,8 @@
                 </select>
             </div>
             <div style="flex: 1;">
-                <label class="form-label" style="margin-bottom: 0.5rem;">Filter by Status</label>
-                <select name="status" class="form-input" onchange="this.form.submit()">
+                <label class="form-label" style="margin-bottom: 0.5rem;" for="event-status-filter">Filter by Status</label>
+                <select name="status" id="event-status-filter" class="form-input" onchange="this.form.submit()">
                     <option value="">All Statuses</option>
                     <option value="success">Success</option>
                     <option value="error">Error</option>
@@ -46,8 +46,8 @@
                 </select>
             </div>
             <div style="flex: 1;">
-                <label class="form-label" style="margin-bottom: 0.5rem;">Limit</label>
-                <select name="limit" class="form-input" onchange="this.form.submit()">
+                <label class="form-label" style="margin-bottom: 0.5rem;" for="event-limit-filter">Limit</label>
+                <select name="limit" id="event-limit-filter" class="form-input" onchange="this.form.submit()">
                     <option value="50">50 events</option>
                     <option value="100" selected>100 events</option>
                     <option value="200">200 events</option>
@@ -140,7 +140,7 @@
         </div>
         {% else %}
         <div style="padding: 3rem; text-align: center; color: var(--text-muted);">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 1rem; opacity: 0.5;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 1rem; opacity: 0.5;" aria-hidden="true">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
             </svg>

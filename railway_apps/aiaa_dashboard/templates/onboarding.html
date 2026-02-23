@@ -485,21 +485,21 @@
     </style>
 </head>
 <body>
-    <button class="theme-toggle" onclick="toggleTheme()">
-        <svg class="theme-icon-sun" viewBox="0 0 24 24">
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark and light theme">
+        <svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
         </svg>
-        <svg class="theme-icon-moon" viewBox="0 0 24 24" style="display: none;">
+        <svg class="theme-icon-moon" viewBox="0 0 24 24" style="display: none;" aria-hidden="true">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>
     </button>
 
     <!-- Progress dots -->
-    <div class="onboarding-progress" id="progressDots">
-        <div class="progress-dot active" data-step="1"></div>
-        <div class="progress-dot" data-step="2"></div>
-        <div class="progress-dot" data-step="3"></div>
-        <div class="progress-dot" data-step="4"></div>
+    <div class="onboarding-progress" id="progressDots" aria-label="Onboarding progress">
+        <div class="progress-dot active" data-step="1" aria-label="Step 1 of 4, current"></div>
+        <div class="progress-dot" data-step="2" aria-label="Step 2 of 4"></div>
+        <div class="progress-dot" data-step="3" aria-label="Step 3 of 4"></div>
+        <div class="progress-dot" data-step="4" aria-label="Step 4 of 4"></div>
     </div>
     <div class="onboarding-progress-text" id="progressText">Step 1 of 4</div>
 
@@ -510,7 +510,7 @@
             <div class="onboarding-step active" id="step-1">
                 <div class="onboarding-brand">
                     <div class="brand-icon">
-                        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                     </div>
                     <span class="brand-name">Agentic OS</span>
                 </div>
@@ -520,34 +520,34 @@
 
                 <p class="form-label" style="text-align: center; margin-bottom: 1rem;">What best describes your role?</p>
                 <div class="role-grid" id="roleGrid">
-                    <div class="role-card" data-role="marketing" onclick="selectRole(this)">
+                    <button type="button" class="role-card" data-role="marketing" onclick="selectRole(this)">
                         <div class="role-icon">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
                         </div>
                         <div class="role-name">Marketing / Content</div>
                         <div class="role-desc">Create content & campaigns</div>
-                    </div>
-                    <div class="role-card" data-role="sales" onclick="selectRole(this)">
+                    </button>
+                    <button type="button" class="role-card" data-role="sales" onclick="selectRole(this)">
                         <div class="role-icon">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                         </div>
                         <div class="role-name">Sales / BD</div>
                         <div class="role-desc">Outreach & prospecting</div>
-                    </div>
-                    <div class="role-card" data-role="operations" onclick="selectRole(this)">
+                    </button>
+                    <button type="button" class="role-card" data-role="operations" onclick="selectRole(this)">
                         <div class="role-icon">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                         </div>
                         <div class="role-name">Operations</div>
                         <div class="role-desc">Workflows & automation</div>
-                    </div>
-                    <div class="role-card" data-role="executive" onclick="selectRole(this)">
+                    </button>
+                    <button type="button" class="role-card" data-role="executive" onclick="selectRole(this)">
                         <div class="role-icon">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                         </div>
                         <div class="role-name">Executive</div>
                         <div class="role-desc">Strategy & oversight</div>
-                    </div>
+                    </button>
                 </div>
 
                 <button class="btn" id="step1Next" onclick="goToStep(2)" disabled>Continue</button>
@@ -599,24 +599,24 @@
                 <p class="step-subtitle">Pick a quick task to see Agentic OS in action.</p>
 
                 <div class="task-grid" id="taskGrid">
-                    <div class="task-card" data-task="blog-post" onclick="selectTask(this)">
+                    <button type="button" class="task-card" data-task="blog-post" onclick="selectTask(this)">
                         <div class="task-icon">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                         </div>
                         <div class="task-name">Write a Blog Post</div>
-                    </div>
-                    <div class="task-card" data-task="email" onclick="selectTask(this)">
+                    </button>
+                    <button type="button" class="task-card" data-task="email" onclick="selectTask(this)">
                         <div class="task-icon">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                         </div>
                         <div class="task-name">Draft an Email</div>
-                    </div>
-                    <div class="task-card" data-task="research" onclick="selectTask(this)">
+                    </button>
+                    <button type="button" class="task-card" data-task="research" onclick="selectTask(this)">
                         <div class="task-icon">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                         </div>
                         <div class="task-name">Research a Company</div>
-                    </div>
+                    </button>
                 </div>
 
                 <div class="btn-row">
@@ -629,7 +629,7 @@
             <!-- Step 4: Success -->
             <div class="onboarding-step" id="step-4">
                 <div class="success-icon">
-                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
 
                 <h2 class="step-title">You're all set!</h2>
@@ -638,15 +638,15 @@
                 <div class="next-steps">
                     <a href="/skills" class="next-step-link">
                         <span>Explore 133 Skills</span>
-                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
                     <a href="/settings" class="next-step-link">
                         <span>Set Up Integrations</span>
-                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
                     <a href="/clients" class="next-step-link">
                         <span>Add a Client</span>
-                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
                 </div>
 
@@ -687,8 +687,15 @@
             document.querySelectorAll('.progress-dot').forEach(function(dot) {
                 var dotStep = parseInt(dot.dataset.step);
                 dot.classList.remove('active', 'completed');
-                if (dotStep === step) dot.classList.add('active');
-                else if (dotStep < step) dot.classList.add('completed');
+                if (dotStep === step) {
+                    dot.classList.add('active');
+                    dot.setAttribute('aria-label', 'Step ' + dotStep + ' of 4, current');
+                } else if (dotStep < step) {
+                    dot.classList.add('completed');
+                    dot.setAttribute('aria-label', 'Step ' + dotStep + ' of 4, completed');
+                } else {
+                    dot.setAttribute('aria-label', 'Step ' + dotStep + ' of 4');
+                }
             });
 
             document.getElementById('progressText').textContent = 'Step ' + step + ' of 4';

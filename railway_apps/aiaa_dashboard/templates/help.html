@@ -342,7 +342,7 @@
         <div class="help-section" id="faq">
             <h2 class="help-section-title">Frequently Asked Questions</h2>
             <div class="faq-search-wrapper">
-                <input type="text" class="faq-search" id="faqSearch" placeholder="Search FAQ..." autocomplete="off">
+                <input type="text" class="faq-search" id="faqSearch" placeholder="Search FAQ..." autocomplete="off" aria-label="Search frequently asked questions">
             </div>
             <div class="faq-list" id="faqList">
 
@@ -536,13 +536,38 @@
 {% block extra_js %}
 <script>
     // FAQ accordion
+    // Initialize FAQ ARIA attributes
+    (function() {
+        document.querySelectorAll('.faq-item').forEach(function(item, index) {
+            var btn = item.querySelector('.faq-question');
+            var answer = item.querySelector('.faq-answer');
+            var answerId = 'faq-answer-' + (index + 1);
+            answer.id = answerId;
+            answer.setAttribute('role', 'region');
+            answer.setAttribute('aria-labelledby', 'faq-btn-' + (index + 1));
+            btn.id = 'faq-btn-' + (index + 1);
+            btn.setAttribute('aria-expanded', 'false');
+            btn.setAttribute('aria-controls', answerId);
+            // Hide decorative chevron SVGs from screen readers
+            var chevronSvg = item.querySelector('.faq-chevron svg');
+            if (chevronSvg) chevronSvg.setAttribute('aria-hidden', 'true');
+        });
+    })();
+
     function toggleFaq(btn) {
         var item = btn.closest('.faq-item');
         var wasOpen = item.classList.contains('open');
         // Close all
-        document.querySelectorAll('.faq-item').forEach(function(i) { i.classList.remove('open'); });
+        document.querySelectorAll('.faq-item').forEach(function(i) {
+            i.classList.remove('open');
+            var b = i.querySelector('.faq-question');
+            if (b) b.setAttribute('aria-expanded', 'false');
+        });
         // Toggle clicked
-        if (!wasOpen) item.classList.add('open');
+        if (!wasOpen) {
+            item.classList.add('open');
+            btn.setAttribute('aria-expanded', 'true');
+        }
     }
 
     // FAQ search filtering

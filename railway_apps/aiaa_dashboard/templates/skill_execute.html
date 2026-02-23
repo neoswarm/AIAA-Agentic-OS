@@ -592,7 +592,7 @@
 <!-- Skill Header -->
 <div class="skill-header">
     <div class="skill-header-icon">
-        <svg viewBox="0 0 24 24" stroke-width="2">
+        <svg viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
         </svg>
     </div>
@@ -616,13 +616,13 @@
 </div>
 
 <!-- Mode Tabs -->
-<div class="mode-tabs">
-    <button class="mode-tab active" id="tab-form" onclick="switchMode('form')">Form</button>
-    <button class="mode-tab" id="tab-nl" onclick="switchMode('nl')">Natural Language</button>
+<div class="mode-tabs" role="tablist" aria-label="Skill input mode">
+    <button class="mode-tab active" id="tab-form" role="tab" aria-selected="true" aria-controls="form-mode-container" onclick="switchMode('form')">Form</button>
+    <button class="mode-tab" id="tab-nl" role="tab" aria-selected="false" aria-controls="nl-mode-container" onclick="switchMode('nl')">Natural Language</button>
 </div>
 
 <!-- Form Mode -->
-<div class="skill-form-card" id="form-mode-container">
+<div class="skill-form-card" id="form-mode-container" role="tabpanel" aria-labelledby="tab-form">
     <div class="skill-form-body">
         <!-- Loading state -->
         <div class="form-loading" id="form-loading">
@@ -635,7 +635,7 @@
 
         <!-- Advanced options -->
         <button class="advanced-toggle" id="advanced-toggle" style="display: none;" onclick="toggleAdvanced()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <polyline points="9 18 15 12 9 6"/>
             </svg>
             Advanced Options
@@ -645,7 +645,7 @@
 
     <div class="form-actions">
         <button class="btn-run" id="btn-run" onclick="runSkill()" disabled>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <polygon points="5 3 19 12 5 21 5 3"/>
             </svg>
             Run Skill
@@ -657,7 +657,7 @@
 </div>
 
 <!-- Natural Language Mode -->
-<div class="nl-mode-container" id="nl-mode-container">
+<div class="nl-mode-container" id="nl-mode-container" role="tabpanel" aria-labelledby="tab-nl">
     <div class="skill-form-card">
         <div class="skill-form-body">
             <div class="field-group">
@@ -668,7 +668,7 @@
         </div>
         <div class="form-actions">
             <button class="btn-run" id="btn-nl-run" onclick="runNaturalLanguage()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <polygon points="5 3 19 12 5 21 5 3"/>
                 </svg>
                 Run
@@ -680,7 +680,7 @@
 <!-- Output Preview -->
 <div class="output-preview" id="output-preview" style="display: none;">
     <div class="output-preview-header">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
         </svg>
         Expected Output
@@ -899,7 +899,7 @@
         } else if (input.type === 'file') {
             var fileArea = document.createElement('div');
             fileArea.className = 'file-upload-area';
-            fileArea.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>'
+            fileArea.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>'
                 + '<span>Click to upload or drag and drop</span>';
             el = document.createElement('input');
             el.type = 'file';
@@ -936,6 +936,7 @@
 
         var errEl = document.createElement('span');
         errEl.className = 'field-error';
+        errEl.setAttribute('aria-live', 'polite');
         errEl.textContent = 'This field is required';
         group.appendChild(errEl);
 
@@ -946,6 +947,8 @@
     window.switchMode = function(mode) {
         document.getElementById('tab-form').classList.toggle('active', mode === 'form');
         document.getElementById('tab-nl').classList.toggle('active', mode === 'nl');
+        document.getElementById('tab-form').setAttribute('aria-selected', mode === 'form' ? 'true' : 'false');
+        document.getElementById('tab-nl').setAttribute('aria-selected', mode === 'nl' ? 'true' : 'false');
         document.getElementById('form-mode-container').style.display = mode === 'form' ? 'block' : 'none';
         document.getElementById('nl-mode-container').classList.toggle('visible', mode === 'nl');
     };

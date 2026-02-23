@@ -97,11 +97,11 @@
 {% endif %}
 
 {# Create API Key Modal #}
-<div id="create-key-modal" class="modal-overlay hidden">
+<div id="create-key-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="create-key-modal-title">
     <div class="modal">
         <div class="modal-header">
-            <h2 class="modal-title">Generate New API Key</h2>
-            <button class="modal-close" onclick="closeCreateKeyModal()">
+            <h2 class="modal-title" id="create-key-modal-title">Generate New API Key</h2>
+            <button class="modal-close" onclick="closeCreateKeyModal()" aria-label="Close dialog">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
@@ -110,12 +110,12 @@
         
         <div class="modal-body">
             <div class="form-group">
-                <label class="form-label">Key Name</label>
+                <label class="form-label" for="key-name-input">Key Name</label>
                 <input type="text" id="key-name-input" class="form-input" placeholder="e.g., CI/CD Pipeline">
             </div>
-            
+
             <div class="form-group">
-                <label class="form-label">Permissions</label>
+                <label class="form-label" id="perm-label">Permissions</label>
                 <div class="checkbox-group">
                     <label class="checkbox-label">
                         <input type="checkbox" id="perm-read" checked>
@@ -133,7 +133,7 @@
             </div>
             
             <div class="form-group">
-                <label class="form-label">Expiration</label>
+                <label class="form-label" for="key-expiry">Expiration</label>
                 <select id="key-expiry" class="form-input">
                     <option value="30">30 days</option>
                     <option value="90" selected>90 days</option>
@@ -151,11 +151,11 @@
 </div>
 
 {# Show Key Modal (one-time display) #}
-<div id="show-key-modal" class="modal-overlay hidden">
+<div id="show-key-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="show-key-modal-title">
     <div class="modal">
         <div class="modal-header">
-            <h2 class="modal-title">API Key Generated</h2>
-            <button class="modal-close" onclick="closeShowKeyModal()">
+            <h2 class="modal-title" id="show-key-modal-title">API Key Generated</h2>
+            <button class="modal-close" onclick="closeShowKeyModal()" aria-label="Close dialog">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
@@ -257,16 +257,34 @@
 </style>
 
 <script>
+var createKeyTrigger = null;
+var createKeyFocusCleanup = null;
+var showKeyFocusCleanup = null;
+
 function openCreateKeyModal() {
-    document.getElementById('create-key-modal').classList.remove('hidden');
+    createKeyTrigger = document.activeElement;
+    var modal = document.getElementById('create-key-modal');
+    modal.classList.remove('hidden');
+    if (typeof trapFocus === 'function') {
+        createKeyFocusCleanup = trapFocus(modal);
+    }
+    modal.addEventListener('modal-escape', function onEsc() {
+        modal.removeEventListener('modal-escape', onEsc);
+        closeCreateKeyModal();
+    });
 }
 
 function closeCreateKeyModal() {
-    document.getElementById('create-key-modal').classList.add('hidden');
+    var modal = document.getElementById('create-key-modal');
+    modal.classList.add('hidden');
+    if (createKeyFocusCleanup) { createKeyFocusCleanup(); createKeyFocusCleanup = null; }
+    if (createKeyTrigger) { createKeyTrigger.focus(); createKeyTrigger = null; }
 }
 
 function closeShowKeyModal() {
-    document.getElementById('show-key-modal').classList.add('hidden');
+    var modal = document.getElementById('show-key-modal');
+    modal.classList.add('hidden');
+    if (showKeyFocusCleanup) { showKeyFocusCleanup(); showKeyFocusCleanup = null; }
     window.location.reload();
 }
 
@@ -297,7 +315,15 @@ async function createApiKey() {
             const result = await response.json();
             document.getElementById('generated-key').textContent = result.key;
             closeCreateKeyModal();
-            document.getElementById('show-key-modal').classList.remove('hidden');
+            var showModal = document.getElementById('show-key-modal');
+            showModal.classList.remove('hidden');
+            if (typeof trapFocus === 'function') {
+                showKeyFocusCleanup = trapFocus(showModal);
+            }
+            showModal.addEventListener('modal-escape', function onEsc() {
+                showModal.removeEventListener('modal-escape', onEsc);
+                closeShowKeyModal();
+            });
         } else {
             alert('Failed to create API key');
         }

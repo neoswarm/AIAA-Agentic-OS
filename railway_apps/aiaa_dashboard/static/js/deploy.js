@@ -20,32 +20,47 @@ class DeployWizard {
     }
 
     open(workflowName, workflowCategory) {
+        this.triggerElement = document.activeElement;
         this.config.workflowName = workflowName;
         this.config.workflowCategory = workflowCategory;
         this.currentStep = 1;
-        
+
         // Pre-select deploy type based on category if possible
         if (workflowCategory && workflowCategory.toLowerCase().includes('webhook')) {
             this.config.deployType = 'webhook';
         }
-        
+
         // Reset UI
-        document.getElementById('deploy-wizard-overlay').classList.remove('hidden');
+        var overlay = document.getElementById('deploy-wizard-overlay');
+        overlay.classList.remove('hidden');
         document.getElementById('workflow-name-input').value = workflowName;
-        
+
         // Generate default webhook slug
         if (this.config.deployType === 'webhook') {
             this.config.webhookSlug = workflowName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
             document.getElementById('webhook-slug-input').value = this.config.webhookSlug;
         }
-        
+
         this.updateStepIndicators();
         this.showStep(1);
         this.checkEnvVars();
+
+        // Trap focus inside the modal
+        var self = this;
+        if (typeof trapFocus === 'function') {
+            this.focusCleanup = trapFocus(overlay);
+        }
+        overlay.addEventListener('modal-escape', function onEsc() {
+            overlay.removeEventListener('modal-escape', onEsc);
+            self.close();
+        });
     }
 
     close() {
-        document.getElementById('deploy-wizard-overlay').classList.add('hidden');
+        var overlay = document.getElementById('deploy-wizard-overlay');
+        overlay.classList.add('hidden');
+        if (this.focusCleanup) { this.focusCleanup(); this.focusCleanup = null; }
+        if (this.triggerElement) { this.triggerElement.focus(); this.triggerElement = null; }
         this.currentStep = 1;
         this.config = {
             workflowName: '',

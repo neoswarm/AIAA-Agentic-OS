@@ -274,13 +274,13 @@
 
 <div class="client-toolbar">
     <div class="client-search">
-        <span class="client-search-icon">
+        <span class="client-search-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </span>
         <input type="text" class="form-input" id="clientSearchInput" placeholder="Search clients...">
     </div>
     <button class="btn" id="addClientBtn" onclick="openClientForm()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add New Client
     </button>
 </div>
@@ -305,7 +305,7 @@
 
     <div class="client-empty" id="clientEmptyState">
         <div class="client-empty-icon">
-            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <h3>No clients yet</h3>
         <p>Add your first client to personalize content and track projects</p>
@@ -314,12 +314,12 @@
 </div>
 
 <!-- Add/Edit Client Form Modal -->
-<div class="client-form-overlay" id="clientFormOverlay">
+<div class="client-form-overlay" id="clientFormOverlay" role="dialog" aria-modal="true" aria-labelledby="clientFormTitle">
     <div class="client-form-modal">
         <div class="client-form-header">
             <span class="client-form-title" id="clientFormTitle">Add New Client</span>
-            <button class="client-form-close" onclick="closeClientForm()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <button class="client-form-close" onclick="closeClientForm()" aria-label="Close dialog">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
         <div class="client-form-body">
@@ -379,7 +379,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Brand Voice</label>
+                    <label class="form-label" for="clientBrandVoice">Brand Voice</label>
                     <div class="brand-voice-options" id="brandVoiceOptions">
                         <button type="button" class="brand-voice-option" data-voice="casual">Casual</button>
                         <button type="button" class="brand-voice-option selected" data-voice="professional">Professional</button>
@@ -449,7 +449,11 @@
     });
 
     // Open form
+    var clientFormTriggerElement = null;
+    var clientFormFocusCleanup = null;
+
     function openClientForm(slug) {
+        clientFormTriggerElement = document.activeElement;
         var overlay = document.getElementById('clientFormOverlay');
         var title = document.getElementById('clientFormTitle');
         document.getElementById('clientForm').reset();
@@ -472,10 +476,29 @@
             title.textContent = 'Add New Client';
         }
         overlay.classList.add('visible');
+
+        // Trap focus inside the modal
+        if (typeof trapFocus === 'function') {
+            clientFormFocusCleanup = trapFocus(overlay);
+        }
+
+        // Listen for modal-escape event
+        overlay.addEventListener('modal-escape', function onEscape() {
+            overlay.removeEventListener('modal-escape', onEscape);
+            closeClientForm();
+        });
     }
 
     function closeClientForm() {
         document.getElementById('clientFormOverlay').classList.remove('visible');
+        if (clientFormFocusCleanup) {
+            clientFormFocusCleanup();
+            clientFormFocusCleanup = null;
+        }
+        if (clientFormTriggerElement) {
+            clientFormTriggerElement.focus();
+            clientFormTriggerElement = null;
+        }
     }
 
     // Close on overlay click

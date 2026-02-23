@@ -337,14 +337,14 @@
 </div>
 
 <!-- Tabs -->
-<div class="settings-tabs" id="settingsTabs">
-    <button class="settings-tab active" data-tab="api-keys">API Keys</button>
-    <button class="settings-tab" data-tab="preferences">Preferences</button>
-    <button class="settings-tab" data-tab="profile">Profile</button>
+<div class="settings-tabs" id="settingsTabs" role="tablist" aria-label="Settings sections">
+    <button class="settings-tab active" data-tab="api-keys" role="tab" aria-selected="true" aria-controls="panel-api-keys" id="tab-api-keys">API Keys</button>
+    <button class="settings-tab" data-tab="preferences" role="tab" aria-selected="false" aria-controls="panel-preferences" id="tab-preferences">Preferences</button>
+    <button class="settings-tab" data-tab="profile" role="tab" aria-selected="false" aria-controls="panel-profile" id="tab-profile">Profile</button>
 </div>
 
 <!-- API Keys Panel -->
-<div class="settings-panel active" id="panel-api-keys">
+<div class="settings-panel active" id="panel-api-keys" role="tabpanel" aria-labelledby="tab-api-keys">
     <div class="api-key-list" id="apiKeyList">
 
         <div class="api-key-item" data-key="openrouter">
@@ -446,7 +446,7 @@
 </div>
 
 <!-- Preferences Panel -->
-<div class="settings-panel" id="panel-preferences">
+<div class="settings-panel" id="panel-preferences" role="tabpanel" aria-labelledby="tab-preferences">
     <div class="card">
         <div class="card-header">
             <span class="card-title">Content Defaults</span>
@@ -521,7 +521,7 @@
 </div>
 
 <!-- Profile Panel -->
-<div class="settings-panel" id="panel-profile">
+<div class="settings-panel" id="panel-profile" role="tabpanel" aria-labelledby="tab-profile">
     <div class="card">
         <div class="card-header">
             <span class="card-title">Your Profile</span>
@@ -567,9 +567,13 @@
     // Tab switching
     document.querySelectorAll('.settings-tab').forEach(function(tab) {
         tab.addEventListener('click', function() {
-            document.querySelectorAll('.settings-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.settings-tab').forEach(function(t) {
+                t.classList.remove('active');
+                t.setAttribute('aria-selected', 'false');
+            });
             document.querySelectorAll('.settings-panel').forEach(function(p) { p.classList.remove('active'); });
             tab.classList.add('active');
+            tab.setAttribute('aria-selected', 'true');
             document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
         });
     });
