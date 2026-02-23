@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 
 ## Current Position
 
-Phase: 11 of 12 (Quick Fixes - Gap Closure)
-Plan: 1 of 1 in current phase
-Status: Phase complete
-Last activity: 2026-02-23 -- Completed 11-01-PLAN.md (quick fixes)
+Phase: 12 of 12 (API v1 Auth + Feature Wiring)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-23 -- Completed 12-01-PLAN.md (session auth fix, favorites API, Google Docs delivery)
 
-Progress: [██████████████████████████████████████░░] 96% (22/23 plans, 11/12 phases complete)
+Progress: [███████████████████████████████████████░] 97% (23/24 plans, 11.5/12 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
-- Average duration: 2.8 min
-- Total execution time: 1.04 hours
+- Total plans completed: 23
+- Average duration: 2.7 min
+- Total execution time: 1.07 hours
 
 **By Phase:**
 
@@ -38,9 +38,10 @@ Progress: [███████████████████████
 | 09-mobile-polish | 2 | 3 min | 1.5 min |
 | 10-end-to-end-verification | 1 | 3 min | 3 min |
 | 11-quick-fixes | 1 | 1.4 min | 1.4 min |
+| 12-api-v1-auth-feature-wiring | 1 | 1.6 min | 1.6 min |
 
 **Recent Trend:**
-- Last 5 plans: 2min, 1min, 3min, 1.4min
+- Last 5 plans: 1min, 3min, 1.4min, 1.6min
 - Trend: Consistent fast execution
 
 *Updated after each plan completion*
@@ -131,6 +132,10 @@ Recent decisions affecting current work:
 - Module-level env vars before imports in test files to prevent cached-import pitfall
 - E2E skill execution accepts 202 OR 400 as both prove the HTTP layer works
 - auth_client uses session_transaction() to inject logged_in=True directly
+- Toggle returns {favorite: bool} key (not is_favorite) to match favorites.js contract
+- GET /api/favorites returns plain JSON array (not wrapped object) to match forEach pattern
+- Google Docs delivery uses subprocess to call existing skill script (DOE pattern)
+- session.get('logged_in') is the single session auth key across all API routes (api.py now matches api_v2.py)
 
 ### Pending Todos
 
@@ -138,10 +143,10 @@ None.
 
 ### Blockers/Concerns
 
-- API v1 protected endpoints return 401 for session-authenticated users due to session key mismatch (api.py checks `session['authenticated']`, login sets `session['logged_in']`). Should be addressed in a future hardening phase.
+None. (API v1 session key mismatch resolved in 12-01.)
 
 ## Session Continuity
 
-Last session: 2026-02-23T16:12:32Z
-Stopped at: Completed 11-01-PLAN.md (quick fixes -- API key payload, response check, output field, dead links)
+Last session: 2026-02-23T16:34:44Z
+Stopped at: Completed 12-01-PLAN.md (session auth fix, favorites API, Google Docs delivery)
 Resume file: None
