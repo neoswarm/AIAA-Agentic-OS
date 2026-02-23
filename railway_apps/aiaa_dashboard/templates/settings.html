@@ -639,8 +639,7 @@
         }
 
         var btn = input.closest('.api-key-item').querySelector('.btn:not(.btn-secondary)');
-        btn.disabled = true;
-        btn.textContent = 'Saving...';
+        setButtonLoading(btn, true, 'Saving...');
 
         fetch('/api/v2/settings/api-keys', {
             method: 'POST',
@@ -649,8 +648,7 @@
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            btn.textContent = 'Save';
-            btn.disabled = false;
+            setButtonLoading(btn, false);
             if (data.status === 'ok') {
                 clearKeyError(keyName);
                 updateKeyStatus(keyName, 'valid', 'Connected');
@@ -666,8 +664,7 @@
             }
         })
         .catch(function(err) {
-            btn.textContent = 'Save';
-            btn.disabled = false;
+            setButtonLoading(btn, false);
             updateKeyStatus(keyName, 'invalid', 'Save failed');
             // Show toast for network errors (the old code silently failed)
             if (typeof showToast === 'function') {
@@ -681,14 +678,12 @@
         var input = document.getElementById('input-' + keyName);
         var statusEl = document.getElementById('status-' + keyName);
         var btn = input.closest('.api-key-item').querySelector('.btn-secondary');
-        btn.disabled = true;
-        btn.textContent = 'Testing...';
+        setButtonLoading(btn, true, 'Testing...');
 
         fetch('/api/v2/settings/api-keys/status')
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            btn.textContent = 'Test';
-            btn.disabled = false;
+            setButtonLoading(btn, false);
             var keyData = data[keyName];
             if (keyData && keyData.configured) {
                 updateKeyStatus(keyName, 'valid', 'Connected');
@@ -697,8 +692,7 @@
             }
         })
         .catch(function() {
-            btn.textContent = 'Test';
-            btn.disabled = false;
+            setButtonLoading(btn, false);
         });
     }
 
@@ -711,8 +705,7 @@
     // Save preferences
     function savePreferences() {
         var btn = document.getElementById('savePrefsBtn');
-        btn.disabled = true;
-        btn.textContent = 'Saving...';
+        setButtonLoading(btn, true, 'Saving...');
 
         var prefs = {
             tone: document.getElementById('pref-tone').value,
@@ -728,15 +721,13 @@
             body: JSON.stringify(prefs)
         })
         .then(function() {
-            btn.disabled = false;
-            btn.textContent = 'Save Preferences';
+            setButtonLoading(btn, false);
             var status = document.getElementById('prefsSaveStatus');
             status.classList.add('visible');
             setTimeout(function() { status.classList.remove('visible'); }, 2000);
         })
         .catch(function() {
-            btn.disabled = false;
-            btn.textContent = 'Save Preferences';
+            setButtonLoading(btn, false);
             if (typeof showToast === 'function') {
                 showToast('Failed to save preferences. Please try again.', 'error');
             }
@@ -746,8 +737,7 @@
     // Save profile
     function saveProfile() {
         var btn = document.getElementById('saveProfileBtn');
-        btn.disabled = true;
-        btn.textContent = 'Saving...';
+        setButtonLoading(btn, true, 'Saving...');
 
         var profile = {
             name: document.getElementById('profile-name').value,
@@ -761,15 +751,13 @@
             body: JSON.stringify(profile)
         })
         .then(function() {
-            btn.disabled = false;
-            btn.textContent = 'Save Profile';
+            setButtonLoading(btn, false);
             var status = document.getElementById('profileSaveStatus');
             status.classList.add('visible');
             setTimeout(function() { status.classList.remove('visible'); }, 2000);
         })
         .catch(function() {
-            btn.disabled = false;
-            btn.textContent = 'Save Profile';
+            setButtonLoading(btn, false);
             if (typeof showToast === 'function') {
                 showToast('Failed to save profile. Please try again.', 'error');
             }

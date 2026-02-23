@@ -872,9 +872,7 @@
         if (!validateForm()) return;
 
         var btn = document.getElementById('btn-run');
-        var originalBtnHTML = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;"></div> Running...';
+        setButtonLoading(btn, true, 'Running...');
 
         // Clear any previous error display
         hideExecutionError();
@@ -892,8 +890,7 @@
             if (!res.ok) {
                 // Show structured error with recovery guidance
                 showExecutionError(res.status, data);
-                btn.disabled = false;
-                btn.innerHTML = originalBtnHTML;
+                setButtonLoading(btn, false);
                 return;
             }
 
@@ -902,8 +899,7 @@
             }
         } catch (e) {
             // Network error or timeout
-            btn.disabled = false;
-            btn.innerHTML = originalBtnHTML;
+            setButtonLoading(btn, false);
 
             if (e.name === 'AbortError' || e.message.includes('timeout') || e.message.includes('network')) {
                 showExecutionError(0, { message: 'Network error. Check your connection and try again.' });
@@ -919,9 +915,7 @@
         if (!input) return;
 
         var btn = document.getElementById('btn-nl-run');
-        var originalBtnHTML = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<div class="spinner" style="width:18px;height:18px;border-width:2px;"></div> Processing...';
+        setButtonLoading(btn, true, 'Processing...');
 
         // Clear any previous error display
         hideExecutionError();
@@ -938,8 +932,7 @@
             if (!res.ok) {
                 // Show structured error with recovery guidance
                 showExecutionError(res.status, data);
-                btn.disabled = false;
-                btn.innerHTML = originalBtnHTML;
+                setButtonLoading(btn, false);
                 return;
             }
 
@@ -948,8 +941,7 @@
             }
         } catch (e) {
             // Network error or timeout
-            btn.disabled = false;
-            btn.innerHTML = originalBtnHTML;
+            setButtonLoading(btn, false);
 
             if (e.name === 'AbortError' || e.message.includes('timeout') || e.message.includes('network')) {
                 showExecutionError(0, { message: 'Network error. Check your connection and try again.' });
@@ -961,13 +953,20 @@
 
     // Estimate cost
     window.estimateCost = async function() {
+        var btn = document.getElementById('btn-estimate');
+        setButtonLoading(btn, true, 'Estimating...');
         try {
             var res = await fetch('/api/v2/skills/' + encodeURIComponent(skillName) + '/estimate');
-            if (!res.ok) return;
+            if (!res.ok) {
+                setButtonLoading(btn, false);
+                return;
+            }
             var data = await res.json();
             showToast('Estimated time: ~' + (data.estimated_time || 'unknown') + ' | Cost: ' + (data.estimated_cost || 'N/A'), 'info');
         } catch (e) {
             showToast('Could not get estimate', 'warning');
+        } finally {
+            setButtonLoading(btn, false);
         }
     };
 

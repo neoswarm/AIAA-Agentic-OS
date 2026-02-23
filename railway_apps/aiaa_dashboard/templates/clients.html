@@ -593,8 +593,7 @@
         };
 
         var btn = document.getElementById('clientFormSubmit');
-        btn.disabled = true;
-        btn.textContent = 'Saving...';
+        setButtonLoading(btn, true, 'Saving...');
 
         var url = slug ? '/api/v2/clients/' + encodeURIComponent(slug) : '/api/v2/clients';
         var method = slug ? 'PUT' : 'POST';
@@ -606,14 +605,12 @@
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            btn.disabled = false;
-            btn.textContent = 'Save Client';
+            setButtonLoading(btn, false);
             closeClientForm();
             loadClients();
         })
         .catch(function() {
-            btn.disabled = false;
-            btn.textContent = 'Save Client';
+            setButtonLoading(btn, false);
             showToast('Failed to save client', 'error');
         });
     }
