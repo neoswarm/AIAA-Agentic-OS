@@ -78,6 +78,10 @@ Recent decisions affecting current work:
 - Spinner keyframes injected globally from main.js (not duplicated per template)
 - setButtonLoading stores/restores innerHTML to preserve button icons
 - withButtonLoading() wraps async ops with auto-restore in finally block
+- Empty states include actionable CTAs guiding users to next logical step
+- Verified clients.html already satisfies UX-03 (no changes needed)
+- Dashboard activity empty state uses inline styles matching existing empty-hint pattern
+- Search empty state includes 'browse all skills' link to /workflows for discoverability
 
 ### Pending Todos
 
@@ -89,6 +93,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-23T00:06:53Z
-Stopped at: Phase 4 complete -- all loading/empty state plans (01-03) finished
+Last session: 2026-02-23T00:09:57Z
+Stopped at: Phase 4 complete -- all loading/empty state plans (01-03) finished (04-02 summary now created)
 Resume file: None
