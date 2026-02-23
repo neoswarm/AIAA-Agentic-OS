@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Error Handling** - Every failure shows a user-friendly message with recovery actions ✓
 - [x] **Phase 4: Loading & Empty States** - Visual feedback for all async operations and empty data views ✓
 - [x] **Phase 5: Help & Guidance** - Contextual help, tooltips, and onboarding improvements ✓
-- [ ] **Phase 6: Workflow Streamlining** - Reduce clicks and friction in common user paths
+- [x] **Phase 6: Workflow Streamlining** - Reduce clicks and friction in common user paths ✓
 - [ ] **Phase 7: Skill Discovery** - Better search, browsing, and skill metadata for 133 skills
 - [ ] **Phase 8: Accessibility** - ARIA labels, keyboard navigation, focus management, color contrast
 - [ ] **Phase 9: Mobile Polish** - Responsive layout fixes, touch targets, mobile-specific UX
@@ -206,7 +206,7 @@ Phase 1 first, then Phases 2-9 in any order (parallelizable), then Phase 10 last
 | 3. Error Handling | 3/3 | Complete ✓ | 2026-02-22 |
 | 4. Loading & Empty States | 3/3 | Complete ✓ | 2026-02-23 |
 | 5. Help & Guidance | 2/2 | Complete ✓ | 2026-02-23 |
-| 6. Workflow Streamlining | 0/2 | Not started | - |
+| 6. Workflow Streamlining | 2/2 | Complete ✓ | 2026-02-23 |
 | 7. Skill Discovery | 0/2 | Not started | - |
 | 8. Accessibility | 0/2 | Not started | - |
 | 9. Mobile Polish | 0/2 | Not started | - |

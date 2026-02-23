@@ -107,11 +107,11 @@
 | HELP-03 | Phase 5 | Complete |
 | HELP-04 | Phase 5 | Complete |
 | HELP-05 | Phase 5 | Complete |
-| FLOW-01 | Phase 6 | Pending |
-| FLOW-02 | Phase 6 | Pending |
-| FLOW-03 | Phase 6 | Pending |
-| FLOW-04 | Phase 6 | Pending |
-| FLOW-05 | Phase 6 | Pending |
+| FLOW-01 | Phase 6 | Complete |
+| FLOW-02 | Phase 6 | Complete |
+| FLOW-03 | Phase 6 | Complete |
+| FLOW-04 | Phase 6 | Complete |
+| FLOW-05 | Phase 6 | Complete |
 | DISC-01 | Phase 7 | Pending |
 | DISC-02 | Phase 7 | Pending |
 | DISC-03 | Phase 7 | Pending |
