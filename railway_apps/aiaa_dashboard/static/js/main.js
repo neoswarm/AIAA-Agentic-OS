@@ -14,6 +14,52 @@
 })();
 
 // ==============================================================================
+// Focus Trap Utility (for accessible modals)
+// ==============================================================================
+
+/**
+ * Trap focus within a modal element.
+ * Call on modal open; returns a cleanup function to call on close.
+ * @param {HTMLElement} modalElement - The modal container element
+ * @returns {Function} cleanup - Call to remove the event listener
+ */
+function trapFocus(modalElement) {
+    var focusableSelectors = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    var focusableElements = modalElement.querySelectorAll(focusableSelectors);
+    var firstFocusable = focusableElements[0];
+    var lastFocusable = focusableElements[focusableElements.length - 1];
+
+    function handleKeydown(e) {
+        if (e.key === 'Tab') {
+            if (e.shiftKey) {
+                if (document.activeElement === firstFocusable) {
+                    e.preventDefault();
+                    lastFocusable.focus();
+                }
+            } else {
+                if (document.activeElement === lastFocusable) {
+                    e.preventDefault();
+                    firstFocusable.focus();
+                }
+            }
+        }
+        if (e.key === 'Escape') {
+            modalElement.dispatchEvent(new CustomEvent('modal-escape'));
+        }
+    }
+
+    modalElement.addEventListener('keydown', handleKeydown);
+
+    // Focus first focusable element
+    if (firstFocusable) firstFocusable.focus();
+
+    return function cleanup() {
+        modalElement.removeEventListener('keydown', handleKeydown);
+    };
+}
+
+
+// ==============================================================================
 // Toast Notifications
 // ==============================================================================
 
@@ -33,7 +79,8 @@ function showToast(message, type = 'info', duration = 3000) {
     // Create toast element
     const toast = document.createElement('div');
     toast.className = `toast-notification toast-${type}`;
-    
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+
     // Icon based on type
     let icon = '';
     switch (type) {
@@ -135,7 +182,7 @@ function showToastWithRetry(message, retryFn, duration = 10000) {
 // ==============================================================================
 
 /**
- * Show a confirmation dialog
+ * Show a confirmation dialog (accessible: focus trap, return focus, Escape key)
  * @param {string} message - Message to display
  * @returns {Promise<boolean>} - Resolves to true if confirmed, false if canceled
  */
@@ -147,40 +194,51 @@ function confirmAction(message) {
             existingModal.remove();
         }
 
+        // Store the element that triggered the modal
+        var triggerElement = document.activeElement;
+
         // Create modal
         const modal = document.createElement('div');
         modal.className = 'confirm-modal-overlay';
         modal.innerHTML = `
-            <div class="modal confirm-modal">
+            <div class="modal confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message">
                 <div class="modal-header">
-                    <span class="modal-title">Confirm Action</span>
+                    <span class="modal-title" id="confirm-title">Confirm Action</span>
                 </div>
                 <div class="modal-body">
-                    <p>${message}</p>
+                    <p id="confirm-message">${message}</p>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn-secondary btn" onclick="closeConfirmModal(false)">Cancel</button>
-                    <button class="btn" onclick="closeConfirmModal(true)">Confirm</button>
+                    <button class="btn-secondary btn" id="confirm-cancel">Cancel</button>
+                    <button class="btn" id="confirm-ok">Confirm</button>
                 </div>
             </div>
         `;
-        
+
         document.body.appendChild(modal);
-        
-        // Store resolve function
-        window._confirmResolve = resolve;
-        
-        // Close on overlay click
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeConfirmModal(false);
-            }
+
+        // Focus trap
+        var focusCleanup = trapFocus(modal.querySelector('.confirm-modal'));
+
+        function close(result) {
+            focusCleanup();
+            modal.remove();
+            // Return focus to trigger element
+            if (triggerElement && triggerElement.focus) triggerElement.focus();
+            resolve(result);
+        }
+
+        modal.querySelector('#confirm-cancel').addEventListener('click', function() { close(false); });
+        modal.querySelector('#confirm-ok').addEventListener('click', function() { close(true); });
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) close(false);
         });
+        modal.querySelector('.confirm-modal').addEventListener('modal-escape', function() { close(false); });
     });
 }
 
 /**
- * Close confirmation modal
+ * Close confirmation modal (legacy - kept for backward compatibility)
  * @param {boolean} result - Confirmation result
  */
 function closeConfirmModal(result) {
@@ -551,6 +609,7 @@ function debounce(func, wait = 300) {
 // Export for use in other scripts
 // ==============================================================================
 
+window.trapFocus = trapFocus;
 window.showToast = showToast;
 window.showToastWithRetry = showToastWithRetry;
 window.confirmAction = confirmAction;
