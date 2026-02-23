@@ -102,11 +102,11 @@
 | UX-04 | Phase 4 | Complete |
 | UX-05 | Phase 4 | Complete |
 | UX-06 | Phase 4 | Complete |
-| HELP-01 | Phase 5 | Pending |
-| HELP-02 | Phase 5 | Pending |
-| HELP-03 | Phase 5 | Pending |
-| HELP-04 | Phase 5 | Pending |
-| HELP-05 | Phase 5 | Pending |
+| HELP-01 | Phase 5 | Complete |
+| HELP-02 | Phase 5 | Complete |
+| HELP-03 | Phase 5 | Complete |
+| HELP-04 | Phase 5 | Complete |
+| HELP-05 | Phase 5 | Complete |
 | FLOW-01 | Phase 6 | Pending |
 | FLOW-02 | Phase 6 | Pending |
 | FLOW-03 | Phase 6 | Pending |
