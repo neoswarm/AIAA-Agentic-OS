@@ -643,7 +643,7 @@
                         <span>Set Up Integrations</span>
                         <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
-                    <a href="/clients" class="next-step-link">
+                    <a href="/clients-manage" class="next-step-link">
                         <span>Add a Client</span>
                         <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
@@ -718,13 +718,13 @@
             fetch('/api/v2/settings/api-keys', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ key_name: 'openrouter', value: key })
+                body: JSON.stringify({ key_name: 'openrouter', key_value: key })
             })
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 btn.disabled = false;
                 btn.textContent = 'Validate Key';
-                if (data.success) {
+                if (data.status === 'ok') {
                     statusEl.className = 'validation-status visible success';
                     textEl.textContent = 'Key is valid! You\'re connected.';
                     document.getElementById('step2Next').disabled = false;
