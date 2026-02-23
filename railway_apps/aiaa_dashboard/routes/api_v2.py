@@ -23,6 +23,7 @@ from services.skill_execution_service import (
     get_skill_categories,
     search_skills,
     get_skill_count,
+    get_recommended_skills,
     SKILLS_DIR,
 )
 
@@ -113,6 +114,31 @@ def api_skill_categories():
             "status": "ok",
             "categories": categories,
             "total_skills": get_skill_count(),
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@api_v2_bp.route('/skills/recommended', methods=['GET'])
+def api_recommended_skills():
+    """Get role-based skill recommendations."""
+    role = request.args.get('role', '').strip()
+    limit = request.args.get('limit', 8, type=int)
+    try:
+        if not role:
+            # Try to get role from user preferences
+            try:
+                prefs = models.get_settings_by_prefix("pref.")
+                role = prefs.get("pref.role", "")
+            except Exception:
+                role = ""
+
+        skills = get_recommended_skills(role, min(limit, 20))
+        return jsonify({
+            "status": "ok",
+            "role": role,
+            "total": len(skills),
+            "skills": skills,
         })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
