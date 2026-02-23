@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 
 ## Current Position
 
-Phase: 4 of 10 (Loading & Empty States)
-Plan: 3 of 3 in current phase
-Status: Phase 4 verified, ready for Phases 5-9
-Last activity: 2026-02-23 -- Phase 4 verified
+Phase: 5 of 10 (Help & Guidance)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-23 -- Completed 05-01-PLAN.md
 
-Progress: [████████░░] 80%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 2.4 min
-- Total execution time: 0.36 hours
+- Total plans completed: 11
+- Average duration: 2.3 min
+- Total execution time: 0.38 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [████████░░] 80%
 | 02-input-validation | 3 | 9 min | 3 min |
 | 03-error-handling | 3 | 6 min | 2 min |
 | 04-loading-empty-states | 3 | 6 min | 2 min |
+| 05-help-guidance | 1 | 1 min | 1 min |
 
 **Recent Trend:**
-- Last 5 plans: 2min, 2min, 2min, 2min, 3min
+- Last 5 plans: 2min, 2min, 2min, 3min, 1min
 - Trend: consistent fast execution
 
 *Updated after each plan completion*
@@ -82,6 +83,9 @@ Recent decisions affecting current work:
 - Verified clients.html already satisfies UX-03 (no changes needed)
 - Dashboard activity empty state uses inline styles matching existing empty-hint pattern
 - Search empty state includes 'browse all skills' link to /workflows for discoverability
+- Tooltip text assembled from description + example/placeholder with pre-line whitespace
+- Placeholders under 60 chars used as example fallback when no explicit example exists
+- Progress text placed below dots (not inside onboarding-card) for visual hierarchy
 
 ### Pending Todos
 
@@ -93,6 +97,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-23T00:09:57Z
-Stopped at: Phase 4 complete -- all loading/empty state plans (01-03) finished (04-02 summary now created)
+Last session: 2026-02-23T00:29:51Z
+Stopped at: Completed 05-01-PLAN.md (tooltips + onboarding progress)
 Resume file: None
