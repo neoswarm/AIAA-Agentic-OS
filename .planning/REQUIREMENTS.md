@@ -116,10 +116,10 @@
 | DISC-02 | Phase 7 | Complete |
 | DISC-03 | Phase 7 | Complete |
 | DISC-04 | Phase 7 | Complete |
-| A11Y-01 | Phase 8 | Pending |
-| A11Y-02 | Phase 8 | Pending |
-| A11Y-03 | Phase 8 | Pending |
-| A11Y-04 | Phase 8 | Pending |
+| A11Y-01 | Phase 8 | Complete |
+| A11Y-02 | Phase 8 | Complete |
+| A11Y-03 | Phase 8 | Complete |
+| A11Y-04 | Phase 8 | Complete |
 | MOB-01 | Phase 9 | Pending |
 | MOB-02 | Phase 9 | Pending |
 | MOB-03 | Phase 9 | Pending |

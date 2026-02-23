@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Help & Guidance** - Contextual help, tooltips, and onboarding improvements ✓
 - [x] **Phase 6: Workflow Streamlining** - Reduce clicks and friction in common user paths ✓
 - [x] **Phase 7: Skill Discovery** - Better search, browsing, and skill metadata for 133 skills ✓
-- [ ] **Phase 8: Accessibility** - ARIA labels, keyboard navigation, focus management, color contrast
+- [x] **Phase 8: Accessibility** - ARIA labels, keyboard navigation, focus management, color contrast ✓
 - [ ] **Phase 9: Mobile Polish** - Responsive layout fixes, touch targets, mobile-specific UX
 - [ ] **Phase 10: End-to-End Verification** - Integration tests confirming the hardened system works as a whole
 
@@ -208,6 +208,6 @@ Phase 1 first, then Phases 2-9 in any order (parallelizable), then Phase 10 last
 | 5. Help & Guidance | 2/2 | Complete ✓ | 2026-02-23 |
 | 6. Workflow Streamlining | 2/2 | Complete ✓ | 2026-02-23 |
 | 7. Skill Discovery | 2/2 | Complete ✓ | 2026-02-23 |
-| 8. Accessibility | 0/2 | Not started | - |
+| 8. Accessibility | 2/2 | Complete ✓ | 2026-02-23 |
 | 9. Mobile Polish | 0/2 | Not started | - |
 | 10. End-to-End Verification | 0/1 | Not started | - |
