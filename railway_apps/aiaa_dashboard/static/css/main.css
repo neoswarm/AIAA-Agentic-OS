@@ -934,24 +934,108 @@ body {
     border-radius: 4px;
 }
 
+/* ===== Mobile Navigation ===== */
+
+.hamburger-btn {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 200;
+    width: 44px;
+    height: 44px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+}
+
+.sidebar-backdrop.visible {
+    display: block;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
-    .sidebar {
-        display: none;
+    /* Hamburger visible on mobile */
+    .hamburger-btn {
+        display: flex;
     }
-    
+
+    /* Sidebar: slide-in overlay instead of display:none */
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    /* Main content: no sidebar margin, space for hamburger */
     .main {
         margin-left: 0;
         padding: 1rem;
+        padding-top: 4rem;
     }
-    
+
+    /* Page titles smaller on mobile */
     .page-title {
         font-size: 1.25rem;
     }
-    
+
+    /* Stats grid: single column on mobile */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Modal: nearly full-width on mobile */
     .modal {
         width: 95%;
         max-height: 95vh;
+    }
+
+    /* Toast: full-width at bottom on mobile */
+    .toast-notification {
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+        min-width: auto;
+    }
+
+    .toast-container {
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+        max-width: none;
+    }
+
+    /* Form buttons stack vertically on mobile */
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn-run,
+    .form-actions .btn-estimate {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Data tables: horizontal scroll on mobile */
+    .data-table {
+        display: block;
+        overflow-x: auto;
     }
 }
 
