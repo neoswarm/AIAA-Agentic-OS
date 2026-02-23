@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 
 ## Current Position
 
-Phase: 5 of 10 (Help & Guidance)
-Plan: 2 of 2 in current phase
-Status: Phase 5 verified, ready for Phases 6-9
-Last activity: 2026-02-23 -- Phase 5 verified
+Phase: 6 of 10 (Workflow Streamlining)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-23 -- Completed 06-01-PLAN.md
 
-Progress: [█████████░] 86%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 13
 - Average duration: 2.2 min
-- Total execution time: 0.41 hours
+- Total execution time: 0.44 hours
 
 **By Phase:**
 
@@ -32,9 +32,10 @@ Progress: [█████████░] 86%
 | 03-error-handling | 3 | 6 min | 2 min |
 | 04-loading-empty-states | 3 | 6 min | 2 min |
 | 05-help-guidance | 2 | 3 min | 1.5 min |
+| 06-workflow-streamlining | 1 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 2min, 2min, 3min, 1min, 2min
+- Last 5 plans: 2min, 3min, 1min, 2min, 2min
 - Trend: consistent fast execution
 
 *Updated after each plan completion*
@@ -89,6 +90,10 @@ Recent decisions affecting current work:
 - FAQ search uses 200ms debounce (local DOM filtering, consistent with existing pattern)
 - Welcome banner dismissal stored in localStorage (consistent with favorites pattern)
 - Welcome banner JS is a separate IIFE (not nested inside existing main IIFE)
+- Use getQueryParams() from main.js for URL param parsing (no hand-rolled alternative)
+- Client selector degrades silently (hidden when no clients, console.warn on API failure)
+- Re-run URL uses /skills/{name}/run route (not the broken /execute route)
+- loadClientSelector() runs in parallel with loadSkill() for faster page load
 
 ### Pending Todos
 
@@ -100,6 +105,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-23T00:30:39Z
-Stopped at: Completed 05-02-PLAN.md (searchable FAQ + welcome banner) -- Phase 5 complete
+Last session: 2026-02-23T01:09:57Z
+Stopped at: Completed 06-01-PLAN.md (Run Again pre-fill + client selector)
 Resume file: None
