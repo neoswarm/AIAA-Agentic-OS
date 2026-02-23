@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 
 ## Current Position
 
-Phase: 6 of 10 (Workflow Streamlining)
-Plan: 2 of 2 in current phase
-Status: Phase 6 verified, ready for Phases 7-9
-Last activity: 2026-02-23 -- Phase 6 verified
+Phase: 7 of 10 (Skill Discovery)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-23 -- Completed 07-01-PLAN.md
 
-Progress: [██████████░] 93%
+Progress: [███████████░] 94%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
+- Total plans completed: 15
 - Average duration: 2.1 min
-- Total execution time: 0.47 hours
+- Total execution time: 0.52 hours
 
 **By Phase:**
 
@@ -33,9 +33,10 @@ Progress: [██████████░] 93%
 | 04-loading-empty-states | 3 | 6 min | 2 min |
 | 05-help-guidance | 2 | 3 min | 1.5 min |
 | 06-workflow-streamlining | 2 | 4 min | 2 min |
+| 07-skill-discovery | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 3min, 1min, 2min, 2min, 2min
+- Last 5 plans: 1min, 2min, 2min, 2min, 3min
 - Trend: consistent fast execution
 
 *Updated after each plan completion*
@@ -97,6 +98,11 @@ Recent decisions affecting current work:
 - toggleFavorite exposed on window for onclick access from IIFE scope
 - All /workflows links replaced with /skills across dashboard and onboarding
 - welcome_banner_dismissed cleared on onboarding completion for first-run banner
+- SYNONYM_MAP uses 15 entries mapping common user terms to skill name fragments
+- Complexity thresholds: <= 5 simple, <= 10 moderate, > 10 advanced (step_count + prereq_count + required_inputs)
+- estimated_minutes = max(step_count // 2, 1) as simple heuristic
+- /skills/recommended route placed before /skills/<skill_name> to avoid Flask parameter capture
+- /skills/recommended falls back to pref.role from DB then curated popular list when no role param
 
 ### Pending Todos
 
@@ -108,6 +114,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-23T01:08:00Z
-Stopped at: Completed 06-02-PLAN.md (favorites toggle, category links, onboarding flow) -- Phase 6 complete
+Last session: 2026-02-23T02:55:05Z
+Stopped at: Completed 07-01-PLAN.md (synonym search, metadata, recommendations backend)
 Resume file: None
