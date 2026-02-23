@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Agentic OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0a0a0a;
+            --bg-elevated: #141414;
+            --bg-surface: #1a1a1a;
+            --bg-hover: #222222;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a3a3a3;
+            --text-muted: #737373;
+            --border: #262626;
+            --accent: #e07a3a;
+            --accent-hover: #f08a4a;
+            --accent-muted: rgba(224, 122, 58, 0.15);
+            --success: #4ade80;
+            --success-muted: rgba(74, 222, 128, 0.15);
+            --error: #f87171;
+            --error-muted: rgba(248, 113, 113, 0.15);
+        }
+
+        [data-theme="light"] {
+            --bg-base: #f8f8f8;
+            --bg-elevated: #f0f0f0;
+            --bg-surface: #ffffff;
+            --bg-hover: #e8e8e8;
+            --text-primary: #1a1a1a;
+            --text-secondary: #525252;
+            --text-muted: #737373;
+            --border: #e0e0e0;
+            --accent: #d96c2c;
+            --accent-hover: #c45e20;
+            --accent-muted: rgba(217, 108, 44, 0.12);
+            --success: #16a34a;
+            --success-muted: rgba(22, 163, 74, 0.12);
+            --error: #dc2626;
+            --error-muted: rgba(220, 38, 38, 0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', -apple-system, sans-serif;
+            background: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* Progress dots */
+        .onboarding-progress {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .progress-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.3s;
+        }
+
+        .progress-dot.active {
+            background: var(--accent);
+            transform: scale(1.2);
+        }
+
+        .progress-dot.completed {
+            background: var(--success);
+        }
+
+        .onboarding-progress-text {
+            text-align: center;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        /* Container */
+        .onboarding-container {
+            max-width: 560px;
+            width: 100%;
+        }
+
+        .onboarding-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Steps */
+        .onboarding-step {
+            display: none;
+            animation: fadeSlideIn 0.4s ease;
+        }
+
+        .onboarding-step.active {
+            display: block;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Brand */
+        .onboarding-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--accent);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .brand-name {
+            font-size: 1.375rem;
+            font-weight: 600;
+        }
+
+        /* Typography */
+        .step-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-subtitle {
+            font-size: 0.9375rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        /* Role cards */
+        .role-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .role-card {
+            padding: 1.25rem 1rem;
+            background: var(--bg-elevated);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .role-card:hover {
+            border-color: var(--accent);
+            background: var(--bg-hover);
+        }
+
+        .role-card.selected {
+            border-color: var(--accent);
+            background: var(--accent-muted);
+        }
+
+        .role-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .role-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .role-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 0.9375rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            font-family: 'DM Mono', monospace;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-hint {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-top: 0.375rem;
+            line-height: 1.5;
+        }
+
+        /* Validation status */
+        .validation-status {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            margin-top: 0.75rem;
+        }
+
+        .validation-status.visible {
+            display: flex;
+        }
+
+        .validation-status.success {
+            background: var(--success-muted);
+            color: var(--success);
+        }
+
+        .validation-status.error {
+            background: var(--error-muted);
+            color: var(--error);
+        }
+
+        .validation-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            flex-shrink: 0;
+        }
+
+        /* Instruction steps */
+        .setup-steps {
+            background: var(--bg-elevated);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .setup-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+        }
+
+        .setup-step-num {
+            width: 24px;
+            height: 24px;
+            background: var(--accent-muted);
+            color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .setup-step-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Task picker */
+        .task-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .task-card {
+            padding: 1.25rem 1rem;
+            background: var(--bg-elevated);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .task-card:hover {
+            border-color: var(--accent);
+            background: var(--bg-hover);
+        }
+
+        .task-card.selected {
+            border-color: var(--accent);
+            background: var(--accent-muted);
+        }
+
+        .task-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .task-name {
+            font-size: 0.8125rem;
+            font-weight: 500;
+        }
+
+        /* Success state */
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--success-muted);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .success-icon svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--success);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .next-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .next-step-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.875rem 1rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+
+        .next-step-link:hover {
+            border-color: var(--accent);
+            background: var(--bg-hover);
+        }
+
+        .next-step-link svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--text-muted);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.875rem 1.25rem;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: white;
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background: var(--accent-hover); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover { background: var(--bg-hover); }
+
+        .btn-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-row .btn { flex: 1; }
+
+        .btn-text {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 1rem;
+            text-align: center;
+            width: 100%;
+        }
+
+        .btn-text:hover { color: var(--text-primary); }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.625rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .theme-toggle:hover { background: var(--bg-hover); }
+        .theme-toggle svg { width: 20px; height: 20px; stroke: var(--text-primary); fill: none; stroke-width: 2; }
+
+        @media (max-width: 560px) {
+            .onboarding-card { padding: 1.75rem; }
+            .role-grid { grid-template-columns: 1fr; }
+            .task-grid { grid-template-columns: 1fr; }
+            .step-title { font-size: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <svg class="theme-icon-sun" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="theme-icon-moon" viewBox="0 0 24 24" style="display: none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </button>
+
+    <!-- Progress dots -->
+    <div class="onboarding-progress" id="progressDots">
+        <div class="progress-dot active" data-step="1"></div>
+        <div class="progress-dot" data-step="2"></div>
+        <div class="progress-dot" data-step="3"></div>
+        <div class="progress-dot" data-step="4"></div>
+    </div>
+    <div class="onboarding-progress-text" id="progressText">Step 1 of 4</div>
+
+    <div class="onboarding-container">
+        <div class="onboarding-card">
+
+            <!-- Step 1: Welcome -->
+            <div class="onboarding-step active" id="step-1">
+                <div class="onboarding-brand">
+                    <div class="brand-icon">
+                        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    </div>
+                    <span class="brand-name">Agentic OS</span>
+                </div>
+
+                <h2 class="step-title">Welcome!</h2>
+                <p class="step-subtitle">Your AI-powered agency assistant. Let's get you set up in under 2 minutes.</p>
+
+                <p class="form-label" style="text-align: center; margin-bottom: 1rem;">What best describes your role?</p>
+                <div class="role-grid" id="roleGrid">
+                    <div class="role-card" data-role="marketing" onclick="selectRole(this)">
+                        <div class="role-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                        </div>
+                        <div class="role-name">Marketing / Content</div>
+                        <div class="role-desc">Create content & campaigns</div>
+                    </div>
+                    <div class="role-card" data-role="sales" onclick="selectRole(this)">
+                        <div class="role-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </div>
+                        <div class="role-name">Sales / BD</div>
+                        <div class="role-desc">Outreach & prospecting</div>
+                    </div>
+                    <div class="role-card" data-role="operations" onclick="selectRole(this)">
+                        <div class="role-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        </div>
+                        <div class="role-name">Operations</div>
+                        <div class="role-desc">Workflows & automation</div>
+                    </div>
+                    <div class="role-card" data-role="executive" onclick="selectRole(this)">
+                        <div class="role-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <div class="role-name">Executive</div>
+                        <div class="role-desc">Strategy & oversight</div>
+                    </div>
+                </div>
+
+                <button class="btn" id="step1Next" onclick="goToStep(2)" disabled>Continue</button>
+                <button class="btn-text" onclick="goToStep(2)">Skip for now</button>
+            </div>
+
+            <!-- Step 2: API Key -->
+            <div class="onboarding-step" id="step-2">
+                <h2 class="step-title">Connect to AI</h2>
+                <p class="step-subtitle">You need one API key to get started. This powers all content generation.</p>
+
+                <div class="setup-steps">
+                    <div class="setup-step">
+                        <span class="setup-step-num">1</span>
+                        <span class="setup-step-text">Go to <strong>openrouter.ai</strong> and create a free account</span>
+                    </div>
+                    <div class="setup-step">
+                        <span class="setup-step-num">2</span>
+                        <span class="setup-step-text">Click your profile icon, then <strong>Keys</strong>, then <strong>Create Key</strong></span>
+                    </div>
+                    <div class="setup-step">
+                        <span class="setup-step-num">3</span>
+                        <span class="setup-step-text">Copy the key and paste it below</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="onboardingApiKey">OpenRouter API Key</label>
+                    <input type="password" class="form-input" id="onboardingApiKey" placeholder="sk-or-v1-..." autocomplete="off">
+                </div>
+
+                <button class="btn" id="validateKeyBtn" onclick="validateApiKey()">Validate Key</button>
+
+                <div class="validation-status" id="keyValidationStatus">
+                    <span class="validation-dot"></span>
+                    <span id="keyValidationText"></span>
+                </div>
+
+                <div class="btn-row" style="margin-top: 1rem;">
+                    <button class="btn btn-secondary" onclick="goToStep(1)">Back</button>
+                    <button class="btn" id="step2Next" onclick="goToStep(3)" disabled>Continue</button>
+                </div>
+                <button class="btn-text" onclick="goToStep(3)">I'll set this up later</button>
+            </div>
+
+            <!-- Step 3: First Task -->
+            <div class="onboarding-step" id="step-3">
+                <h2 class="step-title">Let's create something!</h2>
+                <p class="step-subtitle">Pick a quick task to see Agentic OS in action.</p>
+
+                <div class="task-grid" id="taskGrid">
+                    <div class="task-card" data-task="blog-post" onclick="selectTask(this)">
+                        <div class="task-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        </div>
+                        <div class="task-name">Write a Blog Post</div>
+                    </div>
+                    <div class="task-card" data-task="email" onclick="selectTask(this)">
+                        <div class="task-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </div>
+                        <div class="task-name">Draft an Email</div>
+                    </div>
+                    <div class="task-card" data-task="research" onclick="selectTask(this)">
+                        <div class="task-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        </div>
+                        <div class="task-name">Research a Company</div>
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-secondary" onclick="goToStep(2)">Back</button>
+                    <button class="btn" id="step3Next" onclick="runFirstTask()" disabled>Run Task</button>
+                </div>
+                <button class="btn-text" onclick="goToStep(4)">Skip — I'll explore on my own</button>
+            </div>
+
+            <!-- Step 4: Success -->
+            <div class="onboarding-step" id="step-4">
+                <div class="success-icon">
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+
+                <h2 class="step-title">You're all set!</h2>
+                <p class="step-subtitle">Welcome to Agentic OS. Here's what you can do next.</p>
+
+                <div class="next-steps">
+                    <a href="/workflows" class="next-step-link">
+                        <span>Explore 133 Skills</span>
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                    <a href="/settings" class="next-step-link">
+                        <span>Set Up Integrations</span>
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                    <a href="/clients" class="next-step-link">
+                        <span>Add a Client</span>
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                </div>
+
+                <button class="btn" style="margin-top: 1.5rem;" onclick="window.location.href='/'">Go to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var selectedRole = '';
+        var selectedTask = '';
+
+        function selectRole(card) {
+            document.querySelectorAll('.role-card').forEach(function(c) { c.classList.remove('selected'); });
+            card.classList.add('selected');
+            selectedRole = card.dataset.role;
+            document.getElementById('step1Next').disabled = false;
+        }
+
+        function selectTask(card) {
+            document.querySelectorAll('.task-card').forEach(function(c) { c.classList.remove('selected'); });
+            card.classList.add('selected');
+            selectedTask = card.dataset.task;
+            document.getElementById('step3Next').disabled = false;
+        }
+
+        function goToStep(step) {
+            document.querySelectorAll('.onboarding-step').forEach(function(s) { s.classList.remove('active'); });
+            document.getElementById('step-' + step).classList.add('active');
+
+            document.querySelectorAll('.progress-dot').forEach(function(dot) {
+                var dotStep = parseInt(dot.dataset.step);
+                dot.classList.remove('active', 'completed');
+                if (dotStep === step) dot.classList.add('active');
+                else if (dotStep < step) dot.classList.add('completed');
+            });
+
+            document.getElementById('progressText').textContent = 'Step ' + step + ' of 4';
+        }
+
+        function validateApiKey() {
+            var key = document.getElementById('onboardingApiKey').value.trim();
+            var statusEl = document.getElementById('keyValidationStatus');
+            var textEl = document.getElementById('keyValidationText');
+            var btn = document.getElementById('validateKeyBtn');
+
+            if (!key) {
+                statusEl.className = 'validation-status visible error';
+                textEl.textContent = 'Please paste your API key above';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Checking...';
+
+            fetch('/api/v2/settings/api-keys', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key_name: 'openrouter', value: key })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = 'Validate Key';
+                if (data.success) {
+                    statusEl.className = 'validation-status visible success';
+                    textEl.textContent = 'Key is valid! You\'re connected.';
+                    document.getElementById('step2Next').disabled = false;
+                } else {
+                    statusEl.className = 'validation-status visible error';
+                    textEl.textContent = data.error || 'Key could not be validated. Check and try again.';
+                }
+            })
+            .catch(function() {
+                btn.disabled = false;
+                btn.textContent = 'Validate Key';
+                statusEl.className = 'validation-status visible error';
+                textEl.textContent = 'Could not reach the server. Try again.';
+            });
+        }
+
+        function runFirstTask() {
+            if (!selectedTask) return;
+            // Redirect to the skill execution page for the selected task
+            var skillMap = {
+                'blog-post': 'blog-post',
+                'email': 'cold-email-campaign',
+                'research': 'company-research'
+            };
+            var skill = skillMap[selectedTask] || selectedTask;
+            // For now, go to success step
+            goToStep(4);
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            var html = document.documentElement;
+            var currentTheme = html.getAttribute('data-theme') || 'dark';
+            var newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            var sunIcon = document.querySelector('.theme-icon-sun');
+            var moonIcon = document.querySelector('.theme-icon-moon');
+            if (newTheme === 'light') {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            } else {
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            }
+        }
+
+        (function() {
+            var savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            var sunIcon = document.querySelector('.theme-icon-sun');
+            var moonIcon = document.querySelector('.theme-icon-moon');
+            if (savedTheme === 'light') {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            }
+        })();
+    </script>
+</body>
+</html>
