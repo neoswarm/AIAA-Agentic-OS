@@ -323,6 +323,26 @@
     text-overflow: ellipsis;
 }
 
+/* Star Toggle */
+.qs-star {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-muted);
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s;
+    padding: 0.25rem;
+    line-height: 1;
+}
+.quick-start-card { position: relative; }
+.quick-start-card:hover .qs-star { opacity: 1; }
+.qs-star.favorited { color: var(--warning); opacity: 1; }
+.qs-star:hover { color: var(--warning); }
+
 /* Empty State */
 .empty-hint {
     padding: 1.5rem;
@@ -448,7 +468,7 @@
             <span class="welcome-step-num">1</span>
             <span class="welcome-step-text">Set up your API key</span>
         </a>
-        <a href="/workflows" class="welcome-step">
+        <a href="/skills" class="welcome-step">
             <span class="welcome-step-num">2</span>
             <span class="welcome-step-text">Browse 133 skills</span>
         </a>
@@ -511,36 +531,42 @@
             <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         </div>
         <span class="qs-label">Write Content</span>
+        <button class="qs-star" data-skill="blog-post" onclick="toggleFavorite('blog-post', event)" aria-label="Add to favorites">&#9733;</button>
     </a>
     <a href="/skills/company-research/run" class="quick-start-card">
         <div class="quick-start-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
             <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </div>
         <span class="qs-label">Research Topic</span>
+        <button class="qs-star" data-skill="company-research" onclick="toggleFavorite('company-research', event)" aria-label="Add to favorites">&#9733;</button>
     </a>
     <a href="/skills/cold-email-campaign/run" class="quick-start-card">
         <div class="quick-start-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
             <svg viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         </div>
         <span class="qs-label">Draft Emails</span>
+        <button class="qs-star" data-skill="cold-email-campaign" onclick="toggleFavorite('cold-email-campaign', event)" aria-label="Add to favorites">&#9733;</button>
     </a>
     <a href="/skills/market-research/run" class="quick-start-card">
         <div class="quick-start-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
             <svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         </div>
         <span class="qs-label">Analyze Data</span>
+        <button class="qs-star" data-skill="market-research" onclick="toggleFavorite('market-research', event)" aria-label="Add to favorites">&#9733;</button>
     </a>
     <a href="/skills/lead-list-builder/run" class="quick-start-card">
         <div class="quick-start-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
             <svg viewBox="0 0 24 24" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
         </div>
         <span class="qs-label">Generate Leads</span>
+        <button class="qs-star" data-skill="lead-list-builder" onclick="toggleFavorite('lead-list-builder', event)" aria-label="Add to favorites">&#9733;</button>
     </a>
     <a href="/skills/vsl-funnel/run" class="quick-start-card">
         <div class="quick-start-icon" style="background: linear-gradient(135deg, #a18cd1, #fbc2eb);">
             <svg viewBox="0 0 24 24" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         </div>
         <span class="qs-label">Create Funnel</span>
+        <button class="qs-star" data-skill="vsl-funnel" onclick="toggleFavorite('vsl-funnel', event)" aria-label="Add to favorites">&#9733;</button>
     </a>
 </div>
 
@@ -569,7 +595,7 @@
             <div class="card">
                 <div class="card-header">
                     <span class="card-title" id="category-preview-title">Skills</span>
-                    <a href="/workflows" class="text-link" style="font-size: 0.8125rem; color: var(--accent); text-decoration: none;">View All &rarr;</a>
+                    <a href="/skills" class="text-link" style="font-size: 0.8125rem; color: var(--accent); text-decoration: none;">View All &rarr;</a>
                 </div>
                 <div class="card-body" id="category-skills-list" style="padding: 0;"></div>
             </div>
@@ -640,6 +666,37 @@
     let searchTimeout = null;
     let highlightIndex = -1;
 
+    var FAVORITES_KEY = 'skill_favorites';
+
+    function getFavorites() {
+        try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'); }
+        catch (e) { return []; }
+    }
+
+    window.toggleFavorite = function(skillName, event) {
+        if (event) { event.preventDefault(); event.stopPropagation(); }
+        var favs = getFavorites();
+        var idx = favs.indexOf(skillName);
+        if (idx === -1) {
+            favs.push(skillName);
+        } else {
+            favs.splice(idx, 1);
+        }
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+        updateStarStates();
+        loadFavorites();
+        return idx === -1;
+    };
+
+    function updateStarStates() {
+        var favs = getFavorites();
+        document.querySelectorAll('.qs-star').forEach(function(star) {
+            var name = star.getAttribute('data-skill');
+            star.classList.toggle('favorited', favs.indexOf(name) !== -1);
+            star.setAttribute('aria-label', favs.indexOf(name) !== -1 ? 'Remove from favorites' : 'Add to favorites');
+        });
+    }
+
     // Load skills on page init
     async function loadSkills() {
         try {
@@ -654,6 +711,7 @@
             document.getElementById('quick-start-grid').style.display = 'grid';
             document.getElementById('category-skeleton').style.display = 'none';
             document.getElementById('category-chips').style.display = 'flex';
+            updateStarStates();
         } catch (e) {
             console.warn('Could not load skills:', e);
             if (typeof showToast === 'function') showToast('Failed to load skills', 'error');
@@ -703,25 +761,30 @@
 
     // Load favorites
     async function loadFavorites() {
-        try {
-            const stored = localStorage.getItem('skill_favorites');
-            if (!stored) return;
-            const favs = JSON.parse(stored);
-            if (!Array.isArray(favs) || favs.length === 0) return;
+        var favs = getFavorites();
 
-            favoritesList.innerHTML = '';
-            favs.forEach(function(name) {
-                const a = document.createElement('a');
-                a.className = 'favorite-item';
-                a.href = '/skills/' + encodeURIComponent(name) + '/run';
-                a.innerHTML = '<span class="favorite-star">&#9733;</span>'
-                    + '<span class="favorite-name">' + escapeHtml(formatSkillName(name)) + '</span>';
-                favoritesList.appendChild(a);
-            });
-        } catch (e) {
-            console.warn('Could not load favorites:', e);
-            showToast('Failed to load favorites', 'error');
+        if (!Array.isArray(favs) || favs.length === 0) {
+            favoritesList.innerHTML = '<div class="empty-hint">'
+                + '<div style="margin-bottom: 0.5rem;">'
+                + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--text-muted);">'
+                + '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'
+                + '</svg></div>'
+                + '<div style="font-weight: 500; color: var(--text-primary); margin-bottom: 0.25rem;">No favorites yet</div>'
+                + '<div>Star your most-used skills for quick access.</div>'
+                + '<a href="/skills" class="btn" style="margin-top: 0.75rem; font-size: 0.75rem; padding: 0.5rem 1rem;">Browse Skills</a>'
+                + '</div>';
+            return;
         }
+
+        favoritesList.innerHTML = '';
+        favs.forEach(function(name) {
+            var a = document.createElement('a');
+            a.className = 'favorite-item';
+            a.href = '/skills/' + encodeURIComponent(name) + '/run';
+            a.innerHTML = '<span class="favorite-star">&#9733;</span>'
+                + '<span class="favorite-name">' + escapeHtml(formatSkillName(name)) + '</span>';
+            favoritesList.appendChild(a);
+        });
     }
 
     // Render category chips
@@ -736,7 +799,7 @@
         Object.keys(cats).sort().forEach(function(cat) {
             var chip = document.createElement('a');
             chip.className = 'category-chip';
-            chip.href = '/workflows?category=' + encodeURIComponent(cat);
+            chip.href = '/skills?category=' + encodeURIComponent(cat);
             chip.innerHTML = escapeHtml(cat)
                 + ' <span class="chip-count">' + cats[cat] + '</span>';
             categoryChips.appendChild(chip);
@@ -762,7 +825,7 @@
             }).slice(0, 8);
 
             if (matches.length === 0) {
-                searchResults.innerHTML = '<div style="padding: 1.25rem; text-align: center;"><div style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.25rem;">No skills match your search</div><div style="color: var(--text-muted); font-size: 0.75rem;">Try different keywords or <a href="/workflows" style="color: var(--accent);">browse all skills</a></div></div>';
+                searchResults.innerHTML = '<div style="padding: 1.25rem; text-align: center;"><div style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.25rem;">No skills match your search</div><div style="color: var(--text-muted); font-size: 0.75rem;">Try different keywords or <a href="/skills" style="color: var(--accent);">browse all skills</a></div></div>';
             } else {
                 searchResults.innerHTML = '';
                 matches.forEach(function(s, i) {
