@@ -448,6 +448,42 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* Complexity badges */
+.complexity-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+}
+.complexity-simple {
+    background: var(--success-muted, #dcfce7);
+    color: var(--success, #16a34a);
+}
+.complexity-moderate {
+    background: var(--warning-muted, #fef3c7);
+    color: var(--warning, #d97706);
+}
+.complexity-advanced {
+    background: var(--error-muted, #fef2f2);
+    color: var(--error, #dc2626);
+}
+.time-estimate {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.result-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
 </style>
 {% endblock %}
 
@@ -568,6 +604,12 @@
         <span class="qs-label">Create Funnel</span>
         <button class="qs-star" data-skill="vsl-funnel" onclick="toggleFavorite('vsl-funnel', event)" aria-label="Add to favorites">&#9733;</button>
     </a>
+</div>
+
+<!-- Recommended for You -->
+<div id="recommended-section" style="display: none; margin-bottom: 2rem;">
+    <div class="section-label">Recommended for You</div>
+    <div class="quick-start-grid" id="recommended-grid"></div>
 </div>
 
 <!-- Main Grid: Left + Right sidebar -->
@@ -787,6 +829,48 @@
         });
     }
 
+    // Load recommended skills
+    async function loadRecommended() {
+        try {
+            var res = await fetch('/api/v2/skills/recommended');
+            if (!res.ok) return;
+            var data = await res.json();
+            var skills = (data.skills || []).slice(0, 8);
+            if (skills.length === 0) return;
+
+            var grid = document.getElementById('recommended-grid');
+            grid.innerHTML = '';
+            skills.forEach(function(s) {
+                var card = document.createElement('a');
+                card.className = 'quick-start-card';
+                card.href = '/skills/' + encodeURIComponent(s.name) + '/run';
+                card.style.position = 'relative';
+
+                var metaLine = '';
+                if (s.estimated_minutes) {
+                    metaLine += '<span class="time-estimate">' + escapeHtml(String(s.estimated_minutes)) + ' min</span> ';
+                }
+                if (s.complexity) {
+                    metaLine += '<span class="complexity-badge complexity-' + escapeHtml(s.complexity) + '">' + escapeHtml(s.complexity) + '</span>';
+                }
+
+                card.innerHTML = '<div class="quick-start-icon" style="background: var(--accent);">'
+                    + '<svg viewBox="0 0 24 24" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
+                    + '</div>'
+                    + '<span class="qs-label">' + escapeHtml(formatSkillName(s.name)) + '</span>'
+                    + (metaLine ? '<div style="margin-top: 0.25rem;">' + metaLine + '</div>' : '')
+                    + '<button class="qs-star" data-skill="' + escapeHtml(s.name) + '" onclick="toggleFavorite(\'' + escapeHtml(s.name).replace(/'/g, "\\'") + '\', event)" aria-label="Add to favorites">&#9733;</button>';
+                grid.appendChild(card);
+            });
+
+            document.getElementById('recommended-section').style.display = 'block';
+            updateStarStates();
+        } catch (e) {
+            // Non-critical, silently fail
+            console.warn('Could not load recommendations:', e);
+        }
+    }
+
     // Render category chips
     function renderCategories(skills) {
         var cats = {};
@@ -806,41 +890,53 @@
         });
     }
 
-    // Search
+    // Search (API-backed with synonym expansion)
     searchInput.addEventListener('input', function() {
         clearTimeout(searchTimeout);
         highlightIndex = -1;
-        var q = this.value.trim().toLowerCase();
-        q = q.replace(/\s+/g, ' ');
+        var q = this.value.trim();
         if (q.length < 2) {
             searchResults.classList.remove('visible');
             return;
         }
-        searchTimeout = setTimeout(function() {
-            var matches = allSkills.filter(function(s) {
-                var name = (s.name || '').toLowerCase();
-                var desc = (s.description || '').toLowerCase();
-                var cat = (s.category || '').toLowerCase();
-                return name.includes(q) || desc.includes(q) || cat.includes(q);
-            }).slice(0, 8);
+        searchTimeout = setTimeout(async function() {
+            try {
+                var res = await fetch('/api/v2/skills/search?q=' + encodeURIComponent(q));
+                if (!res.ok) return;
+                var data = await res.json();
+                var matches = (data.skills || []).slice(0, 8);
 
-            if (matches.length === 0) {
-                searchResults.innerHTML = '<div style="padding: 1.25rem; text-align: center;"><div style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.25rem;">No skills match your search</div><div style="color: var(--text-muted); font-size: 0.75rem;">Try different keywords or <a href="/skills" style="color: var(--accent);">browse all skills</a></div></div>';
-            } else {
-                searchResults.innerHTML = '';
-                matches.forEach(function(s, i) {
-                    var item = document.createElement('a');
-                    item.className = 'search-result-item';
-                    item.href = '/skills/' + encodeURIComponent(s.name) + '/run';
-                    item.setAttribute('data-index', i);
-                    item.innerHTML = '<div style="flex:1; min-width:0;">'
-                        + '<div class="result-name">' + escapeHtml(formatSkillName(s.name)) + '</div>'
-                        + '<div class="result-desc">' + escapeHtml(s.description || '') + '</div>'
-                        + '</div>';
-                    searchResults.appendChild(item);
-                });
+                if (matches.length === 0) {
+                    searchResults.innerHTML = '<div style="padding: 1.25rem; text-align: center;"><div style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.25rem;">No skills match your search</div><div style="color: var(--text-muted); font-size: 0.75rem;">Try different keywords or <a href="/skills" style="color: var(--accent);">browse all skills</a></div></div>';
+                } else {
+                    searchResults.innerHTML = '';
+                    matches.forEach(function(s, i) {
+                        var item = document.createElement('a');
+                        item.className = 'search-result-item';
+                        item.href = '/skills/' + encodeURIComponent(s.name) + '/run';
+                        item.setAttribute('data-index', i);
+
+                        var metaHtml = '<div class="result-meta">';
+                        if (s.estimated_minutes) {
+                            metaHtml += '<span class="time-estimate">' + escapeHtml(String(s.estimated_minutes)) + ' min</span>';
+                        }
+                        if (s.complexity) {
+                            metaHtml += '<span class="complexity-badge complexity-' + escapeHtml(s.complexity) + '">' + escapeHtml(s.complexity) + '</span>';
+                        }
+                        metaHtml += '</div>';
+
+                        item.innerHTML = '<div style="flex:1; min-width:0;">'
+                            + '<div class="result-name">' + escapeHtml(formatSkillName(s.name)) + '</div>'
+                            + '<div class="result-desc">' + escapeHtml(s.description || '') + '</div>'
+                            + metaHtml
+                            + '</div>';
+                        searchResults.appendChild(item);
+                    });
+                }
+                searchResults.classList.add('visible');
+            } catch (e) {
+                console.warn('Search error:', e);
             }
-            searchResults.classList.add('visible');
         }, 300);
     });
 
@@ -902,6 +998,7 @@
     loadSkills();
     loadRecentActivity();
     loadFavorites();
+    loadRecommended();
 })();
 </script>
 {% endblock %}
