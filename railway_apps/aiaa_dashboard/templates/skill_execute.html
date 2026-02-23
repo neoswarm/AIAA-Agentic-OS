@@ -176,7 +176,6 @@
 .field-input:focus,
 .field-select:focus,
 .field-textarea:focus {
-    outline: none;
     border-color: var(--accent);
 }
 
@@ -277,7 +276,6 @@
 }
 
 .nl-textarea:focus {
-    outline: none;
     border-color: var(--accent);
 }
 
@@ -952,6 +950,23 @@
         document.getElementById('form-mode-container').style.display = mode === 'form' ? 'block' : 'none';
         document.getElementById('nl-mode-container').classList.toggle('visible', mode === 'nl');
     };
+
+    // Arrow key navigation for mode tabs (W3C APG tabs pattern)
+    var tablist = document.querySelector('[role="tablist"]');
+    if (tablist) {
+        tablist.addEventListener('keydown', function(e) {
+            var tabs = Array.from(this.querySelectorAll('[role="tab"]'));
+            var index = tabs.indexOf(document.activeElement);
+            if (index === -1) return;
+            var newIndex;
+            if (e.key === 'ArrowRight') newIndex = (index + 1) % tabs.length;
+            else if (e.key === 'ArrowLeft') newIndex = (index - 1 + tabs.length) % tabs.length;
+            else return;
+            e.preventDefault();
+            tabs[newIndex].focus();
+            tabs[newIndex].click();
+        });
+    }
 
     window.toggleAdvanced = function() {
         var toggle = document.getElementById('advanced-toggle');

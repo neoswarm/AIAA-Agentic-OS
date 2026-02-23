@@ -221,6 +221,8 @@ function buildFormField(input) {
             break;
     }
 
+    // Error container with aria-live for screen reader announcements
+    fieldHTML += `<span class="field-error" aria-live="polite" style="display:none;"></span>`;
     fieldHTML += '</div>';
     return fieldHTML;
 }
@@ -323,6 +325,7 @@ async function executeSkill(skillName) {
                             if (!errEl) {
                                 errEl = document.createElement('span');
                                 errEl.className = 'field-error';
+                                errEl.setAttribute('aria-live', 'polite');
                                 group.appendChild(errEl);
                             }
                             errEl.textContent = msg;

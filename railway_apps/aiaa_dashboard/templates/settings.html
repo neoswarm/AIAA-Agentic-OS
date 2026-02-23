@@ -578,6 +578,23 @@
         });
     });
 
+    // Arrow key navigation for settings tabs (W3C APG tabs pattern)
+    var settingsTablist = document.getElementById('settingsTabs');
+    if (settingsTablist) {
+        settingsTablist.addEventListener('keydown', function(e) {
+            var tabs = Array.from(this.querySelectorAll('[role="tab"]'));
+            var index = tabs.indexOf(document.activeElement);
+            if (index === -1) return;
+            var newIndex;
+            if (e.key === 'ArrowRight') newIndex = (index + 1) % tabs.length;
+            else if (e.key === 'ArrowLeft') newIndex = (index - 1 + tabs.length) % tabs.length;
+            else return;
+            e.preventDefault();
+            tabs[newIndex].focus();
+            tabs[newIndex].click();
+        });
+    }
+
     // Toggle help text
     function toggleHelp(btn) {
         var content = btn.nextElementSibling;
