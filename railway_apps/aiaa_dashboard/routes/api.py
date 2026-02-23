@@ -473,6 +473,164 @@ def api_get_favorites():
 
 
 # =============================================================================
+# Webhook Management
+# =============================================================================
+
+@api_bp.route('/webhook-workflows', methods=['GET'])
+@require_auth('read')
+def api_list_webhooks():
+    """
+    List all registered webhooks.
+
+    Response:
+    {
+        "webhook_workflows": [
+            {
+                "name": "...",
+                "description": "...",
+                "slug": "...",
+                "enabled": true/false,
+                "webhook_url": "...",
+                "forward_url": "...",
+                "slack_notify": false,
+                "source": "..."
+            }
+        ]
+    }
+    """
+    try:
+        active = models.get_workflows(workflow_type='webhook', status='active')
+        paused = models.get_workflows(workflow_type='webhook', status='paused')
+        all_webhooks = active + paused
+
+        result = []
+        for w in all_webhooks:
+            slug = w.get('webhook_slug') or w.get('id', '')
+            result.append({
+                "name": w.get('name', ''),
+                "description": w.get('description', ''),
+                "slug": slug,
+                "enabled": w.get('status') == 'active',
+                "webhook_url": f"{request.host_url.rstrip('/')}/webhook/{slug}",
+                "forward_url": w.get('forward_url') or '',
+                "slack_notify": bool(w.get('slack_notify')),
+                "source": w.get('description') or 'Database'
+            })
+
+        return jsonify({"webhook_workflows": result})
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Failed to list webhooks: {str(e)}"
+        }), 500
+
+
+@api_bp.route('/webhook-workflows/register', methods=['POST'])
+@require_auth('write')
+def api_register_webhook():
+    """
+    Register or update a webhook.
+
+    Request body:
+    {
+        "slug": "my-webhook",
+        "name": "My Webhook",
+        "description": "...",
+        "forward_url": "...",
+        "slack_notify": false,
+        "enabled": true
+    }
+    """
+    try:
+        data = request.get_json(silent=True) or {}
+        slug = (data.get('slug') or '').strip().lower().replace(' ', '-')
+        name = (data.get('name') or '').strip()
+
+        if not slug or not name:
+            return jsonify({
+                "status": "error",
+                "message": "slug and name are required"
+            }), 400
+
+        existing = models.get_workflow_by_slug(slug)
+
+        models.upsert_workflow(
+            workflow_id=slug,
+            name=name,
+            description=data.get('description', f'Webhook: {slug}'),
+            workflow_type='webhook',
+            status='active' if data.get('enabled', True) else 'paused',
+            webhook_slug=slug,
+            forward_url=data.get('forward_url'),
+            slack_notify=data.get('slack_notify', False)
+        )
+
+        webhook_url = f"{request.host_url.rstrip('/')}/webhook/{slug}"
+
+        if existing:
+            return jsonify({
+                "status": "updated",
+                "slug": slug,
+                "name": name,
+                "webhook_url": webhook_url
+            }), 200
+        else:
+            return jsonify({
+                "status": "registered",
+                "slug": slug,
+                "name": name,
+                "webhook_url": webhook_url
+            }), 201
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Failed to register webhook: {str(e)}"
+        }), 500
+
+
+@api_bp.route('/webhook-workflows/unregister', methods=['POST'])
+@require_auth('write')
+def api_unregister_webhook():
+    """
+    Unregister (soft-delete) a webhook.
+
+    Request body:
+    {
+        "slug": "my-webhook"
+    }
+    """
+    try:
+        data = request.get_json(silent=True) or {}
+        slug = (data.get('slug') or '').strip()
+
+        if not slug:
+            return jsonify({
+                "status": "error",
+                "message": "slug is required"
+            }), 400
+
+        workflow = models.get_workflow_by_slug(slug)
+        if not workflow:
+            return jsonify({
+                "status": "error",
+                "message": f"Webhook '{slug}' not found"
+            }), 404
+
+        models.delete_workflow(slug)
+
+        return jsonify({
+            "status": "unregistered",
+            "slug": slug,
+            "name": workflow['name']
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Failed to unregister webhook: {str(e)}"
+        }), 500
+
+
+# =============================================================================
 # Health Check
 # =============================================================================
 
