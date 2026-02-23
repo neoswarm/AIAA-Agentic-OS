@@ -188,6 +188,16 @@
     <h2 class="section-title">All Workflows</h2>
     <span class="section-count" id="workflow-count">{{ workflows|length }} workflow{{ 's' if workflows|length != 1 }}</span>
 </div>
+<!-- Skeleton: Workflow Grid (visible during initial page paint) -->
+<div class="skeleton-workflows-grid" id="catalog-skeleton">
+    <div class="skeleton-workflow-card skeleton-pulse"><div class="skeleton-line skeleton-line--long" style="margin-bottom:0.75rem"></div><div class="skeleton-line skeleton-line--short"></div></div>
+    <div class="skeleton-workflow-card skeleton-pulse"><div class="skeleton-line skeleton-line--long" style="margin-bottom:0.75rem"></div><div class="skeleton-line skeleton-line--short"></div></div>
+    <div class="skeleton-workflow-card skeleton-pulse"><div class="skeleton-line skeleton-line--long" style="margin-bottom:0.75rem"></div><div class="skeleton-line skeleton-line--short"></div></div>
+    <div class="skeleton-workflow-card skeleton-pulse"><div class="skeleton-line skeleton-line--long" style="margin-bottom:0.75rem"></div><div class="skeleton-line skeleton-line--short"></div></div>
+    <div class="skeleton-workflow-card skeleton-pulse"><div class="skeleton-line skeleton-line--long" style="margin-bottom:0.75rem"></div><div class="skeleton-line skeleton-line--short"></div></div>
+    <div class="skeleton-workflow-card skeleton-pulse"><div class="skeleton-line skeleton-line--long" style="margin-bottom:0.75rem"></div><div class="skeleton-line skeleton-line--short"></div></div>
+</div>
+
 <div class="workflows-grid" id="workflows-grid">
     {% for workflow in workflows %}
     {% from "components/workflow_card.html" import workflow_card %}
@@ -278,6 +288,12 @@ document.getElementById('deployed-only').addEventListener('change', function() {
     } else {
         filterToggle.classList.remove('active');
     }
+});
+
+// Hide catalog skeleton after server-rendered content paints
+document.addEventListener('DOMContentLoaded', function() {
+    var skel = document.getElementById('catalog-skeleton');
+    if (skel) skel.style.display = 'none';
 });
 </script>
 {% endblock %}

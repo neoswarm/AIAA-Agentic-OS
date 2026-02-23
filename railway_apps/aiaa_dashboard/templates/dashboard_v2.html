@@ -391,7 +391,18 @@
 
 <!-- Quick Start -->
 <div class="section-label">Quick Start</div>
-<div class="quick-start-grid" id="quick-start-grid">
+
+<!-- Skeleton: Quick Start (visible while skills API loads) -->
+<div class="skeleton-grid" id="quick-start-skeleton">
+    <div class="skeleton-card skeleton-pulse"><div class="skeleton-circle" style="margin: 0 auto 0.625rem;"></div><div class="skeleton-line skeleton-line--short" style="margin: 0 auto;"></div></div>
+    <div class="skeleton-card skeleton-pulse"><div class="skeleton-circle" style="margin: 0 auto 0.625rem;"></div><div class="skeleton-line skeleton-line--short" style="margin: 0 auto;"></div></div>
+    <div class="skeleton-card skeleton-pulse"><div class="skeleton-circle" style="margin: 0 auto 0.625rem;"></div><div class="skeleton-line skeleton-line--short" style="margin: 0 auto;"></div></div>
+    <div class="skeleton-card skeleton-pulse"><div class="skeleton-circle" style="margin: 0 auto 0.625rem;"></div><div class="skeleton-line skeleton-line--short" style="margin: 0 auto;"></div></div>
+    <div class="skeleton-card skeleton-pulse"><div class="skeleton-circle" style="margin: 0 auto 0.625rem;"></div><div class="skeleton-line skeleton-line--short" style="margin: 0 auto;"></div></div>
+    <div class="skeleton-card skeleton-pulse"><div class="skeleton-circle" style="margin: 0 auto 0.625rem;"></div><div class="skeleton-line skeleton-line--short" style="margin: 0 auto;"></div></div>
+</div>
+
+<div class="quick-start-grid" id="quick-start-grid" style="display:none">
     <a href="/skills/blog-post/run" class="quick-start-card">
         <div class="quick-start-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
             <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -436,7 +447,17 @@
     <div>
         <!-- Browse by Category -->
         <div class="section-label">Browse by Category</div>
-        <div class="category-chips" id="category-chips">
+
+        <!-- Skeleton: Category Chips (visible while skills API loads) -->
+        <div id="category-skeleton" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem;">
+            <div class="skeleton-chip skeleton-pulse"></div>
+            <div class="skeleton-chip skeleton-pulse"></div>
+            <div class="skeleton-chip skeleton-pulse"></div>
+            <div class="skeleton-chip skeleton-pulse"></div>
+            <div class="skeleton-chip skeleton-pulse"></div>
+        </div>
+
+        <div class="category-chips" id="category-chips" style="display:none">
             <!-- Populated by JS -->
         </div>
 
@@ -502,9 +523,21 @@
             const data = await res.json();
             allSkills = data.skills || data || [];
             renderCategories(allSkills);
+
+            // Hide skeletons, show real content
+            document.getElementById('quick-start-skeleton').style.display = 'none';
+            document.getElementById('quick-start-grid').style.display = 'grid';
+            document.getElementById('category-skeleton').style.display = 'none';
+            document.getElementById('category-chips').style.display = 'flex';
         } catch (e) {
             console.warn('Could not load skills:', e);
-            showToast('Failed to load skills', 'error');
+            if (typeof showToast === 'function') showToast('Failed to load skills', 'error');
+
+            // Hide skeletons even on error so user sees error state, not eternal skeleton
+            document.getElementById('quick-start-skeleton').style.display = 'none';
+            document.getElementById('quick-start-grid').style.display = 'grid';
+            document.getElementById('category-skeleton').style.display = 'none';
+            document.getElementById('category-chips').style.display = 'flex';
         }
     }
 
