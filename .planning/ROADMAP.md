@@ -183,6 +183,35 @@ Plans:
 Plans:
 - [ ] 10-01-PLAN.md -- API v2 validation tests for all endpoints + E2E smoke test covering full user journey (TEST-02, TEST-03)
 
+### Phase 11: Quick Fixes (Gap Closure)
+**Goal**: Fix broken user flows discovered by milestone audit — onboarding API key save, skill output viewer, and dead navigation links
+**Depends on**: Phase 10
+**Requirements**: None (pre-existing tech debt, not hardening requirements)
+**Gap Closure**: Closes P0 and P1 items from v1-MILESTONE-AUDIT.md
+**Success Criteria** (what must be TRUE):
+  1. Onboarding API key save sends correct field name and detects success response
+  2. Skill output viewer displays full output content (not just preview)
+  3. All /clients links navigate to /clients-manage without 404
+**Plans**: TBD
+
+Plans:
+- [ ] 11-01-PLAN.md -- Fix onboarding payload/response, skill output field name, dead /clients links
+
+### Phase 12: API v1 Auth & Feature Wiring (Gap Closure)
+**Goal**: Fix API v1 session auth mismatch and wire non-functional features (favorites API, Google Docs delivery, webhook routes)
+**Depends on**: Phase 11
+**Requirements**: None (pre-existing tech debt)
+**Gap Closure**: Closes P1 and P2 items from v1-MILESTONE-AUDIT.md
+**Success Criteria** (what must be TRUE):
+  1. api.py require_auth checks session['logged_in'] (matching login handler)
+  2. Favorites API has working toggle and list endpoints (replacing stub)
+  3. Google Docs delivery endpoint exists and accepts requests
+  4. Webhook management routes migrated from app_legacy.py and functional
+**Plans**: TBD
+
+Plans:
+- [ ] 12-01-PLAN.md -- Fix api.py session key mismatch, implement favorites API, add Google Docs delivery endpoint, migrate webhook routes
+
 ## Parallelization Notes
 
 Phases 2-9 all depend only on Phase 1 (regression baseline), not on each other. This means they can be worked in parallel or any order after Phase 1 completes. Suggested parallel groupings:
@@ -211,3 +240,5 @@ Phase 1 first, then Phases 2-9 in any order (parallelizable), then Phase 10 last
 | 8. Accessibility | 2/2 | Complete ✓ | 2026-02-23 |
 | 9. Mobile Polish | 2/2 | Complete ✓ | 2026-02-23 |
 | 10. End-to-End Verification | 1/1 | Complete ✓ | 2026-02-23 |
+| 11. Quick Fixes (Gap Closure) | 0/1 | Not started | - |
+| 12. API v1 Auth & Feature Wiring | 0/1 | Not started | - |
