@@ -417,6 +417,30 @@ _KEY_PREFIXES = {
     "FAL_KEY": "",
 }
 
+_TOKEN_VALIDATION_STATUSES = ("valid", "expired", "invalid", "unreachable")
+_TOKEN_VALIDATION_STATUS_ALIASES = {
+    "active": "valid",
+    "ok": "valid",
+    "success": "valid",
+    "error": "unreachable",
+    "timeout": "unreachable",
+    "network_error": "unreachable",
+    "connection_error": "unreachable",
+}
+
+
+def _normalize_token_validation_status(raw_status, configured):
+    """Normalize token validation status into metric buckets."""
+    if raw_status is None or raw_status == "":
+        return "valid" if configured else None
+
+    normalized = str(raw_status).strip().lower()
+    if normalized in _TOKEN_VALIDATION_STATUSES:
+        return normalized
+    if normalized in _TOKEN_VALIDATION_STATUS_ALIASES:
+        return _TOKEN_VALIDATION_STATUS_ALIASES[normalized]
+    return "unreachable" if configured else None
+
 
 @api_v2_bp.route('/settings/api-keys', methods=['POST'])
 @login_required
@@ -467,10 +491,31 @@ def api_save_api_key():
 def api_key_status():
     """Check which API keys are configured and valid."""
     try:
+        get_setting = getattr(models, "get_setting", None)
+        get_setting_metadata = getattr(models, "get_setting_metadata", None)
+
         keys_status = {}
+        token_validation_metrics = {status: 0 for status in _TOKEN_VALIDATION_STATUSES}
+
         for friendly_name, env_var in _API_KEY_NAMES.items():
-            value = os.getenv(env_var, "")
+            setting_key = f"api_key.{env_var}"
+            stored_value = ""
+            if callable(get_setting):
+                stored_value = get_setting(setting_key) or ""
+
+            value = os.getenv(env_var, "") or stored_value
             configured = bool(value)
+            metadata = {}
+            if callable(get_setting_metadata):
+                metadata = get_setting_metadata(setting_key) or {}
+
+            validation_status = _normalize_token_validation_status(
+                metadata.get("validation_status"),
+                configured,
+            )
+            if validation_status in token_validation_metrics:
+                token_validation_metrics[validation_status] += 1
+
             # Redact value for display
             redacted = ""
             if value:
@@ -483,9 +528,19 @@ def api_key_status():
                 "env_var": env_var,
                 "configured": configured,
                 "redacted_value": redacted,
+                "validation_status": validation_status,
+                "last_validated_at": metadata.get("last_validated_at"),
+                "last_error": metadata.get("last_error"),
             }
 
-        return jsonify({"status": "ok", "keys": keys_status})
+        return jsonify({
+            "status": "ok",
+            "keys": keys_status,
+            "token_validation_metrics": token_validation_metrics,
+            "metrics": {
+                "token_validation_by_status": token_validation_metrics,
+            },
+        })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
