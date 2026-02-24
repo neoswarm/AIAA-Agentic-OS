@@ -1942,21 +1942,15 @@ def read_demo_transcript(name: str = "kickoff"):
     """
     from fastapi.responses import JSONResponse
 
-    transcript_map = {
-        "kickoff": "/app/demo_kickoff_call_transcript.md",
-        "sales": "/app/demo_sales_call_transcript.md"
-    }
-
-    if name not in transcript_map:
+    if name not in DEMO_TRANSCRIPT_MAP:
         return JSONResponse({
             "status": "error",
             "error": f"Unknown transcript: {name}",
-            "available": list(transcript_map.keys())
+            "available": list(DEMO_TRANSCRIPT_MAP.keys())
         }, status_code=400)
 
     try:
-        with open(transcript_map[name], "r") as f:
-            content = f.read()
+        content = _load_demo_transcript(name)
 
         return JSONResponse({
             "status": "success",
@@ -1968,6 +1962,73 @@ def read_demo_transcript(name: str = "kickoff"):
             "status": "error",
             "error": str(e)
         }, status_code=500)
+
+
+@app.function(image=image, secrets=ALL_SECRETS, timeout=60)
+@modal.fastapi_endpoint(method="GET")
+def export_demo_transcript(name: str = "kickoff", format: str = "json"):
+    """
+    Export demo transcripts as JSON or Markdown.
+
+    URL: GET /export-demo-transcript?name=kickoff&format=json
+    URL: GET /export-demo-transcript?name=sales&format=markdown
+    """
+    from fastapi.responses import JSONResponse, PlainTextResponse
+
+    export_format = (format or "json").strip().lower()
+    if export_format not in {"json", "markdown", "md"}:
+        return JSONResponse({
+            "status": "error",
+            "error": f"Unsupported format: {format}",
+            "available_formats": ["json", "markdown"],
+        }, status_code=400)
+
+    if name not in DEMO_TRANSCRIPT_MAP:
+        return JSONResponse({
+            "status": "error",
+            "error": f"Unknown transcript: {name}",
+            "available": list(DEMO_TRANSCRIPT_MAP.keys())
+        }, status_code=400)
+
+    try:
+        content = _load_demo_transcript(name)
+        if export_format in {"markdown", "md"}:
+            return PlainTextResponse(
+                content=content,
+                media_type="text/markdown; charset=utf-8",
+                headers={
+                    "Content-Disposition": f'attachment; filename="{name}_transcript.md"'
+                },
+            )
+
+        return JSONResponse({
+            "status": "success",
+            "name": name,
+            "format": "json",
+            "content": content,
+        }, headers={
+            "Content-Disposition": f'attachment; filename="{name}_transcript.json"'
+        })
+    except Exception as e:
+        return JSONResponse({
+            "status": "error",
+            "error": str(e)
+        }, status_code=500)
+
+
+DEMO_TRANSCRIPT_MAP = {
+    "kickoff": "/app/demo_kickoff_call_transcript.md",
+    "sales": "/app/demo_sales_call_transcript.md",
+}
+
+
+def _load_demo_transcript(name: str) -> str:
+    """Load one of the built-in demo transcripts."""
+    if name not in DEMO_TRANSCRIPT_MAP:
+        raise ValueError(f"Unknown transcript: {name}")
+
+    with open(DEMO_TRANSCRIPT_MAP[name], "r", encoding="utf-8") as f:
+        return f.read()
 
 
 @app.function(image=image, secrets=ALL_SECRETS, timeout=300)
@@ -1991,24 +2052,18 @@ def create_proposal_from_transcript(transcript: str = "sales", demo: bool = True
     import anthropic
     import requests
 
-    transcript_map = {
-        "kickoff": "/app/demo_kickoff_call_transcript.md",
-        "sales": "/app/demo_sales_call_transcript.md"
-    }
-
-    if transcript not in transcript_map:
+    if transcript not in DEMO_TRANSCRIPT_MAP:
         return JSONResponse({
             "status": "error",
             "error": f"Unknown transcript: {transcript}",
-            "available": list(transcript_map.keys())
+            "available": list(DEMO_TRANSCRIPT_MAP.keys())
         }, status_code=400)
 
     slack_notify(f"📄 *Create Proposal from Transcript*\nTranscript: {transcript}\nDemo mode: {demo}")
 
     try:
         # Step 1: Read the transcript
-        with open(transcript_map[transcript], "r") as f:
-            transcript_content = f.read()
+        transcript_content = _load_demo_transcript(transcript)
 
         slack_notify(f"📝 *Step 1/3: Transcript loaded*\n{len(transcript_content)} characters")
 
@@ -2529,6 +2584,7 @@ def main():
     print("  GET  /scrape-leads?query=dentists&location=US&limit=100")
     print("  POST /generate-proposal      - Body: {client, project}")
     print("  GET  /read-demo-transcript?name=kickoff|sales")
+    print("  GET  /export-demo-transcript?name=sales&format=json|markdown")
     print("  GET  /create-proposal-from-transcript?transcript=sales")
     print("  GET  /youtube-outliers?keywords=AI+agents,ChatGPT&days=7&top_n=10")
     print("")
