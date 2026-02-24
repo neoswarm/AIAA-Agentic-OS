@@ -8,6 +8,7 @@ Beautiful monitoring dashboard + webhook handlers for agentic workflows.
 import os
 import json
 import hashlib
+import time
 from datetime import datetime
 from flask import Flask, request, jsonify, render_template_string
 import requests
@@ -38,6 +39,7 @@ events_lock = threading.Lock()
 
 # File-based deduplication that survives worker restarts
 DEDUP_FILE = "/tmp/processed_webhooks.json"
+RAILWAY_GRAPHQL_URL = "https://backboard.railway.app/graphql/v2"
 
 def load_processed_webhooks():
     """Load processed webhooks from file."""
@@ -74,6 +76,104 @@ def log_event(event_type: str, status: str, data: dict):
             "status": status,
             "data": data
         })
+
+
+def persist_rotated_token_to_railway(token_json: str, max_attempts: int = 3, base_delay_seconds: float = 1.0) -> bool:
+    """Persist GOOGLE_OAUTH_TOKEN_JSON to Railway vars with retry."""
+    api_token = os.getenv("RAILWAY_API_TOKEN", "")
+    project_id = os.getenv("RAILWAY_PROJECT_ID", "")
+    environment_id = os.getenv("RAILWAY_ENVIRONMENT_ID", os.getenv("RAILWAY_ENV_ID", ""))
+    service_id = os.getenv("RAILWAY_SERVICE_ID", "")
+
+    if not api_token or not project_id or not environment_id:
+        print("[WARN] Skipping token persistence: missing Railway API credentials")
+        return False
+
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Content-Type": "application/json",
+    }
+    mutation = """
+    mutation variableUpsert($input: VariableUpsertInput!) {
+      variableUpsert(input: $input)
+    }
+    """
+
+    input_payload = {
+        "projectId": project_id,
+        "environmentId": environment_id,
+        "name": "GOOGLE_OAUTH_TOKEN_JSON",
+        "value": token_json,
+    }
+    if service_id:
+        input_payload["serviceId"] = service_id
+
+    payload = {
+        "query": mutation,
+        "variables": {
+            "input": input_payload,
+        },
+    }
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            resp = requests.post(RAILWAY_GRAPHQL_URL, headers=headers, json=payload, timeout=15)
+            if resp.status_code == 200:
+                body = resp.json()
+                if not body.get("errors"):
+                    print("[INFO] Persisted rotated Google OAuth token to Railway")
+                    return True
+                print(f"[WARN] Railway token persistence error (attempt {attempt}/{max_attempts}): {body['errors']}")
+            else:
+                print(f"[WARN] Railway token persistence failed (attempt {attempt}/{max_attempts}): HTTP {resp.status_code}")
+        except Exception as e:
+            print(f"[WARN] Railway token persistence exception (attempt {attempt}/{max_attempts}): {e}")
+
+        if attempt < max_attempts:
+            time.sleep(base_delay_seconds * (2 ** (attempt - 1)))
+
+    print("[WARN] Failed to persist rotated Google OAuth token to Railway after retries")
+    return False
+
+
+def persist_rotated_token_to_railway_background(token_json: str) -> None:
+    """Persist rotated token in a background daemon thread."""
+    if not token_json:
+        return
+    thread = threading.Thread(
+        target=persist_rotated_token_to_railway,
+        args=(token_json,),
+        daemon=True,
+    )
+    thread.start()
+
+
+def refresh_google_oauth_token_if_needed(creds: Credentials) -> None:
+    """Refresh Google OAuth token and persist rotated value in background."""
+    global GOOGLE_OAUTH_TOKEN_JSON
+
+    if not creds or not creds.expired or not creds.refresh_token:
+        return
+
+    previous_token_json = None
+    try:
+        previous_token_json = creds.to_json()
+    except Exception:
+        pass
+
+    creds.refresh(Request())
+    print("[INFO] Refreshed Google OAuth token")
+
+    try:
+        rotated_token_json = creds.to_json()
+    except Exception as e:
+        print(f"[WARN] Could not serialize refreshed Google OAuth token: {e}")
+        return
+
+    if rotated_token_json and rotated_token_json != previous_token_json:
+        GOOGLE_OAUTH_TOKEN_JSON = rotated_token_json
+        os.environ["GOOGLE_OAUTH_TOKEN_JSON"] = rotated_token_json
+        persist_rotated_token_to_railway_background(rotated_token_json)
 
 # =============================================================================
 # Dashboard HTML Template
@@ -685,10 +785,7 @@ def create_google_doc(research: dict) -> str:
             scopes=token_data.get('scopes')
         )
         
-        # Refresh if expired
-        if creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-            print("[INFO] Refreshed Google OAuth token")
+        refresh_google_oauth_token_if_needed(creds)
         
         drive_service = build('drive', 'v3', credentials=creds)
         docs_service = build('docs', 'v1', credentials=creds)
