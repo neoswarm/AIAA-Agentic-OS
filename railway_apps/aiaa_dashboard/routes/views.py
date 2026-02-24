@@ -166,6 +166,12 @@ def login():
         if username == Config.DASHBOARD_USERNAME and check_password(password):
             session['logged_in'] = True
             session['username'] = username
+            # Optional session-scoped override applied at login/session creation.
+            chat_profile_override = (request.form.get('chat_profile_override') or '').strip()
+            if chat_profile_override:
+                session['chat_profile_override'] = chat_profile_override
+            else:
+                session.pop('chat_profile_override', None)
             session.permanent = True
             
             # Log successful login
