@@ -53,6 +53,23 @@ def validation_error(errors, message="Validation failed"):
     }), 400
 
 
+def _is_known_client_profile(profile_slug: str) -> bool:
+    """Return True when a client profile slug can be resolved."""
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,99}", profile_slug):
+        return False
+
+    get_client_profile = getattr(models, "get_client_profile", None)
+    if callable(get_client_profile):
+        try:
+            return get_client_profile(profile_slug) is not None
+        except Exception:
+            return False
+
+    # Fallback for environments that only have file-based client profiles.
+    profile_file = SKILLS_DIR.parent.parent / "clients" / profile_slug / "profile.md"
+    return profile_file.exists()
+
+
 # =============================================================================
 # Authentication
 # =============================================================================
@@ -187,6 +204,13 @@ def api_execute_skill(skill_name):
 
     if errors:
         return validation_error(errors, "Missing required fields")
+
+    client_profile = str(params.get("client", "")).strip()
+    if client_profile and not _is_known_client_profile(client_profile):
+        return validation_error(
+            {"client": f"Unknown profile: {client_profile}"},
+            "Invalid client profile",
+        )
 
     try:
         execution_id = execute_skill(skill_name, params)
