@@ -5,6 +5,7 @@ Centralized configuration with environment variable management.
 
 import os
 import secrets
+from datetime import timedelta
 from pathlib import Path
 
 
@@ -60,7 +61,13 @@ class Config:
     SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "true").lower() == "true"
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
-    PERMANENT_SESSION_LIFETIME = int(os.getenv("PERMANENT_SESSION_LIFETIME", "86400"))  # 24 hours
+    # Session keepalive strategy:
+    # - Keepalive is activity-based via SESSION_REFRESH_EACH_REQUEST=True (rolling expiry).
+    # - Idle timeout is enforced by PERMANENT_SESSION_LIFETIME when no requests occur.
+    # Together this gives a sliding session window: active users stay logged in, idle users expire.
+    SESSION_REFRESH_EACH_REQUEST = os.getenv("SESSION_REFRESH_EACH_REQUEST", "true").lower() == "true"
+    PERMANENT_SESSION_LIFETIME_SECONDS = int(os.getenv("PERMANENT_SESSION_LIFETIME", "86400"))
+    PERMANENT_SESSION_LIFETIME = timedelta(seconds=PERMANENT_SESSION_LIFETIME_SECONDS)  # 24-hour default idle timeout
     
     # Rate Limiting (future use)
     RATE_LIMIT_ENABLED = os.getenv("RATE_LIMIT_ENABLED", "false").lower() == "true"
