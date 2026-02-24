@@ -53,6 +53,64 @@ def validation_error(errors, message="Validation failed"):
     }), 400
 
 
+_SENSITIVE_KEY_PATTERN = re.compile(
+    r"(token|api[_-]?key|secret|password|authorization|credential)",
+    re.IGNORECASE,
+)
+_TOKEN_VALUE_PATTERNS = [
+    re.compile(r"(?i)bearer\s+([A-Za-z0-9._\-]{8,})"),
+    re.compile(r"\b(?:sk-or-|pplx-|sk-ant-|sk-|xox[baprs]-|ghp_|github_pat_)[A-Za-z0-9._\-]{8,}\b"),
+]
+
+
+def _redact_value(value):
+    """Redact a potentially sensitive token-like value."""
+    if not isinstance(value, str):
+        return value
+
+    clean = value.strip()
+    if not clean:
+        return value
+    if len(clean) > 10:
+        return f"{clean[:6]}...{clean[-4:]}"
+    return "***"
+
+
+def _redact_embedded_tokens(value):
+    """Redact token patterns embedded in freeform strings."""
+    if not isinstance(value, str) or not value:
+        return value
+
+    redacted = value
+    for pattern in _TOKEN_VALUE_PATTERNS:
+        redacted = pattern.sub(lambda m: _redact_value(m.group(0)), redacted)
+    return redacted
+
+
+def _redact_sensitive_tokens(payload, key_name="", force_redact=False):
+    """Recursively redact sensitive token values from API payloads."""
+    key_is_sensitive = force_redact or bool(_SENSITIVE_KEY_PATTERN.search(key_name or ""))
+
+    if isinstance(payload, dict):
+        return {
+            key: _redact_sensitive_tokens(value, key, key_is_sensitive)
+            for key, value in payload.items()
+        }
+
+    if isinstance(payload, list):
+        return [
+            _redact_sensitive_tokens(item, key_name, key_is_sensitive)
+            for item in payload
+        ]
+
+    if isinstance(payload, str):
+        if key_is_sensitive:
+            return _redact_value(payload)
+        return _redact_embedded_tokens(payload)
+
+    return payload
+
+
 # =============================================================================
 # Authentication
 # =============================================================================
@@ -238,7 +296,10 @@ def api_execution_status(execution_id):
         execution = get_execution_status(execution_id)
         if execution is None:
             return jsonify({"status": "error", "message": "Execution not found"}), 404
-        return jsonify({"status": "ok", "execution": execution})
+        return jsonify({
+            "status": "ok",
+            "execution": _redact_sensitive_tokens(execution),
+        })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -264,8 +325,7 @@ def api_execution_output(execution_id):
 
             if full_path.exists():
                 output_content = full_path.read_text(encoding="utf-8")
-
-        return jsonify({
+        response_payload = {
             "status": "ok",
             "execution_id": execution_id,
             "execution_status": execution.get("status"),
@@ -274,7 +334,8 @@ def api_execution_output(execution_id):
             "output_path": output_path,
             "output_content": output_content,
             "output_preview": execution.get("output_preview"),
-        })
+        }
+        return jsonify(_redact_sensitive_tokens(response_payload))
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -377,7 +438,7 @@ def api_list_executions():
         return jsonify({
             "status": "ok",
             "total": len(executions),
-            "executions": executions,
+            "executions": _redact_sensitive_tokens(executions),
         })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
