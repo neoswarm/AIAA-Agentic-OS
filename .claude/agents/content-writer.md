@@ -2,7 +2,7 @@
 name: content-writer
 model: claude-sonnet-4-6
 description: Generates marketing content (emails, VSLs, blog posts, social media) following agency brand voice and client rules. Loads context from context/ and clients/ directories.
-allowedTools:
+allowed_tools:
   - Read
   - Write
   - WebSearch
