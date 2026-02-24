@@ -344,12 +344,16 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/event_stream_utils.js') }}"></script>
 <script>
 (function() {
     var pollInterval = null;
     var executionId = getExecutionIdFromUrl();
     var skillName = getSkillNameFromUrl();
     var startTime = Date.now();
+    var eventIdTracker = window.EventStreamUtils && window.EventStreamUtils.createEventIdTracker
+        ? window.EventStreamUtils.createEventIdTracker()
+        : null;
 
     function getExecutionIdFromUrl() {
         var parts = window.location.pathname.split('/');
@@ -381,6 +385,50 @@
         return secs + 's';
     }
 
+    function extractEventText(event) {
+        if (!event || typeof event !== 'object') return '';
+
+        var eventType = String(event.type || event.event || '').toLowerCase();
+        if (eventType && eventType !== 'output' && eventType !== 'log' && eventType !== 'stdout') {
+            return '';
+        }
+
+        if (typeof event.output_delta === 'string') return event.output_delta;
+        if (typeof event.output === 'string') return event.output;
+        if (typeof event.message === 'string') return event.message;
+
+        if (event.data && typeof event.data === 'object') {
+            if (typeof event.data.output_delta === 'string') return event.data.output_delta;
+            if (typeof event.data.output === 'string') return event.data.output;
+            if (typeof event.data.message === 'string') return event.data.message;
+        }
+
+        return '';
+    }
+
+    function appendOutputFromEvents(events) {
+        if (!Array.isArray(events) || events.length === 0) return false;
+
+        var outputEl = document.getElementById('live-output');
+        if (!outputEl) return false;
+
+        var chunks = [];
+        events.forEach(function(event) {
+            if (eventIdTracker && !eventIdTracker.shouldProcess(event)) {
+                return;
+            }
+
+            var text = extractEventText(event);
+            if (text) chunks.push(text);
+        });
+
+        if (chunks.length === 0) return false;
+
+        outputEl.textContent += chunks.join('');
+        outputEl.scrollTop = outputEl.scrollHeight;
+        return true;
+    }
+
     // Initialize
     document.getElementById('progress-title').textContent = 'Running: ' + formatSkillName(skillName);
 
@@ -397,12 +445,13 @@
             var res = await fetch('/api/v2/executions/' + encodeURIComponent(executionId) + '/status');
             if (!res.ok) throw new Error('Status request failed');
             var data = await res.json();
+            var statusData = data.execution || data;
 
-            updateProgress(data);
+            updateProgress(statusData);
 
-            if (data.status === 'success' || data.status === 'error' || data.status === 'cancelled') {
+            if (statusData.status === 'success' || statusData.status === 'error' || statusData.status === 'cancelled') {
                 clearInterval(pollInterval);
-                onComplete(data);
+                onComplete(statusData);
             }
         } catch (e) {
             console.warn('Poll error:', e);
@@ -435,7 +484,9 @@
         renderSteps(steps);
 
         // Update live output
-        if (data.output) {
+        var didAppendEvents = appendOutputFromEvents(data.events);
+
+        if (!didAppendEvents && data.output) {
             var outputEl = document.getElementById('live-output');
             outputEl.textContent = data.output;
             outputEl.scrollTop = outputEl.scrollHeight;
