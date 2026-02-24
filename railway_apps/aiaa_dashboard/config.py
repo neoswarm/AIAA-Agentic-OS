@@ -13,6 +13,7 @@ class Config:
     
     # Flask Configuration
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", secrets.token_hex(32))
+    CHAT_TOKEN_ENCRYPTION_KEY = os.getenv("CHAT_TOKEN_ENCRYPTION_KEY", "")
     
     # Dashboard Authentication
     DASHBOARD_USERNAME = os.getenv("DASHBOARD_USERNAME", "admin")
@@ -35,6 +36,7 @@ class Config:
         "OPENROUTER_API_KEY",
         "PERPLEXITY_API_KEY",
         "SLACK_WEBHOOK_URL",
+        "CHAT_TOKEN_ENCRYPTION_KEY",
         "CALENDLY_API_KEY",
         "GOOGLE_OAUTH_TOKEN_JSON",
         "ANTHROPIC_API_KEY",
@@ -115,6 +117,11 @@ class Config:
         # Check critical configuration
         if not cls.DASHBOARD_PASSWORD_HASH:
             issues.append("DASHBOARD_PASSWORD_HASH is not set - dashboard is insecure!")
+
+        if not cls.CHAT_TOKEN_ENCRYPTION_KEY:
+            issues.append("CHAT_TOKEN_ENCRYPTION_KEY is not set - chat token encryption is insecure!")
+        elif len(cls.CHAT_TOKEN_ENCRYPTION_KEY) < 32:
+            issues.append("CHAT_TOKEN_ENCRYPTION_KEY must be at least 32 characters long")
         
         if not cls.RAILWAY_API_TOKEN:
             warnings.append("RAILWAY_API_TOKEN not set - Railway features disabled")
