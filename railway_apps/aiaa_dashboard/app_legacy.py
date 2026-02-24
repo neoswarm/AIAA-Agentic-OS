@@ -57,6 +57,7 @@ RAILWAY_API_URL = "https://backboard.railway.app/graphql/v2"
 
 events_log = deque(maxlen=500)
 events_lock = threading.Lock()
+event_id_counter = 0
 RUNTIME_ENV_VARS = {}
 
 # =============================================================================
@@ -2902,9 +2903,11 @@ def login_required(f):
     return decorated_function
 
 def log_event(event_type, status, data, source="system"):
+    global event_id_counter
     with events_lock:
+        event_id_counter += 1
         events_log.appendleft({
-            "id": len(events_log) + 1,
+            "id": event_id_counter,
             "timestamp": datetime.now().isoformat(),
             "type": event_type,
             "status": status,
@@ -4312,8 +4315,30 @@ def health():
 def api_events():
     if not session.get('logged_in'):
         return jsonify({"error": "Unauthorized"}), 401
+
+    last_event_id_raw = (
+        request.args.get("last_event_id")
+        or request.args.get("lastEventId")
+        or request.headers.get("Last-Event-ID")
+    )
+
+    last_event_id = None
+    if last_event_id_raw:
+        try:
+            last_event_id = int(last_event_id_raw)
+        except (TypeError, ValueError):
+            return jsonify({"error": "Invalid last_event_id"}), 400
+
     with events_lock:
-        return jsonify(list(events_log))
+        events = list(events_log)
+
+    if last_event_id is None:
+        return jsonify(events)
+
+    # On reconnect, return only missed events in ascending order for replay.
+    missed_events = [event for event in events if event.get("id", 0) > last_event_id]
+    missed_events.sort(key=lambda event: event.get("id", 0))
+    return jsonify(missed_events)
 
 @app.route('/api/workflows')
 def api_workflows():
