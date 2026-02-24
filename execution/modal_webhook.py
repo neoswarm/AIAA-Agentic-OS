@@ -25,6 +25,12 @@ from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 from pathlib import Path
 
+try:
+    from execution.chat_run_limiter import CHAT_RUN_LIMITER, ChatRunLimitError
+except ImportError:
+    # Support running directly from /app/execution on Modal.
+    from chat_run_limiter import CHAT_RUN_LIMITER, ChatRunLimitError
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("claude-orchestrator")
@@ -899,14 +905,15 @@ def directive(slug: str, payload: dict = None):
             return {"status": "error", "error": str(e)}
 
         try:
-            result = run_directive(
-                slug=slug,
-                directive_content=directive_content,
-                input_data=input_data,
-                allowed_tools=allowed_tools,
-                token_data=token_data,
-                max_turns=max_turns
-            )
+            with CHAT_RUN_LIMITER.run_slot():
+                result = run_directive(
+                    slug=slug,
+                    directive_content=directive_content,
+                    input_data=input_data,
+                    allowed_tools=allowed_tools,
+                    token_data=token_data,
+                    max_turns=max_turns
+                )
             return {
                 "status": "success",
                 "slug": slug,
@@ -917,6 +924,14 @@ def directive(slug: str, payload: dict = None):
                 "conversation": result["conversation"],
                 "usage": result["usage"],
                 "timestamp": datetime.utcnow().isoformat()
+            }
+        except ChatRunLimitError as e:
+            logger.warning(f"Directive limit reached for {slug}: {e}")
+            return {
+                "status": "error",
+                "error": str(e),
+                "code": "chat_run_limit_reached",
+                "max_concurrent_chat_runs": CHAT_RUN_LIMITER.max_concurrent_runs,
             }
         except Exception as e:
             logger.error(f"Directive error: {e}")
@@ -1155,45 +1170,8 @@ Be concise. Complete tasks fully."""
     conversation = []
 
     try:
-        # Initial call
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=4096,
-            system=system,
-            tools=tools,
-            messages=messages
-        )
-
-        # Agentic loop
-        turns = 0
-        max_turns = 10
-
-        while response.stop_reason == "tool_use" and turns < max_turns:
-            turns += 1
-            tool_results = []
-
-            for block in response.content:
-                if block.type == "tool_use":
-                    slack_notify(f"🔧 *Tool: {block.name}*")
-
-                    try:
-                        result = run_agent_tool(block.name, block.input, token_data)
-                        result_str = json.dumps(result) if isinstance(result, (dict, list)) else str(result)
-                        slack_notify(f"✅ Success: {result_str[:200]}")
-                    except Exception as e:
-                        result_str = json.dumps({"error": str(e)})
-                        slack_notify(f"❌ Error: {str(e)}")
-
-                    conversation.append({"tool": block.name, "result": result_str[:500]})
-                    tool_results.append({
-                        "type": "tool_result",
-                        "tool_use_id": block.id,
-                        "content": result_str[:10000]
-                    })
-
-            messages.append({"role": "assistant", "content": response.content})
-            messages.append({"role": "user", "content": tool_results})
-
+        with CHAT_RUN_LIMITER.run_slot():
+            # Initial call
             response = client.messages.create(
                 model="claude-sonnet-4-20250514",
                 max_tokens=4096,
@@ -1202,22 +1180,67 @@ Be concise. Complete tasks fully."""
                 messages=messages
             )
 
-        # Extract final text
-        final = ""
-        for block in response.content:
-            if hasattr(block, "text"):
-                final += block.text
+            # Agentic loop
+            turns = 0
+            max_turns = 10
 
-        slack_notify(f"🏁 *Done*\n{final[:500]}")
+            while response.stop_reason == "tool_use" and turns < max_turns:
+                turns += 1
+                tool_results = []
 
+                for block in response.content:
+                    if block.type == "tool_use":
+                        slack_notify(f"🔧 *Tool: {block.name}*")
+
+                        try:
+                            result = run_agent_tool(block.name, block.input, token_data)
+                            result_str = json.dumps(result) if isinstance(result, (dict, list)) else str(result)
+                            slack_notify(f"✅ Success: {result_str[:200]}")
+                        except Exception as e:
+                            result_str = json.dumps({"error": str(e)})
+                            slack_notify(f"❌ Error: {str(e)}")
+
+                        conversation.append({"tool": block.name, "result": result_str[:500]})
+                        tool_results.append({
+                            "type": "tool_result",
+                            "tool_use_id": block.id,
+                            "content": result_str[:10000]
+                        })
+
+                messages.append({"role": "assistant", "content": response.content})
+                messages.append({"role": "user", "content": tool_results})
+
+                response = client.messages.create(
+                    model="claude-sonnet-4-20250514",
+                    max_tokens=4096,
+                    system=system,
+                    tools=tools,
+                    messages=messages
+                )
+
+            # Extract final text
+            final = ""
+            for block in response.content:
+                if hasattr(block, "text"):
+                    final += block.text
+
+            slack_notify(f"🏁 *Done*\n{final[:500]}")
+
+            return JSONResponse({
+                "status": "success",
+                "query": query,
+                "response": final,
+                "turns": turns,
+                "conversation": conversation
+            })
+
+    except ChatRunLimitError as e:
         return JSONResponse({
-            "status": "success",
-            "query": query,
-            "response": final,
-            "turns": turns,
-            "conversation": conversation
-        })
-
+            "status": "error",
+            "error": str(e),
+            "code": "chat_run_limit_reached",
+            "max_concurrent_chat_runs": CHAT_RUN_LIMITER.max_concurrent_runs,
+        }, status_code=429)
     except Exception as e:
         slack_notify(f"💥 *Error*: {str(e)}")
         return JSONResponse({"error": str(e)}, status_code=500)
