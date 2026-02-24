@@ -223,6 +223,53 @@ ALL_TOOLS = {
     }
 }
 
+# Named tool profiles for webhook configs.
+TOOL_PROFILES = {
+    "safe": ["read_sheet", "instantly_get_emails", "web_search", "web_fetch"],
+    "default": ["send_email", "read_sheet", "update_sheet", "web_search", "web_fetch"],
+    "full": list(ALL_TOOLS.keys())
+}
+DEFAULT_TOOL_PROFILE = "default"
+
+
+def resolve_allowed_tools(webhook_config: dict) -> tuple[list[str], str]:
+    """
+    Resolve allowed tools from webhook config.
+
+    Supported config formats:
+    - {"tool_profile": "safe|default|full"}  # preferred
+    - {"tools": "safe|default|full"}         # shorthand alias
+    - {"tools": ["send_email", "web_fetch"]} # legacy explicit list
+    """
+    raw_profile = webhook_config.get("tool_profile")
+    raw_tools = webhook_config.get("tools")
+
+    # Backward-compatible shorthand: "tools": "safe"
+    if raw_profile is None and isinstance(raw_tools, str):
+        raw_profile = raw_tools
+        raw_tools = None
+
+    if raw_profile is not None:
+        profile = str(raw_profile).strip().lower()
+        if profile in TOOL_PROFILES:
+            return list(TOOL_PROFILES[profile]), profile
+
+        logger.warning(
+            "Unknown tool profile '%s'. Falling back to '%s'.",
+            raw_profile,
+            DEFAULT_TOOL_PROFILE
+        )
+        return list(TOOL_PROFILES[DEFAULT_TOOL_PROFILE]), DEFAULT_TOOL_PROFILE
+
+    if isinstance(raw_tools, list):
+        resolved_tools = [name for name in raw_tools if name in ALL_TOOLS]
+        unknown_tools = [name for name in raw_tools if name not in ALL_TOOLS]
+        if unknown_tools:
+            logger.warning("Ignoring unknown tools in webhook config: %s", unknown_tools)
+        return resolved_tools, "custom"
+
+    return list(TOOL_PROFILES[DEFAULT_TOOL_PROFILE]), DEFAULT_TOOL_PROFILE
+
 # ============================================================================
 # TOOL IMPLEMENTATIONS
 # ============================================================================
@@ -891,7 +938,7 @@ def directive(slug: str, payload: dict = None):
     # AGENTIC MODE: Claude orchestrates using directive + tools
     # =========================================================================
     if directive_name:
-        allowed_tools = webhook_config.get("tools", ["send_email"])
+        allowed_tools, tool_profile = resolve_allowed_tools(webhook_config)
 
         try:
             directive_content = load_directive(directive_name)
@@ -912,6 +959,8 @@ def directive(slug: str, payload: dict = None):
                 "slug": slug,
                 "mode": "agentic",
                 "directive": directive_name,
+                "tool_profile": tool_profile,
+                "allowed_tools": allowed_tools,
                 "response": result["response"],
                 "thinking": result["thinking"],
                 "conversation": result["conversation"],
@@ -933,17 +982,18 @@ def list_webhooks():
     config = load_webhook_config()
     webhooks = config.get("webhooks", {})
 
-    return {
-        "webhooks": {
-            slug: {
-                "directive": cfg.get("directive"),
-                "script": cfg.get("script"),
-                "description": cfg.get("description", ""),
-                "tools": cfg.get("tools", [])
-            }
-            for slug, cfg in webhooks.items()
+    webhook_data = {}
+    for slug, cfg in webhooks.items():
+        tools, tool_profile = resolve_allowed_tools(cfg)
+        webhook_data[slug] = {
+            "directive": cfg.get("directive"),
+            "script": cfg.get("script"),
+            "description": cfg.get("description", ""),
+            "tool_profile": tool_profile,
+            "tools": tools
         }
-    }
+
+    return {"webhooks": webhook_data}
 
 
 # ============================================================================
