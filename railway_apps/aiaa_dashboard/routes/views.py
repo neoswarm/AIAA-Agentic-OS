@@ -27,6 +27,7 @@ from services.skill_execution_service import (
     get_execution_status,
     get_skill_count,
 )
+from .health_utils import get_chat_subsystem_readiness
 
 
 # =============================================================================
@@ -855,13 +856,16 @@ def health():
     """Public health check endpoint (no auth required)."""
     import database
     db_health = database.check_health()
+    chat_subsystem = get_chat_subsystem_readiness()
     
     return jsonify({
         "status": "healthy" if db_health['status'] == 'healthy' else "degraded",
         "timestamp": datetime.utcnow().isoformat(),
         "service": "aiaa-dashboard",
         "database": db_health['status'],
-        "version": "5.0"
+        "version": "5.0",
+        "chat_subsystem_ready": chat_subsystem["ready"],
+        "chat_subsystem": chat_subsystem,
     })
 
 
