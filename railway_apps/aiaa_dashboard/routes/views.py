@@ -338,7 +338,11 @@ def workflows():
 
     # Build favorites and recent lists for template sections
     favorites = [wf for wf in workflows_list if wf.get('is_favorite')]
-    recent_workflows = models.get_recent_executions_workflows(limit=5) if hasattr(models, 'get_recent_executions_workflows') else []
+    recent_workflows = (
+        models.get_recent_executions_workflows(limit=Config.DEFAULT_RECENT_WORKFLOWS_LIMIT)
+        if hasattr(models, 'get_recent_executions_workflows')
+        else []
+    )
 
     return render_template(
         'workflow_catalog.html',
@@ -361,7 +365,7 @@ def executions():
     username = get_username()
     
     # Get executions from database
-    limit = request.args.get('limit', 50, type=int)
+    limit = request.args.get('limit', Config.DEFAULT_EXECUTIONS_LIMIT, type=int)
     workflow_filter = request.args.get('workflow')
     
     execution_list = models.get_executions(workflow_id=workflow_filter, limit=limit)
@@ -445,7 +449,7 @@ def events():
     username = get_username()
     
     # Get events from database
-    limit = request.args.get('limit', 100, type=int)
+    limit = request.args.get('limit', Config.DEFAULT_EVENTS_LIMIT, type=int)
     event_type = request.args.get('type')
     status = request.args.get('status')
     
@@ -496,7 +500,7 @@ def home_v2():
     username = get_username()
 
     categories = get_skill_categories()
-    recent_executions = models.get_recent_skill_executions(limit=10)
+    recent_executions = models.get_recent_skill_executions(limit=Config.DEFAULT_RECENT_SKILL_EXECUTIONS_LIMIT)
     total_skills = get_skill_count()
 
     return render_template(
@@ -645,7 +649,7 @@ def outputs():
     """My Outputs page — list of skill execution history."""
     username = get_username()
 
-    limit = request.args.get('limit', 50, type=int)
+    limit = request.args.get('limit', Config.DEFAULT_OUTPUTS_LIMIT, type=int)
     skill_filter = request.args.get('skill')
     status_filter = request.args.get('status')
 

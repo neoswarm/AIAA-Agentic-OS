@@ -14,6 +14,7 @@ import sys
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import models
+from config import Config
 import requests as http_requests
 from services.deployment_service import DeploymentService, check_required_env_vars
 
@@ -405,7 +406,7 @@ def api_list_deployments():
     """
     # This would query from a database
     # For now, return a placeholder response
-    limit = request.args.get('limit', 50, type=int)
+    limit = request.args.get('limit', Config.DEFAULT_DEPLOYMENTS_LIMIT, type=int)
     workflow_filter = request.args.get('workflow')
     
     return jsonify({
