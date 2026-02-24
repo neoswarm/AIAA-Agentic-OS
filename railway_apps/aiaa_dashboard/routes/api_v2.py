@@ -442,6 +442,11 @@ def api_save_api_key():
     # Prefix format validation
     expected_prefix = _KEY_PREFIXES.get(env_var, "")
     if expected_prefix and not key_value.startswith(expected_prefix):
+        models.update_setting_metadata(
+            f"api_key.{env_var}",
+            validation_status="invalid",
+            last_error=f'Invalid format. {env_var} keys should start with "{expected_prefix}"',
+        )
         return validation_error(
             {'key_value': f'Invalid format. {env_var} keys should start with "{expected_prefix}"'},
             "Invalid key format"
@@ -449,7 +454,12 @@ def api_save_api_key():
 
     try:
         # Save to user_settings table
-        models.set_setting(f"api_key.{env_var}", key_value)
+        models.set_setting(
+            f"api_key.{env_var}",
+            key_value,
+            validation_status="valid",
+            last_error=None,
+        )
         # Set in current process environment
         os.environ[env_var] = key_value
 
@@ -469,8 +479,11 @@ def api_key_status():
     try:
         keys_status = {}
         for friendly_name, env_var in _API_KEY_NAMES.items():
-            value = os.getenv(env_var, "")
+            setting_key = f"api_key.{env_var}"
+            stored_value = models.get_setting(setting_key) or ""
+            value = os.getenv(env_var, "") or stored_value
             configured = bool(value)
+            metadata = models.get_setting_metadata(setting_key)
             # Redact value for display
             redacted = ""
             if value:
@@ -483,6 +496,9 @@ def api_key_status():
                 "env_var": env_var,
                 "configured": configured,
                 "redacted_value": redacted,
+                "last_validated_at": metadata.get("last_validated_at"),
+                "validation_status": metadata.get("validation_status"),
+                "last_error": metadata.get("last_error"),
             }
 
         return jsonify({"status": "ok", "keys": keys_status})

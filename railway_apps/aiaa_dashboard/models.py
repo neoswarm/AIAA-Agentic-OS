@@ -4,7 +4,7 @@ All database operations for workflows, events, webhooks, and executions.
 """
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from database import query, query_one, execute, insert, row_to_dict, rows_to_dicts
 
@@ -383,6 +383,109 @@ def list_api_keys() -> List[Dict[str, Any]]:
 def delete_api_key(key_id: int) -> int:
     """Delete an API key."""
     return execute("DELETE FROM api_keys WHERE id = ?", (key_id,))
+
+
+# ==============================================================================
+# User Settings Operations
+# ==============================================================================
+
+def set_setting(
+    setting_key: str,
+    setting_value: str,
+    last_validated_at: Optional[str] = None,
+    validation_status: Optional[str] = None,
+    last_error: Optional[str] = None
+) -> int:
+    """Create or update a user setting, with optional token metadata."""
+    if validation_status is not None and last_validated_at is None:
+        last_validated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+    return execute(
+        """INSERT INTO user_settings (
+            setting_key, setting_value, last_validated_at, validation_status, last_error, updated_at
+        ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(setting_key) DO UPDATE SET
+            setting_value = excluded.setting_value,
+            last_validated_at = CASE
+                WHEN excluded.validation_status IS NOT NULL THEN excluded.last_validated_at
+                ELSE user_settings.last_validated_at
+            END,
+            validation_status = COALESCE(excluded.validation_status, user_settings.validation_status),
+            last_error = CASE
+                WHEN excluded.validation_status IS NOT NULL THEN excluded.last_error
+                ELSE user_settings.last_error
+            END,
+            updated_at = CURRENT_TIMESTAMP""",
+        (setting_key, setting_value, last_validated_at, validation_status, last_error)
+    )
+
+
+def get_setting(setting_key: str) -> Optional[str]:
+    """Get a setting value by key."""
+    row = query_one("SELECT setting_value FROM user_settings WHERE setting_key = ?", (setting_key,))
+    return row["setting_value"] if row else None
+
+
+def get_setting_metadata(setting_key: str) -> Dict[str, Optional[str]]:
+    """Get token validation metadata for a setting key."""
+    row = query_one(
+        """SELECT last_validated_at, validation_status, last_error
+        FROM user_settings
+        WHERE setting_key = ?""",
+        (setting_key,)
+    )
+    if not row:
+        return {
+            "last_validated_at": None,
+            "validation_status": None,
+            "last_error": None,
+        }
+
+    return {
+        "last_validated_at": row["last_validated_at"],
+        "validation_status": row["validation_status"],
+        "last_error": row["last_error"],
+    }
+
+
+def update_setting_metadata(
+    setting_key: str,
+    validation_status: str,
+    last_error: Optional[str] = None,
+    last_validated_at: Optional[str] = None
+) -> int:
+    """Update token metadata for an existing setting key."""
+    if last_validated_at is None:
+        last_validated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+    return execute(
+        """UPDATE user_settings
+        SET
+            last_validated_at = ?,
+            validation_status = ?,
+            last_error = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE setting_key = ?""",
+        (last_validated_at, validation_status, last_error, setting_key)
+    )
+
+
+def get_settings_by_prefix(prefix: str) -> Dict[str, str]:
+    """Get all settings that start with the given prefix."""
+    rows = query(
+        """SELECT setting_key, setting_value
+        FROM user_settings
+        WHERE setting_key LIKE ?
+        ORDER BY setting_key""",
+        (f"{prefix}%",)
+    )
+    return {row["setting_key"]: row["setting_value"] for row in rows}
+
+
+def get_all_settings() -> Dict[str, str]:
+    """Get all settings."""
+    rows = query("SELECT setting_key, setting_value FROM user_settings ORDER BY setting_key")
+    return {row["setting_key"]: row["setting_value"] for row in rows}
 
 
 # ==============================================================================
