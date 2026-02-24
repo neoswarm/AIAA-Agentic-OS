@@ -8,6 +8,7 @@ import os
 import re
 import subprocess
 import sys
+import threading
 from pathlib import Path
 from functools import wraps
 
@@ -30,6 +31,7 @@ from services.skill_execution_service import (
 
 
 api_v2_bp = Blueprint('api_v2', __name__, url_prefix='/api/v2')
+_TOKEN_ROTATION_LOCK = threading.Lock()
 
 
 # =============================================================================
@@ -417,6 +419,60 @@ _KEY_PREFIXES = {
     "FAL_KEY": "",
 }
 
+_TOKEN_ALIASES = {
+    "runner": "DASHBOARD_API_KEY",
+    "runner_token": "DASHBOARD_API_KEY",
+    "dashboard": "DASHBOARD_API_KEY",
+    "dashboard_api_key": "DASHBOARD_API_KEY",
+}
+
+
+def _resolve_env_var(key_name: str) -> str:
+    """Resolve a friendly key name to an environment variable."""
+    normalized = key_name.lower()
+    if normalized in _TOKEN_ALIASES:
+        return _TOKEN_ALIASES[normalized]
+    return _API_KEY_NAMES.get(normalized, key_name.upper())
+
+
+def _clear_stored_api_key(env_var: str) -> None:
+    """Remove a stored API key/token from settings storage."""
+    setting_key = f"api_key.{env_var}"
+    delete_setting = getattr(models, "delete_setting", None)
+    if callable(delete_setting):
+        delete_setting(setting_key)
+        return
+
+    # Backward compatibility for older models without delete_setting.
+    set_setting = getattr(models, "set_setting", None)
+    if callable(set_setting):
+        set_setting(setting_key, "")
+
+
+def _redact_token(token: str) -> str:
+    """Redact sensitive token values for API responses."""
+    if not token:
+        return ""
+    if len(token) <= 8:
+        return "*" * len(token)
+    return f"{token[:4]}...{token[-4:]}"
+
+
+def _log_token_audit(action: str, status: str, key_name: str, **details) -> None:
+    """Best-effort audit logging for token mutations."""
+    try:
+        data = {"action": action, "key_name": key_name}
+        data.update(details)
+        models.log_event(
+            event_type="token",
+            status=status,
+            data=data,
+            source="api",
+        )
+    except Exception:
+        # Audit logging must not break core token actions.
+        pass
+
 
 @api_v2_bp.route('/settings/api-keys', methods=['POST'])
 @login_required
@@ -437,11 +493,17 @@ def api_save_api_key():
         return validation_error(errors)
 
     # Resolve env var name
-    env_var = _API_KEY_NAMES.get(key_name.lower(), key_name.upper())
+    env_var = _resolve_env_var(key_name)
 
     # Prefix format validation
     expected_prefix = _KEY_PREFIXES.get(env_var, "")
     if expected_prefix and not key_value.startswith(expected_prefix):
+        _log_token_audit(
+            action="save",
+            status="error",
+            key_name=env_var,
+            reason="invalid_prefix",
+        )
         return validation_error(
             {'key_value': f'Invalid format. {env_var} keys should start with "{expected_prefix}"'},
             "Invalid key format"
@@ -452,6 +514,11 @@ def api_save_api_key():
         models.set_setting(f"api_key.{env_var}", key_value)
         # Set in current process environment
         os.environ[env_var] = key_value
+        _log_token_audit(
+            action="save",
+            status="success",
+            key_name=env_var,
+        )
 
         return jsonify({
             "status": "ok",
@@ -459,6 +526,49 @@ def api_save_api_key():
             "key_name": env_var,
         })
     except Exception as e:
+        _log_token_audit(
+            action="save",
+            status="error",
+            key_name=env_var,
+            reason="exception",
+        )
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@api_v2_bp.route('/settings/api-keys/revoke', methods=['POST'])
+@api_v2_bp.route('/settings/api-keys/clear', methods=['POST'])
+@api_v2_bp.route('/settings/api-keys/<key_name>', methods=['DELETE'])
+@login_required
+def api_revoke_api_key(key_name=None):
+    """Clear a stored API key/token and remove it from runner environment."""
+    data = request.get_json(silent=True) or {}
+    requested_key_name = (key_name or data.get('key_name', '')).strip()
+
+    if not requested_key_name:
+        return validation_error({'key_name': 'Key name is required'})
+
+    env_var = _resolve_env_var(requested_key_name)
+
+    try:
+        _clear_stored_api_key(env_var)
+        os.environ.pop(env_var, None)
+        _log_token_audit(
+            action="revoke",
+            status="success",
+            key_name=env_var,
+        )
+        return jsonify({
+            "status": "ok",
+            "message": f"{env_var} revoked successfully",
+            "key_name": env_var,
+        })
+    except Exception as e:
+        _log_token_audit(
+            action="revoke",
+            status="error",
+            key_name=env_var,
+            reason="exception",
+        )
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
@@ -488,6 +598,78 @@ def api_key_status():
         return jsonify({"status": "ok", "keys": keys_status})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@api_v2_bp.route('/settings/auth-token/rotate', methods=['POST'])
+@login_required
+def api_rotate_auth_token():
+    """Atomically replace DASHBOARD_API_KEY."""
+    data = request.get_json(silent=True) or {}
+    new_token = data.get('new_token')
+    current_token = data.get('current_token')
+
+    errors = {}
+    if not isinstance(new_token, str) or not new_token.strip():
+        errors['new_token'] = 'New token is required'
+    if current_token is not None and not isinstance(current_token, str):
+        errors['current_token'] = 'Current token must be a string'
+
+    if errors:
+        return validation_error(errors)
+
+    new_token = new_token.strip()
+    if current_token is not None:
+        current_token = current_token.strip()
+
+    with _TOKEN_ROTATION_LOCK:
+        existing_token = os.getenv('DASHBOARD_API_KEY', '')
+
+        # Compare-and-swap check for safe concurrent rotations.
+        if current_token is not None and current_token != existing_token:
+            _log_token_audit(
+                action="rotate",
+                status="error",
+                key_name="DASHBOARD_API_KEY",
+                reason="current_token_mismatch",
+            )
+            return jsonify({
+                "status": "error",
+                "message": "Current token does not match",
+            }), 409
+
+        if existing_token and existing_token == new_token:
+            _log_token_audit(
+                action="rotate",
+                status="error",
+                key_name="DASHBOARD_API_KEY",
+                reason="token_unchanged",
+            )
+            return validation_error(
+                {'new_token': 'New token must be different from current token'},
+                "Invalid token rotation request"
+            )
+
+        os.environ['DASHBOARD_API_KEY'] = new_token
+
+    try:
+        set_setting = getattr(models, "set_setting", None)
+        if callable(set_setting):
+            set_setting("api_key.DASHBOARD_API_KEY", new_token)
+    except Exception:
+        # Persist failure should not block in-memory rotation.
+        pass
+
+    _log_token_audit(
+        action="rotate",
+        status="success",
+        key_name="DASHBOARD_API_KEY",
+    )
+    return jsonify({
+        "status": "ok",
+        "message": "DASHBOARD_API_KEY rotated successfully",
+        "previous_token": _redact_token(existing_token),
+        "active_token": _redact_token(new_token),
+    })
 
 
 @api_v2_bp.route('/settings/preferences', methods=['GET'])
