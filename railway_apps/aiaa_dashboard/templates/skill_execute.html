@@ -530,6 +530,78 @@
     flex-shrink: 0;
 }
 
+/* Active runner recovery */
+.runner-recovery-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.875rem;
+    margin-bottom: 1rem;
+    padding: 0.875rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--warning, #f59e0b);
+    background: var(--warning-muted, rgba(245, 158, 11, 0.12));
+}
+
+.runner-recovery-banner.visible {
+    display: flex;
+}
+
+.runner-recovery-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.runner-recovery-copy strong {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.runner-recovery-copy span {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.runner-recovery-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.runner-recovery-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.875rem;
+    border-radius: 7px;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.runner-recovery-link:hover {
+    background: var(--accent-hover);
+}
+
+.runner-recovery-dismiss {
+    border: 1px solid var(--border-subtle);
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: 7px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.runner-recovery-dismiss:hover {
+    color: var(--text-primary);
+    border-color: var(--border);
+}
+
 /* Skill Meta Bar */
 .skill-meta-bar {
     display: flex;
@@ -598,6 +670,18 @@
         <h1 id="skill-title">Loading skill...</h1>
         <p id="skill-description"></p>
         <span class="skill-category-badge" id="skill-category" style="display: none;"></span>
+    </div>
+</div>
+
+<!-- Active Runner Recovery -->
+<div class="runner-recovery-banner" id="runner-recovery-banner" role="status" aria-live="polite">
+    <div class="runner-recovery-copy">
+        <strong>Runner still active</strong>
+        <span id="runner-recovery-text">A previous run is still in progress.</span>
+    </div>
+    <div class="runner-recovery-actions">
+        <a class="runner-recovery-link" id="runner-recovery-link" href="#">Resume Run</a>
+        <button class="runner-recovery-dismiss" type="button" onclick="dismissActiveRunner()">Dismiss</button>
     </div>
 </div>
 
@@ -694,12 +778,95 @@
 (function() {
     var skillName = getSkillNameFromUrl();
     var skillMeta = null;
+    var ACTIVE_EXECUTION_STORAGE_KEY = 'aiaa.activeExecution';
 
     function getSkillNameFromUrl() {
         var parts = window.location.pathname.split('/');
         var idx = parts.indexOf('skills');
         if (idx >= 0 && parts[idx + 1]) return decodeURIComponent(parts[idx + 1]);
         return null;
+    }
+
+    function readActiveExecution() {
+        var raw = localStorage.getItem(ACTIVE_EXECUTION_STORAGE_KEY);
+        if (!raw) return null;
+        try {
+            var parsed = JSON.parse(raw);
+            if (!parsed || !parsed.executionId) return null;
+            return parsed;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function persistActiveExecution(executionId, activeSkillName) {
+        localStorage.setItem(ACTIVE_EXECUTION_STORAGE_KEY, JSON.stringify({
+            executionId: executionId,
+            skillName: activeSkillName || '',
+            startedAt: Date.now()
+        }));
+    }
+
+    function clearActiveExecution() {
+        localStorage.removeItem(ACTIVE_EXECUTION_STORAGE_KEY);
+    }
+
+    function extractExecutionFromStatusResponse(payload) {
+        if (payload && payload.execution && typeof payload.execution === 'object') {
+            return payload.execution;
+        }
+        return payload || {};
+    }
+
+    function isActiveExecutionStatus(status) {
+        return status === 'running' || status === 'queued' || status === 'pending' || status === 'starting';
+    }
+
+    function showActiveRunnerBanner(activeExecution, executionData) {
+        var banner = document.getElementById('runner-recovery-banner');
+        var text = document.getElementById('runner-recovery-text');
+        var link = document.getElementById('runner-recovery-link');
+
+        var detectedSkillName = executionData.skill_name || activeExecution.skillName || skillName;
+        if (detectedSkillName) {
+            text.textContent = formatSkillName(detectedSkillName) + ' is still running. Resume live progress.';
+        } else {
+            text.textContent = 'A previous run is still in progress. Resume live progress.';
+        }
+
+        link.href = '/executions/' + encodeURIComponent(activeExecution.executionId) + '/progress';
+        banner.classList.add('visible');
+    }
+
+    window.dismissActiveRunner = function() {
+        clearActiveExecution();
+        var banner = document.getElementById('runner-recovery-banner');
+        banner.classList.remove('visible');
+    };
+
+    async function restoreActiveExecutionIfRunning() {
+        var activeExecution = readActiveExecution();
+        if (!activeExecution || !activeExecution.executionId) return;
+
+        try {
+            var res = await fetch('/api/v2/executions/' + encodeURIComponent(activeExecution.executionId) + '/status');
+            if (!res.ok) {
+                if (res.status === 404) clearActiveExecution();
+                return;
+            }
+
+            var payload = await res.json();
+            var executionData = extractExecutionFromStatusResponse(payload);
+            var status = executionData.status;
+
+            if (isActiveExecutionStatus(status)) {
+                showActiveRunnerBanner(activeExecution, executionData);
+            } else if (status) {
+                clearActiveExecution();
+            }
+        } catch (e) {
+            // Keep the runner marker on transient failures.
+        }
     }
 
     // Load skill metadata and build form
@@ -1121,6 +1288,7 @@
             }
 
             if (data.execution_id) {
+                persistActiveExecution(data.execution_id, skillName);
                 window.location.href = '/executions/' + encodeURIComponent(data.execution_id) + '/progress';
             }
         } catch (e) {
@@ -1163,6 +1331,7 @@
             }
 
             if (data.execution_id) {
+                persistActiveExecution(data.execution_id, skillName);
                 window.location.href = '/executions/' + encodeURIComponent(data.execution_id) + '/progress';
             }
         } catch (e) {
@@ -1353,6 +1522,7 @@
         if (panel) panel.style.display = 'none';
     };
 
+    restoreActiveExecutionIfRunning();
     loadSkill();
     loadClientSelector();
 })();
