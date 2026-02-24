@@ -27,6 +27,7 @@ os.environ["DB_PATH"] = _test_db.name
 # --- Import after env vars ---
 from app import create_app
 import database
+import models
 
 import pytest
 
@@ -170,6 +171,12 @@ def test_clients_create_requires_auth(client):
 def test_executions_requires_auth(client):
     """GET /api/v2/executions without session returns 401."""
     resp = client.get("/api/v2/executions")
+    assert resp.status_code == 401
+
+
+def test_session_history_requires_auth(client):
+    """GET /api/v2/sessions/{id}/history without session returns 401."""
+    resp = client.get("/api/v2/sessions/unauth-session/history")
     assert resp.status_code == 401
 
 
@@ -349,6 +356,69 @@ def test_execution_stats(auth_client):
     data = resp.get_json()
     assert data["status"] == "ok"
     assert "stats" in data
+
+
+# =============================================================================
+# Authenticated: Session History
+# =============================================================================
+
+def test_session_history_paginated(auth_client):
+    """GET /api/v2/sessions/{id}/history returns paginated messages + metadata."""
+    session_id = "test-session-history-001"
+    models.upsert_session_history(session_id, metadata={"source": "test", "user": "testadmin"})
+    models.log_session_history_message(
+        session_id=session_id,
+        role="user",
+        content="Hi there",
+        metadata={"turn": 1},
+    )
+    models.log_session_history_message(
+        session_id=session_id,
+        role="assistant",
+        content="Hello!",
+        metadata={"turn": 2},
+    )
+    models.log_session_history_message(
+        session_id=session_id,
+        role="assistant",
+        content="How can I help?",
+        metadata={"turn": 3},
+    )
+
+    resp = auth_client.get(f"/api/v2/sessions/{session_id}/history?limit=2&offset=1")
+    assert resp.status_code == 200
+    data = resp.get_json()
+
+    assert data["status"] == "ok"
+    assert data["session"]["id"] == session_id
+    assert data["session"]["metadata"]["source"] == "test"
+    assert len(data["messages"]) == 2
+    assert data["messages"][0]["content"] == "Hello!"
+    assert data["messages"][1]["content"] == "How can I help?"
+    assert data["pagination"]["limit"] == 2
+    assert data["pagination"]["offset"] == 1
+    assert data["pagination"]["total"] == 3
+    assert data["pagination"]["has_more"] is False
+
+
+def test_session_history_not_found(auth_client):
+    """GET /api/v2/sessions/{id}/history returns 404 for unknown session."""
+    resp = auth_client.get("/api/v2/sessions/missing-session/history")
+    assert resp.status_code == 404
+    data = resp.get_json()
+    assert data["status"] == "error"
+
+
+def test_session_history_invalid_pagination(auth_client):
+    """GET /api/v2/sessions/{id}/history validates pagination inputs."""
+    session_id = "test-session-history-validation"
+    models.upsert_session_history(session_id, metadata={"source": "test"})
+    resp = auth_client.get(f"/api/v2/sessions/{session_id}/history?limit=0")
+    assert resp.status_code == 400
+    data = resp.get_json()
+    assert data["status"] == "error"
+    assert "errors" in data
+    assert "limit" in data["errors"]
 
 
 # =============================================================================

@@ -395,6 +395,63 @@ def api_execution_stats():
 
 
 # =============================================================================
+# Session History Endpoints
+# =============================================================================
+
+@api_v2_bp.route('/sessions/<session_id>/history', methods=['GET'])
+@login_required
+def api_session_history(session_id):
+    """Get paginated session history (messages + metadata)."""
+    limit = request.args.get('page_size', type=int)
+    if limit is None:
+        limit = request.args.get('limit', 50, type=int)
+    limit = min(limit, 200)
+
+    offset = request.args.get('offset', type=int)
+    if offset is None:
+        page = request.args.get('page', type=int)
+        if page is not None:
+            offset = (page - 1) * limit
+        else:
+            offset = 0
+
+    errors = {}
+    if limit < 1:
+        errors["limit"] = "limit must be greater than 0"
+    if offset < 0:
+        errors["offset"] = "offset must be greater than or equal to 0"
+    if errors:
+        return validation_error(errors)
+
+    try:
+        session_record = models.get_session_history_session(session_id)
+        if session_record is None:
+            return jsonify({"status": "error", "message": f"Session not found: {session_id}"}), 404
+
+        messages = models.get_session_history_messages(session_id, limit=limit, offset=offset)
+        total = models.count_session_history_messages(session_id)
+
+        return jsonify({
+            "status": "ok",
+            "session": {
+                "id": session_record.get("id"),
+                "metadata": session_record.get("metadata"),
+                "created_at": session_record.get("created_at"),
+                "updated_at": session_record.get("updated_at"),
+            },
+            "messages": messages,
+            "pagination": {
+                "limit": limit,
+                "offset": offset,
+                "total": total,
+                "has_more": (offset + len(messages)) < total,
+            },
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+# =============================================================================
 # Settings Endpoints
 # =============================================================================
 
