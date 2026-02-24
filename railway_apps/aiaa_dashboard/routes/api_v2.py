@@ -6,12 +6,13 @@ Skill execution, client management, and settings endpoints.
 
 import os
 import re
+import json
 import subprocess
 import sys
 from pathlib import Path
 from functools import wraps
 
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, Response, stream_with_context
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -51,6 +52,15 @@ def validation_error(errors, message="Validation failed"):
         "message": message,
         "errors": errors,
     }), 400
+
+
+def _format_sse_event(event_id, event_name, payload):
+    """Format one SSE event with an explicit server event ID."""
+    return (
+        f"id: {event_id}\n"
+        f"event: {event_name}\n"
+        f"data: {json.dumps(payload)}\n\n"
+    )
 
 
 # =============================================================================
@@ -239,6 +249,33 @@ def api_execution_status(execution_id):
         if execution is None:
             return jsonify({"status": "error", "message": "Execution not found"}), 404
         return jsonify({"status": "ok", "execution": execution})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@api_v2_bp.route('/executions/<execution_id>/stream', methods=['GET'])
+@login_required
+def api_execution_stream(execution_id):
+    """Stream execution status as SSE with server event IDs."""
+    try:
+        execution = get_execution_status(execution_id)
+        if execution is None:
+            return jsonify({"status": "error", "message": "Execution not found"}), 404
+
+        def event_stream():
+            yield _format_sse_event(
+                event_id=1,
+                event_name="execution",
+                payload={"status": "ok", "execution": execution},
+            )
+
+        response = Response(
+            stream_with_context(event_stream()),
+            mimetype="text/event-stream",
+        )
+        response.headers["Cache-Control"] = "no-cache"
+        response.headers["X-Accel-Buffering"] = "no"
+        return response
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
