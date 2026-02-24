@@ -569,6 +569,22 @@ def search_skills(query: str) -> List[Dict[str, Any]]:
 # Skill Execution
 # ==============================================================================
 
+def _extract_profile_used(params: Optional[Dict[str, str]]) -> Optional[str]:
+    """Extract the selected profile/client slug from execution params."""
+    if not params:
+        return None
+
+    for key in ("profile_used", "profile", "client_profile", "client"):
+        value = params.get(key)
+        if value is None:
+            continue
+        profile = str(value).strip()
+        if profile:
+            return profile
+
+    return None
+
+
 def execute_skill(skill_name: str, params: Optional[Dict[str, str]] = None) -> str:
     """Execute a skill's Python script with the given parameters.
 
@@ -591,12 +607,24 @@ def execute_skill(skill_name: str, params: Optional[Dict[str, str]] = None) -> s
     # Generate execution ID
     execution_id = str(uuid.uuid4())
 
-    # Create DB record
-    models.create_skill_execution(
-        execution_id=execution_id,
-        skill_name=skill_name,
-        params=params,
-    )
+    # Create DB record with profile telemetry when available.
+    profile_used = _extract_profile_used(params)
+    telemetry = {"profile_used": profile_used}
+    try:
+        models.create_skill_execution(
+            execution_id=execution_id,
+            skill_name=skill_name,
+            params=params,
+            telemetry=telemetry,
+            profile_used=profile_used,
+        )
+    except TypeError:
+        # Backward compatibility for older model signatures.
+        models.create_skill_execution(
+            execution_id=execution_id,
+            skill_name=skill_name,
+            params=params,
+        )
 
     # Build command
     cmd = [sys.executable, script_path]
