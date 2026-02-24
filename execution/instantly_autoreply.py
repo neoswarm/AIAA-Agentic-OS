@@ -21,6 +21,10 @@ logger = logging.getLogger("instantly-autoreply")
 
 # Constants
 KB_SPREADSHEET_ID = "1QS7MYDm6RUTzzTWoMfX-0G9NzT5EoE2KiCE7iR1DBLM"
+MAX_HISTORY_API_LIMIT = 25
+MAX_HISTORY_PROMPT_EMAILS = 5
+MAX_HISTORY_CHARS_PER_EMAIL = 500
+MAX_HISTORY_TOTAL_CHARS = 2000
 
 
 def get_google_creds(token_data: dict) -> Credentials:
@@ -74,10 +78,20 @@ def lookup_knowledge_base(campaign_id: str, token_data: dict) -> dict | None:
 
 def get_conversation_history(lead_email: str, limit: int = 10) -> list:
     """Get email conversation history from Instantly."""
+    if not lead_email:
+        return []
+
     api_key = os.getenv("INSTANTLY_API_KEY")
     if not api_key:
         logger.warning("INSTANTLY_API_KEY not configured")
         return []
+
+    try:
+        limit = int(limit)
+    except (TypeError, ValueError):
+        limit = 10
+
+    limit = max(1, min(limit, MAX_HISTORY_API_LIMIT))
 
     url = "https://api.instantly.ai/api/v2/emails"
     headers = {"Authorization": f"Bearer {api_key}"}
@@ -90,10 +104,60 @@ def get_conversation_history(lead_email: str, limit: int = 10) -> list:
             return []
 
         data = response.json()
-        return data.get("items", [])
+        items = data.get("items", [])
+
+        # Keep only fields used for prompt context so long threads stay lightweight.
+        history = []
+        for item in items[:limit]:
+            body = item.get("body", {}) if isinstance(item.get("body"), dict) else {}
+            history.append({
+                "from_address_email": item.get("from_address_email", ""),
+                "body_text": body.get("text", "") if isinstance(body.get("text", ""), str) else "",
+                "timestamp": item.get("timestamp")
+            })
+
+        return history
     except Exception as e:
         logger.error(f"Failed to get conversation history: {e}")
         return []
+
+
+def build_history_context(conversation_history: list) -> str:
+    """Build bounded history context so prompt size remains stable for long threads."""
+    if not conversation_history:
+        return ""
+
+    sections = []
+    total_chars = 0
+
+    for email in conversation_history:
+        if len(sections) >= MAX_HISTORY_PROMPT_EMAILS or total_chars >= MAX_HISTORY_TOTAL_CHARS:
+            break
+
+        body = email.get("body_text", "")
+        if not body and isinstance(email.get("body"), dict):
+            body = email["body"].get("text", "")
+        if not isinstance(body, str):
+            continue
+
+        body = body.strip()
+        if not body:
+            continue
+
+        body = body[:MAX_HISTORY_CHARS_PER_EMAIL]
+        remaining = MAX_HISTORY_TOTAL_CHARS - total_chars
+        if remaining <= 0:
+            break
+        if len(body) > remaining:
+            body = body[:remaining]
+
+        sections.append(f"From: {email.get('from_address_email', '')}\n{body}")
+        total_chars += len(body)
+
+    if not sections:
+        return ""
+
+    return "\n---\n".join(sections)
 
 
 def generate_reply(
@@ -115,13 +179,12 @@ def generate_reply(
     sender_email = payload.get("lead_email", "")
     email_account = payload.get("email_account", "")
 
-    # Format conversation history
-    history_text = ""
-    if conversation_history:
-        for email in conversation_history[:5]:  # Last 5 emails
-            from_addr = email.get("from_address_email", "")
-            body = email.get("body", {}).get("text", "")[:500]
-            history_text += f"\n---\nFrom: {from_addr}\n{body}\n"
+    history_text = build_history_context(conversation_history)
+    history_block = (
+        f"\nRECENT CONVERSATION HISTORY (most recent first):\n{history_text}\n"
+        if history_text
+        else ""
+    )
 
     prompt = f"""Write a sales email reply.
 
@@ -133,6 +196,7 @@ CONTEXT (your company/offering):
 
 TONE EXAMPLES:
 {examples}
+{history_block}
 
 RULES:
 - Reply as {email_account} (use first name to sign off)
