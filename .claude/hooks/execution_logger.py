@@ -25,6 +25,8 @@ STATE_DIR = Path("/Users/lucasnolan/Agentic OS/.tmp/hooks")
 LOG_FILE = STATE_DIR / "execution_log.json"
 MAX_ENTRIES = 500
 
+ERROR_INDICATORS = ["Traceback", "Error:", "Exception:", "FAILED", "error:", "fatal:"]
+
 
 def load_log():
     """Load the execution log."""
@@ -57,24 +59,82 @@ def extract_script_name(command: str) -> str:
     return "unknown"
 
 
-def detect_exit_code(tool_result: str) -> tuple:
-    """Try to detect exit code from tool_result. Returns (exit_code, success)."""
-    if not tool_result:
-        return ("unknown", True)
+def _extract_exit_code(text: str):
+    """Try to extract an exit code from output text."""
+    exit_match = re.search(r'exit\s+code[:\s]+(-?\d+)', text, re.IGNORECASE)
+    if not exit_match:
+        return None
+    try:
+        return int(exit_match.group(1))
+    except ValueError:
+        return None
 
-    # Check for explicit exit code patterns
-    exit_match = re.search(r'exit\s+code[:\s]+(\d+)', tool_result, re.IGNORECASE)
-    if exit_match:
-        code = int(exit_match.group(1))
-        return (code, code == 0)
 
-    # Check for error indicators
-    error_indicators = ["Traceback", "Error:", "Exception:", "FAILED", "error:", "fatal:"]
-    for indicator in error_indicators:
-        if indicator in tool_result:
-            return (1, False)
+def _has_error_signal(text: str) -> bool:
+    """Check if output includes known error markers."""
+    for indicator in ERROR_INDICATORS:
+        if indicator in text:
+            return True
+    return False
 
-    return (0, True)
+
+def parse_terminal_status(tool_result):
+    """Parse tool_result into structured terminal status metadata."""
+    if isinstance(tool_result, dict):
+        exit_code = tool_result.get("exit_code")
+        stdout = str(tool_result.get("stdout", "") or "")
+        stderr = str(tool_result.get("stderr", "") or "")
+        combined = f"{stdout}\n{stderr}".strip()
+    else:
+        exit_code = None
+        combined = str(tool_result or "")
+
+    if isinstance(exit_code, int):
+        status = "success" if exit_code == 0 else "error"
+    elif not combined:
+        status = "unknown"
+    else:
+        inferred_exit = _extract_exit_code(combined)
+        if inferred_exit is not None:
+            exit_code = inferred_exit
+            status = "success" if inferred_exit == 0 else "error"
+        else:
+            status = "error" if _has_error_signal(combined) else "success"
+
+    return {
+        "status": status,
+        "exit_code": exit_code,
+        "error_detected": status == "error",
+    }
+
+
+def build_tool_event(tool_name: str, command: str, script_name: str):
+    """Build structured tool event metadata for the execution command."""
+    return {
+        "name": tool_name,
+        "category": "workflow_execution",
+        "script_name": script_name,
+        "command": command.strip()[:500],
+    }
+
+
+def build_log_entry(command: str, tool_result, tool_name: str = "Bash", timestamp: str = None):
+    """Build a structured execution log entry."""
+    script_name = extract_script_name(command)
+    terminal_status = parse_terminal_status(tool_result)
+    exit_code = terminal_status.get("exit_code")
+    success = terminal_status.get("status") != "error"
+
+    return {
+        "timestamp": timestamp or datetime.now(timezone.utc).isoformat(),
+        "script_name": script_name,
+        "full_command": command[:500],
+        "exit_code": exit_code if exit_code is not None else "unknown",
+        "success": success,
+        "event_type": "tool_event",
+        "tool_event": build_tool_event(tool_name, command, script_name),
+        "terminal_status": terminal_status,
+    }
 
 
 def check_status():
@@ -145,19 +205,9 @@ def main():
         print(json.dumps({"decision": "ALLOW"}))
         sys.exit(0)
 
-    # Extract details
-    script_name = extract_script_name(command)
-    exit_code, success = detect_exit_code(str(tool_result))
-
-    # Log the entry
+    # Log the structured entry
     log_data = load_log()
-    entry = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "script_name": script_name,
-        "full_command": command[:500],  # Truncate very long commands
-        "exit_code": exit_code,
-        "success": success,
-    }
+    entry = build_log_entry(command, tool_result, tool_name=tool_name)
     log_data["entries"].append(entry)
     save_log(log_data)
 

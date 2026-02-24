@@ -20,7 +20,6 @@ import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
 
 
 STATE_DIR = Path("/Users/lucasnolan/Agentic OS/.tmp/hooks")
@@ -33,6 +32,15 @@ TRIVIAL_COMMANDS = {
     "date", "which", "type", "file", "true", "false", "test",
     "cd", "clear", "history", "env", "printenv", "set",
 }
+
+ERROR_INDICATORS = [
+    "Traceback",
+    "Error:",
+    "Exception:",
+    "FAILED",
+    "error:",
+    "fatal:",
+]
 
 
 def load_activity():
@@ -131,6 +139,84 @@ def classify_command(command: str) -> tuple:
     return ("other", base)
 
 
+def _extract_exit_code(text: str):
+    """Extract exit code from tool output text when available."""
+    match = re.search(r'exit\s+code[:\s]+(-?\d+)', text, re.IGNORECASE)
+    if not match:
+        return None
+    try:
+        return int(match.group(1))
+    except ValueError:
+        return None
+
+
+def _has_error_signal(text: str) -> bool:
+    """Detect known terminal error patterns."""
+    for indicator in ERROR_INDICATORS:
+        if indicator in text:
+            return True
+    return False
+
+
+def parse_terminal_status(tool_result):
+    """Parse terminal result into structured status metadata."""
+    if isinstance(tool_result, dict):
+        exit_code = tool_result.get("exit_code")
+        stdout = str(tool_result.get("stdout", "") or "")
+        stderr = str(tool_result.get("stderr", "") or "")
+        combined = f"{stdout}\n{stderr}".strip()
+    else:
+        exit_code = None
+        combined = str(tool_result or "")
+
+    if isinstance(exit_code, int):
+        status = "success" if exit_code == 0 else "error"
+    elif not combined:
+        status = "unknown"
+    else:
+        inferred_exit = _extract_exit_code(combined)
+        if inferred_exit is not None:
+            exit_code = inferred_exit
+            status = "success" if inferred_exit == 0 else "error"
+        else:
+            status = "error" if _has_error_signal(combined) else "success"
+
+    return {
+        "status": status,
+        "exit_code": exit_code,
+        "error_detected": status == "error",
+    }
+
+
+def build_tool_event(tool_name: str, command: str, cmd_type: str, summary: str):
+    """Build a structured tool event payload."""
+    return {
+        "name": tool_name,
+        "category": cmd_type,
+        "summary": summary,
+        "command": command.strip()[:500],
+    }
+
+
+def build_log_entry(tool_name: str, command: str, tool_result, timestamp: str = None):
+    """Build a structured session activity entry."""
+    cmd_type, summary = classify_command(command)
+    now = timestamp or datetime.now(timezone.utc).isoformat()
+    terminal_status = parse_terminal_status(tool_result)
+    tool_event = build_tool_event(tool_name, command, cmd_type, summary)
+
+    return {
+        # Legacy fields retained for compatibility
+        "type": cmd_type,
+        "command_summary": summary,
+        "timestamp": now,
+        # New structured payloads
+        "event_type": "tool_event",
+        "tool_event": tool_event,
+        "terminal_status": terminal_status,
+    }
+
+
 def compute_duration(session_start: str) -> str:
     """Compute human-readable session duration."""
     if not session_start:
@@ -167,14 +253,23 @@ def check_status():
 
     # Activity breakdown by type
     type_counts = {}
+    terminal_counts = {}
     for entry in entries:
         t = entry.get("type", "other")
         type_counts[t] = type_counts.get(t, 0) + 1
+        terminal_status = entry.get("terminal_status", {}).get("status")
+        if terminal_status:
+            terminal_counts[terminal_status] = terminal_counts.get(terminal_status, 0) + 1
 
     print(f"\nTotal activities: {len(entries)}")
     print(f"\nActivity Breakdown:")
     for t, count in sorted(type_counts.items(), key=lambda x: x[1], reverse=True):
         print(f"  {t}: {count}")
+
+    if terminal_counts:
+        print(f"\nTerminal Status Breakdown:")
+        for status, count in sorted(terminal_counts.items(), key=lambda x: x[1], reverse=True):
+            print(f"  {status}: {count}")
 
     # Last 10 activities
     last_10 = entries[-10:] if len(entries) >= 10 else entries
@@ -222,6 +317,7 @@ def main():
 
     tool_input = data.get("tool_input", {})
     command = tool_input.get("command", "")
+    tool_result = data.get("tool_result")
 
     if not command:
         print(json.dumps({"decision": "ALLOW"}))
@@ -232,8 +328,6 @@ def main():
         print(json.dumps({"decision": "ALLOW"}))
         sys.exit(0)
 
-    # Classify and log
-    cmd_type, summary = classify_command(command)
     now = datetime.now(timezone.utc).isoformat()
 
     activity = load_activity()
@@ -242,12 +336,8 @@ def main():
     if not activity.get("session_start"):
         activity["session_start"] = now
 
-    # Add entry
-    entry = {
-        "type": cmd_type,
-        "command_summary": command[:100],
-        "timestamp": now,
-    }
+    # Add structured entry
+    entry = build_log_entry(tool_name, command, tool_result, timestamp=now)
     activity["entries"].append(entry)
 
     save_activity(activity)
