@@ -53,6 +53,44 @@ def validation_error(errors, message="Validation failed"):
     }), 400
 
 
+def limit_validation_error(field_name, raw_value, min_value, max_value, reason):
+    """Return a structured 400 response for invalid limit parameters."""
+    return jsonify({
+        "status": "error",
+        "message": (
+            f"Invalid '{field_name}' value '{raw_value}': {reason}. "
+            f"Retry with a value between {min_value} and {max_value}."
+        ),
+        "errors": {
+            field_name: f"Must be an integer between {min_value} and {max_value}"
+        },
+        "retry_guidance": (
+            f"Set '{field_name}' to a value between {min_value} and {max_value} and retry."
+        ),
+    }), 400
+
+
+def parse_limit_arg(field_name, default, min_value, max_value):
+    """Parse and validate a bounded integer query parameter."""
+    raw_value = request.args.get(field_name)
+    if raw_value is None or raw_value == "":
+        return default, None
+
+    try:
+        value = int(raw_value)
+    except (TypeError, ValueError):
+        return None, limit_validation_error(
+            field_name, raw_value, min_value, max_value, "must be an integer"
+        )
+
+    if value < min_value or value > max_value:
+        return None, limit_validation_error(
+            field_name, raw_value, min_value, max_value, "is outside the allowed range"
+        )
+
+    return value, None
+
+
 # =============================================================================
 # Authentication
 # =============================================================================
@@ -124,7 +162,10 @@ def api_skill_categories():
 def api_recommended_skills():
     """Get role-based skill recommendations."""
     role = request.args.get('role', '').strip()
-    limit = request.args.get('limit', 8, type=int)
+    limit, limit_error = parse_limit_arg('limit', default=8, min_value=1, max_value=20)
+    if limit_error:
+        return limit_error
+
     try:
         if not role:
             # Try to get role from user preferences
@@ -134,7 +175,7 @@ def api_recommended_skills():
             except Exception:
                 role = ""
 
-        skills = get_recommended_skills(role, min(limit, 20))
+        skills = get_recommended_skills(role, limit)
         return jsonify({
             "status": "ok",
             "role": role,
@@ -366,13 +407,15 @@ def api_list_executions():
     """List recent executions with optional filters."""
     skill_name = request.args.get('skill')
     status = request.args.get('status')
-    limit = request.args.get('limit', 50, type=int)
+    limit, limit_error = parse_limit_arg('limit', default=50, min_value=1, max_value=200)
+    if limit_error:
+        return limit_error
 
     try:
         executions = models.get_skill_executions(
             skill_name=skill_name,
             status=status,
-            limit=min(limit, 200),
+            limit=limit,
         )
         return jsonify({
             "status": "ok",
