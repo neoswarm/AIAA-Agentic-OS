@@ -252,6 +252,222 @@ def get_execution_stats() -> Dict[str, Any]:
 
 
 # ==============================================================================
+# Skill Execution Operations
+# ==============================================================================
+
+def create_skill_execution(
+    execution_id: str,
+    skill_name: str,
+    params: Optional[Dict[str, Any]] = None,
+) -> int:
+    """Create a queued skill execution record."""
+    params_json = json.dumps(params) if params is not None else None
+    return execute(
+        """INSERT INTO skill_executions (
+            id, skill_name, status, params, created_at
+        ) VALUES (?, ?, 'queued', ?, CURRENT_TIMESTAMP)""",
+        (execution_id, skill_name, params_json),
+    )
+
+
+def update_skill_execution_status(
+    execution_id: str,
+    status: str,
+    output_preview: Optional[str] = None,
+    output_path: Optional[str] = None,
+    error_message: Optional[str] = None,
+) -> int:
+    """Update a skill execution status and latency metrics."""
+    has_preview = bool(output_preview)
+
+    if status == "running":
+        return execute(
+            """UPDATE skill_executions SET
+                status = 'running',
+                started_at = COALESCE(started_at, CURRENT_TIMESTAMP),
+                queue_wait_ms = COALESCE(
+                    queue_wait_ms,
+                    CAST((julianday(CURRENT_TIMESTAMP) - julianday(created_at)) * 86400000 AS INTEGER)
+                ),
+                first_token_at = CASE
+                    WHEN first_token_at IS NULL AND ? = 1 THEN CURRENT_TIMESTAMP
+                    ELSE first_token_at
+                END,
+                first_token_ms = CASE
+                    WHEN first_token_ms IS NULL AND ? = 1 THEN CAST((julianday(CURRENT_TIMESTAMP) - julianday(created_at)) * 86400000 AS INTEGER)
+                    ELSE first_token_ms
+                END,
+                output_preview = COALESCE(?, output_preview),
+                output_path = COALESCE(?, output_path),
+                error_message = COALESCE(?, error_message)
+            WHERE id = ?""",
+            (
+                1 if has_preview else 0,
+                1 if has_preview else 0,
+                output_preview,
+                output_path,
+                error_message,
+                execution_id,
+            ),
+        )
+
+    if status in {"success", "error", "cancelled", "timeout"}:
+        return execute(
+            """UPDATE skill_executions SET
+                status = ?,
+                completed_at = COALESCE(completed_at, CURRENT_TIMESTAMP),
+                queue_wait_ms = COALESCE(
+                    queue_wait_ms,
+                    CASE
+                        WHEN started_at IS NOT NULL
+                            THEN CAST((julianday(started_at) - julianday(created_at)) * 86400000 AS INTEGER)
+                        ELSE CAST((julianday(CURRENT_TIMESTAMP) - julianday(created_at)) * 86400000 AS INTEGER)
+                    END
+                ),
+                first_token_at = CASE
+                    WHEN first_token_at IS NULL AND ? = 1 THEN CURRENT_TIMESTAMP
+                    ELSE first_token_at
+                END,
+                first_token_ms = CASE
+                    WHEN first_token_ms IS NULL AND ? = 1 THEN CAST((julianday(CURRENT_TIMESTAMP) - julianday(created_at)) * 86400000 AS INTEGER)
+                    ELSE first_token_ms
+                END,
+                duration_ms = COALESCE(
+                    duration_ms,
+                    CASE
+                        WHEN started_at IS NOT NULL
+                            THEN CAST((julianday(CURRENT_TIMESTAMP) - julianday(started_at)) * 86400000 AS INTEGER)
+                        ELSE NULL
+                    END
+                ),
+                total_runtime_ms = COALESCE(
+                    total_runtime_ms,
+                    CAST((julianday(CURRENT_TIMESTAMP) - julianday(created_at)) * 86400000 AS INTEGER)
+                ),
+                output_preview = COALESCE(?, output_preview),
+                output_path = COALESCE(?, output_path),
+                error_message = COALESCE(?, error_message)
+            WHERE id = ?""",
+            (
+                status,
+                1 if has_preview else 0,
+                1 if has_preview else 0,
+                output_preview,
+                output_path,
+                error_message,
+                execution_id,
+            ),
+        )
+
+    return execute(
+        """UPDATE skill_executions SET
+            status = ?,
+            output_preview = COALESCE(?, output_preview),
+            output_path = COALESCE(?, output_path),
+            error_message = COALESCE(?, error_message)
+        WHERE id = ?""",
+        (status, output_preview, output_path, error_message, execution_id),
+    )
+
+
+def get_skill_execution(execution_id: str) -> Optional[Dict[str, Any]]:
+    """Get a single skill execution by ID."""
+    row = query_one("SELECT * FROM skill_executions WHERE id = ?", (execution_id,))
+    return row_to_dict(row)
+
+
+def get_skill_executions(
+    skill_name: Optional[str] = None,
+    status: Optional[str] = None,
+    limit: int = 50,
+) -> List[Dict[str, Any]]:
+    """Get skill executions with optional filters."""
+    sql = "SELECT * FROM skill_executions WHERE 1=1"
+    params: List[Any] = []
+
+    if skill_name:
+        sql += " AND skill_name = ?"
+        params.append(skill_name)
+    if status:
+        sql += " AND status = ?"
+        params.append(status)
+
+    sql += " ORDER BY created_at DESC LIMIT ?"
+    params.append(limit)
+
+    rows = query(sql, tuple(params))
+    return rows_to_dicts(rows)
+
+
+def get_recent_skill_executions(limit: int = 10) -> List[Dict[str, Any]]:
+    """Get recent skill executions."""
+    return get_skill_executions(limit=limit)
+
+
+def cancel_skill_execution(execution_id: str) -> int:
+    """Cancel a queued or running skill execution."""
+    return execute(
+        """UPDATE skill_executions SET
+            status = 'cancelled',
+            completed_at = CURRENT_TIMESTAMP,
+            queue_wait_ms = COALESCE(
+                queue_wait_ms,
+                CASE
+                    WHEN started_at IS NOT NULL
+                        THEN CAST((julianday(started_at) - julianday(created_at)) * 86400000 AS INTEGER)
+                    ELSE CAST((julianday(CURRENT_TIMESTAMP) - julianday(created_at)) * 86400000 AS INTEGER)
+                END
+            ),
+            duration_ms = CASE
+                WHEN started_at IS NOT NULL
+                    THEN CAST((julianday(CURRENT_TIMESTAMP) - julianday(started_at)) * 86400000 AS INTEGER)
+                ELSE duration_ms
+            END,
+            total_runtime_ms = CAST((julianday(CURRENT_TIMESTAMP) - julianday(created_at)) * 86400000 AS INTEGER)
+        WHERE id = ? AND status IN ('queued', 'running')""",
+        (execution_id,),
+    )
+
+
+def get_skill_execution_stats() -> Dict[str, Any]:
+    """Get aggregate skill execution statistics."""
+    stats: Dict[str, Any] = {}
+
+    row = query_one("SELECT COUNT(*) AS total FROM skill_executions")
+    stats["total_executions"] = row["total"] if row else 0
+
+    rows = query("SELECT status, COUNT(*) AS count FROM skill_executions GROUP BY status")
+    stats["by_status"] = {r["status"]: r["count"] for r in rows}
+
+    success_count = stats["by_status"].get("success", 0)
+    total_count = stats["total_executions"]
+    stats["success_rate"] = round((success_count / total_count) * 100, 2) if total_count > 0 else 0
+
+    row = query_one("SELECT AVG(duration_ms) AS avg_duration FROM skill_executions WHERE duration_ms IS NOT NULL")
+    stats["avg_duration_ms"] = int(row["avg_duration"]) if row and row["avg_duration"] else 0
+
+    row = query_one("SELECT AVG(queue_wait_ms) AS avg_queue_wait FROM skill_executions WHERE queue_wait_ms IS NOT NULL")
+    stats["avg_queue_wait_ms"] = int(row["avg_queue_wait"]) if row and row["avg_queue_wait"] else 0
+
+    row = query_one("SELECT AVG(first_token_ms) AS avg_first_token FROM skill_executions WHERE first_token_ms IS NOT NULL")
+    stats["avg_first_token_ms"] = int(row["avg_first_token"]) if row and row["avg_first_token"] else 0
+
+    row = query_one("SELECT AVG(total_runtime_ms) AS avg_total_runtime FROM skill_executions WHERE total_runtime_ms IS NOT NULL")
+    stats["avg_total_runtime_ms"] = int(row["avg_total_runtime"]) if row and row["avg_total_runtime"] else 0
+
+    rows = query(
+        """SELECT skill_name, COUNT(*) AS runs
+        FROM skill_executions
+        GROUP BY skill_name
+        ORDER BY runs DESC
+        LIMIT 8"""
+    )
+    stats["top_skills"] = {r["skill_name"]: r["runs"] for r in rows}
+
+    return stats
+
+
+# ==============================================================================
 # Webhook Log Operations
 # ==============================================================================
 
