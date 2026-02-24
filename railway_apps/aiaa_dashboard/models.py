@@ -221,6 +221,73 @@ def get_executions(workflow_id: Optional[str] = None, limit: int = 50) -> List[D
     return rows_to_dicts(rows)
 
 
+def get_skill_executions(
+    skill_name: Optional[str] = None,
+    status: Optional[str] = None,
+    search: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    limit: int = 50,
+) -> List[Dict[str, Any]]:
+    """Get executions with skill-listing friendly fields and optional filters."""
+    filters: List[str] = []
+    params: List[Any] = []
+
+    if skill_name:
+        filters.append("workflow_name = ?")
+        params.append(skill_name)
+
+    if status:
+        filters.append("status = ?")
+        params.append(status)
+
+    if date_from:
+        filters.append("DATE(started_at) >= DATE(?)")
+        params.append(date_from)
+
+    if date_to:
+        filters.append("DATE(started_at) <= DATE(?)")
+        params.append(date_to)
+
+    if search:
+        search_term = f"%{search.strip().lower()}%"
+        filters.append(
+            "("
+            "LOWER(workflow_name) LIKE ? OR "
+            "LOWER(COALESCE(trigger_type, '')) LIKE ? OR "
+            "LOWER(COALESCE(output_summary, '')) LIKE ? OR "
+            "LOWER(COALESCE(error_message, '')) LIKE ?"
+            ")"
+        )
+        params.extend([search_term, search_term, search_term, search_term])
+
+    sql = """
+        SELECT
+            id,
+            workflow_id,
+            workflow_name,
+            workflow_name AS skill_name,
+            trigger_type,
+            status,
+            started_at,
+            started_at AS created_at,
+            completed_at,
+            duration_ms,
+            output_summary,
+            output_summary AS output_preview,
+            error_message,
+            metadata
+        FROM executions
+    """
+    if filters:
+        sql += " WHERE " + " AND ".join(filters)
+    sql += " ORDER BY started_at DESC LIMIT ?"
+
+    params.append(max(1, limit))
+    rows = query(sql, tuple(params))
+    return rows_to_dicts(rows)
+
+
 def get_execution(execution_id: int) -> Optional[Dict[str, Any]]:
     """Get a single execution by ID."""
     row = query_one("SELECT * FROM executions WHERE id = ?", (execution_id,))

@@ -648,10 +648,16 @@ def outputs():
     limit = request.args.get('limit', 50, type=int)
     skill_filter = request.args.get('skill')
     status_filter = request.args.get('status')
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    search = request.args.get('search') or request.args.get('q')
 
     execution_list = models.get_skill_executions(
         skill_name=skill_filter,
         status=status_filter,
+        search=search,
+        date_from=date_from,
+        date_to=date_to,
         limit=limit,
     )
     stats = models.get_skill_execution_stats()
