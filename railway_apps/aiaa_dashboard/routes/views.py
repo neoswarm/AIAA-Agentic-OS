@@ -8,6 +8,7 @@ import os
 import json
 import hashlib
 import hmac
+import logging
 import threading
 from datetime import datetime
 from functools import wraps
@@ -34,6 +35,7 @@ from services.skill_execution_service import (
 # =============================================================================
 
 views_bp = Blueprint('views', __name__)
+logger = logging.getLogger(__name__)
 
 
 # =============================================================================
@@ -45,6 +47,11 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('logged_in'):
+            log_session_lifecycle(
+                action="missing_session",
+                username=session.get('username', ''),
+                status="redirected",
+            )
             return redirect(url_for('views.login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -103,14 +110,27 @@ def get_username():
     return session.get('username', 'Admin')
 
 
+def log_session_lifecycle(action: str, username: str, status: str):
+    """Emit a structured JSON log for session lifecycle events."""
+    forwarded_for = request.headers.get("X-Forwarded-For", "")
+    ip_address = forwarded_for.split(",")[0].strip() if forwarded_for else request.remote_addr
+    payload = {
+        "event": "session_lifecycle",
+        "action": action,
+        "status": status,
+        "username": username or "unknown",
+        "ip": ip_address,
+        "method": request.method,
+        "path": request.path,
+    }
+    logger.info(json.dumps(payload, sort_keys=True))
+
+
 def persist_to_railway(variables: dict):
     """Persist environment variables to Railway via GraphQL API.
 
     Runs in a background thread. Logs warnings on failure but never raises.
     """
-    import logging
-    logger = logging.getLogger(__name__)
-
     api_token = os.getenv('RAILWAY_API_TOKEN', '') or getattr(Config, 'RAILWAY_API_TOKEN', '')
     service_id = os.getenv('RAILWAY_SERVICE_ID', '') or getattr(Config, 'RAILWAY_SERVICE_ID', '')
     environment_id = os.getenv('RAILWAY_ENVIRONMENT_ID', '')
@@ -167,6 +187,7 @@ def login():
             session['logged_in'] = True
             session['username'] = username
             session.permanent = True
+            log_session_lifecycle(action="login", username=username, status="success")
             
             # Log successful login
             models.log_event(
@@ -178,6 +199,7 @@ def login():
             
             return redirect(url_for('views.home_v2'))
         else:
+            log_session_lifecycle(action="login", username=username, status="error")
             # Log failed login
             models.log_event(
                 event_type="auth",
@@ -199,6 +221,7 @@ def login():
 def logout():
     """Logout handler."""
     username = session.get('username', 'unknown')
+    log_session_lifecycle(action="logout", username=username, status="success")
     
     # Log logout
     models.log_event(
