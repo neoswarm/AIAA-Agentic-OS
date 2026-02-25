@@ -12,6 +12,7 @@ import logging
 import queue
 import secrets
 import threading
+import time
 from datetime import datetime
 from typing import Any, Callable, Dict, Generator, Optional
 
@@ -58,6 +59,7 @@ class AgentRunner:
 
         self._sessions: Dict[str, Dict[str, Any]] = {}
         self._output_queues: Dict[str, queue.Queue] = {}
+        self._run_timing: Dict[str, Dict[str, Any]] = {}
         self._lock = threading.RLock()
 
     def create_session(self, title: Optional[str] = None) -> Dict[str, Any]:
@@ -73,6 +75,9 @@ class AgentRunner:
             "status": "idle",
             "messages": [],
             "last_error": None,
+            "queue_wait_ms": None,
+            "first_event_latency_ms": None,
+            "total_runtime_ms": None,
         }
         with self._lock:
             self._sessions[session_id] = session
@@ -110,6 +115,9 @@ class AgentRunner:
                 "status": "idle",
                 "messages": [],
                 "last_error": None,
+                "queue_wait_ms": None,
+                "first_event_latency_ms": None,
+                "total_runtime_ms": None,
             }
             self._sessions[session_id] = session
             self._output_queues[session_id] = queue.Queue()
@@ -129,6 +137,9 @@ class AgentRunner:
                         "updated_at": session.get("updated_at"),
                         "message_count": len(session.get("messages") or []),
                         "last_error": session.get("last_error"),
+                        "queue_wait_ms": session.get("queue_wait_ms"),
+                        "first_event_latency_ms": session.get("first_event_latency_ms"),
+                        "total_runtime_ms": session.get("total_runtime_ms"),
                     }
                 )
         rows.sort(key=lambda r: r.get("updated_at") or "", reverse=True)
@@ -148,6 +159,9 @@ class AgentRunner:
                 "sdk_session_id": session.get("sdk_session_id"),
                 "messages": list(session.get("messages") or []),
                 "last_error": session.get("last_error"),
+                "queue_wait_ms": session.get("queue_wait_ms"),
+                "first_event_latency_ms": session.get("first_event_latency_ms"),
+                "total_runtime_ms": session.get("total_runtime_ms"),
             }
 
     def has_session(self, session_id: str) -> bool:
@@ -171,9 +185,24 @@ class AgentRunner:
             session["status"] = "running"
             session["updated_at"] = now
             session["last_error"] = None
+            session["queue_wait_ms"] = None
+            session["first_event_latency_ms"] = None
+            session["total_runtime_ms"] = None
+            self._run_timing[session_id] = {
+                "enqueued_at": time.perf_counter(),
+                "started_at": None,
+                "first_event_recorded": False,
+            }
             self._persist_session_update(
                 session_id,
-                {"status": "running", "updated_at": now, "last_error": None},
+                {
+                    "status": "running",
+                    "updated_at": now,
+                    "last_error": None,
+                    "queue_wait_ms": None,
+                    "first_event_latency_ms": None,
+                    "total_runtime_ms": None,
+                },
             )
 
         thread = threading.Thread(
@@ -207,6 +236,7 @@ class AgentRunner:
         loop: Optional[asyncio.AbstractEventLoop] = None
 
         try:
+            self._record_run_started(session_id)
             token = (self._token_provider() or "").strip()
             if not token:
                 raise RunnerError("Claude token is not configured")
@@ -245,6 +275,7 @@ class AgentRunner:
                     if not event:
                         continue
 
+                    self._record_first_event_latency(session_id)
                     q.put(event)
                     self._persist_event(session_id, event)
                     if event["type"] in ("text", "result"):
@@ -263,7 +294,13 @@ class AgentRunner:
                 self._append_assistant_message(session_id, "\n".join(assistant_chunks))
 
             self._set_session_state(session_id, status="idle", last_error=None)
-            q.put({"type": "done", "timestamp": _utc_now_iso()})
+            q.put(
+                {
+                    "type": "done",
+                    "timestamp": _utc_now_iso(),
+                    "metrics": self._record_total_runtime(session_id),
+                }
+            )
         except Exception as exc:  # pragma: no cover - runtime safety path
             message = str(exc) or "Agent execution failed"
             if stderr_lines:
@@ -283,9 +320,17 @@ class AgentRunner:
 
             logger.exception("Agent run failed for session %s: %s", session_id, message)
             self._set_session_state(session_id, status="error", last_error=message)
+            metrics = self._record_total_runtime(session_id)
             if emitted_error_event and streamed_error:
                 return
-            q.put({"type": "error", "content": message, "timestamp": _utc_now_iso()})
+            q.put(
+                {
+                    "type": "error",
+                    "content": message,
+                    "timestamp": _utc_now_iso(),
+                    "metrics": metrics,
+                }
+            )
         finally:
             if loop is not None:
                 try:
@@ -589,6 +634,104 @@ class AgentRunner:
             session_id,
             {"status": status, "last_error": last_error, "updated_at": now},
         )
+
+    def _record_run_started(self, session_id: str) -> None:
+        updates: Dict[str, Any] = {}
+        now_iso = _utc_now_iso()
+
+        with self._lock:
+            state = self._run_timing.get(session_id)
+            if not state:
+                state = {
+                    "enqueued_at": time.perf_counter(),
+                    "started_at": None,
+                    "first_event_recorded": False,
+                }
+                self._run_timing[session_id] = state
+            if state.get("started_at") is not None:
+                return
+
+            started_at = time.perf_counter()
+            state["started_at"] = started_at
+            enqueued_at = state.get("enqueued_at")
+            queue_wait_ms: Optional[int]
+            if isinstance(enqueued_at, (int, float)):
+                queue_wait_ms = max(0, int((started_at - enqueued_at) * 1000))
+            else:
+                queue_wait_ms = 0
+
+            session = self._sessions.get(session_id)
+            if session is not None:
+                session["queue_wait_ms"] = queue_wait_ms
+                session["updated_at"] = now_iso
+                updates = {"queue_wait_ms": queue_wait_ms, "updated_at": now_iso}
+
+        if updates:
+            self._persist_session_update(session_id, updates)
+
+    def _record_first_event_latency(self, session_id: str) -> None:
+        updates: Dict[str, Any] = {}
+        now_iso = _utc_now_iso()
+
+        with self._lock:
+            state = self._run_timing.get(session_id)
+            if not state or bool(state.get("first_event_recorded")):
+                return
+            state["first_event_recorded"] = True
+
+            enqueued_at = state.get("enqueued_at")
+            first_event_latency_ms: Optional[int] = None
+            if isinstance(enqueued_at, (int, float)):
+                first_event_latency_ms = max(
+                    0, int((time.perf_counter() - enqueued_at) * 1000)
+                )
+
+            session = self._sessions.get(session_id)
+            if session is not None:
+                session["first_event_latency_ms"] = first_event_latency_ms
+                session["updated_at"] = now_iso
+                updates = {
+                    "first_event_latency_ms": first_event_latency_ms,
+                    "updated_at": now_iso,
+                }
+
+        if updates:
+            self._persist_session_update(session_id, updates)
+
+    def _record_total_runtime(self, session_id: str) -> Dict[str, Optional[int]]:
+        updates: Dict[str, Any] = {}
+        now_iso = _utc_now_iso()
+        metrics: Dict[str, Optional[int]] = {
+            "queue_wait_ms": None,
+            "first_event_latency_ms": None,
+            "total_runtime_ms": None,
+        }
+
+        with self._lock:
+            state = self._run_timing.get(session_id)
+            started_at = state.get("started_at") if state else None
+            total_runtime_ms: Optional[int] = None
+            if isinstance(started_at, (int, float)):
+                total_runtime_ms = max(0, int((time.perf_counter() - started_at) * 1000))
+
+            session = self._sessions.get(session_id)
+            if session is not None:
+                if total_runtime_ms is not None:
+                    session["total_runtime_ms"] = total_runtime_ms
+                    updates = {"total_runtime_ms": total_runtime_ms, "updated_at": now_iso}
+                    session["updated_at"] = now_iso
+                metrics = {
+                    "queue_wait_ms": session.get("queue_wait_ms"),
+                    "first_event_latency_ms": session.get("first_event_latency_ms"),
+                    "total_runtime_ms": session.get("total_runtime_ms"),
+                }
+
+            self._run_timing.pop(session_id, None)
+
+        if updates:
+            self._persist_session_update(session_id, updates)
+
+        return metrics
 
     def _persist_session_update(self, session_id: str, updates: Dict[str, Any]) -> None:
         store = self._session_store
