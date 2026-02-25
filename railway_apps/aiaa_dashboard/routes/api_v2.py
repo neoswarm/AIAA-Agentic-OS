@@ -62,13 +62,21 @@ def validation_error(errors, message="Validation failed"):
     }), 400
 
 
-def _format_sse_event(event_id, event_name, payload):
-    """Format one SSE event with an explicit server event ID."""
-    return (
-        f"id: {event_id}\n"
-        f"event: {event_name}\n"
-        f"data: {json.dumps(payload)}\n\n"
-    )
+def _is_known_client_profile(profile_slug: str) -> bool:
+    """Return True when a client profile slug can be resolved."""
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,99}", profile_slug):
+        return False
+
+    get_client_profile = getattr(models, "get_client_profile", None)
+    if callable(get_client_profile):
+        try:
+            return get_client_profile(profile_slug) is not None
+        except Exception:
+            return False
+
+    # Fallback for environments that only have file-based client profiles.
+    profile_file = SKILLS_DIR.parent.parent / "clients" / profile_slug / "profile.md"
+    return profile_file.exists()
 
 
 # =============================================================================
@@ -244,24 +252,12 @@ def api_execute_skill(skill_name):
     if errors:
         return validation_error(errors, "Missing required fields")
 
-    run_guard_session_key = get_run_guard_session_key()
-    max_active_runs = max(Config.MAX_PENDING_RUNNING_RUNS_PER_SESSION, 1)
-    reservation_id = reserve_run_slot(run_guard_session_key, max_active_runs)
-
-    if reservation_id is None:
-        retry_after_seconds = 5
-        active_runs = get_active_run_count(run_guard_session_key)
-        response = jsonify({
-            "status": "error",
-            "message": "Session run limit reached. Wait for a pending/running run to finish.",
-            "error_code": "session_run_limit_exceeded",
-            "max_pending_running_runs": max_active_runs,
-            "active_pending_running_runs": active_runs,
-            "retry_after_seconds": retry_after_seconds,
-        })
-        response.status_code = 429
-        response.headers["Retry-After"] = str(retry_after_seconds)
-        return response
+    client_profile = str(params.get("client", "")).strip()
+    if client_profile and not _is_known_client_profile(client_profile):
+        return validation_error(
+            {"client": f"Unknown profile: {client_profile}"},
+            "Invalid client profile",
+        )
 
     try:
         execution_id = execute_skill(
