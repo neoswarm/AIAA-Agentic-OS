@@ -8,6 +8,7 @@ import os
 import re
 import subprocess
 import sys
+import threading
 from pathlib import Path
 from functools import wraps
 
@@ -30,6 +31,7 @@ from services.skill_execution_service import (
 
 
 api_v2_bp = Blueprint('api_v2', __name__, url_prefix='/api/v2')
+_TOKEN_ROTATION_LOCK = threading.Lock()
 
 
 # =============================================================================
@@ -507,6 +509,15 @@ _KEY_PREFIXES = {
 }
 
 
+def _redact_token(token: str) -> str:
+    """Redact sensitive token values for API responses."""
+    if not token:
+        return ""
+    if len(token) <= 8:
+        return "*" * len(token)
+    return f"{token[:4]}...{token[-4:]}"
+
+
 @api_v2_bp.route('/settings/api-keys', methods=['POST'])
 @login_required
 def api_save_api_key():
@@ -616,6 +627,53 @@ def api_key_status():
         return jsonify(payload)
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@api_v2_bp.route('/settings/auth-token/rotate', methods=['POST'])
+@login_required
+def api_rotate_auth_token():
+    """Atomically replace DASHBOARD_API_KEY."""
+    data = request.get_json(silent=True) or {}
+    new_token = data.get('new_token')
+    current_token = data.get('current_token')
+
+    errors = {}
+    if not isinstance(new_token, str) or not new_token.strip():
+        errors['new_token'] = 'New token is required'
+    if current_token is not None and not isinstance(current_token, str):
+        errors['current_token'] = 'Current token must be a string'
+
+    if errors:
+        return validation_error(errors)
+
+    new_token = new_token.strip()
+    if current_token is not None:
+        current_token = current_token.strip()
+
+    with _TOKEN_ROTATION_LOCK:
+        existing_token = os.getenv('DASHBOARD_API_KEY', '')
+
+        # Compare-and-swap check for safe concurrent rotations.
+        if current_token is not None and current_token != existing_token:
+            return jsonify({
+                "status": "error",
+                "message": "Current token does not match",
+            }), 409
+
+        if existing_token and existing_token == new_token:
+            return validation_error(
+                {'new_token': 'New token must be different from current token'},
+                "Invalid token rotation request"
+            )
+
+        os.environ['DASHBOARD_API_KEY'] = new_token
+
+    return jsonify({
+        "status": "ok",
+        "message": "DASHBOARD_API_KEY rotated successfully",
+        "previous_token": _redact_token(existing_token),
+        "active_token": _redact_token(new_token),
+    })
 
 
 @api_v2_bp.route('/settings/preferences', methods=['GET'])
