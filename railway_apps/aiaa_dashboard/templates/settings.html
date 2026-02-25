@@ -622,6 +622,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/token_lifecycle.js') }}"></script>
 <script>
     // Tab switching
     document.querySelectorAll('.settings-tab').forEach(function(tab) {
@@ -858,12 +859,15 @@
         fetch('/api/v2/settings/api-keys/status')
         .then(function(r) { return r.json(); })
         .then(function(data) {
+            if (!data || data.status !== 'ok') {
+                throw new Error('Status endpoint returned an invalid payload');
+            }
             setButtonLoading(btn, false);
-            var keyData = (data.keys || {})[keyName];
-            if (keyData && keyData.configured) {
-                updateKeyStatus(keyName, 'valid', 'Connected');
-            } else {
-                updateKeyStatus(keyName, 'missing', 'Not configured');
+            var keyData = (data.keys || {})[keyName] || {};
+            var mapped = mapApiKeyLifecycleStatus(keyData);
+            updateKeyStatus(keyName, mapped.statusClass, mapped.text);
+            if ((mapped.statusClass === 'invalid' || mapped.statusClass === 'warning') && keyData.last_error) {
+                showKeyError(keyName, keyData.last_error);
             }
         })
         .catch(function() {
@@ -876,6 +880,16 @@
         if (!el) return;
         el.className = 'api-key-status ' + status;
         el.querySelector('.api-key-status-text').textContent = text;
+    }
+
+    function mapApiKeyLifecycleStatus(keyData) {
+        var lifecycle = window.TokenLifecycle;
+        if (lifecycle && typeof lifecycle.mapTokenMetadataToUi === 'function') {
+            return lifecycle.mapTokenMetadataToUi(keyData || {});
+        }
+        return (keyData && keyData.configured)
+            ? { statusClass: 'valid', text: 'Connected' }
+            : { statusClass: 'missing', text: 'Not configured' };
     }
 
     function mapClaudeValidation(validation) {
@@ -1053,10 +1067,12 @@
         fetch('/api/v2/settings/api-keys/status')
         .then(function(r) { return r.json(); })
         .then(function(data) {
+            if (!data || data.status !== 'ok') {
+                return;
+            }
             Object.keys(data.keys || {}).forEach(function(key) {
-                if (data.keys[key] && data.keys[key].configured) {
-                    updateKeyStatus(key, 'valid', 'Connected');
-                }
+                var mapped = mapApiKeyLifecycleStatus(data.keys[key] || {});
+                updateKeyStatus(key, mapped.statusClass, mapped.text);
             });
         })
         .catch(function() {});
