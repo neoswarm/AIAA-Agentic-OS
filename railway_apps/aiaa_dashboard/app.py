@@ -20,7 +20,7 @@ import database
 import models
 
 # Import blueprints
-from routes import api_bp, views_bp, api_v2_bp, chat_bp, init_chat_runner
+from routes import api_bp, api_v1_bp, views_bp, api_v2_bp, chat_bp, init_chat_runner
 
 VERSION = "5.0"
 
@@ -46,11 +46,13 @@ def create_app(config_class=None):
     # Load configuration
     if config_class is None:
         config_class = get_config()
-    
+
     app.config.from_object(config_class)
     # Re-read env overrides at app-creation time so tests and subprocesses that
     # mutate env vars after module import still get the correct runtime config.
-    app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", app.config.get("SECRET_KEY"))
+    app.config["SECRET_KEY"] = os.getenv(
+        "FLASK_SECRET_KEY", app.config.get("SECRET_KEY")
+    )
     app.config["DASHBOARD_USERNAME"] = os.getenv(
         "DASHBOARD_USERNAME", app.config.get("DASHBOARD_USERNAME")
     )
@@ -89,6 +91,7 @@ def create_app(config_class=None):
 
     # Register blueprints
     app.register_blueprint(api_bp)
+    app.register_blueprint(api_v1_bp)
     app.register_blueprint(views_bp)
     app.register_blueprint(api_v2_bp)
     app.register_blueprint(chat_bp)
@@ -97,6 +100,7 @@ def create_app(config_class=None):
         init_chat_runner(app)
 
     print(f"✅ Registered API blueprint at /api")
+    print(f"✅ Registered API v1 blueprint at /v1")
     print(f"✅ Registered API v2 blueprint at /api/v2")
     print(f"✅ Registered views blueprint at /")
     print(f"✅ Registered chat blueprint at /chat and /api/chat/*")
@@ -149,7 +153,7 @@ def hash_password(password: str) -> str:
 def check_password(password: str) -> bool:
     """Check password against configured hash."""
     from config import Config
-    
+
     password_hash = os.getenv("DASHBOARD_PASSWORD_HASH", Config.DASHBOARD_PASSWORD_HASH)
 
     if not password_hash:
