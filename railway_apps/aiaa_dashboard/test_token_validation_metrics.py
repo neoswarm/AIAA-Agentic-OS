@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """Tests for token validation status metric counters."""
 
-from flask import Flask
-import pytest
-
 import database
-from routes.api_v2 import api_v2_bp, _API_KEY_NAMES
+import pytest
 import routes.api_v2 as api_v2_module
+from flask import Flask
+from routes.api_v2 import _API_KEY_NAMES, api_v2_bp
 
 
 @pytest.fixture()
@@ -105,3 +104,42 @@ def test_configured_key_without_metadata_counts_as_valid(auth_client, monkeypatc
     assert metrics["expired"] == 0
     assert metrics["invalid"] == 0
     assert metrics["unreachable"] == 0
+
+
+def test_status_metrics_include_stream_and_runtime_error_counters(auth_client, monkeypatch):
+    """Status endpoint includes stream failure + runtime error counters."""
+    _clear_api_key_env(monkeypatch)
+
+    monkeypatch.setattr(api_v2_module.models, "get_setting", lambda _key: "", raising=False)
+    monkeypatch.setattr(api_v2_module.models, "get_setting_metadata", lambda _key: {}, raising=False)
+    monkeypatch.setattr(
+        api_v2_module,
+        "_list_chat_sessions_for_metrics",
+        lambda: [
+            {
+                "id": "stream-failed-session",
+                "status": "error",
+                "last_error": "SSE stream disconnected by client",
+            },
+            {
+                "id": "runtime-error-session",
+                "status": "error",
+                "last_error": "RuntimeError: failed to execute tool",
+            },
+            {
+                "id": "healthy-session",
+                "status": "idle",
+                "last_error": "",
+            },
+        ],
+        raising=False,
+    )
+
+    resp = auth_client.get("/api/v2/settings/api-keys/status")
+    assert resp.status_code == 200
+
+    data = resp.get_json()
+    assert data["stream_failure_count"] == 1
+    assert data["runtime_error_count"] == 2
+    assert data["metrics"]["stream_failures"] == 1
+    assert data["metrics"]["runtime_errors"] == 2

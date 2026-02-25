@@ -4,41 +4,35 @@ AIAA Dashboard API v2 Routes
 Skill execution, client management, and settings endpoints.
 """
 
+import hashlib
+import json
 import os
 import re
-import json
 import subprocess
 import sys
 import threading
 import uuid
-import hashlib
 from datetime import datetime, timezone
-from pathlib import Path
 from functools import wraps
+from pathlib import Path
 
-from flask import Blueprint, request, jsonify, session, Response, stream_with_context
+from flask import (Blueprint, Response, jsonify, request, session,
+                   stream_with_context)
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import models
-from config import Config
-from services.skill_execution_service import (
-    parse_skill_md,
-    list_available_skills,
-    execute_skill,
-    get_execution_status,
-    get_skill_categories,
-    search_skills,
-    get_skill_count,
-    get_recommended_skills,
-    SKILLS_DIR,
-)
-from services.run_guard import (
-    reserve_run_slot,
-    release_run_reservation,
-    get_active_run_count,
-)
+from services.run_guard import (get_active_run_count, release_run_reservation,
+                                reserve_run_slot)
+from services.skill_execution_service import (SKILLS_DIR, execute_skill,
+                                              get_execution_status,
+                                              get_recommended_skills,
+                                              get_skill_categories,
+                                              get_skill_count,
+                                              list_available_skills,
+                                              parse_skill_md, search_skills)
 
+from config import Config
 
 api_v2_bp = Blueprint('api_v2', __name__, url_prefix='/api/v2')
 _TOKEN_ROTATION_LOCK = threading.Lock()
@@ -875,6 +869,14 @@ _TOKEN_VALIDATION_STATUS_ALIASES = {
     "network_error": "unreachable",
     "connection_error": "unreachable",
 }
+_STREAM_FAILURE_MARKERS = (
+    "stream",
+    "sse",
+    "broken pipe",
+    "connection reset",
+    "connection aborted",
+    "client disconnected",
+)
 
 
 def _normalize_token_validation_status(raw_status, configured):
@@ -888,6 +890,54 @@ def _normalize_token_validation_status(raw_status, configured):
     if normalized in _TOKEN_VALIDATION_STATUS_ALIASES:
         return _TOKEN_VALIDATION_STATUS_ALIASES[normalized]
     return "unreachable" if configured else None
+
+
+def _list_chat_sessions_for_metrics():
+    """Best-effort session listing for chat failure metric counters."""
+    try:
+        from routes import chat as chat_routes
+        store = chat_routes._get_chat_store()
+    except Exception:
+        return []
+
+    try:
+        return store.list_sessions(limit=1000) or []
+    except TypeError:
+        try:
+            return store.list_sessions() or []
+        except Exception:
+            return []
+    except Exception:
+        return []
+
+
+def _collect_chat_failure_metrics():
+    """Aggregate stream/runtime failure counters from chat sessions."""
+    metrics = {
+        "stream_failures": 0,
+        "runtime_errors": 0,
+    }
+
+    try:
+        sessions = _list_chat_sessions_for_metrics()
+    except Exception:
+        return metrics
+
+    for session_data in sessions:
+        if not isinstance(session_data, dict):
+            continue
+
+        status = str(session_data.get("status") or "").strip().lower()
+        last_error = str(session_data.get("last_error") or "").strip()
+        if status != "error" and not last_error:
+            continue
+
+        metrics["runtime_errors"] += 1
+        lowered_error = last_error.lower()
+        if lowered_error and any(marker in lowered_error for marker in _STREAM_FAILURE_MARKERS):
+            metrics["stream_failures"] += 1
+
+    return metrics
 
 
 @api_v2_bp.route('/settings/api-keys', methods=['POST'])
@@ -1071,6 +1121,7 @@ def api_key_status():
 
         keys_status = {}
         token_validation_metrics = {status: 0 for status in _TOKEN_VALIDATION_STATUSES}
+        chat_failure_metrics = _collect_chat_failure_metrics()
 
         for friendly_name, env_var in _API_KEY_NAMES.items():
             setting_key = f"api_key.{env_var}"
@@ -1112,8 +1163,12 @@ def api_key_status():
             "status": "ok",
             "keys": keys_status,
             "token_validation_metrics": token_validation_metrics,
+            "stream_failure_count": chat_failure_metrics["stream_failures"],
+            "runtime_error_count": chat_failure_metrics["runtime_errors"],
             "metrics": {
                 "token_validation_by_status": token_validation_metrics,
+                "stream_failures": chat_failure_metrics["stream_failures"],
+                "runtime_errors": chat_failure_metrics["runtime_errors"],
             },
         })
     except Exception as e:
