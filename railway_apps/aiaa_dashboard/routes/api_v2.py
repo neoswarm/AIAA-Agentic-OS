@@ -10,7 +10,7 @@ import uuid
 import hashlib
 import subprocess
 import sys
-import threading
+from datetime import datetime, timezone
 from pathlib import Path
 from functools import wraps
 
@@ -118,6 +118,44 @@ def login_required(f):
             return f(*args, **kwargs)
         return jsonify({"status": "error", "message": "Authentication required"}), 401
     return decorated
+
+
+# =============================================================================
+# Session Endpoints
+# =============================================================================
+
+@api_v2_bp.route('/session', methods=['DELETE'])
+@login_required
+def api_soft_delete_session():
+    """Soft-delete the current authenticated session."""
+    username = session.get('username', 'unknown')
+    deleted_at = datetime.now(timezone.utc).isoformat()
+
+    # Soft-delete semantics: mark session as deleted instead of clearing all keys.
+    session['logged_in'] = False
+    session['session_status'] = 'deleted'
+    session['session_deleted_at'] = deleted_at
+    session.modified = True
+
+    try:
+        models.log_event(
+            event_type="auth",
+            status="success",
+            data={"username": username, "action": "session_soft_delete"},
+            source="api_v2",
+        )
+    except Exception:
+        # Session invalidation should still succeed if event logging fails.
+        pass
+
+    return jsonify({
+        "status": "ok",
+        "message": "Session soft-deleted",
+        "session": {
+            "status": "deleted",
+            "deleted_at": deleted_at,
+        },
+    })
 
 
 # =============================================================================
