@@ -67,6 +67,9 @@ class Config:
     # Rate Limiting (future use)
     RATE_LIMIT_ENABLED = os.getenv("RATE_LIMIT_ENABLED", "false").lower() == "true"
     RATE_LIMIT_PER_MINUTE = int(os.getenv("RATE_LIMIT_PER_MINUTE", "60"))
+    MAX_PENDING_RUNNING_RUNS_PER_SESSION = int(
+        os.getenv("MAX_PENDING_RUNNING_RUNS_PER_SESSION", "3")
+    )
     
     # Deployment Configuration
     PORT = int(os.getenv("PORT", "8080"))

@@ -16,6 +16,12 @@ from typing import Any, Dict, List, Optional
 # Add parent directory to path so we can import models/database
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import models
+from services.run_guard import (
+    bind_run_to_reservation,
+    release_run_reservation,
+    mark_run_running,
+    mark_run_finished,
+)
 
 
 # ==============================================================================
@@ -569,7 +575,12 @@ def search_skills(query: str) -> List[Dict[str, Any]]:
 # Skill Execution
 # ==============================================================================
 
-def execute_skill(skill_name: str, params: Optional[Dict[str, str]] = None) -> str:
+def execute_skill(
+    skill_name: str,
+    params: Optional[Dict[str, str]] = None,
+    run_guard_session_key: Optional[str] = None,
+    run_guard_reservation_id: Optional[str] = None,
+) -> str:
     """Execute a skill's Python script with the given parameters.
 
     Creates a DB record, launches subprocess in a background thread,
@@ -608,13 +619,30 @@ def execute_skill(skill_name: str, params: Optional[Dict[str, str]] = None) -> s
             arg = key if key.startswith('--') else f"--{key}"
             cmd.extend([arg, str(value)])
 
+    slot_bound = False
+    if run_guard_session_key and run_guard_reservation_id:
+        slot_bound = bind_run_to_reservation(
+            run_guard_session_key,
+            run_guard_reservation_id,
+            execution_id,
+        )
+        if not slot_bound:
+            raise RuntimeError("Failed to reserve session run slot")
+
     # Launch in background thread
     thread = threading.Thread(
         target=_run_skill_subprocess,
         args=(execution_id, cmd, skill_name),
         daemon=True,
     )
-    thread.start()
+    try:
+        thread.start()
+    except Exception:
+        if slot_bound:
+            mark_run_finished(execution_id)
+        elif run_guard_session_key and run_guard_reservation_id:
+            release_run_reservation(run_guard_session_key, run_guard_reservation_id)
+        raise
 
     return execution_id
 
@@ -624,6 +652,7 @@ def _run_skill_subprocess(execution_id: str, cmd: List[str], skill_name: str):
 
     This runs in a background thread.
     """
+    mark_run_running(execution_id)
     # Mark as running
     models.update_skill_execution_status(execution_id, 'running')
 
@@ -679,6 +708,8 @@ def _run_skill_subprocess(execution_id: str, cmd: List[str], skill_name: str):
             'error',
             error_message=str(e)[:1000],
         )
+    finally:
+        mark_run_finished(execution_id)
 
 
 def _extract_output_path(stdout: str) -> Optional[str]:

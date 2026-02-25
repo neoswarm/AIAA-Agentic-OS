@@ -6,6 +6,8 @@ Skill execution, client management, and settings endpoints.
 
 import os
 import re
+import uuid
+import hashlib
 import subprocess
 import sys
 import threading
@@ -17,6 +19,7 @@ from flask import Blueprint, request, jsonify, session
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import models
+from config import Config
 from services.skill_execution_service import (
     parse_skill_md,
     list_available_skills,
@@ -27,6 +30,11 @@ from services.skill_execution_service import (
     get_skill_count,
     get_recommended_skills,
     SKILLS_DIR,
+)
+from services.run_guard import (
+    reserve_run_slot,
+    release_run_reservation,
+    get_active_run_count,
 )
 
 
@@ -55,62 +63,22 @@ def validation_error(errors, message="Validation failed"):
     }), 400
 
 
-_SENSITIVE_KEY_PATTERN = re.compile(
-    r"(token|api[_-]?key|secret|password|authorization|credential)",
-    re.IGNORECASE,
-)
-_TOKEN_VALUE_PATTERNS = [
-    re.compile(r"(?i)bearer\s+([A-Za-z0-9._\-]{8,})"),
-    re.compile(r"\b(?:sk-or-|pplx-|sk-ant-|sk-|xox[baprs]-|ghp_|github_pat_)[A-Za-z0-9._\-]{8,}\b"),
-]
+def get_run_guard_session_key() -> str:
+    """Get a stable key used for per-session run limiting."""
+    if session.get('logged_in'):
+        guard_key = session.get('_run_guard_session_key')
+        if not guard_key:
+            guard_key = str(uuid.uuid4())
+            session['_run_guard_session_key'] = guard_key
+        return f"session:{guard_key}"
 
+    api_key = request.headers.get('X-API-Key', '')
+    if api_key:
+        api_key_hash = hashlib.sha256(api_key.encode('utf-8')).hexdigest()[:24]
+        return f"api-key:{api_key_hash}"
 
-def _redact_value(value):
-    """Redact a potentially sensitive token-like value."""
-    if not isinstance(value, str):
-        return value
-
-    clean = value.strip()
-    if not clean:
-        return value
-    if len(clean) > 10:
-        return f"{clean[:6]}...{clean[-4:]}"
-    return "***"
-
-
-def _redact_embedded_tokens(value):
-    """Redact token patterns embedded in freeform strings."""
-    if not isinstance(value, str) or not value:
-        return value
-
-    redacted = value
-    for pattern in _TOKEN_VALUE_PATTERNS:
-        redacted = pattern.sub(lambda m: _redact_value(m.group(0)), redacted)
-    return redacted
-
-
-def _redact_sensitive_tokens(payload, key_name="", force_redact=False):
-    """Recursively redact sensitive token values from API payloads."""
-    key_is_sensitive = force_redact or bool(_SENSITIVE_KEY_PATTERN.search(key_name or ""))
-
-    if isinstance(payload, dict):
-        return {
-            key: _redact_sensitive_tokens(value, key, key_is_sensitive)
-            for key, value in payload.items()
-        }
-
-    if isinstance(payload, list):
-        return [
-            _redact_sensitive_tokens(item, key_name, key_is_sensitive)
-            for item in payload
-        ]
-
-    if isinstance(payload, str):
-        if key_is_sensitive:
-            return _redact_value(payload)
-        return _redact_embedded_tokens(payload)
-
-    return payload
+    # Fallback for unusual auth adapters that bypass session + API key paths.
+    return "unknown"
 
 
 # =============================================================================
@@ -248,16 +216,42 @@ def api_execute_skill(skill_name):
     if errors:
         return validation_error(errors, "Missing required fields")
 
+    run_guard_session_key = get_run_guard_session_key()
+    max_active_runs = max(Config.MAX_PENDING_RUNNING_RUNS_PER_SESSION, 1)
+    reservation_id = reserve_run_slot(run_guard_session_key, max_active_runs)
+
+    if reservation_id is None:
+        retry_after_seconds = 5
+        active_runs = get_active_run_count(run_guard_session_key)
+        response = jsonify({
+            "status": "error",
+            "message": "Session run limit reached. Wait for a pending/running run to finish.",
+            "error_code": "session_run_limit_exceeded",
+            "max_pending_running_runs": max_active_runs,
+            "active_pending_running_runs": active_runs,
+            "retry_after_seconds": retry_after_seconds,
+        })
+        response.status_code = 429
+        response.headers["Retry-After"] = str(retry_after_seconds)
+        return response
+
     try:
-        execution_id = execute_skill(skill_name, params)
+        execution_id = execute_skill(
+            skill_name,
+            params,
+            run_guard_session_key=run_guard_session_key,
+            run_guard_reservation_id=reservation_id,
+        )
         return jsonify({
             "status": "ok",
             "execution_id": execution_id,
             "message": f"Skill '{skill_name}' execution started",
         }), 202
     except ValueError as e:
+        release_run_reservation(run_guard_session_key, reservation_id)
         return jsonify({"status": "error", "message": str(e)}), 404
     except Exception as e:
+        release_run_reservation(run_guard_session_key, reservation_id)
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
