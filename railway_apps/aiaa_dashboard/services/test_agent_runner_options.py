@@ -4,11 +4,18 @@
 from __future__ import annotations
 
 import asyncio
+import json
 
 import pytest
 
 import services.agent_runner as agent_runner_module
-from services.agent_runner import AgentRunner, RunnerError
+from services.agent_runner import (
+    AgentRunner,
+    RunnerError,
+    _frame_sse_done_event,
+    _frame_sse_error_event,
+    _frame_sse_ping_event,
+)
 
 
 class RecordingStore:
@@ -77,6 +84,7 @@ class ModernOptionsWithStderr:
             "stderr": stderr,
             "extra_args": extra_args,
         }
+
 
 class ModernOptionsWithWorkspace:
     def __init__(
@@ -166,6 +174,12 @@ def test_runner_accepts_allowlisted_cwd():
         cwd_allowlist=["/workspace"],
     )
     assert runner.cwd == "/workspace/demo"
+
+
+def _parse_sse_payload(frame: str) -> dict:
+    assert frame.startswith("data: ")
+    assert frame.endswith("\n\n")
+    return json.loads(frame[len("data: ") : -2])
 
 
 def test_build_options_modern_sdk_uses_env_auth_for_oat_token():
@@ -291,7 +305,9 @@ def test_parse_message_maps_is_error_result_to_error_event():
 
 
 def test_run_agent_prefers_streamed_error_over_generic_process_error():
-    runner = AgentRunner(cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token")
+    runner = AgentRunner(
+        cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token"
+    )
     session = runner.create_session()
     session_id = session["id"]
 
@@ -506,3 +522,51 @@ def test_send_message_transitions_session_to_running_before_thread_starts(monkey
 
     with pytest.raises(RunnerError, match="already running"):
         runner.send_message("session-flow-3", "second")
+
+
+def test_frame_sse_helpers_for_ping_error_and_done_events():
+    ping = _parse_sse_payload(_frame_sse_ping_event("2026-02-25T10:00:00Z"))
+    error = _parse_sse_payload(
+        _frame_sse_error_event(
+            content="stream failed",
+            timestamp="2026-02-25T10:00:01Z",
+        )
+    )
+    done = _parse_sse_payload(_frame_sse_done_event("2026-02-25T10:00:02Z"))
+
+    assert ping == {"type": "ping", "timestamp": "2026-02-25T10:00:00Z"}
+    assert error == {
+        "type": "error",
+        "content": "stream failed",
+        "timestamp": "2026-02-25T10:00:01Z",
+    }
+    assert done == {"type": "done", "timestamp": "2026-02-25T10:00:02Z"}
+
+
+def test_get_stream_frames_terminal_error_and_done_events():
+    runner = _runner()
+
+    error_session = runner.create_session()
+    error_id = error_session["id"]
+    runner._output_queues[error_id].put(
+        {"type": "error", "content": "boom", "timestamp": "2026-02-25T11:00:00Z"}
+    )
+    error_frames = list(runner.get_stream(error_id, keepalive_seconds=1))
+    assert len(error_frames) == 1
+    assert _parse_sse_payload(error_frames[0]) == {
+        "type": "error",
+        "content": "boom",
+        "timestamp": "2026-02-25T11:00:00Z",
+    }
+
+    done_session = runner.create_session()
+    done_id = done_session["id"]
+    runner._output_queues[done_id].put(
+        {"type": "done", "timestamp": "2026-02-25T11:00:01Z"}
+    )
+    done_frames = list(runner.get_stream(done_id, keepalive_seconds=1))
+    assert len(done_frames) == 1
+    assert _parse_sse_payload(done_frames[0]) == {
+        "type": "done",
+        "timestamp": "2026-02-25T11:00:01Z",
+    }

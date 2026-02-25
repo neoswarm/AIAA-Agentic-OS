@@ -28,6 +28,32 @@ def _utc_now_iso() -> str:
     return datetime.utcnow().isoformat() + "Z"
 
 
+def _frame_sse_event(event: Dict[str, Any]) -> str:
+    """Serialize an event dict into a single SSE data frame."""
+    return f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+
+
+def _frame_sse_ping_event(timestamp: str | None = None) -> str:
+    """Frame a keepalive ping SSE event."""
+    return _frame_sse_event({"type": "ping", "timestamp": timestamp or _utc_now_iso()})
+
+
+def _frame_sse_error_event(content: str, timestamp: str | None = None) -> str:
+    """Frame a terminal error SSE event."""
+    return _frame_sse_event(
+        {
+            "type": "error",
+            "content": content,
+            "timestamp": timestamp or _utc_now_iso(),
+        }
+    )
+
+
+def _frame_sse_done_event(timestamp: str | None = None) -> str:
+    """Frame a terminal done SSE event."""
+    return _frame_sse_event({"type": "done", "timestamp": timestamp or _utc_now_iso()})
+
+
 class AgentRunner:
     """Runs Claude Agent SDK queries in a background thread and streams events."""
 
@@ -256,10 +282,21 @@ class AgentRunner:
             try:
                 event = q.get(timeout=keepalive_seconds)
             except queue.Empty:
-                event = {"type": "ping", "timestamp": _utc_now_iso()}
-            yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
-            if event.get("type") in ("done", "error"):
+                yield _frame_sse_ping_event()
+                continue
+
+            event_type = event.get("type")
+            if event_type == "error":
+                yield _frame_sse_error_event(
+                    content=str(event.get("content") or ""),
+                    timestamp=event.get("timestamp"),
+                )
                 break
+            if event_type == "done":
+                yield _frame_sse_done_event(timestamp=event.get("timestamp"))
+                break
+
+            yield _frame_sse_event(event)
 
     def _run_agent(self, session_id: str, user_message: str) -> None:
         """Background worker thread for a single agent run."""
@@ -339,9 +376,7 @@ class AgentRunner:
                 or "Command failed with exit code" in message
             ):
                 if stderr_lines:
-                    message = (
-                        f"{streamed_error}\nCLI stderr: {' | '.join(stderr_lines[-10:])}"
-                    )
+                    message = f"{streamed_error}\nCLI stderr: {' | '.join(stderr_lines[-10:])}"
                 else:
                     message = streamed_error
 
