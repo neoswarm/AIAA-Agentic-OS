@@ -273,6 +273,24 @@
     flex-shrink: 0;
 }
 
+/* Reload recovery */
+.runner-recovered-banner {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--warning, #f59e0b);
+    background: var(--warning-muted, rgba(245, 158, 11, 0.12));
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.runner-recovered-banner.visible {
+    display: flex;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .progress-header {
@@ -303,6 +321,11 @@
         </svg>
         Cancel
     </button>
+</div>
+
+<!-- Reload Recovery -->
+<div class="runner-recovered-banner" id="runner-recovered-banner" role="status" aria-live="polite">
+    Runner still active. Reconnected to live progress.
 </div>
 
 <!-- Progress Bar -->
@@ -347,17 +370,83 @@
 <script src="{{ url_for('static', filename='js/event_stream_utils.js') }}"></script>
 <script>
 (function() {
-    var pollTimer = null;
-    var basePollMs = 2000;
-    var maxBackoffMs = 30000;
-    var reconnectAttempts = 0;
-    var reconnectNotified = false;
-    var executionId = getExecutionIdFromUrl();
-    var skillName = getSkillNameFromUrl();
+    var pollInterval = null;
+    var ACTIVE_EXECUTION_STORAGE_KEY = 'aiaa.activeExecution';
+    var executionId = {{ (execution.get('execution_id') or execution.get('id')) | tojson }};
+    var skillName = {{ execution.get('skill_name') | tojson }};
+    if (!executionId) executionId = getExecutionIdFromUrl();
+    if (!skillName) skillName = getSkillNameFromUrl();
     var startTime = Date.now();
-    var eventIdTracker = window.EventStreamUtils && window.EventStreamUtils.createEventIdTracker
-        ? window.EventStreamUtils.createEventIdTracker()
-        : null;
+    var shouldShowReloadRecovery = isPageReload();
+
+    function getExecutionIdFromUrl() {
+        var parts = window.location.pathname.split('/');
+        var idx = parts.indexOf('executions');
+        if (idx >= 0 && parts[idx + 1]) return decodeURIComponent(parts[idx + 1]);
+        return null;
+    }
+
+    function getSkillNameFromUrl() {
+        var parts = window.location.pathname.split('/');
+        var idx = parts.indexOf('skills');
+        if (idx >= 0 && parts[idx + 1]) return decodeURIComponent(parts[idx + 1]);
+        return null;
+    }
+
+    function isPageReload() {
+        if (!window.performance || !window.performance.getEntriesByType) return false;
+        var nav = window.performance.getEntriesByType('navigation');
+        return nav && nav[0] && nav[0].type === 'reload';
+    }
+
+    function readActiveExecution() {
+        var raw = localStorage.getItem(ACTIVE_EXECUTION_STORAGE_KEY);
+        if (!raw) return null;
+        try {
+            var parsed = JSON.parse(raw);
+            if (!parsed || !parsed.executionId) return null;
+            return parsed;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function persistActiveExecution(activeExecutionId, activeSkillName) {
+        if (!activeExecutionId) return;
+        localStorage.setItem(ACTIVE_EXECUTION_STORAGE_KEY, JSON.stringify({
+            executionId: activeExecutionId,
+            skillName: activeSkillName || '',
+            startedAt: Date.now()
+        }));
+    }
+
+    function clearActiveExecution() {
+        var active = readActiveExecution();
+        if (!active) return;
+        if (active.executionId === executionId) {
+            localStorage.removeItem(ACTIVE_EXECUTION_STORAGE_KEY);
+        }
+    }
+
+    function extractExecution(payload) {
+        if (payload && payload.execution && typeof payload.execution === 'object') {
+            return payload.execution;
+        }
+        return payload || {};
+    }
+
+    function isActiveExecutionStatus(status) {
+        return status === 'running' || status === 'queued' || status === 'pending' || status === 'starting';
+    }
+
+    function isTerminalExecutionStatus(status) {
+        return status === 'success' || status === 'error' || status === 'cancelled' || status === 'timeout';
+    }
+
+    function showReloadRecoveryBanner() {
+        var banner = document.getElementById('runner-recovered-banner');
+        if (banner) banner.classList.add('visible');
+    }
 
     function formatSkillName(name) {
         return (name || '').replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
@@ -428,7 +517,7 @@
     function startPolling() {
         if (!executionId) return;
 
-        clearPollingTimer();
+        persistActiveExecution(executionId, skillName);
         pollStatus();
     }
 
@@ -466,14 +555,27 @@
         try {
             var res = await fetch('/api/v2/executions/' + encodeURIComponent(executionId) + '/status');
             if (!res.ok) throw new Error('Status request failed');
-            var data = await res.json();
-            var statusData = data.execution || data;
+            var payload = await res.json();
+            var data = extractExecution(payload);
+            if (!data.status && payload && payload.execution_status) data.status = payload.execution_status;
+            if (!data.skill_name && skillName) data.skill_name = skillName;
 
             updateProgress(statusData);
 
-            if (statusData.status === 'success' || statusData.status === 'error' || statusData.status === 'cancelled') {
+            if (shouldShowReloadRecovery && isActiveExecutionStatus(data.status)) {
+                showReloadRecoveryBanner();
+                showToast('Runner still active. Reconnected to live run.', 'info');
+                shouldShowReloadRecovery = false;
+            }
+
+            if (isActiveExecutionStatus(data.status)) {
+                persistActiveExecution(executionId, data.skill_name || skillName);
+            }
+
+            if (isTerminalExecutionStatus(data.status)) {
                 clearInterval(pollInterval);
-                onComplete(statusData);
+                clearActiveExecution();
+                onComplete(data);
             }
 
             scheduleNextPoll(basePollMs);
@@ -503,7 +605,7 @@
         // Update progress bar
         var steps = deriveSteps(execution);
         var totalSteps = steps.length || 1;
-        var completedSteps = steps.filter(function(s) { return s.status === 'done'; }).length;
+        var completedSteps = steps.filter(function(s) { return s.status === 'done' || s.status === 'completed'; }).length;
         var runningSteps = steps.filter(function(s) { return s.status === 'running'; }).length;
         var pct = computeProgressPercent(status);
 
@@ -517,11 +619,10 @@
         renderSteps(steps);
 
         // Update live output
-        var didAppendEvents = appendOutputFromEvents(data.events);
-
-        if (!didAppendEvents && data.output) {
+        var liveOutput = data.output || data.output_preview;
+        if (liveOutput) {
             var outputEl = document.getElementById('live-output');
-            outputEl.textContent = data.output;
+            outputEl.textContent = liveOutput;
             outputEl.scrollTop = outputEl.scrollHeight;
         }
     }
@@ -539,7 +640,7 @@
             item.className = 'step-item';
 
             var iconHtml;
-            if (step.status === 'done') {
+            if (step.status === 'done' || step.status === 'completed') {
                 iconHtml = '<div class="step-icon done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>';
             } else if (step.status === 'running') {
                 iconHtml = '<div class="step-icon running"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83"/></svg></div>';
@@ -593,7 +694,7 @@
             banner.classList.add('banner-error', 'visible');
             document.getElementById('banner-text').textContent = execution.error_message || 'Execution failed.';
             var actionBtn2 = document.getElementById('banner-action');
-            actionBtn2.href = skillName ? ('/skills/' + encodeURIComponent(skillName) + '/run') : '/skills';
+            actionBtn2.href = skillName ? '/skills/' + encodeURIComponent(skillName) + '/run' : '/skills';
             actionBtn2.textContent = 'Try Again';
 
             headerIcon.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
