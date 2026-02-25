@@ -392,14 +392,14 @@
 
         <div class="api-key-item" data-key="claude" id="claude-token-card">
             <div class="api-key-header">
-                <span class="api-key-name">Claude API Key (Anthropic)</span>
+                <span class="api-key-name">Claude Setup Token (Gateway)</span>
                 <span class="api-key-status missing" id="status-claude">
                     <span class="api-key-status-dot"></span>
                     <span class="api-key-status-text">Not configured</span>
                 </span>
             </div>
             <div class="api-key-input-row">
-                <input type="password" class="form-input" id="input-claude" placeholder="sk-ant-..." autocomplete="off">
+                <input type="password" class="form-input" id="input-claude" placeholder="sk-ant-oat..." autocomplete="off">
                 <div class="api-key-actions">
                     <button class="btn btn-sm btn-secondary" onclick="testClaudeToken()">Verify</button>
                     <button class="btn btn-sm" onclick="saveClaudeToken()">Save</button>
@@ -409,9 +409,9 @@
             <div class="api-key-help">
                 <button class="api-key-help-toggle" onclick="toggleHelp(this)">What is this?</button>
                 <div class="api-key-help-content">
-                    This key is used by Claude Agent SDK to run chat and tools server-side.<br><br>
-                    <strong>Use:</strong> Anthropic API key format <code>sk-ant-...</code>.<br>
-                    <strong>Note:</strong> <code>claude setup-token</code> / OAuth tokens (<code>sk-ant-oat...</code>) are not supported in this dashboard's SDK runtime.
+                    This token is used by the Gateway setup-token flow to run Claude chat and tools server-side.<br><br>
+                    <strong>Use:</strong> Run <code>claude setup-token</code> and paste the generated token (<code>sk-ant-oat...</code>).<br>
+                    <strong>Note:</strong> Anthropic API keys (<code>sk-ant-...</code>) are not part of the gateway setup-token flow.
                 </div>
             </div>
         </div>
