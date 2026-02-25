@@ -2,6 +2,65 @@
  * Dashboard chat UI for Claude agent streaming.
  */
 
+function includesAny(value, needles) {
+    return needles.some((needle) => value.includes(needle));
+}
+
+function isGatewayAuthFailure(message) {
+    const text = String(message || '').toLowerCase();
+    if (!text) {
+        return false;
+    }
+    return includesAny(text, [
+        'gateway auth',
+        'gateway authentication',
+        'authentication failed',
+        'unauthorized',
+        'invalid api key',
+        'invalid x-api-key',
+        'invalid x-api key',
+        'anthropic_api_key',
+        'anthropic_auth_token',
+        '401',
+        'forbidden',
+        'permission denied',
+    ]);
+}
+
+function isRuntimeFailure(message) {
+    const text = String(message || '').toLowerCase();
+    if (!text) {
+        return false;
+    }
+    return includesAny(text, [
+        'agent execution failed',
+        'runtime failed',
+        'command failed with exit code',
+        'check stderr output for details',
+        'cli stderr',
+        'internal error',
+    ]);
+}
+
+function formatChatErrorMessage(message) {
+    const text = String(message || '').trim();
+    if (isGatewayAuthFailure(text)) {
+        return 'Claude gateway authentication failed. Check your Anthropic API key in Settings and try again.';
+    }
+    if (isRuntimeFailure(text)) {
+        return 'The chat runtime failed before completion. Retry your message, or start a new session if this keeps happening.';
+    }
+    return text || 'Chat failed. Please try again.';
+}
+
+if (typeof globalThis !== 'undefined') {
+    globalThis.ChatUIErrorMessages = {
+        isGatewayAuthFailure,
+        isRuntimeFailure,
+        formatChatErrorMessage,
+    };
+}
+
 class ChatUI {
     constructor() {
         this.sessionId = null;
@@ -251,13 +310,14 @@ class ChatUI {
     }
 
     appendError(agentBubble, content) {
+        const message = formatChatErrorMessage(content);
         if (agentBubble && agentBubble.bubble) {
             agentBubble.row.classList.add('error');
-            agentBubble.bubble.textContent = content || 'Unknown chat error';
+            agentBubble.bubble.textContent = message;
             this.scrollToBottom();
             return;
         }
-        this.appendMessage('error', content || 'Unknown chat error');
+        this.appendMessage('error', message);
     }
 
     markComplete(agentBubble) {
@@ -299,6 +359,7 @@ class ChatUI {
                 }),
             });
         } catch (error) {
+            this.appendError(null, error && error.message);
             this.setSending(false);
             return;
         }
@@ -312,6 +373,7 @@ class ChatUI {
         this.closeStream();
         const streamUrl = `/api/chat/stream/${encodeURIComponent(sessionId)}`;
         const es = new EventSource(streamUrl);
+        let terminalReceived = false;
         this.eventSource = es;
 
         es.onmessage = (event) => {
@@ -337,12 +399,14 @@ class ChatUI {
                     this.appendToolStep(agentBubble, 'System', data.content || '');
                     break;
                 case 'error':
+                    terminalReceived = true;
                     this.appendError(agentBubble, data.content || 'Agent failed');
                     this.setSending(false);
                     this.closeStream();
                     this.refreshSessions();
                     break;
                 case 'done':
+                    terminalReceived = true;
                     this.markComplete(agentBubble);
                     this.setSending(false);
                     this.closeStream();
@@ -355,6 +419,9 @@ class ChatUI {
 
         es.onerror = () => {
             // EventSource may emit onerror once before close; close defensively.
+            if (!terminalReceived) {
+                this.appendError(agentBubble, 'The chat runtime connection dropped before completion.');
+            }
             this.setSending(false);
             this.closeStream();
             this.refreshSessions();
@@ -379,7 +446,9 @@ class ChatUI {
 }
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    const ui = new ChatUI();
-    ui.init();
-});
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+        const ui = new ChatUI();
+        ui.init();
+    });
+}
