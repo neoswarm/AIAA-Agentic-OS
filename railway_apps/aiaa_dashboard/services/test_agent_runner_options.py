@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
-from services.agent_runner import AgentRunner
+import pytest
+
+from services.agent_runner import AgentRunner, RunnerError
 
 
 class RecordingStore:
@@ -284,3 +286,95 @@ def test_run_agent_uses_cli_stream_error_payload_once():
     assert session_state is not None
     assert session_state["status"] == "error"
     assert session_state["last_error"] == "CLI auth failed"
+
+
+def test_ensure_session_updates_title_without_overwriting_sdk_session_id():
+    runner = _runner()
+
+    created = runner.ensure_session(
+        "session-flow-1",
+        title="Initial Title",
+        sdk_session_id="sdk-initial",
+    )
+    updated = runner.ensure_session(
+        "session-flow-1",
+        title="Renamed Title",
+        sdk_session_id="sdk-new",
+    )
+
+    assert created["id"] == "session-flow-1"
+    assert created["sdk_session_id"] == "sdk-initial"
+    assert updated["title"] == "Renamed Title"
+    assert updated["sdk_session_id"] == "sdk-initial"
+
+
+def test_capture_sdk_session_id_persists_only_once():
+    updates: list[tuple[str, dict[str, object]]] = []
+
+    class SessionStoreSpy:
+        def update_session(self, session_id, payload):
+            updates.append((session_id, dict(payload)))
+
+    runner = AgentRunner(
+        cwd="/app",
+        token_provider=lambda: "unused",
+        session_store=SessionStoreSpy(),
+    )
+    runner.ensure_session("session-flow-2")
+
+    runner._capture_sdk_session_id(
+        "session-flow-2",
+        raw_message=object(),
+        payload={"session_id": "sdk-first"},
+    )
+    runner._capture_sdk_session_id(
+        "session-flow-2",
+        raw_message=object(),
+        payload={"session_id": "sdk-second"},
+    )
+
+    session_state = runner.get_session("session-flow-2")
+    assert session_state is not None
+    assert session_state["sdk_session_id"] == "sdk-first"
+    assert updates[0][0] == "session-flow-2"
+    assert updates[0][1]["sdk_session_id"] == "sdk-first"
+    assert len(updates) == 1
+
+
+def test_send_message_transitions_session_to_running_before_thread_starts(monkeypatch):
+    updates: list[tuple[str, dict[str, object]]] = []
+    started: list[tuple[str, str]] = []
+
+    class SessionStoreSpy:
+        def update_session(self, session_id, payload):
+            updates.append((session_id, dict(payload)))
+
+    class DummyThread:
+        def __init__(self, *, target, args=(), daemon=False):
+            self._target = target
+            self._args = args
+            self.daemon = daemon
+
+        def start(self):
+            started.append((self._args[0], self._args[1]))
+
+    runner = AgentRunner(
+        cwd="/app",
+        token_provider=lambda: "unused",
+        session_store=SessionStoreSpy(),
+    )
+    runner.ensure_session("session-flow-3")
+
+    monkeypatch.setattr("services.agent_runner.threading.Thread", DummyThread)
+
+    runner.send_message("session-flow-3", "hello")
+
+    session_state = runner.get_session("session-flow-3")
+    assert session_state is not None
+    assert session_state["status"] == "running"
+    assert started == [("session-flow-3", "hello")]
+    assert updates[0][0] == "session-flow-3"
+    assert updates[0][1]["status"] == "running"
+
+    with pytest.raises(RunnerError, match="already running"):
+        runner.send_message("session-flow-3", "second")

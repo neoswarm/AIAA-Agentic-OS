@@ -484,3 +484,58 @@ def test_init_chat_runner_reuses_existing_runner_instance(app, monkeypatch):
     assert runner is existing_runner
     assert existing_runner.cwd == "/tmp/new-root"
     assert existing_runner.attached_stores == [store]
+
+
+def test_init_chat_store_defaults_to_in_memory(monkeypatch):
+    monkeypatch.setattr(chat_routes, "_store", None)
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    monkeypatch.delenv("CHAT_STORE_PREFIX", raising=False)
+
+    store = chat_routes.init_chat_store()
+
+    assert isinstance(store, chat_routes.InMemoryChatStore)
+    assert chat_routes._store is store
+
+
+def test_init_chat_store_uses_redis_when_configured(monkeypatch):
+    monkeypatch.setattr(chat_routes, "_store", None)
+    monkeypatch.setenv("REDIS_URL", "redis://example.test:6379/0")
+    monkeypatch.setenv("CHAT_STORE_PREFIX", "chat:test")
+
+    captured: dict[str, str] = {}
+
+    class FakeRedisStore:
+        pass
+
+    class FakeRedisChatStore:
+        @classmethod
+        def from_url(cls, redis_url, *, key_prefix):
+            captured["redis_url"] = redis_url
+            captured["key_prefix"] = key_prefix
+            return FakeRedisStore()
+
+    monkeypatch.setattr(chat_routes, "RedisChatStore", FakeRedisChatStore)
+
+    store = chat_routes.init_chat_store()
+
+    assert isinstance(store, FakeRedisStore)
+    assert captured == {
+        "redis_url": "redis://example.test:6379/0",
+        "key_prefix": "chat:test",
+    }
+
+
+def test_init_chat_store_falls_back_when_redis_init_fails(monkeypatch):
+    monkeypatch.setattr(chat_routes, "_store", None)
+    monkeypatch.setenv("REDIS_URL", "redis://example.test:6379/0")
+
+    class BrokenRedisChatStore:
+        @classmethod
+        def from_url(cls, redis_url, *, key_prefix):
+            raise RuntimeError(f"cannot connect: {redis_url}:{key_prefix}")
+
+    monkeypatch.setattr(chat_routes, "RedisChatStore", BrokenRedisChatStore)
+
+    store = chat_routes.init_chat_store()
+
+    assert isinstance(store, chat_routes.InMemoryChatStore)
