@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import importlib
+import inspect
 import json
 import logging
 import queue
@@ -284,28 +285,77 @@ class AgentRunner:
     def _build_options(
         self, options_cls: Any, token: str, resume_id: Optional[str]
     ) -> Any:
-        """Build options compatible with current SDK version."""
-        options_kwargs = {
-            "auth_token": token,
-            "allowed_tools": list(self.allowed_tools),
-            "permission_mode": self.permission_mode,
-            "setting_sources": ["project"],
-            "cwd": self.cwd,
-        }
-        if resume_id:
+        """Build options compatible with multiple SDK versions."""
+        params = inspect.signature(options_cls).parameters
+        options_kwargs: dict[str, Any] = {}
+
+        # Tool + runtime controls.
+        if "allowed_tools" in params:
+            options_kwargs["allowed_tools"] = list(self.allowed_tools)
+        elif "tools" in params:
+            options_kwargs["tools"] = list(self.allowed_tools)
+        if "permission_mode" in params:
+            options_kwargs["permission_mode"] = self.permission_mode
+        if "setting_sources" in params:
+            options_kwargs["setting_sources"] = ["project"]
+        if "cwd" in params:
+            options_kwargs["cwd"] = self.cwd
+        if resume_id and "resume" in params:
             options_kwargs["resume"] = resume_id
+
+        # Prefer explicit auth options when available, and always provide env auth
+        # for newer SDKs that read credentials from process environment.
+        auth_set = False
+        for auth_key in ("auth_token", "api_key", "token"):
+            if auth_key in params:
+                options_kwargs[auth_key] = token
+                auth_set = True
+                break
+        auth_env = self._build_auth_env(token)
+        if auth_env and "env" in params:
+            options_kwargs["env"] = auth_env
 
         try:
             return options_cls(**options_kwargs)
         except TypeError:
-            fallback_kwargs = {
-                "auth_token": token,
-                "cwd": self.cwd,
-                "allowed_tools": list(self.allowed_tools),
-            }
-            if resume_id:
-                fallback_kwargs["resume"] = resume_id
+            # Last-ditch fallback with minimal options for older SDK variants.
+            fallback_kwargs: dict[str, Any] = {}
+            for key in ("cwd", "allowed_tools", "tools", "resume"):
+                if key in options_kwargs:
+                    fallback_kwargs[key] = options_kwargs[key]
+            if not auth_set:
+                for auth_key in ("auth_token", "api_key", "token"):
+                    if auth_key in params:
+                        fallback_kwargs[auth_key] = token
+                        break
+            if auth_env and "env" in params:
+                fallback_kwargs["env"] = auth_env
             return options_cls(**fallback_kwargs)
+
+    def _build_auth_env(self, token: str) -> Dict[str, str]:
+        """Map dashboard token into auth env vars recognized by Claude CLI/SDK."""
+        candidate = (token or "").strip()
+        if not candidate:
+            return {}
+
+        env = {"CLAUDE_SETUP_TOKEN": candidate}
+
+        # setup-token OAuth artifact
+        if candidate.startswith("sk-ant-oat"):
+            env["CLAUDE_CODE_OAUTH_TOKEN"] = candidate
+            env["ANTHROPIC_AUTH_TOKEN"] = candidate
+            return env
+
+        # standard Anthropic API key
+        if candidate.startswith("sk-ant-"):
+            env["ANTHROPIC_API_KEY"] = candidate
+            env["CLAUDE_API_KEY"] = candidate
+            return env
+
+        # Fallback for opaque token formats
+        env["CLAUDE_CODE_OAUTH_TOKEN"] = candidate
+        env["ANTHROPIC_AUTH_TOKEN"] = candidate
+        return env
 
     def _capture_sdk_session_id(
         self, session_id: str, raw_message: Any, payload: Dict[str, Any]
