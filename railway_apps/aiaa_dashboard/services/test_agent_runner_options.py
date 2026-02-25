@@ -27,6 +27,31 @@ class ModernOptions:
         }
 
 
+class ModernOptionsWithStderr:
+    def __init__(
+        self,
+        *,
+        allowed_tools=None,
+        permission_mode=None,
+        setting_sources=None,
+        cwd=None,
+        resume=None,
+        env=None,
+        stderr=None,
+        extra_args=None,
+    ):
+        self.kwargs = {
+            "allowed_tools": allowed_tools,
+            "permission_mode": permission_mode,
+            "setting_sources": setting_sources,
+            "cwd": cwd,
+            "resume": resume,
+            "env": env,
+            "stderr": stderr,
+            "extra_args": extra_args,
+        }
+
+
 class LegacyOptions:
     def __init__(self, *, auth_token=None, cwd=None, allowed_tools=None, resume=None):
         self.kwargs = {
@@ -79,3 +104,19 @@ def test_build_auth_env_maps_api_key_prefix():
     assert env["ANTHROPIC_API_KEY"] == token
     assert env["CLAUDE_API_KEY"] == token
     assert "CLAUDE_CODE_OAUTH_TOKEN" not in env
+
+
+def test_build_options_includes_stderr_and_debug_flag_when_supported():
+    runner = _runner()
+    token = "sk-ant-oat01-example-token"
+    callback = lambda line: None
+
+    options = runner._build_options(
+        options_cls=ModernOptionsWithStderr,
+        token=token,
+        resume_id=None,
+        stderr_callback=callback,
+    )
+
+    assert options.kwargs["stderr"] is callback
+    assert options.kwargs["extra_args"] == {"debug-to-stderr": None}

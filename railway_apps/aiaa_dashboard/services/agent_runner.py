@@ -201,6 +201,7 @@ class AgentRunner:
         """Background worker thread for a single agent run."""
         q = self._get_queue_or_raise(session_id)
         assistant_chunks: list[str] = []
+        stderr_lines: list[str] = []
         loop: Optional[asyncio.AbstractEventLoop] = None
 
         try:
@@ -214,10 +215,20 @@ class AgentRunner:
                 session = self._sessions.get(session_id) or {}
                 resume_id = session.get("sdk_session_id")
 
+            def _stderr_callback(line: str) -> None:
+                text = (line or "").strip()
+                if not text:
+                    return
+                stderr_lines.append(text)
+                # Keep bounded memory while preserving most recent context.
+                if len(stderr_lines) > 50:
+                    del stderr_lines[:-50]
+
             options = self._build_options(
                 options_cls=sdk["options_cls"],
                 token=token,
                 resume_id=resume_id,
+                stderr_callback=_stderr_callback,
             )
 
             loop = asyncio.new_event_loop()
@@ -247,6 +258,8 @@ class AgentRunner:
             q.put({"type": "done", "timestamp": _utc_now_iso()})
         except Exception as exc:  # pragma: no cover - runtime safety path
             message = str(exc) or "Agent execution failed"
+            if stderr_lines:
+                message = f"{message}\nCLI stderr: {' | '.join(stderr_lines[-10:])}"
             logger.exception("Agent run failed for session %s: %s", session_id, message)
             self._set_session_state(session_id, status="error", last_error=message)
             q.put({"type": "error", "content": message, "timestamp": _utc_now_iso()})
@@ -283,7 +296,11 @@ class AgentRunner:
         ) from last_error
 
     def _build_options(
-        self, options_cls: Any, token: str, resume_id: Optional[str]
+        self,
+        options_cls: Any,
+        token: str,
+        resume_id: Optional[str],
+        stderr_callback: Optional[Callable[[str], None]] = None,
     ) -> Any:
         """Build options compatible with multiple SDK versions."""
         params = inspect.signature(options_cls).parameters
@@ -314,6 +331,11 @@ class AgentRunner:
         auth_env = self._build_auth_env(token)
         if auth_env and "env" in params:
             options_kwargs["env"] = auth_env
+        if stderr_callback and "stderr" in params:
+            options_kwargs["stderr"] = stderr_callback
+        if "extra_args" in params:
+            # Request verbose CLI stderr so runtime auth/config errors are visible.
+            options_kwargs["extra_args"] = {"debug-to-stderr": None}
 
         try:
             return options_cls(**options_kwargs)
@@ -330,6 +352,10 @@ class AgentRunner:
                         break
             if auth_env and "env" in params:
                 fallback_kwargs["env"] = auth_env
+            if stderr_callback and "stderr" in params:
+                fallback_kwargs["stderr"] = stderr_callback
+            if "extra_args" in params:
+                fallback_kwargs["extra_args"] = {"debug-to-stderr": None}
             return options_cls(**fallback_kwargs)
 
     def _build_auth_env(self, token: str) -> Dict[str, str]:
