@@ -142,6 +142,16 @@ class FakeRunner:
         yield 'data: {"type":"done"}\n\n'
 
 
+class FactoryRunner(FakeRunner):
+    def __init__(self) -> None:
+        super().__init__()
+        self.cwd = "/initial"
+        self.attached_stores: list[FakeStore] = []
+
+    def attach_store(self, session_store) -> None:
+        self.attached_stores.append(session_store)
+
+
 @pytest.fixture(scope="module")
 def app():
     application = create_app()
@@ -430,3 +440,47 @@ def test_v1_responses_rejects_non_stream_mode(auth_client, monkeypatch):
     assert resp.status_code == 400
     payload = resp.get_json()
     assert "stream=true" in payload["error"]["message"]
+
+
+def test_init_chat_runner_uses_backend_agnostic_factory(app, monkeypatch):
+    store = FakeStore()
+    factory_runner = FactoryRunner()
+    factory_calls: list[tuple[str, Any, Any]] = []
+
+    monkeypatch.setattr(chat_routes, "_runner", None)
+    monkeypatch.setattr(chat_routes, "_get_chat_store", lambda: store)
+    monkeypatch.setattr(chat_routes, "_project_root", lambda: "/tmp/project-root")
+
+    def fake_create_chat_runner(*, cwd, token_provider, session_store):
+        factory_calls.append((cwd, token_provider, session_store))
+        return factory_runner
+
+    monkeypatch.setattr(chat_routes, "create_chat_runner", fake_create_chat_runner)
+
+    with app.app_context():
+        runner = chat_routes.init_chat_runner()
+
+    assert runner is factory_runner
+    assert chat_routes._runner is factory_runner
+    assert factory_calls == [("/tmp/project-root", chat_routes.get_claude_token, store)]
+
+
+def test_init_chat_runner_reuses_existing_runner_instance(app, monkeypatch):
+    store = FakeStore()
+    existing_runner = FactoryRunner()
+
+    monkeypatch.setattr(chat_routes, "_runner", existing_runner)
+    monkeypatch.setattr(chat_routes, "_get_chat_store", lambda: store)
+    monkeypatch.setattr(chat_routes, "_project_root", lambda: "/tmp/new-root")
+    monkeypatch.setattr(
+        chat_routes,
+        "create_chat_runner",
+        lambda **_: (_ for _ in ()).throw(AssertionError("factory should not run")),
+    )
+
+    with app.app_context():
+        runner = chat_routes.init_chat_runner()
+
+    assert runner is existing_runner
+    assert existing_runner.cwd == "/tmp/new-root"
+    assert existing_runner.attached_stores == [store]
