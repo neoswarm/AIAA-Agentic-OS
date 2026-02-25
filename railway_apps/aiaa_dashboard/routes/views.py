@@ -8,6 +8,7 @@ import os
 import json
 import hashlib
 import hmac
+import logging
 import threading
 from datetime import datetime, timedelta
 from functools import wraps
@@ -34,6 +35,7 @@ from services.skill_execution_service import (
 # =============================================================================
 
 views_bp = Blueprint('views', __name__)
+logger = logging.getLogger(__name__)
 
 
 # =============================================================================
@@ -45,6 +47,11 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('logged_in'):
+            log_session_lifecycle(
+                action="missing_session",
+                username=session.get('username', ''),
+                status="redirected",
+            )
             return redirect(url_for('views.login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -103,98 +110,20 @@ def get_username():
     return session.get('username', 'Admin')
 
 
-def _parse_datetime(value):
-    """Parse SQLite/ISO datetime strings into datetime objects."""
-    if not value:
-        return None
-    if isinstance(value, datetime):
-        return value
-    for candidate in (str(value), str(value).replace('Z', '+00:00')):
-        try:
-            return datetime.fromisoformat(candidate)
-        except ValueError:
-            continue
-    return None
-
-
-def _format_duration_ms(duration_ms):
-    """Format duration in ms to short human-readable text."""
-    if duration_ms is None:
-        return None
-    try:
-        total_seconds = max(int(duration_ms) // 1000, 0)
-    except (TypeError, ValueError):
-        return None
-    minutes, seconds = divmod(total_seconds, 60)
-    hours, minutes = divmod(minutes, 60)
-    if hours:
-        return f"{hours}h {minutes}m"
-    if minutes:
-        return f"{minutes}m {seconds}s"
-    return f"{seconds}s"
-
-
-def _day_label(dt):
-    """Get relative day label for timeline grouping."""
-    if dt is None:
-        return "Unknown Date"
-    today = datetime.now().date()
-    d = dt.date()
-    if d == today:
-        return "Today"
-    if d == today - timedelta(days=1):
-        return "Yesterday"
-    return dt.strftime("%b %d, %Y")
-
-
-def _normalize_execution(raw):
-    """Normalize legacy and v2 execution records for timeline rendering."""
-    created_dt = _parse_datetime(raw.get('created_at') or raw.get('started_at'))
-    status = (raw.get('status') or 'queued').lower()
-    skill_name = raw.get('skill_name')
-    workflow_name = (
-        raw.get('workflow_name')
-        or raw.get('name')
-        or skill_name
-        or raw.get('workflow_id')
-        or "Unknown Workflow"
-    )
-
-    params = raw.get('params')
-    if not isinstance(params, dict):
-        params = {}
-
-    return {
-        "id": str(raw.get('id')),
-        "workflow": workflow_name,
-        "skill_name": skill_name,
+def log_session_lifecycle(action: str, username: str, status: str):
+    """Emit a structured JSON log for session lifecycle events."""
+    forwarded_for = request.headers.get("X-Forwarded-For", "")
+    ip_address = forwarded_for.split(",")[0].strip() if forwarded_for else request.remote_addr
+    payload = {
+        "event": "session_lifecycle",
+        "action": action,
         "status": status,
-        "time": created_dt.strftime("%I:%M %p").lstrip("0") if created_dt else "Unknown",
-        "date": created_dt.date().isoformat() if created_dt else "",
-        "trigger": raw.get('trigger_type') or ("manual" if skill_name else "system"),
-        "duration": _format_duration_ms(raw.get('duration_ms')),
-        "output": raw.get('output_preview') or raw.get('output_summary'),
-        "error": raw.get('error_message'),
-        "is_skill": bool(skill_name),
-        "params": params,
-        "_created_dt": created_dt,
+        "username": username or "unknown",
+        "ip": ip_address,
+        "method": request.method,
+        "path": request.path,
     }
-
-
-def _build_execution_timeline(rows):
-    """Build timeline groups and workflow list for execution history template."""
-    normalized = [_normalize_execution(r) for r in rows]
-    normalized.sort(key=lambda r: r.get("_created_dt") or datetime.min, reverse=True)
-
-    executions_by_day = {}
-    for row in normalized:
-        label = _day_label(row.get("_created_dt"))
-        row_copy = dict(row)
-        row_copy.pop("_created_dt", None)
-        executions_by_day.setdefault(label, []).append(row_copy)
-
-    workflows = sorted({r["workflow"] for r in normalized if r.get("workflow")})
-    return normalized, executions_by_day, workflows
+    logger.info(json.dumps(payload, sort_keys=True))
 
 
 def persist_to_railway(variables: dict):
@@ -202,9 +131,6 @@ def persist_to_railway(variables: dict):
 
     Runs in a background thread. Logs warnings on failure but never raises.
     """
-    import logging
-    logger = logging.getLogger(__name__)
-
     api_token = os.getenv('RAILWAY_API_TOKEN', '') or getattr(Config, 'RAILWAY_API_TOKEN', '')
     service_id = os.getenv('RAILWAY_SERVICE_ID', '') or getattr(Config, 'RAILWAY_SERVICE_ID', '')
     environment_id = os.getenv('RAILWAY_ENVIRONMENT_ID', '')
@@ -268,6 +194,7 @@ def login():
             else:
                 session.pop('chat_profile_override', None)
             session.permanent = True
+            log_session_lifecycle(action="login", username=username, status="success")
             
             # Log successful login
             models.log_event(
@@ -279,6 +206,7 @@ def login():
             
             return redirect(url_for('views.home_v2'))
         else:
+            log_session_lifecycle(action="login", username=username, status="error")
             # Log failed login
             models.log_event(
                 event_type="auth",
@@ -300,6 +228,7 @@ def login():
 def logout():
     """Logout handler."""
     username = session.get('username', 'unknown')
+    log_session_lifecycle(action="logout", username=username, status="success")
     
     # Log logout
     models.log_event(
