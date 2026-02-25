@@ -30,6 +30,15 @@ VERSION = "5.0"
 # =============================================================================
 
 
+def _resolve_project_root() -> str:
+    """Resolve project root safely across local and Railway layouts."""
+    current_dir = Path(__file__).resolve().parent
+    for candidate in [current_dir, *current_dir.parents]:
+        if (candidate / ".claude").exists() or (candidate / "context").exists():
+            return str(candidate)
+    return str(current_dir)
+
+
 def create_app(config_class=None):
     """Create and configure the Flask application."""
     app = Flask(__name__)
@@ -51,7 +60,7 @@ def create_app(config_class=None):
     app.config["DB_PATH"] = os.getenv("DB_PATH", app.config.get("DB_PATH"))
 
     app.secret_key = app.config["SECRET_KEY"]
-    app.config["PROJECT_ROOT"] = str(Path(__file__).resolve().parents[2])
+    app.config["PROJECT_ROOT"] = _resolve_project_root()
 
     # Configure session cookies
     app.config["SESSION_COOKIE_SECURE"] = config_class.SESSION_COOKIE_SECURE
