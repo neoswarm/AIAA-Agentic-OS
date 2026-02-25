@@ -28,3 +28,12 @@ def test_save_preferences_includes_default_chat_profile():
         "default_chat_profile: document.getElementById('pref-default-chat-profile').value"
         in template
     )
+
+
+def test_claude_gateway_setup_token_copy_is_rendered():
+    template = _settings_template()
+
+    assert "Claude Setup Token (Gateway)" in template
+    assert 'placeholder="sk-ant-oat..."' in template
+    assert "Gateway setup-token flow" in template
+    assert "Run <code>claude setup-token</code>" in template
