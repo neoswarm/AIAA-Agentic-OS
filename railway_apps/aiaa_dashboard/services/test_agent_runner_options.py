@@ -3,6 +3,9 @@
 
 from __future__ import annotations
 
+import asyncio
+
+import services.agent_runner as agent_runner_module
 from services.agent_runner import AgentRunner
 
 
@@ -49,6 +52,29 @@ class ModernOptionsWithStderr:
             "env": env,
             "stderr": stderr,
             "extra_args": extra_args,
+        }
+
+
+class ModernOptionsWithRuntimeLauncher:
+    def __init__(
+        self,
+        *,
+        allowed_tools=None,
+        permission_mode=None,
+        setting_sources=None,
+        cwd=None,
+        resume=None,
+        env=None,
+        runtime_launcher=None,
+    ):
+        self.kwargs = {
+            "allowed_tools": allowed_tools,
+            "permission_mode": permission_mode,
+            "setting_sources": setting_sources,
+            "cwd": cwd,
+            "resume": resume,
+            "env": env,
+            "runtime_launcher": runtime_launcher,
         }
 
 
@@ -120,6 +146,49 @@ def test_build_options_includes_stderr_and_debug_flag_when_supported():
 
     assert options.kwargs["stderr"] is callback
     assert options.kwargs["extra_args"] == {"debug-to-stderr": None}
+
+
+def test_build_options_includes_runtime_launcher_when_supported():
+    runner = _runner()
+    token = "sk-ant-oat01-example-token"
+
+    options = runner._build_options(
+        options_cls=ModernOptionsWithRuntimeLauncher,
+        token=token,
+        resume_id=None,
+    )
+
+    assert callable(options.kwargs["runtime_launcher"])
+
+
+def test_runtime_launcher_executes_claude_with_setup_token_env(monkeypatch):
+    runner = _runner()
+    token = "sk-ant-oat01-example-token"
+    launcher = runner._build_runtime_launcher(token)
+    captured = {}
+
+    async def fake_create_subprocess_exec(*args, **kwargs):
+        captured["args"] = args
+        captured["kwargs"] = kwargs
+
+        class _DummyProcess:
+            pass
+
+        return _DummyProcess()
+
+    monkeypatch.setattr(
+        agent_runner_module.asyncio,
+        "create_subprocess_exec",
+        fake_create_subprocess_exec,
+    )
+
+    asyncio.run(launcher("--print", "json", env={"CUSTOM": "1"}))
+
+    assert captured["args"] == ("claude", "--print", "json")
+    assert captured["kwargs"]["env"]["CUSTOM"] == "1"
+    assert captured["kwargs"]["env"]["CLAUDE_SETUP_TOKEN"] == token
+    assert captured["kwargs"]["env"]["CLAUDE_CODE_OAUTH_TOKEN"] == token
+    assert captured["kwargs"]["env"]["ANTHROPIC_AUTH_TOKEN"] == token
 
 
 def test_parse_message_maps_is_error_result_to_error_event():

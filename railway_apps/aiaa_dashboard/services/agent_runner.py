@@ -9,6 +9,7 @@ import importlib
 import inspect
 import json
 import logging
+import os
 import queue
 import secrets
 import threading
@@ -352,8 +353,13 @@ class AgentRunner:
                 auth_set = True
                 break
         auth_env = self._build_auth_env(token)
+        runtime_launcher = self._build_runtime_launcher(token)
         if auth_env and "env" in params:
             options_kwargs["env"] = auth_env
+        for runtime_key in ("runtime_launcher", "runtime"):
+            if runtime_key in params:
+                options_kwargs[runtime_key] = runtime_launcher
+                break
         if stderr_callback and "stderr" in params:
             options_kwargs["stderr"] = stderr_callback
         if "extra_args" in params:
@@ -365,7 +371,7 @@ class AgentRunner:
         except TypeError:
             # Last-ditch fallback with minimal options for older SDK variants.
             fallback_kwargs: dict[str, Any] = {}
-            for key in ("cwd", "allowed_tools", "tools", "resume"):
+            for key in ("cwd", "allowed_tools", "tools", "resume", "runtime_launcher", "runtime"):
                 if key in options_kwargs:
                     fallback_kwargs[key] = options_kwargs[key]
             if not auth_set:
@@ -380,6 +386,31 @@ class AgentRunner:
             if "extra_args" in params:
                 fallback_kwargs["extra_args"] = {"debug-to-stderr": None}
             return options_cls(**fallback_kwargs)
+
+    def _build_runtime_launcher(self, token: str) -> Callable[..., Any]:
+        """Create a runtime launcher that injects dashboard token auth env."""
+        auth_env = self._build_auth_env(token)
+
+        async def _runtime_launcher(*args: Any, **kwargs: Any) -> asyncio.subprocess.Process:
+            runtime_args = list(args)
+            if len(runtime_args) == 1 and isinstance(runtime_args[0], (list, tuple)):
+                runtime_args = list(runtime_args[0])
+            if not runtime_args or str(runtime_args[0]).strip() != "claude":
+                runtime_args.insert(0, "claude")
+
+            merged_env = dict(os.environ)
+            provided_env = kwargs.pop("env", None)
+            if isinstance(provided_env, dict):
+                merged_env.update({str(k): str(v) for k, v in provided_env.items()})
+            merged_env.update(auth_env)
+
+            return await asyncio.create_subprocess_exec(
+                *[str(arg) for arg in runtime_args],
+                env=merged_env,
+                **kwargs,
+            )
+
+        return _runtime_launcher
 
     def _build_auth_env(self, token: str) -> Dict[str, str]:
         """Map dashboard token into auth env vars recognized by Claude CLI/SDK."""
