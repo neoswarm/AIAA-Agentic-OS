@@ -98,6 +98,21 @@
         color: var(--warning);
     }
 
+    .api-key-status.validating,
+    .api-key-status.saving,
+    .api-key-status.rotating,
+    .api-key-status.revoking {
+        background: var(--accent-muted);
+        color: var(--accent);
+    }
+
+    .api-key-status.validating .api-key-status-dot,
+    .api-key-status.saving .api-key-status-dot,
+    .api-key-status.rotating .api-key-status-dot,
+    .api-key-status.revoking .api-key-status-dot {
+        animation: tokenStatusPulse 1s ease-in-out infinite;
+    }
+
     .api-key-status-dot {
         width: 6px;
         height: 6px;
@@ -320,6 +335,11 @@
         50% { box-shadow: 0 0 0 4px var(--accent), 0 0 12px rgba(99, 102, 241, 0.3); }
     }
 
+    @keyframes tokenStatusPulse {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 1; }
+    }
+
     @media (max-width: 768px) {
         .pref-grid {
             grid-template-columns: 1fr;
@@ -366,7 +386,7 @@
         <div class="api-key-item" data-key="openrouter">
             <div class="api-key-header">
                 <span class="api-key-name">OpenRouter API Key</span>
-                <span class="api-key-status missing" id="status-openrouter">
+                <span class="api-key-status missing" id="status-openrouter" role="status" aria-live="polite">
                     <span class="api-key-status-dot"></span>
                     <span class="api-key-status-text">Not configured</span>
                 </span>
@@ -393,7 +413,7 @@
         <div class="api-key-item" data-key="claude" id="claude-token-card">
             <div class="api-key-header">
                 <span class="api-key-name">Claude Setup Token (Gateway)</span>
-                <span class="api-key-status missing" id="status-claude">
+                <span class="api-key-status missing" id="status-claude" role="status" aria-live="polite">
                     <span class="api-key-status-dot"></span>
                     <span class="api-key-status-text">Not configured</span>
                 </span>
@@ -401,8 +421,8 @@
             <div class="api-key-input-row">
                 <input type="password" class="form-input" id="input-claude" placeholder="sk-ant-oat..." autocomplete="off">
                 <div class="api-key-actions">
-                    <button class="btn btn-sm btn-secondary" onclick="testClaudeToken()">Verify</button>
-                    <button class="btn btn-sm" onclick="saveClaudeToken()">Save</button>
+                    <button class="btn btn-sm btn-secondary" data-action="validate" onclick="testClaudeToken()">Verify</button>
+                    <button class="btn btn-sm" data-action="save" onclick="saveClaudeToken()">Save</button>
                 </div>
             </div>
             <span class="key-format-error" id="error-claude"></span>
@@ -419,7 +439,7 @@
         <div class="api-key-item" data-key="perplexity">
             <div class="api-key-header">
                 <span class="api-key-name">Perplexity API Key</span>
-                <span class="api-key-status missing" id="status-perplexity">
+                <span class="api-key-status missing" id="status-perplexity" role="status" aria-live="polite">
                     <span class="api-key-status-dot"></span>
                     <span class="api-key-status-text">Not configured</span>
                 </span>
@@ -446,7 +466,7 @@
         <div class="api-key-item" data-key="slack">
             <div class="api-key-header">
                 <span class="api-key-name">Slack Webhook URL</span>
-                <span class="api-key-status missing" id="status-slack">
+                <span class="api-key-status missing" id="status-slack" role="status" aria-live="polite">
                     <span class="api-key-status-dot"></span>
                     <span class="api-key-status-text">Not configured</span>
                 </span>
@@ -473,7 +493,7 @@
         <div class="api-key-item" data-key="google">
             <div class="api-key-header">
                 <span class="api-key-name">Google Docs</span>
-                <span class="api-key-status missing" id="status-google">
+                <span class="api-key-status missing" id="status-google" role="status" aria-live="polite">
                     <span class="api-key-status-dot"></span>
                     <span class="api-key-status-text">Not configured</span>
                 </span>
@@ -671,6 +691,19 @@
         'fal':        { prefix: '', label: 'fal.ai Key', hint: '' }
     };
 
+    var TOKEN_ACTION_STATUS = {
+        validate: { status: 'validating', text: 'Validating...' },
+        save: { status: 'saving', text: 'Saving...' },
+        rotate: { status: 'rotating', text: 'Rotating...' },
+        revoke: { status: 'revoking', text: 'Revoking...' }
+    };
+
+    function setTokenActionStatus(keyName, action) {
+        var actionStatus = TOKEN_ACTION_STATUS[action];
+        if (!actionStatus) return;
+        updateKeyStatus(keyName, actionStatus.status, actionStatus.text);
+    }
+
     // Show/hide key format error
     function showKeyError(keyName, message) {
         var errorEl = document.getElementById('error-' + keyName);
@@ -728,6 +761,7 @@
         var item = input.closest('.api-key-item');
         var btn = item.querySelector('[data-action="save"]');
         setButtonLoading(btn, true, 'Saving...');
+        setTokenActionStatus(keyName, 'save');
 
         fetch('/api/v2/settings/api-keys', {
             method: 'POST',
@@ -776,6 +810,7 @@
         var item = input.closest('.api-key-item');
         var btn = item.querySelector('[data-action="rotate"]');
         setButtonLoading(btn, true, 'Rotating...');
+        setTokenActionStatus(keyName, 'rotate');
 
         fetch('/api/v2/settings/api-keys/' + encodeURIComponent(keyName) + '/rotate', {
             method: 'POST',
@@ -820,6 +855,7 @@
         var item = input.closest('.api-key-item');
         var btn = item.querySelector('[data-action="revoke"]');
         setButtonLoading(btn, true, 'Revoking...');
+        setTokenActionStatus(keyName, 'revoke');
 
         fetch('/api/v2/settings/api-keys/' + encodeURIComponent(keyName) + '/revoke', {
             method: 'POST',
@@ -854,6 +890,7 @@
         var input = document.getElementById('input-' + keyName);
         var btn = input.closest('.api-key-item').querySelector('[data-action="test"]');
         setButtonLoading(btn, true, 'Testing...');
+        setTokenActionStatus(keyName, 'validate');
 
         fetch('/api/v2/settings/api-keys/status')
         .then(function(r) { return r.json(); })
@@ -909,8 +946,9 @@
             return;
         }
 
-        var btn = document.querySelector('#claude-token-card .api-key-actions .btn:not(.btn-secondary)');
+        var btn = document.querySelector('#claude-token-card .api-key-actions [data-action="save"]');
         setButtonLoading(btn, true, 'Saving...');
+        setTokenActionStatus('claude', 'save');
 
         fetch('/api/chat/token', {
             method: 'POST',
@@ -956,8 +994,9 @@
         var value = input.value.trim();
         clearKeyError('claude');
 
-        var btn = document.querySelector('#claude-token-card .api-key-actions .btn-secondary');
+        var btn = document.querySelector('#claude-token-card .api-key-actions [data-action="validate"]');
         setButtonLoading(btn, true, 'Testing...');
+        setTokenActionStatus('claude', 'validate');
 
         fetch('/api/chat/token/validate', {
             method: 'POST',
