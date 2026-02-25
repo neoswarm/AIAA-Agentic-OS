@@ -12,6 +12,7 @@ import threading
 import time
 import base64
 import json
+import logging
 from collections import deque
 from functools import wraps
 from pathlib import Path
@@ -37,6 +38,7 @@ from services.chat_store import ChatStore, InMemoryChatStore, RedisChatStore
 
 
 chat_bp = Blueprint("chat", __name__)
+logger = logging.getLogger(__name__)
 
 CLAUDE_TOKEN_SETTING_KEY = "claude_setup_token"
 
@@ -314,6 +316,44 @@ def _derive_title(message: str) -> str:
     return (first_line[:57] + "...") if len(first_line) > 60 else first_line
 
 
+def _request_ip_address() -> str:
+    forwarded_for = request.headers.get("X-Forwarded-For", "")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    return request.remote_addr or ""
+
+
+def _log_token_lifecycle(action: str, status: str, **details: Any) -> None:
+    payload: Dict[str, Any] = {
+        "event": "token_lifecycle",
+        "action": action,
+        "status": status,
+        "username": session.get("username", "unknown"),
+        "ip": _request_ip_address(),
+        "method": request.method,
+        "path": request.path,
+    }
+    payload.update(details)
+    logger.info(json.dumps(payload, sort_keys=True))
+
+
+def _log_chat_session_lifecycle(
+    action: str, status: str, session_id: str = "", **details: Any
+) -> None:
+    payload: Dict[str, Any] = {
+        "event": "chat_session_lifecycle",
+        "action": action,
+        "status": status,
+        "session_id": session_id,
+        "username": session.get("username", "unknown"),
+        "ip": _request_ip_address(),
+        "method": request.method,
+        "path": request.path,
+    }
+    payload.update(details)
+    logger.info(json.dumps(payload, sort_keys=True))
+
+
 def init_chat_store(app=None) -> ChatStore:
     """Initialize singleton chat store once per process."""
     del app
@@ -411,11 +451,21 @@ def create_session():
     """Create a new chat session."""
     token = get_claude_token()
     if not token:
+        _log_chat_session_lifecycle(
+            action="create",
+            status="error",
+            reason="token_missing",
+        )
         return (
             jsonify({"status": "error", "message": "Claude token not configured"}),
             400,
         )
     if _looks_like_setup_token(token):
+        _log_chat_session_lifecycle(
+            action="create",
+            status="error",
+            reason="token_unsupported",
+        )
         return (
             jsonify({"status": "error", "message": _unsupported_setup_token_message()}),
             400,
@@ -432,6 +482,11 @@ def create_session():
         title=session_obj.get("title"),
         sdk_session_id=session_obj.get("sdk_session_id"),
     )
+    _log_chat_session_lifecycle(
+        action="create",
+        status="success",
+        session_id=session_obj["id"],
+    )
     return (
         jsonify(
             {"status": "ok", "session_id": session_obj["id"], "session": session_obj}
@@ -446,11 +501,21 @@ def send_message():
     """Send a message into an existing chat session."""
     token = get_claude_token()
     if not token:
+        _log_chat_session_lifecycle(
+            action="send_message",
+            status="error",
+            reason="token_missing",
+        )
         return (
             jsonify({"status": "error", "message": "Claude token not configured"}),
             400,
         )
     if _looks_like_setup_token(token):
+        _log_chat_session_lifecycle(
+            action="send_message",
+            status="error",
+            reason="token_unsupported",
+        )
         return (
             jsonify({"status": "error", "message": _unsupported_setup_token_message()}),
             400,
@@ -466,6 +531,12 @@ def send_message():
     if not message:
         errors["message"] = "message is required"
     if errors:
+        _log_chat_session_lifecycle(
+            action="send_message",
+            status="error",
+            session_id=session_id,
+            reason="validation_failed",
+        )
         return (
             jsonify(
                 {"status": "error", "message": "Validation failed", "errors": errors}
@@ -476,10 +547,22 @@ def send_message():
     store = _get_chat_store()
     session_obj = store.get_session(session_id)
     if session_obj is None:
+        _log_chat_session_lifecycle(
+            action="send_message",
+            status="error",
+            session_id=session_id,
+            reason="session_not_found",
+        )
         return jsonify({"status": "error", "message": "Session not found"}), 404
 
     allowed, retry_after, limit, window_seconds = _check_user_message_rate_limit()
     if not allowed:
+        _log_chat_session_lifecycle(
+            action="send_message",
+            status="rate_limited",
+            session_id=session_id,
+            retry_after_seconds=retry_after,
+        )
         response = jsonify(
             {
                 "status": "error",
@@ -517,20 +600,44 @@ def send_message():
         runner.send_message(session_id=session_id, user_message=message)
     except ValueError as exc:
         store.update_session(session_id, {"status": "idle", "last_error": str(exc)})
+        _log_chat_session_lifecycle(
+            action="send_message",
+            status="error",
+            session_id=session_id,
+            reason="validation_error",
+        )
         return jsonify({"status": "error", "message": str(exc)}), 400
     except RunnerError as exc:
         store.update_session(session_id, {"status": "error", "last_error": str(exc)})
+        _log_chat_session_lifecycle(
+            action="send_message",
+            status="error",
+            session_id=session_id,
+            reason="runner_error",
+        )
         return jsonify({"status": "error", "message": str(exc)}), 409
     except Exception as exc:
         store.update_session(
             session_id,
             {"status": "error", "last_error": f"Failed to send message: {exc}"},
         )
+        _log_chat_session_lifecycle(
+            action="send_message",
+            status="error",
+            session_id=session_id,
+            reason="unexpected_error",
+        )
         return (
             jsonify({"status": "error", "message": f"Failed to send message: {exc}"}),
             500,
         )
 
+    _log_chat_session_lifecycle(
+        action="send_message",
+        status="accepted",
+        session_id=session_id,
+        message_length=len(message),
+    )
     return jsonify({"status": "ok"}), 202
 
 
@@ -541,6 +648,12 @@ def stream_response(session_id: str):
     store = _get_chat_store()
     session_obj = store.get_session(session_id)
     if session_obj is None:
+        _log_chat_session_lifecycle(
+            action="stream",
+            status="error",
+            session_id=session_id,
+            reason="session_not_found",
+        )
         return jsonify({"status": "error", "message": "Invalid session"}), 404
 
     runner = _get_runner()
@@ -550,6 +663,7 @@ def stream_response(session_id: str):
             title=session_obj.get("title"),
             sdk_session_id=session_obj.get("sdk_session_id"),
         )
+    _log_chat_session_lifecycle(action="stream", status="opened", session_id=session_id)
 
     response = Response(
         stream_with_context(runner.get_stream(session_id)),
@@ -567,6 +681,13 @@ def token_status():
     """Get Claude token configuration state."""
     token = get_claude_token()
     if not token:
+        _log_token_lifecycle(
+            action="status",
+            status="missing",
+            configured=False,
+            validation="missing",
+            redacted="",
+        )
         return jsonify(
             {
                 "status": "ok",
@@ -577,6 +698,13 @@ def token_status():
         )
 
     validation = validate_claude_token(token)
+    _log_token_lifecycle(
+        action="status",
+        status="success",
+        configured=True,
+        validation=validation["status"],
+        redacted=_redact_token(token),
+    )
     return jsonify(
         {
             "status": "ok",
@@ -596,10 +724,24 @@ def save_token():
     token = (payload.get("token") or "").strip()
 
     if not token:
+        _log_token_lifecycle(
+            action="save",
+            status="error",
+            reason="missing_token",
+            validation="missing",
+            redacted="",
+        )
         return jsonify({"status": "error", "message": "token is required"}), 400
 
     validation = validate_claude_token(token)
     if validation["status"] in ("invalid", "expired", "unsupported"):
+        _log_token_lifecycle(
+            action="save",
+            status="error",
+            reason="validation_failed",
+            validation=validation["status"],
+            redacted=_redact_token(token),
+        )
         return (
             jsonify(
                 {
@@ -616,6 +758,14 @@ def save_token():
     persisted = _persist_to_railway_async({"CLAUDE_SETUP_TOKEN": token})
 
     init_chat_runner()
+
+    _log_token_lifecycle(
+        action="save",
+        status="success",
+        validation=validation["status"],
+        persisted_to_railway=persisted,
+        redacted=_redact_token(token),
+    )
 
     return jsonify(
         {
@@ -637,6 +787,13 @@ def validate_token():
     token = (payload.get("token") or "").strip() or get_claude_token()
 
     if not token:
+        _log_token_lifecycle(
+            action="validate",
+            status="missing",
+            configured=False,
+            validation="missing",
+            redacted="",
+        )
         return jsonify(
             {
                 "status": "ok",
@@ -650,6 +807,13 @@ def validate_token():
         )
 
     validation = validate_claude_token(token)
+    _log_token_lifecycle(
+        action="validate",
+        status="success",
+        configured=True,
+        validation=validation["status"],
+        redacted=_redact_token(token),
+    )
     return jsonify(
         {
             "status": "ok",
