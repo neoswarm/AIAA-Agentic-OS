@@ -10,6 +10,8 @@ import os
 import secrets
 import threading
 import time
+import base64
+import json
 from collections import deque
 from functools import wraps
 from pathlib import Path
@@ -155,11 +157,50 @@ def get_claude_token() -> str:
     return stored
 
 
+def _decode_base64url_json(segment: str) -> dict[str, Any] | None:
+    """Decode a base64url segment to JSON object, returning None on failure."""
+    try:
+        padded = segment + ("=" * ((4 - len(segment) % 4) % 4))
+        raw = base64.urlsafe_b64decode(padded.encode("utf-8"))
+        payload = json.loads(raw.decode("utf-8"))
+        if isinstance(payload, dict):
+            return payload
+    except Exception:
+        return None
+    return None
+
+
+def _looks_like_setup_token(token: str) -> bool:
+    """Heuristic for Claude setup tokens, which are JWT-shaped strings."""
+    parts = token.split(".")
+    if len(parts) != 3:
+        return False
+
+    header = _decode_base64url_json(parts[0])
+    claims = _decode_base64url_json(parts[1])
+    if not header or not claims:
+        return False
+    return True
+
+
 def validate_claude_token(token: str) -> Dict[str, Any]:
-    """Validate token against Anthropic models endpoint."""
+    """Validate Claude token with compatible checks.
+
+    Note: `claude setup-token` values are JWT-style auth artifacts for Claude
+    tooling and are not reliably verifiable via Anthropic's REST API key
+    endpoint. For those tokens, return `unknown` instead of false-negative
+    `expired/invalid`.
+    """
     candidate = (token or "").strip()
     if not candidate:
         return {"status": "invalid", "http_status": None, "message": "Missing token"}
+
+    if _looks_like_setup_token(candidate):
+        return {
+            "status": "unknown",
+            "http_status": None,
+            "message": "Setup token format accepted. Full validity is confirmed on first agent run.",
+        }
 
     try:
         resp = http_requests.get(
