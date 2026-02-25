@@ -6,15 +6,14 @@ Skill execution, client management, and settings endpoints.
 
 import os
 import re
-import uuid
-import hashlib
+import json
 import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from functools import wraps
 
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, Response, stream_with_context
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -63,42 +62,13 @@ def validation_error(errors, message="Validation failed"):
     }), 400
 
 
-def limit_validation_error(field_name, raw_value, min_value, max_value, reason):
-    """Return a structured 400 response for invalid limit parameters."""
-    return jsonify({
-        "status": "error",
-        "message": (
-            f"Invalid '{field_name}' value '{raw_value}': {reason}. "
-            f"Retry with a value between {min_value} and {max_value}."
-        ),
-        "errors": {
-            field_name: f"Must be an integer between {min_value} and {max_value}"
-        },
-        "retry_guidance": (
-            f"Set '{field_name}' to a value between {min_value} and {max_value} and retry."
-        ),
-    }), 400
-
-
-def parse_limit_arg(field_name, default, min_value, max_value):
-    """Parse and validate a bounded integer query parameter."""
-    raw_value = request.args.get(field_name)
-    if raw_value is None or raw_value == "":
-        return default, None
-
-    try:
-        value = int(raw_value)
-    except (TypeError, ValueError):
-        return None, limit_validation_error(
-            field_name, raw_value, min_value, max_value, "must be an integer"
-        )
-
-    if value < min_value or value > max_value:
-        return None, limit_validation_error(
-            field_name, raw_value, min_value, max_value, "is outside the allowed range"
-        )
-
-    return value, None
+def _format_sse_event(event_id, event_name, payload):
+    """Format one SSE event with an explicit server event ID."""
+    return (
+        f"id: {event_id}\n"
+        f"event: {event_name}\n"
+        f"data: {json.dumps(payload)}\n\n"
+    )
 
 
 # =============================================================================
@@ -354,6 +324,33 @@ def api_execution_status(execution_id):
             "status": "ok",
             "execution": _redact_sensitive_tokens(execution),
         })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@api_v2_bp.route('/executions/<execution_id>/stream', methods=['GET'])
+@login_required
+def api_execution_stream(execution_id):
+    """Stream execution status as SSE with server event IDs."""
+    try:
+        execution = get_execution_status(execution_id)
+        if execution is None:
+            return jsonify({"status": "error", "message": "Execution not found"}), 404
+
+        def event_stream():
+            yield _format_sse_event(
+                event_id=1,
+                event_name="execution",
+                payload={"status": "ok", "execution": execution},
+            )
+
+        response = Response(
+            stream_with_context(event_stream()),
+            mimetype="text/event-stream",
+        )
+        response.headers["Cache-Control"] = "no-cache"
+        response.headers["X-Accel-Buffering"] = "no"
+        return response
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
