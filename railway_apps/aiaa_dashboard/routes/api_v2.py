@@ -172,10 +172,7 @@ def api_skill_categories():
 def api_recommended_skills():
     """Get role-based skill recommendations."""
     role = request.args.get('role', '').strip()
-    limit, limit_error = parse_limit_arg('limit', default=8, min_value=1, max_value=20)
-    if limit_error:
-        return limit_error
-
+    limit = request.args.get('limit', Config.DEFAULT_RECOMMENDED_SKILLS_LIMIT, type=int)
     try:
         if not role:
             # Try to get role from user preferences
@@ -185,7 +182,7 @@ def api_recommended_skills():
             except Exception:
                 role = ""
 
-        skills = get_recommended_skills(role, limit)
+        skills = get_recommended_skills(role, min(limit, Config.MAX_RECOMMENDED_SKILLS_LIMIT))
         return jsonify({
             "status": "ok",
             "role": role,
@@ -389,7 +386,9 @@ def api_deliver_gdocs(execution_id):
             [sys.executable, str(skill_script),
              "--file", str(full_path),
              "--title", f"{skill_name} - {execution_id[:8]}"],
-            capture_output=True, text=True, timeout=60
+            capture_output=True,
+            text=True,
+            timeout=Config.GOOGLE_DOC_DELIVERY_TIMEOUT_SECONDS,
         )
 
         if result.returncode != 0:
@@ -474,15 +473,13 @@ def api_list_executions():
     """List recent executions with optional filters."""
     skill_name = request.args.get('skill')
     status = request.args.get('status')
-    limit, limit_error = parse_limit_arg('limit', default=50, min_value=1, max_value=200)
-    if limit_error:
-        return limit_error
+    limit = request.args.get('limit', Config.DEFAULT_EXECUTIONS_LIMIT, type=int)
 
     try:
         executions = models.get_skill_executions(
             skill_name=skill_name,
             status=status,
-            limit=limit,
+            limit=min(limit, Config.MAX_EXECUTIONS_LIMIT),
         )
         return jsonify({
             "status": "ok",

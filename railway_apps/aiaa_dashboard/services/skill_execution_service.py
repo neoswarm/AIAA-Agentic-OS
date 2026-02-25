@@ -16,12 +16,7 @@ from typing import Any, Dict, List, Optional
 # Add parent directory to path so we can import models/database
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import models
-from services.run_guard import (
-    bind_run_to_reservation,
-    release_run_reservation,
-    mark_run_running,
-    mark_run_finished,
-)
+from config import Config
 
 
 # ==============================================================================
@@ -479,7 +474,7 @@ def get_skill_categories() -> Dict[str, List[Dict[str, str]]]:
     return dict(sorted(categories.items(), key=lambda x: -len(x[1])))
 
 
-def get_recommended_skills(role: str, limit: int = 8) -> list:
+def get_recommended_skills(role: str, limit: int = Config.DEFAULT_RECOMMENDED_SKILLS_LIMIT) -> list:
     """Get skills recommended for a user role."""
     categories = ROLE_SKILL_MAP.get(role.lower(), []) if role else []
     if not categories:
@@ -492,7 +487,7 @@ def get_recommended_skills(role: str, limit: int = 8) -> list:
     return recommended[:limit]
 
 
-def _get_popular_skills(limit: int = 8) -> list:
+def _get_popular_skills(limit: int = Config.DEFAULT_RECOMMENDED_SKILLS_LIMIT) -> list:
     """Fallback: get popular skills by execution count, or curated defaults."""
     try:
         stats = models.get_skill_execution_stats()
@@ -666,7 +661,7 @@ def _run_skill_subprocess(execution_id: str, cmd: List[str], skill_name: str):
             cmd,
             capture_output=True,
             text=True,
-            timeout=600,  # 10 minute timeout
+            timeout=Config.SKILL_EXECUTION_TIMEOUT_SECONDS,
             cwd=str(_PROJECT_ROOT),
             env=env,
         )
@@ -700,7 +695,7 @@ def _run_skill_subprocess(execution_id: str, cmd: List[str], skill_name: str):
         models.update_skill_execution_status(
             execution_id,
             'error',
-            error_message="Execution timed out after 10 minutes",
+            error_message=f"Execution timed out after {Config.SKILL_EXECUTION_TIMEOUT_SECONDS} seconds",
         )
     except Exception as e:
         models.update_skill_execution_status(
