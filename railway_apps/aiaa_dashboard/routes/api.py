@@ -16,11 +16,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import models
 from config import Config
 import requests as http_requests
-from services.deployment_service import (
-    DeploymentService,
-    check_required_env_vars,
-    get_required_env_vars,
-)
+from services.deployment_service import DeploymentService, check_required_env_vars
+from .health_utils import get_chat_subsystem_readiness
 
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -762,10 +759,13 @@ def api_test_webhook():
 @api_bp.route('/health', methods=['GET'])
 def api_health():
     """Public health check endpoint (no auth required)."""
+    chat_subsystem = get_chat_subsystem_readiness()
     return jsonify({
         "status": "ok",
         "timestamp": datetime.utcnow().isoformat(),
-        "service": "aiaa-dashboard-api"
+        "service": "aiaa-dashboard-api",
+        "chat_subsystem_ready": chat_subsystem["ready"],
+        "chat_subsystem": chat_subsystem,
     })
 
 
