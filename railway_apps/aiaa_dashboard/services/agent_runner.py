@@ -202,6 +202,8 @@ class AgentRunner:
         q = self._get_queue_or_raise(session_id)
         assistant_chunks: list[str] = []
         stderr_lines: list[str] = []
+        streamed_error: str | None = None
+        emitted_error_event = False
         loop: Optional[asyncio.AbstractEventLoop] = None
 
         try:
@@ -235,6 +237,7 @@ class AgentRunner:
             asyncio.set_event_loop(loop)
 
             async def run_query() -> None:
+                nonlocal streamed_error, emitted_error_event
                 async for message in sdk["query"](prompt=user_message, options=options):
                     payload = self._message_payload(message)
                     self._capture_sdk_session_id(session_id, message, payload)
@@ -248,6 +251,11 @@ class AgentRunner:
                         content = (event.get("content") or "").strip()
                         if content:
                             assistant_chunks.append(content)
+                    if event["type"] == "error":
+                        content = (event.get("content") or "").strip()
+                        if content:
+                            streamed_error = content
+                        emitted_error_event = True
 
             loop.run_until_complete(run_query())
 
@@ -260,8 +268,23 @@ class AgentRunner:
             message = str(exc) or "Agent execution failed"
             if stderr_lines:
                 message = f"{message}\nCLI stderr: {' | '.join(stderr_lines[-10:])}"
+
+            # Prefer meaningful streamed errors over generic SDK process tail errors.
+            if streamed_error and (
+                "Check stderr output for details" in message
+                or "Command failed with exit code" in message
+            ):
+                if stderr_lines:
+                    message = (
+                        f"{streamed_error}\nCLI stderr: {' | '.join(stderr_lines[-10:])}"
+                    )
+                else:
+                    message = streamed_error
+
             logger.exception("Agent run failed for session %s: %s", session_id, message)
             self._set_session_state(session_id, status="error", last_error=message)
+            if emitted_error_event and streamed_error:
+                return
             q.put({"type": "error", "content": message, "timestamp": _utc_now_iso()})
         finally:
             if loop is not None:
@@ -421,6 +444,8 @@ class AgentRunner:
             "tool_input",
             "tool_result",
             "result",
+            "is_error",
+            "error",
             "message",
         ):
             if hasattr(message, key):
@@ -451,6 +476,12 @@ class AgentRunner:
             }
 
         if payload.get("result") is not None:
+            if bool(payload.get("is_error")):
+                return {
+                    "type": "error",
+                    "content": self._stringify(payload.get("result")),
+                    "timestamp": _utc_now_iso(),
+                }
             return {
                 "type": "result",
                 "content": self._stringify(payload.get("result")),

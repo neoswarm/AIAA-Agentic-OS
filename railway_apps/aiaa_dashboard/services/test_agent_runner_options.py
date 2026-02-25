@@ -120,3 +120,47 @@ def test_build_options_includes_stderr_and_debug_flag_when_supported():
 
     assert options.kwargs["stderr"] is callback
     assert options.kwargs["extra_args"] == {"debug-to-stderr": None}
+
+
+def test_parse_message_maps_is_error_result_to_error_event():
+    runner = _runner()
+    event = runner._parse_message({"type": "result", "result": "Auth failed", "is_error": True})
+    assert event is not None
+    assert event["type"] == "error"
+    assert event["content"] == "Auth failed"
+
+
+def test_run_agent_prefers_streamed_error_over_generic_process_error():
+    runner = AgentRunner(cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token")
+    session = runner.create_session()
+    session_id = session["id"]
+
+    class DummyOptions:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+    async def fake_query(*, prompt, options):
+        del prompt, options
+        yield {"type": "result", "result": "Authentication failed", "is_error": True}
+        raise RuntimeError(
+            "Command failed with exit code 1 (exit code: 1)\n"
+            "Error output: Check stderr output for details"
+        )
+
+    runner._load_sdk = lambda: {"query": fake_query, "options_cls": DummyOptions}
+    runner._run_agent(session_id, "test")
+
+    events = []
+    q = runner._output_queues[session_id]
+    while not q.empty():
+        events.append(q.get())
+
+    error_events = [event for event in events if event.get("type") == "error"]
+    assert len(error_events) == 1
+    assert error_events[0]["content"] == "Authentication failed"
+    assert "Check stderr output for details" not in error_events[0]["content"]
+
+    session_state = runner.get_session(session_id)
+    assert session_state is not None
+    assert session_state["status"] == "error"
+    assert session_state["last_error"] == "Authentication failed"
