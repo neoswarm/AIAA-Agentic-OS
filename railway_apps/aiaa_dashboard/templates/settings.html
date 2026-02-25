@@ -499,6 +499,7 @@
             <span class="card-title">Content Defaults</span>
         </div>
         <div class="card-body">
+            {% set default_chat_profile = preferences.get('pref.default_chat_profile', 'balanced') %}
             <div class="pref-grid">
                 <div class="pref-item">
                     <label class="form-label" for="pref-tone">Default tone</label>
@@ -528,6 +529,16 @@
                         <option value="plain">Plain Text</option>
                     </select>
                     <span class="form-hint">Default file format for generated content</span>
+                </div>
+                <div class="pref-item">
+                    <label class="form-label" for="pref-default-chat-profile">Default chat profile</label>
+                    <select class="form-select" id="pref-default-chat-profile">
+                        <option value="balanced" {% if default_chat_profile == 'balanced' %}selected{% endif %}>Balanced</option>
+                        <option value="research" {% if default_chat_profile == 'research' %}selected{% endif %}>Research</option>
+                        <option value="creative" {% if default_chat_profile == 'creative' %}selected{% endif %}>Creative</option>
+                        <option value="concise" {% if default_chat_profile == 'concise' %}selected{% endif %}>Concise</option>
+                    </select>
+                    <span class="form-hint">Used as the starter profile for new chat sessions</span>
                 </div>
             </div>
         </div>
@@ -980,6 +991,7 @@
             tone: document.getElementById('pref-tone').value,
             length: document.getElementById('pref-length').value,
             format: document.getElementById('pref-format').value,
+            default_chat_profile: document.getElementById('pref-default-chat-profile').value,
             auto_gdocs: document.getElementById('pref-auto-gdocs').checked,
             slack_notify: document.getElementById('pref-slack-notify').checked
         };
