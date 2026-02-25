@@ -2,7 +2,7 @@
 name: research
 model: claude-sonnet-4-6
 description: Deep research agent for market research, company analysis, prospect research, and competitive intelligence. Uses web search and Perplexity-style queries. Returns condensed summaries only.
-allowedTools:
+allowed_tools:
   - WebSearch
   - WebFetch
   - Read

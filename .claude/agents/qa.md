@@ -2,7 +2,7 @@
 name: qa
 model: claude-sonnet-4-6
 description: Generates and runs automated tests for execution scripts. Validates outputs, checks edge cases, and ensures scripts work end-to-end.
-allowedTools:
+allowed_tools:
   - Read
   - Write
   - Bash

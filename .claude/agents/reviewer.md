@@ -2,7 +2,7 @@
 name: reviewer
 model: claude-sonnet-4-6
 description: Reviews code and content with zero prior context for unbiased quality assessment. Catches issues the parent agent missed due to creation bias.
-allowedTools:
+allowed_tools:
   - Read
   - Grep
   - Glob

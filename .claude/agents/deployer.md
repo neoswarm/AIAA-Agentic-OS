@@ -2,7 +2,7 @@
 name: deployer
 model: claude-sonnet-4-6
 description: Handles deployment to Railway and Modal. Manages environment variables, service configuration, and post-deploy verification.
-allowedTools:
+allowed_tools:
   - Read
   - Write
   - Bash
