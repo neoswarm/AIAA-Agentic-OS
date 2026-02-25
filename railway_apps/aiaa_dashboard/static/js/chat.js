@@ -53,11 +53,70 @@ function formatChatErrorMessage(message) {
     return text || 'Chat failed. Please try again.';
 }
 
+function _asPayloadObject(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        return null;
+    }
+    return value;
+}
+
+function _firstString(...values) {
+    for (const value of values) {
+        if (typeof value === 'string') {
+            return value;
+        }
+    }
+    return '';
+}
+
+function normalizeStreamEvent(eventData) {
+    if (!eventData || typeof eventData !== 'object') {
+        return null;
+    }
+
+    const payload = _asPayloadObject(eventData.payload);
+    if (!payload) {
+        return eventData;
+    }
+
+    if (eventData.type === 'tool') {
+        const kind = _firstString(payload.kind).toLowerCase();
+        if (kind === 'tool_use') {
+            return {
+                ...eventData,
+                type: 'tool_use',
+                tool: _firstString(eventData.tool, payload.tool),
+                input: _firstString(eventData.input, payload.input, payload.content),
+            };
+        }
+        if (kind === 'tool_result') {
+            return {
+                ...eventData,
+                type: 'tool_result',
+                content: _firstString(eventData.content, payload.content),
+            };
+        }
+        return eventData;
+    }
+
+    if (eventData.type === 'result' || eventData.type === 'system' || eventData.type === 'error') {
+        return {
+            ...eventData,
+            content: _firstString(eventData.content, payload.content),
+        };
+    }
+
+    return eventData;
+}
+
 if (typeof globalThis !== 'undefined') {
     globalThis.ChatUIErrorMessages = {
         isGatewayAuthFailure,
         isRuntimeFailure,
         formatChatErrorMessage,
+    };
+    globalThis.ChatUIStreamEvents = {
+        normalizeStreamEvent,
     };
 }
 
@@ -383,24 +442,28 @@ class ChatUI {
             } catch (err) {
                 return;
             }
+            const parsed = normalizeStreamEvent(data);
+            if (!parsed) {
+                return;
+            }
 
-            switch (data.type) {
+            switch (parsed.type) {
                 case 'tool_use':
-                    this.appendToolStep(agentBubble, data.tool || 'Tool', data.input || '');
+                    this.appendToolStep(agentBubble, parsed.tool || 'Tool', parsed.input || '');
                     break;
                 case 'tool_result':
-                    this.appendToolStep(agentBubble, 'Result', data.content || '');
+                    this.appendToolStep(agentBubble, 'Result', parsed.content || '');
                     break;
                 case 'text':
                 case 'result':
-                    this.appendText(agentBubble, data.content || '');
+                    this.appendText(agentBubble, parsed.content || '');
                     break;
                 case 'system':
-                    this.appendToolStep(agentBubble, 'System', data.content || '');
+                    this.appendToolStep(agentBubble, 'System', parsed.content || '');
                     break;
                 case 'error':
                     terminalReceived = true;
-                    this.appendError(agentBubble, data.content || 'Agent failed');
+                    this.appendError(agentBubble, parsed.content || 'Agent failed');
                     this.setSending(false);
                     this.closeStream();
                     this.refreshSessions();
