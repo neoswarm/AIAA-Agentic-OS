@@ -344,13 +344,16 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/reconnect_backoff.js') }}"></script>
 <script>
 (function() {
-    var pollInterval = null;
-    var executionId = {{ execution.id | tojson }};
-    var initialExecution = {{ execution | tojson }};
-    var skillMeta = {{ (skill or {}) | tojson }};
-    var skillName = initialExecution.skill_name || skillMeta.name || '';
+    var pollTimer = null;
+    var basePollMs = 2000;
+    var maxBackoffMs = 30000;
+    var reconnectAttempts = 0;
+    var reconnectNotified = false;
+    var executionId = getExecutionIdFromUrl();
+    var skillName = getSkillNameFromUrl();
     var startTime = Date.now();
 
     function formatSkillName(name) {
@@ -435,9 +438,38 @@
     function startPolling() {
         if (!executionId) return;
 
-        updateProgress(initialExecution);
+        clearPollingTimer();
         pollStatus();
-        pollInterval = setInterval(pollStatus, 2000);
+    }
+
+    function clearPollingTimer() {
+        if (pollTimer) {
+            clearTimeout(pollTimer);
+            pollTimer = null;
+        }
+    }
+
+    function scheduleNextPoll(delayMs) {
+        clearPollingTimer();
+        pollTimer = setTimeout(pollStatus, delayMs);
+    }
+
+    function getReconnectDelay(attempt) {
+        if (typeof window.calculateReconnectDelay === 'function') {
+            return window.calculateReconnectDelay(attempt, {
+                baseDelayMs: basePollMs,
+                maxDelayMs: maxBackoffMs
+            });
+        }
+
+        return Math.min(maxBackoffMs, basePollMs * Math.pow(2, Math.max(0, attempt - 1)));
+    }
+
+    function setOutputStatus(text, className) {
+        var outputStatus = document.getElementById('output-status');
+        if (!outputStatus) return;
+        outputStatus.textContent = text;
+        outputStatus.className = className;
     }
 
     async function pollStatus() {
@@ -448,13 +480,38 @@
             var execution = payload.execution || initialExecution;
             updateProgress(execution);
 
-            if (execution.status === 'success' || execution.status === 'error' || execution.status === 'cancelled') {
-                clearInterval(pollInterval);
-                onComplete(execution);
+            if (reconnectAttempts > 0) {
+                reconnectAttempts = 0;
+                if (reconnectNotified) {
+                    showToast('Reconnected. Live updates resumed.', 'success', 2500);
+                    reconnectNotified = false;
+                }
+                setOutputStatus('streaming', 'badge badge-info');
             }
+
+            updateProgress(data);
+
+            if (data.status === 'success' || data.status === 'error' || data.status === 'cancelled') {
+                clearPollingTimer();
+                onComplete(data);
+                return;
+            }
+
+            scheduleNextPoll(basePollMs);
         } catch (e) {
             console.warn('Poll error:', e);
-            showToast('Failed to fetch execution status', 'error');
+            reconnectAttempts += 1;
+            var delayMs = getReconnectDelay(reconnectAttempts);
+            var delaySeconds = Math.ceil(delayMs / 1000);
+
+            setOutputStatus('reconnecting (' + delaySeconds + 's)', 'badge badge-warning');
+
+            if (!reconnectNotified) {
+                showToast('Connection lost. Reconnecting automatically...', 'warning', 4000);
+                reconnectNotified = true;
+            }
+
+            scheduleNextPoll(delayMs);
         }
     }
 
@@ -521,8 +578,9 @@
         });
     }
 
-    function onComplete(execution) {
-        var status = execution.status || 'error';
+    function onComplete(data) {
+        clearPollingTimer();
+
         var banner = document.getElementById('completion-banner');
         var fill = document.getElementById('progress-fill');
         var headerIcon = document.getElementById('header-icon');
