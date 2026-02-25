@@ -618,59 +618,29 @@ _KEY_PREFIXES = {
     "FAL_KEY": "",
 }
 
-_TOKEN_ALIASES = {
-    "runner": "DASHBOARD_API_KEY",
-    "runner_token": "DASHBOARD_API_KEY",
-    "dashboard": "DASHBOARD_API_KEY",
-    "dashboard_api_key": "DASHBOARD_API_KEY",
+_TOKEN_VALIDATION_STATUSES = ("valid", "expired", "invalid", "unreachable")
+_TOKEN_VALIDATION_STATUS_ALIASES = {
+    "active": "valid",
+    "ok": "valid",
+    "success": "valid",
+    "error": "unreachable",
+    "timeout": "unreachable",
+    "network_error": "unreachable",
+    "connection_error": "unreachable",
 }
 
 
-def _resolve_env_var(key_name: str) -> str:
-    """Resolve a friendly key name to an environment variable."""
-    normalized = key_name.lower()
-    if normalized in _TOKEN_ALIASES:
-        return _TOKEN_ALIASES[normalized]
-    return _API_KEY_NAMES.get(normalized, key_name.upper())
+def _normalize_token_validation_status(raw_status, configured):
+    """Normalize token validation status into metric buckets."""
+    if raw_status is None or raw_status == "":
+        return "valid" if configured else None
 
-
-def _clear_stored_api_key(env_var: str) -> None:
-    """Remove a stored API key/token from settings storage."""
-    setting_key = f"api_key.{env_var}"
-    delete_setting = getattr(models, "delete_setting", None)
-    if callable(delete_setting):
-        delete_setting(setting_key)
-        return
-
-    # Backward compatibility for older models without delete_setting.
-    set_setting = getattr(models, "set_setting", None)
-    if callable(set_setting):
-        set_setting(setting_key, "")
-
-
-def _redact_token(token: str) -> str:
-    """Redact sensitive token values for API responses."""
-    if not token:
-        return ""
-    if len(token) <= 8:
-        return "*" * len(token)
-    return f"{token[:4]}...{token[-4:]}"
-
-
-def _log_token_audit(action: str, status: str, key_name: str, **details) -> None:
-    """Best-effort audit logging for token mutations."""
-    try:
-        data = {"action": action, "key_name": key_name}
-        data.update(details)
-        models.log_event(
-            event_type="token",
-            status=status,
-            data=data,
-            source="api",
-        )
-    except Exception:
-        # Audit logging must not break core token actions.
-        pass
+    normalized = str(raw_status).strip().lower()
+    if normalized in _TOKEN_VALIDATION_STATUSES:
+        return normalized
+    if normalized in _TOKEN_VALIDATION_STATUS_ALIASES:
+        return _TOKEN_VALIDATION_STATUS_ALIASES[normalized]
+    return "unreachable" if configured else None
 
 
 @api_v2_bp.route('/settings/api-keys', methods=['POST'])
@@ -836,11 +806,31 @@ def api_revoke_api_key(key_name):
 def api_key_status():
     """Check which API keys are configured and valid."""
     try:
+        get_setting = getattr(models, "get_setting", None)
+        get_setting_metadata = getattr(models, "get_setting_metadata", None)
+
         keys_status = {}
+        token_validation_metrics = {status: 0 for status in _TOKEN_VALIDATION_STATUSES}
+
         for friendly_name, env_var in _API_KEY_NAMES.items():
-            value = os.getenv(env_var, "") or (models.get_setting(f"api_key.{env_var}", "") or "")
+            setting_key = f"api_key.{env_var}"
+            stored_value = ""
+            if callable(get_setting):
+                stored_value = get_setting(setting_key) or ""
+
+            value = os.getenv(env_var, "") or stored_value
             configured = bool(value)
-            metadata = models.get_setting_metadata(setting_key)
+            metadata = {}
+            if callable(get_setting_metadata):
+                metadata = get_setting_metadata(setting_key) or {}
+
+            validation_status = _normalize_token_validation_status(
+                metadata.get("validation_status"),
+                configured,
+            )
+            if validation_status in token_validation_metrics:
+                token_validation_metrics[validation_status] += 1
+
             # Redact value for display
             redacted = ""
             if value:
@@ -853,14 +843,19 @@ def api_key_status():
                 "env_var": env_var,
                 "configured": configured,
                 "redacted_value": redacted,
+                "validation_status": validation_status,
                 "last_validated_at": metadata.get("last_validated_at"),
-                "validation_status": metadata.get("validation_status"),
                 "last_error": metadata.get("last_error"),
             }
 
-        payload = {"status": "ok", "keys": keys_status}
-        payload.update(keys_status)
-        return jsonify(payload)
+        return jsonify({
+            "status": "ok",
+            "keys": keys_status,
+            "token_validation_metrics": token_validation_metrics,
+            "metrics": {
+                "token_validation_by_status": token_validation_metrics,
+            },
+        })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
