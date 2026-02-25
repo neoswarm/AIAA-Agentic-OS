@@ -10,6 +10,7 @@ import inspect
 import json
 import logging
 import queue
+import re
 import secrets
 import threading
 from datetime import datetime
@@ -18,6 +19,18 @@ from typing import Any, Callable, Dict, Generator, Optional
 
 logger = logging.getLogger(__name__)
 
+_TOKEN_BEARER_PATTERN = re.compile(r"(?i)\b(bearer)(\s+)([A-Za-z0-9._\-]{8,})\b")
+_TOKEN_PREFIX_PATTERN = re.compile(
+    r"\b(?:sk-or-|pplx-|sk-ant-|sk-|xox[baprs]-|ghp_|github_pat_)[A-Za-z0-9._\-]{8,}\b",
+    re.IGNORECASE,
+)
+_TOKEN_KEY_VALUE_PATTERN = re.compile(
+    r"(?i)\b(api[_-]?key|token|secret|password|authorization)\b(\s*[:=]\s*)([^\s\"',;]{8,})"
+)
+_TOKEN_JWT_PATTERN = re.compile(
+    r"\beyJ[A-Za-z0-9_-]{5,}\.[A-Za-z0-9._\-]{5,}\.[A-Za-z0-9._\-]{5,}\b"
+)
+
 
 class RunnerError(RuntimeError):
     """Raised when the chat runner cannot execute a request."""
@@ -25,6 +38,39 @@ class RunnerError(RuntimeError):
 
 def _utc_now_iso() -> str:
     return datetime.utcnow().isoformat() + "Z"
+
+
+def _redact_token(token: str) -> str:
+    clean = (token or "").strip()
+    if not clean:
+        return clean
+    if len(clean) <= 10:
+        return "***"
+    return f"{clean[:6]}...{clean[-4:]}"
+
+
+def _redact_token_like_text(value: str) -> str:
+    """Redact common token-like patterns from freeform text."""
+    if not isinstance(value, str) or not value:
+        return value
+
+    redacted = _TOKEN_BEARER_PATTERN.sub(
+        lambda match: f"{match.group(1)}{match.group(2)}{_redact_token(match.group(3))}",
+        value,
+    )
+    redacted = _TOKEN_KEY_VALUE_PATTERN.sub(
+        lambda match: f"{match.group(1)}{match.group(2)}{_redact_token(match.group(3))}",
+        redacted,
+    )
+    redacted = _TOKEN_PREFIX_PATTERN.sub(
+        lambda match: _redact_token(match.group(0)),
+        redacted,
+    )
+    redacted = _TOKEN_JWT_PATTERN.sub(
+        lambda match: _redact_token(match.group(0)),
+        redacted,
+    )
+    return redacted
 
 
 class AgentRunner:
@@ -221,6 +267,7 @@ class AgentRunner:
                 text = (line or "").strip()
                 if not text:
                     return
+                text = _redact_token_like_text(text)
                 stderr_lines.append(text)
                 # Keep bounded memory while preserving most recent context.
                 if len(stderr_lines) > 50:
@@ -281,6 +328,7 @@ class AgentRunner:
                 else:
                     message = streamed_error
 
+            message = _redact_token_like_text(message)
             logger.exception("Agent run failed for session %s: %s", session_id, message)
             self._set_session_state(session_id, status="error", last_error=message)
             if emitted_error_event and streamed_error:
@@ -467,36 +515,44 @@ class AgentRunner:
             }
 
         if payload.get("tool_result") is not None:
+            tool_result = _redact_token_like_text(
+                self._stringify(payload.get("tool_result"))
+            )
             return {
                 "type": "tool_result",
-                "content": self._truncate(
-                    self._stringify(payload.get("tool_result")), 600
-                ),
+                "content": self._truncate(tool_result, 600),
                 "timestamp": _utc_now_iso(),
             }
 
         if payload.get("result") is not None:
+            result_content = _redact_token_like_text(
+                self._stringify(payload.get("result"))
+            )
             if bool(payload.get("is_error")):
                 return {
                     "type": "error",
-                    "content": self._stringify(payload.get("result")),
+                    "content": result_content,
                     "timestamp": _utc_now_iso(),
                 }
             return {
                 "type": "result",
-                "content": self._stringify(payload.get("result")),
+                "content": result_content,
                 "timestamp": _utc_now_iso(),
             }
 
         text = self._extract_text(payload)
         if text:
+            text = _redact_token_like_text(text)
             if msg_type in ("assistant", "assistant_message") or role == "assistant":
                 return {"type": "text", "content": text, "timestamp": _utc_now_iso()}
             if msg_type in ("system", "status"):
                 return {"type": "system", "content": text, "timestamp": _utc_now_iso()}
 
         if msg_type in ("error", "exception"):
-            content = text or self._truncate(self._stringify(payload), 500)
+            content = text or self._truncate(
+                _redact_token_like_text(self._stringify(payload)),
+                500,
+            )
             return {"type": "error", "content": content, "timestamp": _utc_now_iso()}
 
         return None
@@ -504,12 +560,15 @@ class AgentRunner:
     def _summarize_tool_input(self, tool_name: str, tool_input: Any) -> str:
         tool = str(tool_name or "").strip()
         if not isinstance(tool_input, dict):
-            return self._truncate(self._stringify(tool_input), 180)
+            return _redact_token_like_text(
+                self._truncate(self._stringify(tool_input), 180)
+            )
 
         if tool == "Read":
             return f"Reading {tool_input.get('file_path', '?')}"
         if tool == "Bash":
-            return f"Running: {self._truncate(tool_input.get('command', ''), 120)}"
+            command = self._truncate(tool_input.get("command", ""), 120)
+            return f"Running: {_redact_token_like_text(command)}"
         if tool == "Glob":
             return f"Searching for {tool_input.get('pattern', '?')}"
         if tool == "Grep":
@@ -524,7 +583,8 @@ class AgentRunner:
             return f"Searching web: {tool_input.get('query', '?')}"
         if tool == "WebFetch":
             return f"Fetching URL: {tool_input.get('url', '?')}"
-        return f"{tool}: {self._truncate(self._stringify(tool_input), 120)}"
+        input_summary = self._truncate(self._stringify(tool_input), 120)
+        return f"{tool}: {_redact_token_like_text(input_summary)}"
 
     def _extract_text(self, payload: Dict[str, Any]) -> str:
         content = payload.get("content")

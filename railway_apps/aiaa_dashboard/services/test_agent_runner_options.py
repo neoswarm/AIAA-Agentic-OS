@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from services.agent_runner import AgentRunner
+from services.agent_runner import AgentRunner, _redact_token_like_text
 
 
 class ModernOptions:
@@ -164,3 +164,77 @@ def test_run_agent_prefers_streamed_error_over_generic_process_error():
     assert session_state is not None
     assert session_state["status"] == "error"
     assert session_state["last_error"] == "Authentication failed"
+
+
+def test_redact_token_like_text_masks_common_gateway_patterns():
+    raw_bearer = "Bearer sk-ant-api03-super-secret-token-1234567890"
+    raw_prefix = "github_pat_1234567890abcdefghijklmno"
+    raw_kv = "token=pplx-super-secret-token-1234567890"
+    raw_jwt = (
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+        "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4ifQ."
+        "signedpayload1234567890"
+    )
+    sample = f"{raw_bearer} {raw_prefix} {raw_kv} {raw_jwt}"
+
+    redacted = _redact_token_like_text(sample)
+
+    assert raw_bearer not in redacted
+    assert raw_prefix not in redacted
+    assert raw_kv not in redacted
+    assert raw_jwt not in redacted
+    assert "Bearer " in redacted
+    assert "token=" in redacted
+
+
+def test_parse_message_redacts_token_like_result_content():
+    runner = _runner()
+    raw = "Authorization: Bearer sk-or-secret-token-1234567890"
+
+    event = runner._parse_message({"type": "result", "result": raw, "is_error": True})
+
+    assert event is not None
+    assert event["type"] == "error"
+    assert raw not in event["content"]
+    assert "Bearer " in event["content"]
+
+
+def test_run_agent_redacts_token_like_values_from_runtime_errors():
+    runner = AgentRunner(cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token")
+    session = runner.create_session()
+    session_id = session["id"]
+    leaked_stderr = "Authorization: Bearer sk-ant-api03-super-secret-token-123456"
+    leaked_error = "gateway failed: api_key=sk-or-secret-token-1234567890"
+
+    class DummyOptions:
+        def __init__(self, *, stderr=None, **kwargs):
+            self.kwargs = {"stderr": stderr}
+            self.kwargs.update(kwargs)
+
+    async def fake_query(*, prompt, options):
+        del prompt
+        stderr_callback = options.kwargs.get("stderr")
+        if callable(stderr_callback):
+            stderr_callback(leaked_stderr)
+        if False:  # pragma: no cover - keeps async-generator shape
+            yield {}
+        raise RuntimeError(leaked_error)
+
+    runner._load_sdk = lambda: {"query": fake_query, "options_cls": DummyOptions}
+    runner._run_agent(session_id, "test")
+
+    events = []
+    q = runner._output_queues[session_id]
+    while not q.empty():
+        events.append(q.get())
+
+    error_events = [event for event in events if event.get("type") == "error"]
+    assert len(error_events) == 1
+    assert leaked_stderr not in error_events[0]["content"]
+    assert leaked_error not in error_events[0]["content"]
+    assert "Bearer " in error_events[0]["content"]
+
+    session_state = runner.get_session(session_id)
+    assert session_state is not None
+    assert leaked_stderr not in session_state["last_error"]
+    assert leaked_error not in session_state["last_error"]
