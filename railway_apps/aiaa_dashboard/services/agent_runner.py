@@ -9,6 +9,7 @@ import importlib
 import inspect
 import json
 import logging
+import os
 import queue
 import secrets
 import threading
@@ -30,6 +31,7 @@ def _utc_now_iso() -> str:
 class AgentRunner:
     """Runs Claude Agent SDK queries in a background thread and streams events."""
 
+    DEFAULT_CWD = "/app"
     DEFAULT_ALLOWED_TOOLS = [
         "Read",
         "Write",
@@ -44,12 +46,15 @@ class AgentRunner:
 
     def __init__(
         self,
-        cwd: str,
+        cwd: str | None,
         token_provider: Callable[[], str],
         allowed_tools: Optional[list[str]] = None,
         permission_mode: str = "acceptEdits",
         session_store: Any | None = None,
+        cwd_allowlist: Optional[list[str]] = None,
     ):
+        self.cwd_allowlist = self._build_cwd_allowlist(cwd_allowlist)
+        self._cwd = self.DEFAULT_CWD
         self.cwd = cwd
         self._token_provider = token_provider
         self.allowed_tools = allowed_tools or list(self.DEFAULT_ALLOWED_TOOLS)
@@ -59,6 +64,65 @@ class AgentRunner:
         self._sessions: Dict[str, Dict[str, Any]] = {}
         self._output_queues: Dict[str, queue.Queue] = {}
         self._lock = threading.RLock()
+
+    @property
+    def cwd(self) -> str:
+        return self._cwd
+
+    @cwd.setter
+    def cwd(self, value: str | None) -> None:
+        self._cwd = self._enforce_cwd(value)
+
+    def _build_cwd_allowlist(
+        self, explicit_allowlist: Optional[list[str]] = None
+    ) -> list[str]:
+        raw_env_allowlist = (os.getenv("AGENT_RUNNER_CWD_ALLOWLIST") or "").strip()
+        env_allowlist = [
+            item.strip()
+            for item in raw_env_allowlist.split(",")
+            if item and item.strip()
+        ]
+        normalized: list[str] = []
+        for path in [*(explicit_allowlist or []), *env_allowlist]:
+            normalized_path = self._normalize_absolute_path(path)
+            if normalized_path and normalized_path not in normalized:
+                normalized.append(normalized_path)
+
+        default_cwd = (
+            self._normalize_absolute_path(self.DEFAULT_CWD) or self.DEFAULT_CWD
+        )
+        if default_cwd not in normalized:
+            normalized.append(default_cwd)
+        return normalized
+
+    def _normalize_absolute_path(self, path_value: str | None) -> str:
+        candidate = (path_value or "").strip()
+        if not candidate or not os.path.isabs(candidate):
+            return ""
+        return os.path.normpath(candidate)
+
+    def _is_cwd_allowlisted(self, candidate: str) -> bool:
+        for allowed_root in self.cwd_allowlist:
+            try:
+                if os.path.commonpath([candidate, allowed_root]) == allowed_root:
+                    return True
+            except ValueError:
+                continue
+        return False
+
+    def _enforce_cwd(self, path_value: str | None) -> str:
+        normalized = self._normalize_absolute_path(path_value)
+        if normalized and self._is_cwd_allowlisted(normalized):
+            return normalized
+
+        fallback = self._normalize_absolute_path(self.DEFAULT_CWD) or self.DEFAULT_CWD
+        if normalized:
+            logger.warning(
+                "Rejecting non-allowlisted cwd '%s'; falling back to '%s'",
+                normalized,
+                fallback,
+            )
+        return fallback
 
     def create_session(self, title: Optional[str] = None) -> Dict[str, Any]:
         """Create a new chat session."""
@@ -338,6 +402,8 @@ class AgentRunner:
             options_kwargs["permission_mode"] = self.permission_mode
         if "setting_sources" in params:
             options_kwargs["setting_sources"] = ["project"]
+        if "workspace" in params:
+            options_kwargs["workspace"] = self.cwd
         if "cwd" in params:
             options_kwargs["cwd"] = self.cwd
         if resume_id and "resume" in params:
@@ -365,7 +431,7 @@ class AgentRunner:
         except TypeError:
             # Last-ditch fallback with minimal options for older SDK variants.
             fallback_kwargs: dict[str, Any] = {}
-            for key in ("cwd", "allowed_tools", "tools", "resume"):
+            for key in ("workspace", "cwd", "allowed_tools", "tools", "resume"):
                 if key in options_kwargs:
                     fallback_kwargs[key] = options_kwargs[key]
             if not auth_set:

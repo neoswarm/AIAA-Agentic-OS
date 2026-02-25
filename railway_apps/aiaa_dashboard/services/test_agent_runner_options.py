@@ -52,6 +52,29 @@ class ModernOptionsWithStderr:
         }
 
 
+class ModernOptionsWithWorkspace:
+    def __init__(
+        self,
+        *,
+        allowed_tools=None,
+        permission_mode=None,
+        setting_sources=None,
+        workspace=None,
+        cwd=None,
+        resume=None,
+        env=None,
+    ):
+        self.kwargs = {
+            "allowed_tools": allowed_tools,
+            "permission_mode": permission_mode,
+            "setting_sources": setting_sources,
+            "workspace": workspace,
+            "cwd": cwd,
+            "resume": resume,
+            "env": env,
+        }
+
+
 class LegacyOptions:
     def __init__(self, *, auth_token=None, cwd=None, allowed_tools=None, resume=None):
         self.kwargs = {
@@ -64,6 +87,29 @@ class LegacyOptions:
 
 def _runner() -> AgentRunner:
     return AgentRunner(cwd="/app", token_provider=lambda: "unused")
+
+
+def test_runner_defaults_cwd_to_app_when_missing():
+    runner = AgentRunner(cwd=None, token_provider=lambda: "unused")
+    assert runner.cwd == "/app"
+
+
+def test_runner_rejects_non_allowlisted_cwd():
+    runner = AgentRunner(
+        cwd="/tmp/not-allowed",
+        token_provider=lambda: "unused",
+        cwd_allowlist=["/app"],
+    )
+    assert runner.cwd == "/app"
+
+
+def test_runner_accepts_allowlisted_cwd():
+    runner = AgentRunner(
+        cwd="/workspace/demo",
+        token_provider=lambda: "unused",
+        cwd_allowlist=["/workspace"],
+    )
+    assert runner.cwd == "/workspace/demo"
 
 
 def test_build_options_modern_sdk_uses_env_auth_for_oat_token():
@@ -122,9 +168,25 @@ def test_build_options_includes_stderr_and_debug_flag_when_supported():
     assert options.kwargs["extra_args"] == {"debug-to-stderr": None}
 
 
+def test_build_options_sets_workspace_when_sdk_supports_it():
+    runner = _runner()
+
+    options = runner._build_options(
+        options_cls=ModernOptionsWithWorkspace,
+        token="sk-ant-oat01-example-token",
+        resume_id="resume-3",
+    )
+
+    assert options.kwargs["workspace"] == "/app"
+    assert options.kwargs["cwd"] == "/app"
+    assert options.kwargs["resume"] == "resume-3"
+
+
 def test_parse_message_maps_is_error_result_to_error_event():
     runner = _runner()
-    event = runner._parse_message({"type": "result", "result": "Auth failed", "is_error": True})
+    event = runner._parse_message(
+        {"type": "result", "result": "Auth failed", "is_error": True}
+    )
     assert event is not None
     assert event["type"] == "error"
     assert event["content"] == "Auth failed"
