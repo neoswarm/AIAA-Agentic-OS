@@ -32,7 +32,7 @@ from flask import (
 )
 
 import models
-from services.agent_runner import AgentRunner, RunnerError
+from services.chat_runner import ChatRunnerBackend, RunnerError, create_chat_runner
 from services.chat_store import ChatStore, InMemoryChatStore, RedisChatStore
 
 
@@ -41,7 +41,7 @@ chat_bp = Blueprint("chat", __name__)
 CLAUDE_TOKEN_SETTING_KEY = "claude_setup_token"
 
 _runner_lock = threading.RLock()
-_runner: AgentRunner | None = None
+_runner: ChatRunnerBackend | None = None
 _store_lock = threading.RLock()
 _store: ChatStore | None = None
 _message_rate_lock = threading.RLock()
@@ -344,14 +344,14 @@ def _get_chat_store() -> ChatStore:
     return _store
 
 
-def init_chat_runner(app=None) -> AgentRunner:
+def init_chat_runner(app=None) -> ChatRunnerBackend:
     """Initialize singleton runner once per process."""
     del app  # app is optional; current_app provides config context.
     global _runner
     store = _get_chat_store()
     with _runner_lock:
         if _runner is None:
-            _runner = AgentRunner(
+            _runner = create_chat_runner(
                 cwd=_project_root(),
                 token_provider=get_claude_token,
                 session_store=store,
@@ -362,7 +362,7 @@ def init_chat_runner(app=None) -> AgentRunner:
     return _runner
 
 
-def _get_runner() -> AgentRunner:
+def _get_runner() -> ChatRunnerBackend:
     global _runner
     if _runner is None:
         return init_chat_runner()
