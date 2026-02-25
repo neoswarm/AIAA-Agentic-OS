@@ -485,7 +485,7 @@ class RedisChatStore(ChatStore):
         session = self.get_session(session_id) or {
             "id": session_id,
             "title": "New Chat",
-            "status": "idle",
+            "status": "active",
             "sdk_session_id": None,
             "created_at": now,
         }

@@ -69,6 +69,10 @@ class FakePipeline:
         self._commands.append(("expire", key, ttl_seconds))
         return self
 
+    def zadd(self, key: str, mapping: dict[str, float]) -> "FakePipeline":
+        self._commands.append(("zadd", key, dict(mapping)))
+        return self
+
     def execute(self) -> list[bool]:
         for command in self._commands:
             op = command[0]
@@ -81,6 +85,10 @@ class FakePipeline:
             elif op == "expire":
                 _, key, ttl = command
                 self._client.expiry[key] = ttl
+            elif op == "zadd":
+                _, key, mapping = command
+                bucket = self._client.sorted_sets.setdefault(key, {})
+                bucket.update(mapping)
         return [True] * len(self._commands)
 
 
@@ -90,6 +98,7 @@ class FakeRedis:
     def __init__(self) -> None:
         self.values: dict[str, str] = {}
         self.lists: dict[str, list[str]] = {}
+        self.sorted_sets: dict[str, dict[str, float]] = {}
         self.expiry: dict[str, int] = {}
 
     def pipeline(self, transaction: bool = True) -> FakePipeline:
@@ -104,6 +113,13 @@ class FakeRedis:
         if end == -1:
             return items[start:]
         return items[start : end + 1]
+
+    def zrevrange(self, key: str, start: int, end: int) -> list[str]:
+        entries = self.sorted_sets.get(key, {})
+        ordered = [item[0] for item in sorted(entries.items(), key=lambda item: item[1], reverse=True)]
+        if end == -1:
+            return ordered[start:]
+        return ordered[start : end + 1]
 
 
 def _reset_db_connection() -> None:

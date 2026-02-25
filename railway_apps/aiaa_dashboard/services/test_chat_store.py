@@ -37,6 +37,10 @@ class FakePipeline:
         self._commands.append(("expire", key, ttl_seconds))
         return self
 
+    def zadd(self, key: str, mapping: dict[str, float]) -> "FakePipeline":
+        self._commands.append(("zadd", key, dict(mapping)))
+        return self
+
     def execute(self) -> list[bool]:
         if self._should_fail:
             raise RuntimeError("simulated transaction failure")
@@ -52,6 +56,10 @@ class FakePipeline:
             elif op == "expire":
                 _, key, ttl = command
                 self._client.expiry[key] = ttl
+            elif op == "zadd":
+                _, key, mapping = command
+                bucket = self._client.sorted_sets.setdefault(key, {})
+                bucket.update(mapping)
         return [True] * len(self._commands)
 
 
@@ -61,6 +69,7 @@ class FakeRedis:
     def __init__(self, *, fail_execute: bool = False) -> None:
         self.values: dict[str, str] = {}
         self.lists: dict[str, list[str]] = {}
+        self.sorted_sets: dict[str, dict[str, float]] = {}
         self.expiry: dict[str, int] = {}
         self.pipeline_transactions: list[bool] = []
         self._fail_execute = fail_execute
@@ -79,6 +88,13 @@ class FakeRedis:
         if end == -1:
             return items[start:]
         return items[start : end + 1]
+
+    def zrevrange(self, key: str, start: int, end: int) -> list[str]:
+        entries = self.sorted_sets.get(key, {})
+        ordered = [item[0] for item in sorted(entries.items(), key=lambda item: item[1], reverse=True)]
+        if end == -1:
+            return ordered[start:]
+        return ordered[start : end + 1]
 
 
 def test_append_message_is_atomic_and_uses_transaction() -> None:

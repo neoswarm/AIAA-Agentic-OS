@@ -37,9 +37,20 @@ def create_app(config_class=None):
     # Load configuration
     if config_class is None:
         config_class = get_config()
-
+    
     app.config.from_object(config_class)
-    app.secret_key = config_class.SECRET_KEY
+    # Re-read env overrides at app-creation time so tests and subprocesses that
+    # mutate env vars after module import still get the correct runtime config.
+    app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", app.config.get("SECRET_KEY"))
+    app.config["DASHBOARD_USERNAME"] = os.getenv(
+        "DASHBOARD_USERNAME", app.config.get("DASHBOARD_USERNAME")
+    )
+    app.config["DASHBOARD_PASSWORD_HASH"] = os.getenv(
+        "DASHBOARD_PASSWORD_HASH", app.config.get("DASHBOARD_PASSWORD_HASH")
+    )
+    app.config["DB_PATH"] = os.getenv("DB_PATH", app.config.get("DB_PATH"))
+
+    app.secret_key = app.config["SECRET_KEY"]
     app.config["PROJECT_ROOT"] = str(Path(__file__).resolve().parents[2])
 
     # Configure session cookies
@@ -49,12 +60,12 @@ def create_app(config_class=None):
     app.config["PERMANENT_SESSION_LIFETIME"] = config_class.PERMANENT_SESSION_LIFETIME
 
     # Set database path
-    database.set_db_path(config_class.DB_PATH)
+    database.set_db_path(app.config["DB_PATH"])
 
     # Initialize database
     with app.app_context():
         database.init_db(app)
-        print(f"✅ Database initialized at {config_class.DB_PATH}")
+        print(f"✅ Database initialized at {app.config['DB_PATH']}")
 
         # Validate configuration
         validation = config_class.validate_config()
@@ -129,8 +140,8 @@ def hash_password(password: str) -> str:
 def check_password(password: str) -> bool:
     """Check password against configured hash."""
     from config import Config
-
-    password_hash = Config.DASHBOARD_PASSWORD_HASH
+    
+    password_hash = os.getenv("DASHBOARD_PASSWORD_HASH", Config.DASHBOARD_PASSWORD_HASH)
 
     if not password_hash:
         return False

@@ -5,6 +5,9 @@
 CREATE TABLE IF NOT EXISTS user_settings (
     setting_key TEXT PRIMARY KEY,
     setting_value TEXT NOT NULL,
+    last_validated_at TEXT,
+    validation_status TEXT,
+    last_error TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

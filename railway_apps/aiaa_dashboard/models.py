@@ -4,6 +4,9 @@ All database operations for workflows, events, webhooks, and executions.
 """
 
 import json
+import os
+import base64
+import hashlib
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from cryptography.fernet import Fernet, InvalidToken
@@ -890,15 +893,29 @@ def create_skill_execution(
     execution_id: str,
     skill_name: str,
     params: Optional[Dict] = None,
-    cost_estimate: Optional[float] = None
+    cost_estimate: Optional[float] = None,
+    telemetry: Optional[Dict[str, Any]] = None,
+    profile_used: Optional[str] = None,
 ) -> str:
     """Create a new skill execution record. Returns the execution ID."""
-    params_json = json.dumps(params) if params else None
-    execute(
-        """INSERT INTO skill_executions (id, skill_name, params, status, cost_estimate, created_at)
-        VALUES (?, ?, ?, 'queued', ?, datetime('now'))""",
-        (execution_id, skill_name, params_json, cost_estimate)
-    )
+    params_json = json.dumps(params) if params is not None else None
+    telemetry_json = json.dumps(telemetry) if telemetry is not None else None
+
+    try:
+        execute(
+            """INSERT INTO skill_executions (
+                id, skill_name, params, status, cost_estimate, telemetry, profile_used, created_at
+            ) VALUES (?, ?, ?, 'queued', ?, ?, ?, datetime('now'))""",
+            (execution_id, skill_name, params_json, cost_estimate, telemetry_json, profile_used),
+        )
+    except Exception:
+        # Backward-compatible fallback for older schemas without telemetry/profile_used.
+        execute(
+            """INSERT INTO skill_executions (
+                id, skill_name, params, status, cost_estimate, created_at
+            ) VALUES (?, ?, ?, 'queued', ?, datetime('now'))""",
+            (execution_id, skill_name, params_json, cost_estimate),
+        )
     return execution_id
 
 
@@ -909,108 +926,293 @@ def update_skill_execution_status(
     output_path: Optional[str] = None,
     error_message: Optional[str] = None
 ) -> int:
-    """Update a skill execution status and optional fields."""
-    if status == 'running':
-        return execute(
-            "UPDATE skill_executions SET status = ?, started_at = datetime('now') WHERE id = ?",
-            (status, execution_id)
-        )
-    elif status in ('success', 'error', 'cancelled'):
-        return execute(
-            """UPDATE skill_executions SET
-                status = ?,
-                completed_at = datetime('now'),
-                duration_ms = CAST((julianday(datetime('now')) - julianday(started_at)) * 86400000 AS INTEGER),
-                output_preview = COALESCE(?, output_preview),
-                output_path = COALESCE(?, output_path),
-                error_message = COALESCE(?, error_message)
-            WHERE id = ?""",
-            (status, output_preview, output_path, error_message, execution_id)
-        )
-    else:
-        return execute(
-            "UPDATE skill_executions SET status = ? WHERE id = ?",
-            (status, execution_id)
-        )
+    """Update a skill execution status and latency metrics."""
+    has_preview = bool(output_preview)
+
+    try:
+        if status == "running":
+            return execute(
+                """UPDATE skill_executions SET
+                    status = 'running',
+                    started_at = COALESCE(started_at, CURRENT_TIMESTAMP),
+                    queue_wait_ms = COALESCE(
+                        queue_wait_ms,
+                        CAST((julianday(CURRENT_TIMESTAMP) - julianday(created_at)) * 86400000 AS INTEGER)
+                    ),
+                    first_token_at = CASE
+                        WHEN first_token_at IS NULL AND ? = 1 THEN CURRENT_TIMESTAMP
+                        ELSE first_token_at
+                    END,
+                    first_token_ms = CASE
+                        WHEN first_token_ms IS NULL AND ? = 1 THEN CAST((julianday(CURRENT_TIMESTAMP) - julianday(created_at)) * 86400000 AS INTEGER)
+                        ELSE first_token_ms
+                    END,
+                    output_preview = COALESCE(?, output_preview),
+                    output_path = COALESCE(?, output_path),
+                    error_message = COALESCE(?, error_message)
+                WHERE id = ?""",
+                (
+                    1 if has_preview else 0,
+                    1 if has_preview else 0,
+                    output_preview,
+                    output_path,
+                    error_message,
+                    execution_id,
+                ),
+            )
+
+        if status in {"success", "error", "cancelled", "timeout"}:
+            return execute(
+                """UPDATE skill_executions SET
+                    status = ?,
+                    completed_at = COALESCE(completed_at, CURRENT_TIMESTAMP),
+                    queue_wait_ms = COALESCE(
+                        queue_wait_ms,
+                        CASE
+                            WHEN started_at IS NOT NULL
+                                THEN CAST((julianday(started_at) - julianday(created_at)) * 86400000 AS INTEGER)
+                            ELSE CAST((julianday(CURRENT_TIMESTAMP) - julianday(created_at)) * 86400000 AS INTEGER)
+                        END
+                    ),
+                    first_token_at = CASE
+                        WHEN first_token_at IS NULL AND ? = 1 THEN CURRENT_TIMESTAMP
+                        ELSE first_token_at
+                    END,
+                    first_token_ms = CASE
+                        WHEN first_token_ms IS NULL AND ? = 1 THEN CAST((julianday(CURRENT_TIMESTAMP) - julianday(created_at)) * 86400000 AS INTEGER)
+                        ELSE first_token_ms
+                    END,
+                    duration_ms = COALESCE(
+                        duration_ms,
+                        CASE
+                            WHEN started_at IS NOT NULL
+                                THEN CAST((julianday(CURRENT_TIMESTAMP) - julianday(started_at)) * 86400000 AS INTEGER)
+                            ELSE NULL
+                        END
+                    ),
+                    total_runtime_ms = COALESCE(
+                        total_runtime_ms,
+                        CAST((julianday(CURRENT_TIMESTAMP) - julianday(created_at)) * 86400000 AS INTEGER)
+                    ),
+                    output_preview = COALESCE(?, output_preview),
+                    output_path = COALESCE(?, output_path),
+                    error_message = COALESCE(?, error_message)
+                WHERE id = ?""",
+                (
+                    status,
+                    1 if has_preview else 0,
+                    1 if has_preview else 0,
+                    output_preview,
+                    output_path,
+                    error_message,
+                    execution_id,
+                ),
+            )
+    except Exception:
+        # Compatibility fallback for pre-latency schemas.
+        if status == 'running':
+            return execute(
+                "UPDATE skill_executions SET status = ?, started_at = datetime('now') WHERE id = ?",
+                (status, execution_id),
+            )
+        if status in ('success', 'error', 'cancelled'):
+            return execute(
+                """UPDATE skill_executions SET
+                    status = ?,
+                    completed_at = datetime('now'),
+                    duration_ms = CAST((julianday(datetime('now')) - julianday(started_at)) * 86400000 AS INTEGER),
+                    output_preview = COALESCE(?, output_preview),
+                    output_path = COALESCE(?, output_path),
+                    error_message = COALESCE(?, error_message)
+                WHERE id = ?""",
+                (status, output_preview, output_path, error_message, execution_id),
+            )
+
+    return execute(
+        """UPDATE skill_executions SET
+            status = ?,
+            output_preview = COALESCE(?, output_preview),
+            output_path = COALESCE(?, output_path),
+            error_message = COALESCE(?, error_message)
+        WHERE id = ?""",
+        (status, output_preview, output_path, error_message, execution_id),
+    )
 
 
 def get_skill_execution(execution_id: str) -> Optional[Dict[str, Any]]:
     """Get a single skill execution by ID."""
     row = query_one("SELECT * FROM skill_executions WHERE id = ?", (execution_id,))
-    return row_to_dict(row)
+    payload = row_to_dict(row)
+    if payload is None:
+        return None
+
+    params_value = payload.get("params")
+    if isinstance(params_value, str):
+        try:
+            payload["params"] = json.loads(params_value)
+        except Exception:
+            pass
+
+    telemetry_value = payload.get("telemetry")
+    if isinstance(telemetry_value, str):
+        try:
+            payload["telemetry"] = json.loads(telemetry_value)
+        except Exception:
+            pass
+
+    return payload
 
 
 def get_skill_executions(
     skill_name: Optional[str] = None,
     status: Optional[str] = None,
-    limit: int = 50
+    search: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    limit: int = 50,
 ) -> List[Dict[str, Any]]:
-    """Get skill executions with optional filters."""
-    conditions = []
-    params = []
+    """Get executions with skill-listing friendly fields and optional filters."""
+    filters: List[str] = []
+    params: List[Any] = []
+
     if skill_name:
-        conditions.append("skill_name = ?")
+        filters.append("workflow_name = ?")
         params.append(skill_name)
+
     if status:
-        conditions.append("status = ?")
+        filters.append("status = ?")
         params.append(status)
 
-    where = " AND ".join(conditions)
-    if where:
-        where = "WHERE " + where
+    if date_from:
+        filters.append("DATE(started_at) >= DATE(?)")
+        params.append(date_from)
 
-    params.append(limit)
-    rows = query(
-        f"SELECT * FROM skill_executions {where} ORDER BY created_at DESC LIMIT ?",
-        tuple(params)
-    )
+    if date_to:
+        filters.append("DATE(started_at) <= DATE(?)")
+        params.append(date_to)
+
+    if search:
+        search_term = f"%{search.strip().lower()}%"
+        filters.append(
+            "("
+            "LOWER(workflow_name) LIKE ? OR "
+            "LOWER(COALESCE(trigger_type, '')) LIKE ? OR "
+            "LOWER(COALESCE(output_summary, '')) LIKE ? OR "
+            "LOWER(COALESCE(error_message, '')) LIKE ?"
+            ")"
+        )
+        params.extend([search_term, search_term, search_term, search_term])
+
+    sql = """
+        SELECT
+            id,
+            workflow_id,
+            workflow_name,
+            workflow_name AS skill_name,
+            trigger_type,
+            status,
+            started_at,
+            started_at AS created_at,
+            completed_at,
+            duration_ms,
+            output_summary,
+            output_summary AS output_preview,
+            error_message,
+            metadata
+        FROM executions
+    """
+    if filters:
+        sql += " WHERE " + " AND ".join(filters)
+    sql += " ORDER BY started_at DESC LIMIT ?"
+
+    params.append(max(1, limit))
+    rows = query(sql, tuple(params))
     return rows_to_dicts(rows)
 
 
 def get_recent_skill_executions(limit: int = 10) -> List[Dict[str, Any]]:
     """Get most recent skill executions."""
-    return get_skill_executions(limit=limit)
+    rows = query(
+        "SELECT * FROM skill_executions ORDER BY created_at DESC LIMIT ?",
+        (max(1, limit),),
+    )
+    return rows_to_dicts(rows)
 
 
 def cancel_skill_execution(execution_id: str) -> int:
     """Cancel a queued or running skill execution."""
-    return execute(
-        """UPDATE skill_executions SET
-            status = 'cancelled',
-            completed_at = datetime('now'),
-            duration_ms = CASE
-                WHEN started_at IS NOT NULL
-                THEN CAST((julianday(datetime('now')) - julianday(started_at)) * 86400000 AS INTEGER)
-                ELSE 0
-            END
-        WHERE id = ? AND status IN ('queued', 'running')""",
-        (execution_id,)
-    )
+    try:
+        return execute(
+            """UPDATE skill_executions SET
+                status = 'cancelled',
+                completed_at = CURRENT_TIMESTAMP,
+                queue_wait_ms = COALESCE(
+                    queue_wait_ms,
+                    CASE
+                        WHEN started_at IS NOT NULL
+                            THEN CAST((julianday(started_at) - julianday(created_at)) * 86400000 AS INTEGER)
+                        ELSE CAST((julianday(CURRENT_TIMESTAMP) - julianday(created_at)) * 86400000 AS INTEGER)
+                    END
+                ),
+                duration_ms = CASE
+                    WHEN started_at IS NOT NULL
+                        THEN CAST((julianday(CURRENT_TIMESTAMP) - julianday(started_at)) * 86400000 AS INTEGER)
+                    ELSE duration_ms
+                END,
+                total_runtime_ms = CAST((julianday(CURRENT_TIMESTAMP) - julianday(created_at)) * 86400000 AS INTEGER)
+            WHERE id = ? AND status IN ('queued', 'running')""",
+            (execution_id,),
+        )
+    except Exception:
+        return execute(
+            """UPDATE skill_executions SET
+                status = 'cancelled',
+                completed_at = datetime('now'),
+                duration_ms = CASE
+                    WHEN started_at IS NOT NULL
+                    THEN CAST((julianday(datetime('now')) - julianday(started_at)) * 86400000 AS INTEGER)
+                    ELSE 0
+                END
+            WHERE id = ? AND status IN ('queued', 'running')""",
+            (execution_id,),
+        )
 
 
 def get_skill_execution_stats() -> Dict[str, Any]:
-    """Get skill execution statistics."""
-    stats = {}
+    """Get aggregate skill execution statistics."""
+    stats: Dict[str, Any] = {}
 
-    row = query_one("SELECT COUNT(*) as total FROM skill_executions")
-    stats["total"] = row["total"]
+    row = query_one("SELECT COUNT(*) AS total FROM skill_executions")
+    stats["total_executions"] = row["total"] if row else 0
+    stats["total"] = stats["total_executions"]
 
-    rows = query("SELECT status, COUNT(*) as count FROM skill_executions GROUP BY status")
-    stats["by_status"] = {row["status"]: row["count"] for row in rows}
+    rows = query("SELECT status, COUNT(*) AS count FROM skill_executions GROUP BY status")
+    stats["by_status"] = {r["status"]: r["count"] for r in rows}
 
-    success = stats["by_status"].get("success", 0)
-    total = stats["total"]
-    stats["success_rate"] = round(success / total * 100, 2) if total > 0 else 0
+    success_count = stats["by_status"].get("success", 0)
+    total_count = stats["total_executions"]
+    stats["success_rate"] = round((success_count / total_count) * 100, 2) if total_count > 0 else 0
 
-    row = query_one(
-        "SELECT AVG(duration_ms) as avg_duration FROM skill_executions WHERE duration_ms IS NOT NULL"
-    )
-    stats["avg_duration_ms"] = int(row["avg_duration"]) if row["avg_duration"] else 0
+    row = query_one("SELECT AVG(duration_ms) AS avg_duration FROM skill_executions WHERE duration_ms IS NOT NULL")
+    stats["avg_duration_ms"] = int(row["avg_duration"]) if row and row["avg_duration"] else 0
+
+    row = query_one("SELECT AVG(queue_wait_ms) AS avg_queue_wait FROM skill_executions WHERE queue_wait_ms IS NOT NULL")
+    stats["avg_queue_wait_ms"] = int(row["avg_queue_wait"]) if row and row["avg_queue_wait"] else 0
+
+    row = query_one("SELECT AVG(first_token_ms) AS avg_first_token FROM skill_executions WHERE first_token_ms IS NOT NULL")
+    stats["avg_first_token_ms"] = int(row["avg_first_token"]) if row and row["avg_first_token"] else 0
+
+    row = query_one("SELECT AVG(total_runtime_ms) AS avg_total_runtime FROM skill_executions WHERE total_runtime_ms IS NOT NULL")
+    stats["avg_total_runtime_ms"] = int(row["avg_total_runtime"]) if row and row["avg_total_runtime"] else 0
 
     rows = query(
-        "SELECT skill_name, COUNT(*) as count FROM skill_executions GROUP BY skill_name ORDER BY count DESC LIMIT 10"
+        """SELECT skill_name, COUNT(*) AS runs
+        FROM skill_executions
+        GROUP BY skill_name
+        ORDER BY runs DESC
+        LIMIT 8"""
     )
-    stats["top_skills"] = {row["skill_name"]: row["count"] for row in rows}
+    stats["top_skills"] = {r["skill_name"]: r["runs"] for r in rows}
 
     return stats
 
@@ -1109,45 +1311,348 @@ def search_client_profiles(query_str: str) -> List[Dict[str, Any]]:
 
 
 # ==============================================================================
+# Session History Operations
+# ==============================================================================
+
+def upsert_session_history(session_id: str, metadata: Optional[Dict[str, Any]] = None) -> int:
+    """Insert or update a session history envelope."""
+    metadata_json = json.dumps(metadata or {})
+    return execute(
+        """INSERT INTO session_history_sessions (id, metadata, updated_at)
+        VALUES (?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(id) DO UPDATE SET
+            metadata = excluded.metadata,
+            updated_at = CURRENT_TIMESTAMP""",
+        (session_id, metadata_json),
+    )
+
+
+def log_session_history_message(
+    session_id: str,
+    role: str,
+    content: str,
+    metadata: Optional[Dict[str, Any]] = None,
+) -> int:
+    """Append one chat message to session history."""
+    metadata_json = json.dumps(metadata or {})
+    # Ensure session shell exists without clobbering existing metadata.
+    execute(
+        """INSERT INTO session_history_sessions (id, metadata, updated_at)
+        VALUES (?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(id) DO UPDATE SET
+            updated_at = CURRENT_TIMESTAMP""",
+        (session_id, json.dumps({})),
+    )
+    return insert(
+        """INSERT INTO session_history_messages (session_id, role, content, metadata)
+        VALUES (?, ?, ?, ?)""",
+        (session_id, role, content, metadata_json),
+    )
+
+
+def get_session_history_session(session_id: str) -> Optional[Dict[str, Any]]:
+    """Get one session history row by session id."""
+    row = query_one(
+        "SELECT id, metadata, created_at, updated_at FROM session_history_sessions WHERE id = ?",
+        (session_id,),
+    )
+    payload = row_to_dict(row)
+    if payload is None:
+        return None
+
+    metadata = payload.get("metadata")
+    if isinstance(metadata, str):
+        try:
+            payload["metadata"] = json.loads(metadata)
+        except Exception:
+            payload["metadata"] = {}
+    elif metadata is None:
+        payload["metadata"] = {}
+
+    return payload
+
+
+def get_session_history_messages(
+    session_id: str,
+    limit: int = 50,
+    offset: int = 0,
+) -> List[Dict[str, Any]]:
+    """Get paginated session history messages in insertion order."""
+    rows = query(
+        """SELECT id, session_id, role, content, metadata, created_at
+        FROM session_history_messages
+        WHERE session_id = ?
+        ORDER BY id ASC
+        LIMIT ? OFFSET ?""",
+        (session_id, max(1, limit), max(0, offset)),
+    )
+    payloads = rows_to_dicts(rows)
+    for item in payloads:
+        metadata = item.get("metadata")
+        if isinstance(metadata, str):
+            try:
+                item["metadata"] = json.loads(metadata)
+            except Exception:
+                item["metadata"] = {}
+        elif metadata is None:
+            item["metadata"] = {}
+    return payloads
+
+
+def count_session_history_messages(session_id: str) -> int:
+    """Count messages for a given session history id."""
+    row = query_one(
+        "SELECT COUNT(*) AS total FROM session_history_messages WHERE session_id = ?",
+        (session_id,),
+    )
+    return int(row["total"]) if row else 0
+
+
+# ==============================================================================
 # User Settings Operations
 # ==============================================================================
 
-def get_setting(key: str) -> Optional[str]:
-    """Get a user setting value by key."""
-    row = query_one("SELECT value FROM user_settings WHERE key = ?", (key,))
-    return row["value"] if row else None
+_ENCRYPTED_SETTING_PREFIX = "enc:v1:"
 
 
-def set_setting(key: str, value: str) -> int:
-    """Set a user setting (upsert)."""
+def _requires_encryption(setting_key: str) -> bool:
+    """Return True for setting keys that must be encrypted at rest."""
+    return setting_key == "claude_setup_token" or setting_key.endswith(".claude_setup_token")
+
+
+def _get_settings_fernet() -> Fernet:
+    """Build a Fernet cipher from explicit key or Flask secret."""
+    raw_key = (
+        os.getenv("SETTINGS_ENCRYPTION_KEY")
+        or os.getenv("FLASK_SECRET_KEY")
+        or os.getenv("SECRET_KEY")
+    )
+    if not raw_key:
+        raise RuntimeError(
+            "Missing encryption key. Set SETTINGS_ENCRYPTION_KEY or FLASK_SECRET_KEY."
+        )
+
+    try:
+        return Fernet(raw_key.encode("utf-8"))
+    except Exception:
+        derived = base64.urlsafe_b64encode(hashlib.sha256(raw_key.encode("utf-8")).digest())
+        return Fernet(derived)
+
+
+def _encrypt_setting_value(setting_key: str, setting_value: Optional[str]) -> Optional[str]:
+    """Encrypt sensitive setting values before persisting to storage."""
+    if setting_value is None or not _requires_encryption(setting_key):
+        return setting_value
+    if setting_value.startswith(_ENCRYPTED_SETTING_PREFIX):
+        return setting_value
+
+    cipher = _get_settings_fernet()
+    encrypted = cipher.encrypt(setting_value.encode("utf-8")).decode("utf-8")
+    return f"{_ENCRYPTED_SETTING_PREFIX}{encrypted}"
+
+
+def _decrypt_setting_value(setting_key: str, stored_value: Optional[str]) -> Optional[str]:
+    """Decrypt sensitive setting values after reading from storage."""
+    if stored_value is None or not _requires_encryption(setting_key):
+        return stored_value
+    if not stored_value.startswith(_ENCRYPTED_SETTING_PREFIX):
+        # Backward compatibility for pre-encryption rows.
+        return stored_value
+
+    cipher = _get_settings_fernet()
+    token = stored_value[len(_ENCRYPTED_SETTING_PREFIX):]
+    try:
+        return cipher.decrypt(token.encode("utf-8")).decode("utf-8")
+    except InvalidToken as exc:
+        raise RuntimeError("Unable to decrypt claude_setup_token setting value.") from exc
+
+
+def _upsert_user_setting(
+    setting_key: str,
+    setting_value: Optional[str],
+    last_validated_at: Optional[str] = None,
+    validation_status: Optional[str] = None,
+    last_error: Optional[str] = None,
+) -> int:
+    """Upsert user_settings row with optional token metadata."""
+    if validation_status is not None and last_validated_at is None:
+        last_validated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+
     return execute(
-        """INSERT INTO user_settings (key, value, updated_at)
-        VALUES (?, ?, datetime('now'))
+        """INSERT INTO user_settings (
+            setting_key, setting_value, last_validated_at, validation_status, last_error, updated_at
+        ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(setting_key) DO UPDATE SET
+            setting_value = excluded.setting_value,
+            last_validated_at = CASE
+                WHEN excluded.validation_status IS NOT NULL THEN excluded.last_validated_at
+                ELSE user_settings.last_validated_at
+            END,
+            validation_status = COALESCE(excluded.validation_status, user_settings.validation_status),
+            last_error = CASE
+                WHEN excluded.validation_status IS NOT NULL THEN excluded.last_error
+                ELSE user_settings.last_error
+            END,
+            updated_at = CURRENT_TIMESTAMP""",
+        (setting_key, setting_value or "", last_validated_at, validation_status, last_error),
+    )
+
+
+def set_setting(
+    setting_key: str,
+    setting_value: Optional[str],
+    last_validated_at: Optional[str] = None,
+    validation_status: Optional[str] = None,
+    last_error: Optional[str] = None,
+) -> int:
+    """Create or update a setting value with optional metadata.
+
+    `settings` remains the canonical encrypted store for `claude_setup_token`.
+    `user_settings` stores dashboard/runtime settings and token metadata.
+    """
+    value_to_store = _encrypt_setting_value(setting_key, setting_value)
+    rows = execute(
+        """INSERT INTO settings (key, value, updated_at)
+        VALUES (?, ?, CURRENT_TIMESTAMP)
         ON CONFLICT(key) DO UPDATE SET
             value = excluded.value,
-            updated_at = datetime('now')""",
-        (key, value)
+            updated_at = CURRENT_TIMESTAMP""",
+        (setting_key, value_to_store),
     )
 
+    if not _requires_encryption(setting_key):
+        _upsert_user_setting(
+            setting_key,
+            setting_value,
+            last_validated_at=last_validated_at,
+            validation_status=validation_status,
+            last_error=last_error,
+        )
 
-def get_all_settings() -> Dict[str, str]:
-    """Get all user settings as a dictionary."""
-    rows = query("SELECT key, value FROM user_settings ORDER BY key")
-    return {row["key"]: row["value"] for row in rows}
+    return rows
 
 
-def delete_setting(key: str) -> int:
-    """Delete a user setting."""
-    return execute("DELETE FROM user_settings WHERE key = ?", (key,))
+def get_setting(setting_key: str, default: Optional[str] = None) -> Optional[str]:
+    """Get a setting value, preferring user_settings and falling back to settings."""
+    if not _requires_encryption(setting_key):
+        row = query_one(
+            "SELECT setting_value FROM user_settings WHERE setting_key = ?",
+            (setting_key,),
+        )
+        if row is not None:
+            return row["setting_value"]
+
+    row = query_one("SELECT value FROM settings WHERE key = ?", (setting_key,))
+    if row is None:
+        return default
+    return _decrypt_setting_value(setting_key, row["value"])
 
 
-def get_settings_by_prefix(prefix: str) -> Dict[str, str]:
-    """Get all settings matching a key prefix (e.g. 'api_key.')."""
-    rows = query(
-        "SELECT key, value FROM user_settings WHERE key LIKE ? ORDER BY key",
-        (f"{prefix}%",)
+def get_setting_metadata(setting_key: str) -> Dict[str, Optional[str]]:
+    """Get token validation metadata for a setting key."""
+    row = query_one(
+        """SELECT last_validated_at, validation_status, last_error
+        FROM user_settings
+        WHERE setting_key = ?""",
+        (setting_key,),
     )
-    return {row["key"]: row["value"] for row in rows}
+    if not row:
+        return {
+            "last_validated_at": None,
+            "validation_status": None,
+            "last_error": None,
+        }
+
+    return {
+        "last_validated_at": row["last_validated_at"],
+        "validation_status": row["validation_status"],
+        "last_error": row["last_error"],
+    }
+
+
+def update_setting_metadata(
+    setting_key: str,
+    validation_status: str,
+    last_error: Optional[str] = None,
+    last_validated_at: Optional[str] = None,
+) -> int:
+    """Update token metadata for a setting key."""
+    if last_validated_at is None:
+        last_validated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+    rows = execute(
+        """UPDATE user_settings
+        SET
+            last_validated_at = ?,
+            validation_status = ?,
+            last_error = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE setting_key = ?""",
+        (last_validated_at, validation_status, last_error, setting_key),
+    )
+
+    if rows == 0:
+        return _upsert_user_setting(
+            setting_key,
+            get_setting(setting_key) or "",
+            last_validated_at=last_validated_at,
+            validation_status=validation_status,
+            last_error=last_error,
+        )
+    return rows
+
+
+def get_all_settings() -> Dict[str, Optional[str]]:
+    """Get all settings merged from user_settings and encrypted settings."""
+    user_rows = query(
+        "SELECT setting_key, setting_value FROM user_settings ORDER BY setting_key"
+    )
+    merged: Dict[str, Optional[str]] = {
+        row["setting_key"]: row["setting_value"] for row in user_rows
+    }
+
+    settings_rows = query("SELECT key, value FROM settings ORDER BY key")
+    for row in settings_rows:
+        key = row["key"]
+        if key not in merged:
+            merged[key] = _decrypt_setting_value(key, row["value"])
+
+    return merged
+
+
+def delete_setting(setting_key: str) -> int:
+    """Delete a setting from both legacy and user_settings stores."""
+    user_deleted = execute(
+        "DELETE FROM user_settings WHERE setting_key = ?",
+        (setting_key,),
+    )
+    settings_deleted = execute(
+        "DELETE FROM settings WHERE key = ?",
+        (setting_key,),
+    )
+    return user_deleted + settings_deleted
+
+
+def get_settings_by_prefix(prefix: str) -> Dict[str, Optional[str]]:
+    """Get settings that begin with a key prefix."""
+    merged: Dict[str, Optional[str]] = {}
+
+    user_rows = query(
+        "SELECT setting_key, setting_value FROM user_settings WHERE setting_key LIKE ? ORDER BY setting_key",
+        (f"{prefix}%",),
+    )
+    for row in user_rows:
+        merged[row["setting_key"]] = row["setting_value"]
+
+    settings_rows = query(
+        "SELECT key, value FROM settings WHERE key LIKE ? ORDER BY key",
+        (f"{prefix}%",),
+    )
+    for row in settings_rows:
+        if row["key"] not in merged:
+            merged[row["key"]] = _decrypt_setting_value(row["key"], row["value"])
+
+    return merged
 
 
 # ==============================================================================

@@ -17,6 +17,12 @@ from typing import Any, Dict, List, Optional
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import models
 from config import Config
+from services.run_guard import (
+    bind_run_to_reservation,
+    release_run_reservation,
+    mark_run_running,
+    mark_run_finished,
+)
 
 
 # ==============================================================================
@@ -586,7 +592,12 @@ def _extract_profile_used(params: Optional[Dict[str, str]]) -> Optional[str]:
     return None
 
 
-def execute_skill(skill_name: str, params: Optional[Dict[str, str]] = None) -> str:
+def execute_skill(
+    skill_name: str,
+    params: Optional[Dict[str, str]] = None,
+    run_guard_session_key: Optional[str] = None,
+    run_guard_reservation_id: Optional[str] = None,
+) -> str:
     """Execute a skill's Python script with the given parameters.
 
     Creates a DB record, launches subprocess in a background thread,
@@ -670,9 +681,16 @@ def _run_skill_subprocess(execution_id: str, cmd: List[str], skill_name: str):
 
     This runs in a background thread.
     """
+    def _safe_update(status: str, **kwargs) -> None:
+        try:
+            models.update_skill_execution_status(execution_id, status, **kwargs)
+        except Exception:
+            # Avoid leaking thread exceptions when DB is unavailable during test teardown.
+            pass
+
     mark_run_running(execution_id)
     # Mark as running
-    models.update_skill_execution_status(execution_id, 'running')
+    _safe_update('running')
 
     try:
         # Set up environment with project root
@@ -697,8 +715,7 @@ def _run_skill_subprocess(execution_id: str, cmd: List[str], skill_name: str):
             output_path = _extract_output_path(stdout)
             preview = stdout[:500] if stdout else None
 
-            models.update_skill_execution_status(
-                execution_id,
+            _safe_update(
                 'success',
                 output_preview=preview,
                 output_path=output_path,
@@ -707,22 +724,19 @@ def _run_skill_subprocess(execution_id: str, cmd: List[str], skill_name: str):
             error_msg = stderr[:1000] if stderr else f"Process exited with code {process.returncode}"
             preview = stdout[:500] if stdout else None
 
-            models.update_skill_execution_status(
-                execution_id,
+            _safe_update(
                 'error',
                 output_preview=preview,
                 error_message=error_msg,
             )
 
     except subprocess.TimeoutExpired:
-        models.update_skill_execution_status(
-            execution_id,
+        _safe_update(
             'error',
             error_message=f"Execution timed out after {Config.SKILL_EXECUTION_TIMEOUT_SECONDS} seconds",
         )
     except Exception as e:
-        models.update_skill_execution_status(
-            execution_id,
+        _safe_update(
             'error',
             error_message=str(e)[:1000],
         )

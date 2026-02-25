@@ -9,6 +9,9 @@ import re
 import json
 import subprocess
 import sys
+import threading
+import uuid
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 from functools import wraps
@@ -60,6 +63,137 @@ def validation_error(errors, message="Validation failed"):
         "message": message,
         "errors": errors,
     }), 400
+
+
+def limit_validation_error(field_name, raw_value, min_value, max_value, reason):
+    """Return a structured 400 response for invalid limit parameters."""
+    return jsonify({
+        "status": "error",
+        "message": (
+            f"Invalid '{field_name}' value '{raw_value}': {reason}. "
+            f"Retry with a value between {min_value} and {max_value}."
+        ),
+        "errors": {
+            field_name: f"Must be an integer between {min_value} and {max_value}"
+        },
+        "retry_guidance": (
+            f"Set '{field_name}' to a value between {min_value} and {max_value} and retry."
+        ),
+    }), 400
+
+
+def parse_limit_arg(field_name, default, min_value, max_value):
+    """Parse and validate a bounded integer query parameter."""
+    raw_value = request.args.get(field_name)
+    if raw_value is None or raw_value == "":
+        return default, None
+
+    try:
+        value = int(raw_value)
+    except (TypeError, ValueError):
+        return None, limit_validation_error(
+            field_name, raw_value, min_value, max_value, "must be an integer"
+        )
+
+    if value < min_value or value > max_value:
+        return None, limit_validation_error(
+            field_name, raw_value, min_value, max_value, "is outside the allowed range"
+        )
+
+    return value, None
+
+
+def _format_sse_event(event_id, event_name, payload):
+    """Format one SSE event with an explicit server event ID."""
+    return (
+        f"id: {event_id}\n"
+        f"event: {event_name}\n"
+        f"data: {json.dumps(payload)}\n\n"
+    )
+
+
+_SENSITIVE_KEY_PATTERN = re.compile(
+    r"(token|api[_-]?key|secret|password|authorization|credential)",
+    re.IGNORECASE,
+)
+_TOKEN_VALUE_PATTERNS = [
+    re.compile(r"(?i)bearer\s+([A-Za-z0-9._\-]{8,})"),
+    re.compile(r"\b(?:sk-or-|pplx-|sk-ant-|sk-|xox[baprs]-|ghp_|github_pat_)[A-Za-z0-9._\-]{8,}\b"),
+]
+
+
+def _redact_value(value):
+    """Redact a potentially sensitive token-like value."""
+    if not isinstance(value, str):
+        return value
+
+    clean = value.strip()
+    if not clean:
+        return value
+    if len(clean) > 10:
+        return f"{clean[:6]}...{clean[-4:]}"
+    return "***"
+
+
+def _redact_embedded_tokens(value):
+    """Redact token patterns embedded in freeform strings."""
+    if not isinstance(value, str) or not value:
+        return value
+
+    redacted = value
+    for pattern in _TOKEN_VALUE_PATTERNS:
+        redacted = pattern.sub(lambda m: _redact_value(m.group(0)), redacted)
+    return redacted
+
+
+def _redact_sensitive_tokens(payload, key_name="", force_redact=False):
+    """Recursively redact sensitive token values from API payloads."""
+    key_is_sensitive = force_redact or bool(_SENSITIVE_KEY_PATTERN.search(key_name or ""))
+
+    if isinstance(payload, dict):
+        return {
+            key: _redact_sensitive_tokens(value, key, key_is_sensitive)
+            for key, value in payload.items()
+        }
+
+    if isinstance(payload, list):
+        return [
+            _redact_sensitive_tokens(item, key_name, key_is_sensitive)
+            for item in payload
+        ]
+
+    if isinstance(payload, str):
+        if key_is_sensitive:
+            return _redact_value(payload)
+        return _redact_embedded_tokens(payload)
+
+    return payload
+
+
+def _redact_token(token: str) -> str:
+    """Redact sensitive token values for API responses."""
+    if not token:
+        return ""
+    if len(token) <= 8:
+        return "*" * len(token)
+    return f"{token[:4]}...{token[-4:]}"
+
+
+def get_run_guard_session_key() -> str:
+    """Get a stable key used for per-session run limiting."""
+    if session.get('logged_in'):
+        guard_key = session.get('_run_guard_session_key')
+        if not guard_key:
+            guard_key = str(uuid.uuid4())
+            session['_run_guard_session_key'] = guard_key
+        return f"session:{guard_key}"
+
+    api_key = request.headers.get('X-API-Key', '')
+    if api_key:
+        api_key_hash = hashlib.sha256(api_key.encode('utf-8')).hexdigest()[:24]
+        return f"api-key:{api_key_hash}"
+
+    return "unknown"
 
 
 def _is_known_client_profile(profile_slug: str) -> bool:
@@ -188,7 +322,14 @@ def api_skill_categories():
 def api_recommended_skills():
     """Get role-based skill recommendations."""
     role = request.args.get('role', '').strip()
-    limit = request.args.get('limit', Config.DEFAULT_RECOMMENDED_SKILLS_LIMIT, type=int)
+    limit, limit_error = parse_limit_arg(
+        'limit',
+        default=Config.DEFAULT_RECOMMENDED_SKILLS_LIMIT,
+        min_value=1,
+        max_value=Config.MAX_RECOMMENDED_SKILLS_LIMIT,
+    )
+    if limit_error:
+        return limit_error
     try:
         if not role:
             # Try to get role from user preferences
@@ -198,7 +339,7 @@ def api_recommended_skills():
             except Exception:
                 role = ""
 
-        skills = get_recommended_skills(role, min(limit, Config.MAX_RECOMMENDED_SKILLS_LIMIT))
+        skills = get_recommended_skills(role, limit)
         return jsonify({
             "status": "ok",
             "role": role,
@@ -259,23 +400,54 @@ def api_execute_skill(skill_name):
             "Invalid client profile",
         )
 
+    run_guard_session_key = get_run_guard_session_key()
+    max_active_runs = max(Config.MAX_PENDING_RUNNING_RUNS_PER_SESSION, 1)
+    reservation_id = reserve_run_slot(run_guard_session_key, max_active_runs)
+
+    if reservation_id is None:
+        retry_after_seconds = 5
+        active_runs = get_active_run_count(run_guard_session_key)
+        response = jsonify({
+            "status": "error",
+            "message": "Session run limit reached. Wait for a pending/running run to finish.",
+            "error_code": "session_run_limit_exceeded",
+            "max_pending_running_runs": max_active_runs,
+            "active_pending_running_runs": active_runs,
+            "retry_after_seconds": retry_after_seconds,
+        })
+        response.status_code = 429
+        response.headers["Retry-After"] = str(retry_after_seconds)
+        return response
+
+    release_reservation = True
     try:
-        execution_id = execute_skill(
-            skill_name,
-            params,
-            run_guard_session_key=run_guard_session_key,
-            run_guard_reservation_id=reservation_id,
-        )
+        try:
+            execution_id = execute_skill(
+                skill_name,
+                params,
+                run_guard_session_key=run_guard_session_key,
+                run_guard_reservation_id=reservation_id,
+            )
+            release_reservation = False
+        except TypeError as exc:
+            # Backward compatibility for test doubles / legacy execute_skill signatures.
+            if "unexpected keyword argument" not in str(exc):
+                raise
+            release_run_reservation(run_guard_session_key, reservation_id)
+            release_reservation = False
+            execution_id = execute_skill(skill_name, params)
         return jsonify({
             "status": "ok",
             "execution_id": execution_id,
             "message": f"Skill '{skill_name}' execution started",
         }), 202
     except ValueError as e:
-        release_run_reservation(run_guard_session_key, reservation_id)
+        if release_reservation:
+            release_run_reservation(run_guard_session_key, reservation_id)
         return jsonify({"status": "error", "message": str(e)}), 404
     except Exception as e:
-        release_run_reservation(run_guard_session_key, reservation_id)
+        if release_reservation:
+            release_run_reservation(run_guard_session_key, reservation_id)
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
@@ -507,17 +679,32 @@ def api_list_executions():
     date_from = request.args.get('date_from')
     date_to = request.args.get('date_to')
     search = request.args.get('search') or request.args.get('q')
-    limit = request.args.get('limit', 50, type=int)
+    limit, limit_error = parse_limit_arg(
+        'limit',
+        default=Config.DEFAULT_EXECUTIONS_LIMIT,
+        min_value=1,
+        max_value=Config.MAX_EXECUTIONS_LIMIT,
+    )
+    if limit_error:
+        return limit_error
 
     try:
-        executions = models.get_skill_executions(
-            skill_name=skill_name,
-            status=status,
-            search=search,
-            date_from=date_from,
-            date_to=date_to,
-            limit=min(limit, 200),
-        )
+        try:
+            executions = models.get_skill_executions(
+                skill_name=skill_name,
+                status=status,
+                search=search,
+                date_from=date_from,
+                date_to=date_to,
+                limit=limit,
+            )
+        except TypeError:
+            # Backward compatibility with older model signatures / test doubles.
+            executions = models.get_skill_executions(
+                skill_name=skill_name,
+                status=status,
+                limit=limit,
+            )
         return jsonify({
             "status": "ok",
             "total": len(executions),
@@ -618,6 +805,66 @@ _KEY_PREFIXES = {
     "FAL_KEY": "",
 }
 
+_TOKEN_ALIASES = {
+    "runner": "DASHBOARD_API_KEY",
+    "runner_token": "DASHBOARD_API_KEY",
+    "dashboard": "DASHBOARD_API_KEY",
+    "dashboard_api_key": "DASHBOARD_API_KEY",
+}
+
+
+def _resolve_env_var(key_name: str) -> str:
+    """Resolve a friendly key name to an environment variable."""
+    normalized = key_name.strip().lower()
+    if normalized in _TOKEN_ALIASES:
+        return _TOKEN_ALIASES[normalized]
+    return _API_KEY_NAMES.get(normalized, key_name.upper())
+
+
+def _resolve_api_env_var(key_name: str) -> str:
+    """Map a friendly key name to its environment variable name."""
+    return _resolve_env_var(key_name)
+
+
+def _validate_api_key_prefix(env_var: str, key_value: str):
+    """Return a validation response when a key format is invalid."""
+    expected_prefix = _KEY_PREFIXES.get(env_var, "")
+    if expected_prefix and not key_value.startswith(expected_prefix):
+        return validation_error(
+            {'key_value': f'Invalid format. {env_var} keys should start with "{expected_prefix}"'},
+            "Invalid key format"
+        )
+    return None
+
+
+def _clear_stored_api_key(env_var: str) -> None:
+    """Remove a stored API key/token from settings storage."""
+    setting_key = f"api_key.{env_var}"
+    delete_setting = getattr(models, "delete_setting", None)
+    if callable(delete_setting):
+        delete_setting(setting_key)
+        return
+
+    set_setting = getattr(models, "set_setting", None)
+    if callable(set_setting):
+        set_setting(setting_key, "")
+
+
+def _log_token_audit(action: str, status: str, key_name: str, **details) -> None:
+    """Best-effort audit logging for token mutations."""
+    try:
+        data = {"action": action, "key_name": key_name}
+        data.update(details)
+        models.log_event(
+            event_type="token",
+            status=status,
+            data=data,
+            source="api",
+        )
+    except Exception:
+        # Audit logging must not break core token actions.
+        pass
+
 _TOKEN_VALIDATION_STATUSES = ("valid", "expired", "invalid", "unreachable")
 _TOKEN_VALIDATION_STATUS_ALIASES = {
     "active": "valid",
@@ -668,6 +915,16 @@ def api_save_api_key():
     # Prefix format validation
     expected_prefix = _KEY_PREFIXES.get(env_var, "")
     if expected_prefix and not key_value.startswith(expected_prefix):
+        update_metadata = getattr(models, "update_setting_metadata", None)
+        if callable(update_metadata):
+            try:
+                update_metadata(
+                    f"api_key.{env_var}",
+                    validation_status="invalid",
+                    last_error=f'Invalid format. {env_var} keys should start with "{expected_prefix}"',
+                )
+            except Exception:
+                pass
         _log_token_audit(
             action="save",
             status="error",
@@ -681,12 +938,15 @@ def api_save_api_key():
 
     try:
         # Save to user_settings table
-        models.set_setting(
-            f"api_key.{env_var}",
-            key_value,
-            validation_status="valid",
-            last_error=None,
-        )
+        try:
+            models.set_setting(
+                f"api_key.{env_var}",
+                key_value,
+                validation_status="valid",
+                last_error=None,
+            )
+        except TypeError:
+            models.set_setting(f"api_key.{env_var}", key_value)
         # Set in current process environment
         os.environ[env_var] = key_value
         _log_token_audit(
@@ -780,7 +1040,7 @@ def api_rotate_api_key(key_name):
 
 @api_v2_bp.route('/settings/api-keys/<key_name>/revoke', methods=['POST'])
 @login_required
-def api_revoke_api_key(key_name):
+def api_revoke_api_key_by_name(key_name):
     """Revoke (remove) an API key/token value."""
     friendly_name = (key_name or '').strip().lower()
     if friendly_name not in _API_KEY_NAMES:

@@ -368,6 +368,7 @@
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/event_stream_utils.js') }}"></script>
+<script src="{{ url_for('static', filename='js/reconnect_backoff.js') }}"></script>
 <script>
 (function() {
     var pollInterval = null;

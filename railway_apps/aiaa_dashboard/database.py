@@ -21,6 +21,14 @@ def set_db_path(path: str):
     """Set custom database path (call before init_db)."""
     global DB_PATH
     DB_PATH = Path(path)
+    # Reset thread-local connection when switching database paths so tests
+    # and app factories do not reuse a stale connection to another DB file.
+    if hasattr(_thread_local, "connection"):
+        try:
+            _thread_local.connection.close()
+        except Exception:
+            pass
+        delattr(_thread_local, "connection")
 
 
 def get_db() -> sqlite3.Connection:
