@@ -20,7 +20,7 @@ import database
 import models
 
 # Import blueprints
-from routes import api_bp, views_bp, api_v2_bp, chat_bp, init_chat_runner
+from routes import api_bp, views_bp, api_v2_bp, api_v1_bp, chat_bp, init_chat_runner
 
 VERSION = "5.0"
 
@@ -91,6 +91,7 @@ def create_app(config_class=None):
     app.register_blueprint(api_bp)
     app.register_blueprint(views_bp)
     app.register_blueprint(api_v2_bp)
+    app.register_blueprint(api_v1_bp)
     app.register_blueprint(chat_bp)
 
     with app.app_context():
@@ -98,6 +99,7 @@ def create_app(config_class=None):
 
     print(f"✅ Registered API blueprint at /api")
     print(f"✅ Registered API v2 blueprint at /api/v2")
+    print(f"✅ Registered API v1 profile blueprint at /v1")
     print(f"✅ Registered views blueprint at /")
     print(f"✅ Registered chat blueprint at /chat and /api/chat/*")
 
