@@ -6,6 +6,28 @@ from __future__ import annotations
 from services.agent_runner import AgentRunner
 
 
+class RecordingStore:
+    def __init__(self):
+        self.events = []
+        self.messages = []
+        self.updates = []
+
+    def append_event(self, session_id, event):
+        self.events.append((session_id, dict(event)))
+
+    def append_message(self, session_id, message):
+        self.messages.append((session_id, dict(message)))
+
+    def update_session(self, session_id, updates):
+        self.updates.append((session_id, dict(updates)))
+
+
+class MessageObject:
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+
 class ModernOptions:
     def __init__(
         self,
@@ -64,6 +86,14 @@ class LegacyOptions:
 
 def _runner() -> AgentRunner:
     return AgentRunner(cwd="/app", token_provider=lambda: "unused")
+
+
+def _drain_queue(runner: AgentRunner, session_id: str):
+    events = []
+    q = runner._output_queues[session_id]
+    while not q.empty():
+        events.append(q.get())
+    return events
 
 
 def test_build_options_modern_sdk_uses_env_auth_for_oat_token():
@@ -164,3 +194,93 @@ def test_run_agent_prefers_streamed_error_over_generic_process_error():
     assert session_state is not None
     assert session_state["status"] == "error"
     assert session_state["last_error"] == "Authentication failed"
+
+
+def test_run_agent_streams_success_sequence_from_mocked_sdk_payloads():
+    store = RecordingStore()
+    runner = AgentRunner(
+        cwd="/app",
+        token_provider=lambda: "sk-ant-api03-example-token",
+        session_store=store,
+    )
+    session_id = runner.create_session()["id"]
+
+    class DummyOptions:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+    async def fake_query(*, prompt, options):
+        del prompt, options
+        yield MessageObject(
+            session_id="sdk-session-123",
+            tool_name="Read",
+            tool_input={"file_path": "README.md"},
+        )
+        yield {"tool_result": {"lines": 3}}
+        yield {"type": "assistant_message", "content": [{"text": "Working"}]}
+        yield {"type": "result", "result": {"status": "ok"}}
+
+    runner._load_sdk = lambda: {"query": fake_query, "options_cls": DummyOptions}
+    runner._run_agent(session_id, "test")
+
+    events = _drain_queue(runner, session_id)
+    assert [event.get("type") for event in events] == [
+        "tool_use",
+        "tool_result",
+        "text",
+        "result",
+        "done",
+    ]
+    assert events[0]["input"] == "Reading README.md"
+    assert events[1]["content"] == '{"lines": 3}'
+    assert events[2]["content"] == "Working"
+    assert events[3]["content"] == '{"status": "ok"}'
+
+    session_state = runner.get_session(session_id)
+    assert session_state is not None
+    assert session_state["status"] == "idle"
+    assert session_state["last_error"] is None
+    assert session_state["sdk_session_id"] == "sdk-session-123"
+    assert session_state["messages"][-1]["content"] == 'Working\n{"status": "ok"}'
+
+    assert [event["type"] for _, event in store.events] == [
+        "tool",
+        "tool",
+        "result",
+        "result",
+    ]
+    assert [event["payload"]["kind"] for _, event in store.events] == [
+        "tool_use",
+        "tool_result",
+        "text",
+        "result",
+    ]
+
+
+def test_run_agent_uses_cli_stream_error_payload_once():
+    runner = AgentRunner(cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token")
+    session_id = runner.create_session()["id"]
+
+    class DummyOptions:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+    async def fake_query(*, prompt, options):
+        del prompt, options
+        yield {"type": "error", "message": "CLI auth failed"}
+        raise RuntimeError(
+            "Command failed with exit code 1 (exit code: 1)\n"
+            "Error output: Check stderr output for details"
+        )
+
+    runner._load_sdk = lambda: {"query": fake_query, "options_cls": DummyOptions}
+    runner._run_agent(session_id, "test")
+
+    events = _drain_queue(runner, session_id)
+    assert [event.get("type") for event in events] == ["error"]
+    assert events[0]["content"] == "CLI auth failed"
+
+    session_state = runner.get_session(session_id)
+    assert session_state is not None
+    assert session_state["status"] == "error"
+    assert session_state["last_error"] == "CLI auth failed"
