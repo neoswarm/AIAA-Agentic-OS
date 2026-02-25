@@ -26,7 +26,58 @@ def _updated_score(timestamp: str) -> float:
         return datetime.now(tz=timezone.utc).timestamp()
 
 
-ALLOWED_STREAM_EVENT_TYPES = {"tool", "system", "result"}
+ALLOWED_STREAM_EVENT_TYPES = {
+    "tool_use",
+    "tool_result",
+    "text",
+    "result",
+    "error",
+    "done",
+}
+
+
+def normalize_gateway_event_type(
+    event_type: str,
+    payload: Mapping[str, Any] | None = None,
+) -> str | None:
+    """Normalize gateway event aliases to canonical persisted event types."""
+    raw_type = (event_type or "").strip().lower()
+
+    payload_kind = ""
+    if payload is not None:
+        payload_kind = str(payload.get("kind", "")).strip().lower()
+        if payload_kind in ALLOWED_STREAM_EVENT_TYPES and raw_type in (
+            "tool",
+            "result",
+            "system",
+        ):
+            return payload_kind
+
+    if raw_type in ALLOWED_STREAM_EVENT_TYPES:
+        return raw_type
+
+    if raw_type == "tool":
+        if payload_kind in ("tool_use", "tool_result"):
+            return payload_kind
+        if payload is not None and (
+            payload.get("tool") is not None or payload.get("input") is not None
+        ):
+            return "tool_use"
+        return "tool_result"
+
+    if raw_type == "system":
+        return "text"
+
+    if raw_type in ("assistant", "assistant_message", "message"):
+        return "text"
+
+    if raw_type in ("exception", "failed", "failure"):
+        return "error"
+
+    if raw_type in ("complete", "completed"):
+        return "done"
+
+    return None
 
 
 @dataclass(frozen=True)
@@ -85,7 +136,7 @@ class MessageSchema:
 
 @dataclass(frozen=True)
 class EventSchema:
-    """Normalized streamed tool/system/result event schema."""
+    """Normalized streamed gateway event schema."""
 
     type: str
     payload: dict[str, Any] = field(default_factory=dict)
@@ -94,16 +145,12 @@ class EventSchema:
     @classmethod
     def from_mapping(cls, event: Mapping[str, Any], now: str) -> "EventSchema":
         """Build and validate an event from arbitrary mapping input."""
-        event_type = event.get("type", "system")
+        event_type = event.get("type", "text")
         payload = event.get("payload")
         timestamp = event.get("timestamp", now)
 
         if not isinstance(event_type, str) or not event_type.strip():
             raise ValueError("event.type must be a non-empty string")
-        if event_type not in ALLOWED_STREAM_EVENT_TYPES:
-            raise ValueError("event.type must be one of: tool, system, result")
-        if not isinstance(timestamp, str) or not timestamp.strip():
-            raise ValueError("event.timestamp must be a non-empty string")
 
         if payload is None:
             payload_dict: dict[str, Any] = {}
@@ -112,7 +159,14 @@ class EventSchema:
         else:
             raise ValueError("event.payload must be an object")
 
-        return cls(type=event_type, payload=payload_dict, timestamp=timestamp)
+        normalized_type = normalize_gateway_event_type(event_type, payload_dict)
+        if normalized_type is None:
+            allowed = ", ".join(sorted(ALLOWED_STREAM_EVENT_TYPES))
+            raise ValueError(f"event.type must normalize to one of: {allowed}")
+        if not isinstance(timestamp, str) or not timestamp.strip():
+            raise ValueError("event.timestamp must be a non-empty string")
+
+        return cls(type=normalized_type, payload=payload_dict, timestamp=timestamp)
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize schema to a plain dictionary."""

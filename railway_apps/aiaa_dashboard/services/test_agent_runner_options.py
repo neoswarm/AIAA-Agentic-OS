@@ -18,6 +18,7 @@ from services.agent_runner import (
     _frame_sse_ping_event,
     _redact_token_like_text,
 )
+from services.chat_store import InMemoryChatStore
 
 
 class RecordingStore:
@@ -344,6 +345,44 @@ def test_run_agent_prefers_streamed_error_over_generic_process_error():
     assert session_state["last_error"] == "Authentication failed"
 
 
+def test_persist_event_normalizes_gateway_event_types():
+    store = InMemoryChatStore()
+    runner = AgentRunner(
+        cwd="/app", token_provider=lambda: "unused", session_store=store
+    )
+    session_id = "persist-normalized"
+
+    runner._persist_event(
+        session_id, {"type": "tool_use", "tool": "Read", "input": "foo.py"}
+    )
+    runner._persist_event(session_id, {"type": "tool_result", "content": "ok"})
+    runner._persist_event(session_id, {"type": "text", "content": "chunk"})
+    runner._persist_event(session_id, {"type": "result", "content": "final"})
+    runner._persist_event(session_id, {"type": "error", "content": "boom"})
+    runner._persist_event(session_id, {"type": "done"})
+
+    events = store.get_events(session_id)
+    assert [event["type"] for event in events] == [
+        "tool_use",
+        "tool_result",
+        "text",
+        "result",
+        "error",
+        "done",
+    ]
+
+
+def test_persist_event_skips_unknown_types():
+    store = InMemoryChatStore()
+    runner = AgentRunner(
+        cwd="/app", token_provider=lambda: "unused", session_store=store
+    )
+    session_id = "persist-unknown"
+
+    runner._persist_event(session_id, {"type": "unsupported", "content": "noop"})
+    assert store.get_events(session_id) == []
+
+
 def test_redact_token_like_text_masks_common_gateway_patterns():
     raw_bearer = "Bearer sk-ant-api03-super-secret-token-1234567890"
     raw_prefix = "github_pat_1234567890abcdefghijklmno"
@@ -555,9 +594,9 @@ def test_run_agent_streams_success_sequence_from_mocked_sdk_payloads():
     assert session_state["messages"][-1]["content"] == 'Working\n{"status": "ok"}'
 
     assert [event["type"] for _, event in store.events] == [
-        "tool",
-        "tool",
-        "result",
+        "tool_use",
+        "tool_result",
+        "text",
         "result",
     ]
     assert [event["payload"]["kind"] for _, event in store.events] == [

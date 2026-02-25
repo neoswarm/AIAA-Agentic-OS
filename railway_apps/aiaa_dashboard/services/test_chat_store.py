@@ -91,7 +91,10 @@ class FakeRedis:
 
     def zrevrange(self, key: str, start: int, end: int) -> list[str]:
         entries = self.sorted_sets.get(key, {})
-        ordered = [item[0] for item in sorted(entries.items(), key=lambda item: item[1], reverse=True)]
+        ordered = [
+            item[0]
+            for item in sorted(entries.items(), key=lambda item: item[1], reverse=True)
+        ]
         if end == -1:
             return ordered[start:]
         return ordered[start : end + 1]
@@ -154,11 +157,14 @@ def test_append_event_is_atomic_and_uses_transaction() -> None:
 
     event = store.append_event(
         "session-ev-1",
-        {"type": "tool", "payload": {"name": "search", "status": "ok"}},
+        {
+            "type": "tool",
+            "payload": {"kind": "tool_use", "tool": "search", "input": "topic"},
+        },
         {"status": "running"},
     )
 
-    assert event["type"] == "tool"
+    assert event["type"] == "tool_use"
     assert redis_client.pipeline_transactions == [True]
 
     session_data = json.loads(redis_client.values["event-chat:sessions:session-ev-1"])
@@ -169,7 +175,7 @@ def test_append_event_is_atomic_and_uses_transaction() -> None:
         for value in redis_client.lists["event-chat:events:session-ev-1"]
     ]
     assert len(events) == 1
-    assert events[0]["payload"]["name"] == "search"
+    assert events[0]["payload"]["tool"] == "search"
     assert redis_client.expiry["event-chat:sessions:session-ev-1"] == 120
     assert redis_client.expiry["event-chat:events:session-ev-1"] == 240
 
@@ -217,20 +223,20 @@ def test_get_events_round_trip() -> None:
 
     store.append_event(
         "session-ev-3",
-        {"type": "system", "payload": {"phase": "start"}},
+        {"type": "system", "payload": {"phase": "start", "content": "begin"}},
     )
     store.append_event(
         "session-ev-3",
-        {"type": "result", "payload": {"status": "done"}},
+        {"type": "result", "payload": {"kind": "done"}},
     )
 
     events = store.get_events("session-ev-3")
-    assert [event["type"] for event in events] == ["system", "result"]
-    assert events[1]["payload"]["status"] == "done"
+    assert [event["type"] for event in events] == ["text", "done"]
+    assert events[1]["payload"]["kind"] == "done"
 
     first_only = store.get_events("session-ev-3", limit=1)
     assert len(first_only) == 1
-    assert first_only[0]["type"] == "system"
+    assert first_only[0]["type"] == "text"
 
 
 def test_message_schema_defaults_required_fields() -> None:
@@ -251,10 +257,27 @@ def test_event_schema_defaults_required_fields() -> None:
     schema = EventSchema.from_mapping({}, "2026-02-24T00:00:00+00:00")
 
     assert schema.to_dict() == {
-        "type": "system",
+        "type": "text",
         "payload": {},
         "timestamp": "2026-02-24T00:00:00+00:00",
     }
+
+
+@pytest.mark.parametrize(
+    ("payload", "event_type"),
+    [
+        ({"type": "tool", "payload": {"kind": "tool_use"}}, "tool_use"),
+        ({"type": "tool", "payload": {"kind": "tool_result"}}, "tool_result"),
+        ({"type": "system"}, "text"),
+        ({"type": "result", "payload": {"kind": "error"}}, "error"),
+        ({"type": "result", "payload": {"kind": "done"}}, "done"),
+    ],
+)
+def test_event_schema_normalizes_legacy_gateway_event_types(
+    payload: dict[str, Any], event_type: str
+) -> None:
+    schema = EventSchema.from_mapping(payload, "2026-02-24T00:00:00+00:00")
+    assert schema.type == event_type
 
 
 @pytest.mark.parametrize(
