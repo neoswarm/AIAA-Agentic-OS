@@ -18,6 +18,7 @@ from flask import Flask, session, redirect, url_for, render_template
 from config import get_config
 import database
 import models
+from services.chat_backend import select_chat_backend
 
 # Import blueprints
 from routes import api_bp, views_bp, api_v2_bp, chat_bp, init_chat_runner
@@ -61,6 +62,13 @@ def create_app(config_class=None):
 
     app.secret_key = app.config["SECRET_KEY"]
     app.config["PROJECT_ROOT"] = _resolve_project_root()
+    selected_backend, backend_warning = select_chat_backend(
+        os.getenv("CHAT_BACKEND", app.config.get("CHAT_BACKEND"))
+    )
+    app.config["CHAT_BACKEND"] = selected_backend
+    print(f"✅ Chat backend selected: {selected_backend}")
+    if backend_warning:
+        print(f"⚠️  {backend_warning}")
 
     # Configure session cookies
     app.config["SESSION_COOKIE_SECURE"] = config_class.SESSION_COOKIE_SECURE
