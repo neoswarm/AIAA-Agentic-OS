@@ -47,11 +47,13 @@ class AgentRunner:
         token_provider: Callable[[], str],
         allowed_tools: Optional[list[str]] = None,
         permission_mode: str = "acceptEdits",
+        session_store: Any | None = None,
     ):
         self.cwd = cwd
         self._token_provider = token_provider
         self.allowed_tools = allowed_tools or list(self.DEFAULT_ALLOWED_TOOLS)
         self.permission_mode = permission_mode
+        self._session_store = session_store
 
         self._sessions: Dict[str, Dict[str, Any]] = {}
         self._output_queues: Dict[str, queue.Queue] = {}
@@ -75,6 +77,42 @@ class AgentRunner:
             self._sessions[session_id] = session
             self._output_queues[session_id] = queue.Queue()
         return self.get_session(session_id) or {}
+
+    def attach_store(self, session_store: Any | None) -> None:
+        """Attach or replace the persistence store used for callbacks."""
+        self._session_store = session_store
+
+    def ensure_session(
+        self,
+        session_id: str,
+        *,
+        title: str | None = None,
+        sdk_session_id: str | None = None,
+    ) -> Dict[str, Any]:
+        """Ensure runtime session structures exist for a known external session id."""
+        with self._lock:
+            existing = self._sessions.get(session_id)
+            if existing is not None:
+                if title:
+                    existing["title"] = title
+                if sdk_session_id and not existing.get("sdk_session_id"):
+                    existing["sdk_session_id"] = sdk_session_id
+                return dict(existing)
+
+            now = _utc_now_iso()
+            session = {
+                "id": session_id,
+                "title": title or "New chat",
+                "created_at": now,
+                "updated_at": now,
+                "sdk_session_id": sdk_session_id,
+                "status": "idle",
+                "messages": [],
+                "last_error": None,
+            }
+            self._sessions[session_id] = session
+            self._output_queues[session_id] = queue.Queue()
+            return dict(session)
 
     def list_sessions(self) -> list[Dict[str, Any]]:
         """Return session summaries sorted by last update time."""
@@ -132,15 +170,10 @@ class AgentRunner:
             session["status"] = "running"
             session["updated_at"] = now
             session["last_error"] = None
-            session["messages"].append(
-                {
-                    "role": "user",
-                    "content": message,
-                    "timestamp": now,
-                }
+            self._persist_session_update(
+                session_id,
+                {"status": "running", "updated_at": now, "last_error": None},
             )
-            if (session.get("title") or "New chat") == "New chat":
-                session["title"] = self._derive_title(message)
 
         thread = threading.Thread(
             target=self._run_agent,
@@ -149,7 +182,9 @@ class AgentRunner:
         )
         thread.start()
 
-    def get_stream(self, session_id: str, keepalive_seconds: int = 20) -> Generator[str, None, None]:
+    def get_stream(
+        self, session_id: str, keepalive_seconds: int = 20
+    ) -> Generator[str, None, None]:
         """Yield Server-Sent Events from the session queue."""
         q = self._get_queue_or_raise(session_id)
         while True:
@@ -196,6 +231,7 @@ class AgentRunner:
                         continue
 
                     q.put(event)
+                    self._persist_event(session_id, event)
                     if event["type"] in ("text", "result"):
                         content = (event.get("content") or "").strip()
                         if content:
@@ -233,7 +269,11 @@ class AgentRunner:
                     raise RunnerError(
                         f"{module_name} is missing required symbols (query, ClaudeAgentOptions)"
                     )
-                return {"module_name": module_name, "query": query, "options_cls": options_cls}
+                return {
+                    "module_name": module_name,
+                    "query": query,
+                    "options_cls": options_cls,
+                }
             except Exception as exc:
                 last_error = exc
                 continue
@@ -241,7 +281,9 @@ class AgentRunner:
             "Claude Agent SDK is not installed. Add 'claude-agent-sdk' to dependencies."
         ) from last_error
 
-    def _build_options(self, options_cls: Any, token: str, resume_id: Optional[str]) -> Any:
+    def _build_options(
+        self, options_cls: Any, token: str, resume_id: Optional[str]
+    ) -> Any:
         """Build options compatible with current SDK version."""
         options_kwargs = {
             "auth_token": token,
@@ -265,8 +307,12 @@ class AgentRunner:
                 fallback_kwargs["resume"] = resume_id
             return options_cls(**fallback_kwargs)
 
-    def _capture_sdk_session_id(self, session_id: str, raw_message: Any, payload: Dict[str, Any]) -> None:
-        sdk_session_id = payload.get("session_id") or getattr(raw_message, "session_id", None)
+    def _capture_sdk_session_id(
+        self, session_id: str, raw_message: Any, payload: Dict[str, Any]
+    ) -> None:
+        sdk_session_id = payload.get("session_id") or getattr(
+            raw_message, "session_id", None
+        )
         if not sdk_session_id:
             return
         with self._lock:
@@ -274,6 +320,13 @@ class AgentRunner:
             if session and not session.get("sdk_session_id"):
                 session["sdk_session_id"] = sdk_session_id
                 session["updated_at"] = _utc_now_iso()
+                self._persist_session_update(
+                    session_id,
+                    {
+                        "sdk_session_id": sdk_session_id,
+                        "updated_at": session["updated_at"],
+                    },
+                )
 
     def _message_payload(self, message: Any) -> Dict[str, Any]:
         if isinstance(message, dict):
@@ -306,14 +359,18 @@ class AgentRunner:
             return {
                 "type": "tool_use",
                 "tool": str(payload.get("tool_name")),
-                "input": self._summarize_tool_input(payload.get("tool_name"), payload.get("tool_input")),
+                "input": self._summarize_tool_input(
+                    payload.get("tool_name"), payload.get("tool_input")
+                ),
                 "timestamp": _utc_now_iso(),
             }
 
         if payload.get("tool_result") is not None:
             return {
                 "type": "tool_result",
-                "content": self._truncate(self._stringify(payload.get("tool_result")), 600),
+                "content": self._truncate(
+                    self._stringify(payload.get("tool_result")), 600
+                ),
                 "timestamp": _utc_now_iso(),
             }
 
@@ -386,6 +443,7 @@ class AgentRunner:
         return ""
 
     def _append_assistant_message(self, session_id: str, content: str) -> None:
+        now = _utc_now_iso()
         with self._lock:
             session = self._sessions.get(session_id)
             if session is None:
@@ -394,19 +452,91 @@ class AgentRunner:
                 {
                     "role": "assistant",
                     "content": content,
-                    "timestamp": _utc_now_iso(),
+                    "timestamp": now,
                 }
             )
-            session["updated_at"] = _utc_now_iso()
+            session["updated_at"] = now
+        self._persist_message(
+            session_id,
+            {
+                "role": "assistant",
+                "content": content,
+                "timestamp": now,
+                "type": "message",
+                "metadata": {},
+            },
+        )
 
-    def _set_session_state(self, session_id: str, status: str, last_error: Optional[str]) -> None:
+    def _set_session_state(
+        self, session_id: str, status: str, last_error: Optional[str]
+    ) -> None:
+        now = _utc_now_iso()
         with self._lock:
             session = self._sessions.get(session_id)
             if session is None:
                 return
             session["status"] = status
             session["last_error"] = last_error
-            session["updated_at"] = _utc_now_iso()
+            session["updated_at"] = now
+        self._persist_session_update(
+            session_id,
+            {"status": status, "last_error": last_error, "updated_at": now},
+        )
+
+    def _persist_session_update(self, session_id: str, updates: Dict[str, Any]) -> None:
+        store = self._session_store
+        if store is None:
+            return
+        try:
+            store.update_session(session_id, updates)
+        except Exception:
+            logger.exception("Failed to persist session update for %s", session_id)
+
+    def _persist_message(self, session_id: str, message: Dict[str, Any]) -> None:
+        store = self._session_store
+        if store is None:
+            return
+        try:
+            store.append_message(session_id, message)
+        except Exception:
+            logger.exception("Failed to persist message for %s", session_id)
+
+    def _persist_event(self, session_id: str, event: Dict[str, Any]) -> None:
+        store = self._session_store
+        if store is None:
+            return
+
+        event_type = "system"
+        payload: Dict[str, Any] = {}
+        raw_type = event.get("type")
+        if raw_type in ("tool_use", "tool_result"):
+            event_type = "tool"
+            payload = {
+                "kind": raw_type,
+                "tool": event.get("tool"),
+                "input": event.get("input"),
+                "content": event.get("content"),
+            }
+        elif raw_type in ("result", "text"):
+            event_type = "result"
+            payload = {"content": event.get("content"), "kind": raw_type}
+        elif raw_type == "system":
+            event_type = "system"
+            payload = {"content": event.get("content"), "kind": raw_type}
+        else:
+            return
+
+        try:
+            store.append_event(
+                session_id,
+                {
+                    "type": event_type,
+                    "payload": payload,
+                    "timestamp": event.get("timestamp") or _utc_now_iso(),
+                },
+            )
+        except Exception:
+            logger.exception("Failed to persist event for %s", session_id)
 
     def _get_queue_or_raise(self, session_id: str) -> queue.Queue:
         with self._lock:

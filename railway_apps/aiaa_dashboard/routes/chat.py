@@ -7,7 +7,10 @@ Chat UI and streaming agent endpoints powered by Claude setup token auth.
 from __future__ import annotations
 
 import os
+import secrets
 import threading
+import time
+from collections import deque
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict
@@ -28,6 +31,7 @@ from flask import (
 
 import models
 from services.agent_runner import AgentRunner, RunnerError
+from services.chat_store import ChatStore, InMemoryChatStore, RedisChatStore
 
 
 chat_bp = Blueprint("chat", __name__)
@@ -36,6 +40,69 @@ CLAUDE_TOKEN_SETTING_KEY = "claude_setup_token"
 
 _runner_lock = threading.RLock()
 _runner: AgentRunner | None = None
+_store_lock = threading.RLock()
+_store: ChatStore | None = None
+_message_rate_lock = threading.RLock()
+_message_rate_windows: dict[str, deque[float]] = {}
+
+
+def _get_message_rate_limit_per_minute() -> int:
+    raw_value = current_app.config.get(
+        "CHAT_MESSAGE_RATE_LIMIT_PER_MINUTE",
+        os.getenv("CHAT_MESSAGE_RATE_LIMIT_PER_MINUTE", "20"),
+    )
+    try:
+        return max(1, int(raw_value))
+    except (TypeError, ValueError):
+        return 20
+
+
+def _get_message_rate_limit_window_seconds() -> int:
+    raw_value = current_app.config.get(
+        "CHAT_MESSAGE_RATE_LIMIT_WINDOW_SECONDS",
+        os.getenv("CHAT_MESSAGE_RATE_LIMIT_WINDOW_SECONDS", "60"),
+    )
+    try:
+        return max(1, int(raw_value))
+    except (TypeError, ValueError):
+        return 60
+
+
+def _get_rate_limit_user_key() -> str:
+    username = (session.get("username") or "").strip()
+    if username:
+        return f"user:{username}"
+    if request.remote_addr:
+        return f"ip:{request.remote_addr}"
+    return "ip:unknown"
+
+
+def _check_user_message_rate_limit() -> tuple[bool, int, int, int]:
+    """Return (allowed, retry_after_seconds, limit, window_seconds)."""
+    limit = _get_message_rate_limit_per_minute()
+    window_seconds = _get_message_rate_limit_window_seconds()
+    now = time.monotonic()
+    user_key = _get_rate_limit_user_key()
+
+    with _message_rate_lock:
+        history = _message_rate_windows.setdefault(user_key, deque())
+        cutoff = now - window_seconds
+        while history and history[0] <= cutoff:
+            history.popleft()
+
+        if len(history) >= limit:
+            retry_after = max(1, int(history[0] + window_seconds - now))
+            return False, retry_after, limit, window_seconds
+
+        history.append(now)
+
+    return True, 0, limit, window_seconds
+
+
+def _reset_message_rate_limits() -> None:
+    """Testing helper to clear in-memory rate-limit state."""
+    with _message_rate_lock:
+        _message_rate_windows.clear()
 
 
 def _login_required_page(f):
@@ -52,7 +119,10 @@ def _login_required_api(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if not session.get("logged_in"):
-            return jsonify({"status": "error", "message": "Authentication required"}), 401
+            return (
+                jsonify({"status": "error", "message": "Authentication required"}),
+                401,
+            )
         return f(*args, **kwargs)
 
     return decorated
@@ -110,9 +180,17 @@ def validate_claude_token(token: str) -> Dict[str, Any]:
     if resp.status_code == 200:
         return {"status": "valid", "http_status": 200, "message": "Token is valid"}
     if resp.status_code == 401:
-        return {"status": "expired", "http_status": 401, "message": "Token is expired or unauthorized"}
+        return {
+            "status": "expired",
+            "http_status": 401,
+            "message": "Token is expired or unauthorized",
+        }
     if resp.status_code == 429:
-        return {"status": "rate_limited", "http_status": 429, "message": "Token is valid but currently rate-limited"}
+        return {
+            "status": "rate_limited",
+            "http_status": 429,
+            "message": "Token is valid but currently rate-limited",
+        }
     if resp.status_code in (403, 404, 405):
         return {
             "status": "unknown",
@@ -137,7 +215,10 @@ def _persist_to_railway(variables: Dict[str, str]) -> None:
         return
 
     endpoint = "https://backboard.railway.app/graphql/v2"
-    headers = {"Authorization": f"Bearer {api_token}", "Content-Type": "application/json"}
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Content-Type": "application/json",
+    }
     mutation = """
     mutation variableUpsert($input: VariableUpsertInput!) {
       variableUpsert(input: $input)
@@ -166,23 +247,63 @@ def _persist_to_railway(variables: Dict[str, str]) -> None:
 def _persist_to_railway_async(variables: Dict[str, str]) -> bool:
     if not os.getenv("RAILWAY_API_TOKEN") or not os.getenv("RAILWAY_SERVICE_ID"):
         return False
-    thread = threading.Thread(target=_persist_to_railway, args=(variables,), daemon=True)
+    thread = threading.Thread(
+        target=_persist_to_railway, args=(variables,), daemon=True
+    )
     thread.start()
     return True
+
+
+def _derive_title(message: str) -> str:
+    first_line = (message or "").strip().splitlines()[0] if message else "New chat"
+    return (first_line[:57] + "...") if len(first_line) > 60 else first_line
+
+
+def init_chat_store(app=None) -> ChatStore:
+    """Initialize singleton chat store once per process."""
+    del app
+    global _store
+    with _store_lock:
+        if _store is not None:
+            return _store
+
+        redis_url = (os.getenv("REDIS_URL") or "").strip()
+        key_prefix = (os.getenv("CHAT_STORE_PREFIX") or "aiaa:dashboard:chat").strip()
+        if not key_prefix:
+            key_prefix = "aiaa:dashboard:chat"
+
+        if redis_url:
+            try:
+                _store = RedisChatStore.from_url(redis_url, key_prefix=key_prefix)
+            except Exception:
+                _store = InMemoryChatStore()
+        else:
+            _store = InMemoryChatStore()
+    return _store
+
+
+def _get_chat_store() -> ChatStore:
+    global _store
+    if _store is None:
+        return init_chat_store()
+    return _store
 
 
 def init_chat_runner(app=None) -> AgentRunner:
     """Initialize singleton runner once per process."""
     del app  # app is optional; current_app provides config context.
     global _runner
+    store = _get_chat_store()
     with _runner_lock:
         if _runner is None:
             _runner = AgentRunner(
                 cwd=_project_root(),
                 token_provider=get_claude_token,
+                session_store=store,
             )
         else:
             _runner.cwd = _project_root()
+            _runner.attach_store(store)
     return _runner
 
 
@@ -197,32 +318,34 @@ def _get_runner() -> AgentRunner:
 @_login_required_page
 def chat_page():
     """Render chat UI page."""
-    runner = _get_runner()
+    store = _get_chat_store()
     return render_template(
         "chat.html",
         username=session.get("username", "Admin"),
         active_page="chat",
         has_token=bool(get_claude_token()),
-        sessions=runner.list_sessions(),
+        sessions=store.list_sessions(),
     )
 
 
 @chat_bp.route("/api/chat/sessions", methods=["GET"])
 @_login_required_api
 def list_sessions():
-    """List current in-memory chat sessions."""
-    runner = _get_runner()
-    return jsonify({"status": "ok", "sessions": runner.list_sessions()})
+    """List current chat sessions from store."""
+    store = _get_chat_store()
+    return jsonify({"status": "ok", "sessions": store.list_sessions()})
 
 
 @chat_bp.route("/api/chat/sessions/<session_id>", methods=["GET"])
 @_login_required_api
 def get_session(session_id: str):
     """Get a single session including message history."""
-    runner = _get_runner()
-    session_obj = runner.get_session(session_id)
+    store = _get_chat_store()
+    session_obj = store.get_session(session_id)
     if session_obj is None:
         return jsonify({"status": "error", "message": "Session not found"}), 404
+    session_obj = dict(session_obj)
+    session_obj["messages"] = store.get_messages(session_id)
     return jsonify({"status": "ok", "session": session_obj})
 
 
@@ -232,13 +355,28 @@ def get_session(session_id: str):
 def create_session():
     """Create a new chat session."""
     if not get_claude_token():
-        return jsonify({"status": "error", "message": "Claude token not configured"}), 400
+        return (
+            jsonify({"status": "error", "message": "Claude token not configured"}),
+            400,
+        )
 
     data = request.get_json(silent=True) or {}
-    title = (data.get("title") or "").strip() or None
+    title = (data.get("title") or "").strip() or "New chat"
+    session_id = secrets.token_hex(16)
+    store = _get_chat_store()
+    session_obj = store.create_session(session_id, title=title, status="idle")
     runner = _get_runner()
-    session_obj = runner.create_session(title=title)
-    return jsonify({"status": "ok", "session_id": session_obj["id"], "session": session_obj}), 201
+    runner.ensure_session(
+        session_obj["id"],
+        title=session_obj.get("title"),
+        sdk_session_id=session_obj.get("sdk_session_id"),
+    )
+    return (
+        jsonify(
+            {"status": "ok", "session_id": session_obj["id"], "session": session_obj}
+        ),
+        201,
+    )
 
 
 @chat_bp.route("/api/chat/message", methods=["POST"])
@@ -246,7 +384,10 @@ def create_session():
 def send_message():
     """Send a message into an existing chat session."""
     if not get_claude_token():
-        return jsonify({"status": "error", "message": "Claude token not configured"}), 400
+        return (
+            jsonify({"status": "error", "message": "Claude token not configured"}),
+            400,
+        )
 
     payload = request.get_json(silent=True) or {}
     session_id = (payload.get("session_id") or "").strip()
@@ -258,20 +399,70 @@ def send_message():
     if not message:
         errors["message"] = "message is required"
     if errors:
-        return jsonify({"status": "error", "message": "Validation failed", "errors": errors}), 400
+        return (
+            jsonify(
+                {"status": "error", "message": "Validation failed", "errors": errors}
+            ),
+            400,
+        )
 
-    runner = _get_runner()
-    if not runner.has_session(session_id):
+    store = _get_chat_store()
+    session_obj = store.get_session(session_id)
+    if session_obj is None:
         return jsonify({"status": "error", "message": "Session not found"}), 404
 
+    allowed, retry_after, limit, window_seconds = _check_user_message_rate_limit()
+    if not allowed:
+        response = jsonify(
+            {
+                "status": "error",
+                "error_code": "rate_limited",
+                "message": "Too many messages. Please wait before sending another message.",
+                "retry_after_seconds": retry_after,
+                "limit": limit,
+                "window_seconds": window_seconds,
+            }
+        )
+        response.headers["Retry-After"] = str(retry_after)
+        return response, 429
+
+    session_updates: Dict[str, Any] = {"status": "running", "last_error": None}
+    if (session_obj.get("title") or "New chat") == "New chat":
+        session_updates["title"] = _derive_title(message)
+
     try:
+        store.append_message(
+            session_id,
+            {
+                "role": "user",
+                "content": message,
+                "type": "message",
+                "metadata": {},
+            },
+            session_updates=session_updates,
+        )
+        runner = _get_runner()
+        runner.ensure_session(
+            session_id,
+            title=session_updates.get("title") or session_obj.get("title"),
+            sdk_session_id=session_obj.get("sdk_session_id"),
+        )
         runner.send_message(session_id=session_id, user_message=message)
     except ValueError as exc:
+        store.update_session(session_id, {"status": "idle", "last_error": str(exc)})
         return jsonify({"status": "error", "message": str(exc)}), 400
     except RunnerError as exc:
+        store.update_session(session_id, {"status": "error", "last_error": str(exc)})
         return jsonify({"status": "error", "message": str(exc)}), 409
     except Exception as exc:
-        return jsonify({"status": "error", "message": f"Failed to send message: {exc}"}), 500
+        store.update_session(
+            session_id,
+            {"status": "error", "last_error": f"Failed to send message: {exc}"},
+        )
+        return (
+            jsonify({"status": "error", "message": f"Failed to send message: {exc}"}),
+            500,
+        )
 
     return jsonify({"status": "ok"}), 202
 
@@ -280,9 +471,18 @@ def send_message():
 @_login_required_api
 def stream_response(session_id: str):
     """Stream SSE events for a session."""
+    store = _get_chat_store()
+    session_obj = store.get_session(session_id)
+    if session_obj is None:
+        return jsonify({"status": "error", "message": "Invalid session"}), 404
+
     runner = _get_runner()
     if not runner.has_session(session_id):
-        return jsonify({"status": "error", "message": "Invalid session"}), 404
+        runner.ensure_session(
+            session_id,
+            title=session_obj.get("title"),
+            sdk_session_id=session_obj.get("sdk_session_id"),
+        )
 
     response = Response(
         stream_with_context(runner.get_stream(session_id)),
@@ -333,13 +533,16 @@ def save_token():
 
     validation = validate_claude_token(token)
     if validation["status"] in ("invalid", "expired"):
-        return jsonify(
-            {
-                "status": "error",
-                "message": "Claude token validation failed",
-                "validation": validation,
-            }
-        ), 400
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": "Claude token validation failed",
+                    "validation": validation,
+                }
+            ),
+            400,
+        )
 
     os.environ["CLAUDE_SETUP_TOKEN"] = token
     models.set_setting(CLAUDE_TOKEN_SETTING_KEY, token)
@@ -372,7 +575,10 @@ def validate_token():
                 "status": "ok",
                 "configured": False,
                 "validation": "missing",
-                "validation_detail": {"status": "missing", "message": "No token provided"},
+                "validation_detail": {
+                    "status": "missing",
+                    "message": "No token provided",
+                },
             }
         )
 
