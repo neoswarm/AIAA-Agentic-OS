@@ -473,13 +473,19 @@ def api_list_executions():
     """List recent executions with optional filters."""
     skill_name = request.args.get('skill')
     status = request.args.get('status')
-    limit = request.args.get('limit', Config.DEFAULT_EXECUTIONS_LIMIT, type=int)
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    search = request.args.get('search') or request.args.get('q')
+    limit = request.args.get('limit', 50, type=int)
 
     try:
         executions = models.get_skill_executions(
             skill_name=skill_name,
             status=status,
-            limit=min(limit, Config.MAX_EXECUTIONS_LIMIT),
+            search=search,
+            date_from=date_from,
+            date_to=date_to,
+            limit=min(limit, 200),
         )
         return jsonify({
             "status": "ok",
