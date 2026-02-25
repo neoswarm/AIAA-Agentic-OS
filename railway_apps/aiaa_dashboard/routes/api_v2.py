@@ -22,6 +22,7 @@ from flask import Blueprint, request, jsonify, session, Response, stream_with_co
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import models
 from config import Config
+from .health_utils import get_chat_subsystem_readiness
 from services.skill_execution_service import (
     parse_skill_md,
     list_available_skills,
@@ -235,6 +236,20 @@ def login_required(f):
 # =============================================================================
 # Session Endpoints
 # =============================================================================
+
+@api_v2_bp.route('/health', methods=['GET'])
+def api_v2_health():
+    """Public gateway readiness endpoint (no auth required)."""
+    chat_subsystem = get_chat_subsystem_readiness()
+    return jsonify({
+        "status": "ok",
+        "ready": chat_subsystem["ready"],
+        "timestamp": datetime.utcnow().isoformat(),
+        "service": "aiaa-dashboard-gateway",
+        "chat_subsystem_ready": chat_subsystem["ready"],
+        "chat_subsystem": chat_subsystem,
+    })
+
 
 @api_v2_bp.route('/session', methods=['DELETE'])
 @login_required
