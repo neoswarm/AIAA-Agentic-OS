@@ -275,9 +275,7 @@ class AgentRunner:
                 or "Command failed with exit code" in message
             ):
                 if stderr_lines:
-                    message = (
-                        f"{streamed_error}\nCLI stderr: {' | '.join(stderr_lines[-10:])}"
-                    )
+                    message = f"{streamed_error}\nCLI stderr: {' | '.join(stderr_lines[-10:])}"
                 else:
                     message = streamed_error
 
@@ -613,23 +611,27 @@ class AgentRunner:
         if store is None:
             return
 
-        event_type = "system"
+        raw_type = str(event.get("type", "")).strip().lower()
+        if not raw_type:
+            return
+
+        event_type = raw_type
         payload: Dict[str, Any] = {}
-        raw_type = event.get("type")
-        if raw_type in ("tool_use", "tool_result"):
-            event_type = "tool"
+        if raw_type == "tool_use":
             payload = {
-                "kind": raw_type,
+                "kind": "tool_use",
                 "tool": event.get("tool"),
                 "input": event.get("input"),
+            }
+        elif raw_type == "tool_result":
+            payload = {
+                "kind": "tool_result",
                 "content": event.get("content"),
             }
-        elif raw_type in ("result", "text"):
-            event_type = "result"
+        elif raw_type in ("text", "result", "error", "system"):
             payload = {"content": event.get("content"), "kind": raw_type}
-        elif raw_type == "system":
-            event_type = "system"
-            payload = {"content": event.get("content"), "kind": raw_type}
+        elif raw_type == "done":
+            payload = {"kind": "done"}
         else:
             return
 

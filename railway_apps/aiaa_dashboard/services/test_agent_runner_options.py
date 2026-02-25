@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from services.agent_runner import AgentRunner
+from services.chat_store import InMemoryChatStore
 
 
 class ModernOptions:
@@ -124,14 +125,18 @@ def test_build_options_includes_stderr_and_debug_flag_when_supported():
 
 def test_parse_message_maps_is_error_result_to_error_event():
     runner = _runner()
-    event = runner._parse_message({"type": "result", "result": "Auth failed", "is_error": True})
+    event = runner._parse_message(
+        {"type": "result", "result": "Auth failed", "is_error": True}
+    )
     assert event is not None
     assert event["type"] == "error"
     assert event["content"] == "Auth failed"
 
 
 def test_run_agent_prefers_streamed_error_over_generic_process_error():
-    runner = AgentRunner(cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token")
+    runner = AgentRunner(
+        cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token"
+    )
     session = runner.create_session()
     session_id = session["id"]
 
@@ -164,3 +169,41 @@ def test_run_agent_prefers_streamed_error_over_generic_process_error():
     assert session_state is not None
     assert session_state["status"] == "error"
     assert session_state["last_error"] == "Authentication failed"
+
+
+def test_persist_event_normalizes_gateway_event_types():
+    store = InMemoryChatStore()
+    runner = AgentRunner(
+        cwd="/app", token_provider=lambda: "unused", session_store=store
+    )
+    session_id = "persist-normalized"
+
+    runner._persist_event(
+        session_id, {"type": "tool_use", "tool": "Read", "input": "foo.py"}
+    )
+    runner._persist_event(session_id, {"type": "tool_result", "content": "ok"})
+    runner._persist_event(session_id, {"type": "text", "content": "chunk"})
+    runner._persist_event(session_id, {"type": "result", "content": "final"})
+    runner._persist_event(session_id, {"type": "error", "content": "boom"})
+    runner._persist_event(session_id, {"type": "done"})
+
+    events = store.get_events(session_id)
+    assert [event["type"] for event in events] == [
+        "tool_use",
+        "tool_result",
+        "text",
+        "result",
+        "error",
+        "done",
+    ]
+
+
+def test_persist_event_skips_unknown_types():
+    store = InMemoryChatStore()
+    runner = AgentRunner(
+        cwd="/app", token_provider=lambda: "unused", session_store=store
+    )
+    session_id = "persist-unknown"
+
+    runner._persist_event(session_id, {"type": "unsupported", "content": "noop"})
+    assert store.get_events(session_id) == []
