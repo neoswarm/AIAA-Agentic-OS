@@ -4321,7 +4321,6 @@ def api_events():
         or request.args.get("lastEventId")
         or request.headers.get("Last-Event-ID")
     )
-
     last_event_id = None
     if last_event_id_raw:
         try:
@@ -4335,7 +4334,6 @@ def api_events():
     if last_event_id is None:
         return jsonify(events)
 
-    # On reconnect, return only missed events in ascending order for replay.
     missed_events = [event for event in events if event.get("id", 0) > last_event_id]
     missed_events.sort(key=lambda event: event.get("id", 0))
     return jsonify(missed_events)

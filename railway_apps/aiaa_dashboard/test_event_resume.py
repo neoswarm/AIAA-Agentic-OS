@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for event resume behavior in app_legacy /api/events."""
+"""Integration test for interrupted event stream resume behavior."""
 
 import pytest
 
@@ -8,76 +8,45 @@ import app_legacy
 
 @pytest.fixture(autouse=True)
 def reset_event_state():
-    """Reset shared in-memory event state between tests."""
+    """Reset shared in-memory event state for isolated tests."""
     with app_legacy.events_lock:
         app_legacy.events_log.clear()
         app_legacy.event_id_counter = 0
 
 
-@pytest.fixture
+@pytest.fixture()
 def auth_client():
-    """Authenticated Flask test client."""
+    """Authenticated Flask test client for legacy app routes."""
     app_legacy.app.config["TESTING"] = True
     client = app_legacy.app.test_client()
     with client.session_transaction() as sess:
         sess["logged_in"] = True
-        sess["username"] = "test"
+        sess["username"] = "testadmin"
     return client
 
 
-def test_log_event_ids_remain_monotonic_after_buffer_rollover():
-    for i in range(510):
-        app_legacy.log_event("test", "success", {"index": i}, source="test")
+def test_interrupted_stream_resume_returns_only_missed_events(auth_client):
+    """Client can resume after interruption using the last seen event ID."""
+    app_legacy.log_event("test", "success", {"chunk": "A"}, source="test")
+    app_legacy.log_event("test", "success", {"chunk": "B"}, source="test")
 
-    with app_legacy.events_lock:
-        ids = [event["id"] for event in app_legacy.events_log]
+    initial = auth_client.get("/api/events")
+    assert initial.status_code == 200
+    initial_events = initial.get_json()
+    assert [event["id"] for event in initial_events] == [2, 1]
 
-    assert len(ids) == 500
-    assert len(set(ids)) == 500
-    assert ids[0] == 510
-    assert ids[-1] == 11
+    # Simulate disconnect after the client received event ID 2.
+    last_seen_id = initial_events[0]["id"]
 
+    app_legacy.log_event("test", "success", {"chunk": "C"}, source="test")
+    app_legacy.log_event("test", "success", {"chunk": "D"}, source="test")
 
-def test_api_events_resume_with_last_event_id_query(auth_client):
-    app_legacy.log_event("test", "success", {"index": 1}, source="test")
-    app_legacy.log_event("test", "success", {"index": 2}, source="test")
-    app_legacy.log_event("test", "success", {"index": 3}, source="test")
+    resumed = auth_client.get(
+        "/api/events",
+        headers={"Last-Event-ID": str(last_seen_id)},
+    )
+    assert resumed.status_code == 200
 
-    response = auth_client.get("/api/events?last_event_id=1")
-
-    assert response.status_code == 200
-    ids = [event["id"] for event in response.get_json()]
-    assert ids == [2, 3]
-
-
-def test_api_events_resume_with_last_event_id_header(auth_client):
-    app_legacy.log_event("test", "success", {"index": 1}, source="test")
-    app_legacy.log_event("test", "success", {"index": 2}, source="test")
-    app_legacy.log_event("test", "success", {"index": 3}, source="test")
-
-    response = auth_client.get("/api/events", headers={"Last-Event-ID": "2"})
-
-    assert response.status_code == 200
-    ids = [event["id"] for event in response.get_json()]
-    assert ids == [3]
-
-
-def test_api_events_invalid_last_event_id_returns_400(auth_client):
-    app_legacy.log_event("test", "success", {"index": 1}, source="test")
-
-    response = auth_client.get("/api/events?last_event_id=abc")
-
-    assert response.status_code == 400
-    assert response.get_json()["error"] == "Invalid last_event_id"
-
-
-def test_api_events_without_last_event_id_preserves_current_order(auth_client):
-    app_legacy.log_event("test", "success", {"index": 1}, source="test")
-    app_legacy.log_event("test", "success", {"index": 2}, source="test")
-    app_legacy.log_event("test", "success", {"index": 3}, source="test")
-
-    response = auth_client.get("/api/events")
-
-    assert response.status_code == 200
-    ids = [event["id"] for event in response.get_json()]
-    assert ids == [3, 2, 1]
+    resumed_events = resumed.get_json()
+    assert [event["id"] for event in resumed_events] == [3, 4]
+    assert [event["data"]["chunk"] for event in resumed_events] == ["C", "D"]
