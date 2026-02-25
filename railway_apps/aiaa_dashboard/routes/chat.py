@@ -171,7 +171,12 @@ def _decode_base64url_json(segment: str) -> dict[str, Any] | None:
 
 
 def _looks_like_setup_token(token: str) -> bool:
-    """Heuristic for Claude setup tokens, which are JWT-shaped strings."""
+    """Heuristic for Claude setup tokens from CLI setup/auth flows."""
+    normalized = (token or "").strip()
+    # Claude setup-token values currently use an oat prefix.
+    if normalized.startswith("sk-ant-oat"):
+        return True
+
     parts = token.split(".")
     if len(parts) != 3:
         return False
@@ -186,10 +191,9 @@ def _looks_like_setup_token(token: str) -> bool:
 def validate_claude_token(token: str) -> Dict[str, Any]:
     """Validate Claude token with compatible checks.
 
-    Note: `claude setup-token` values are JWT-style auth artifacts for Claude
-    tooling and are not reliably verifiable via Anthropic's REST API key
-    endpoint. For those tokens, return `unknown` instead of false-negative
-    `expired/invalid`.
+    Note: `claude setup-token` values are CLI auth artifacts and are not
+    reliably verifiable via Anthropic's REST API-key endpoint. For those
+    tokens, return `unknown` instead of false-negative `expired/invalid`.
     """
     candidate = (token or "").strip()
     if not candidate:
@@ -202,13 +206,17 @@ def validate_claude_token(token: str) -> Dict[str, Any]:
             "message": "Setup token format accepted. Full validity is confirmed on first agent run.",
         }
 
+    headers = {"Accept": "application/json"}
+    if candidate.startswith("sk-ant-"):
+        headers["x-api-key"] = candidate
+        headers["anthropic-version"] = "2023-06-01"
+    else:
+        headers["Authorization"] = f"Bearer {candidate}"
+
     try:
         resp = http_requests.get(
             "https://api.anthropic.com/v1/models",
-            headers={
-                "Authorization": f"Bearer {candidate}",
-                "Accept": "application/json",
-            },
+            headers=headers,
             timeout=8,
         )
     except Exception as exc:

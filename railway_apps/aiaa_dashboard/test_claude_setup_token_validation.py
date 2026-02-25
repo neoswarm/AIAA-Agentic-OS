@@ -24,6 +24,7 @@ import routes.chat as chat_routes
 
 
 SETUP_TOKEN_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.signature"
+SETUP_TOKEN_OAT = "sk-ant-oat01-example-example-example"
 
 
 @pytest.fixture(scope="module")
@@ -48,13 +49,14 @@ def auth_client(app):
     return client
 
 
-def test_validate_setup_token_skips_rest_models_probe(monkeypatch):
+@pytest.mark.parametrize("token", [SETUP_TOKEN_JWT, SETUP_TOKEN_OAT])
+def test_validate_setup_token_skips_rest_models_probe(monkeypatch, token):
     def _unexpected_get(*args, **kwargs):
-        raise AssertionError("REST endpoint should not be called for setup-token JWTs")
+        raise AssertionError("REST endpoint should not be called for setup-token artifacts")
 
     monkeypatch.setattr(chat_routes.http_requests, "get", _unexpected_get)
 
-    result = chat_routes.validate_claude_token(SETUP_TOKEN_JWT)
+    result = chat_routes.validate_claude_token(token)
 
     assert result["status"] == "unknown"
     assert result["http_status"] is None
@@ -72,13 +74,14 @@ def test_validate_non_setup_token_keeps_rest_behavior(monkeypatch):
     assert result["http_status"] == 401
 
 
+@pytest.mark.parametrize("token", [SETUP_TOKEN_JWT, SETUP_TOKEN_OAT])
 def test_save_token_accepts_setup_token_with_unknown_validation(
-    auth_client, app, monkeypatch
+    auth_client, app, monkeypatch, token
 ):
     monkeypatch.setattr(chat_routes, "_persist_to_railway_async", lambda *_: False)
     monkeypatch.setattr(chat_routes, "init_chat_runner", lambda *_: None)
 
-    resp = auth_client.post("/api/chat/token", json={"token": SETUP_TOKEN_JWT})
+    resp = auth_client.post("/api/chat/token", json={"token": token})
 
     assert resp.status_code == 200
     body = resp.get_json()
@@ -86,7 +89,4 @@ def test_save_token_accepts_setup_token_with_unknown_validation(
     assert body["validation"] == "unknown"
 
     with app.app_context():
-        assert (
-            models.get_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY) == SETUP_TOKEN_JWT
-        )
-
+        assert models.get_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY) == token
