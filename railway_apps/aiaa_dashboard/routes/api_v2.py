@@ -547,6 +547,22 @@ def _redact_token(token: str) -> str:
     return f"{token[:4]}...{token[-4:]}"
 
 
+def _resolve_api_env_var(key_name: str) -> str:
+    """Map a friendly key name to its environment variable name."""
+    return _API_KEY_NAMES.get(key_name.lower(), key_name.upper())
+
+
+def _validate_api_key_prefix(env_var: str, key_value: str):
+    """Return a validation response when a key format is invalid."""
+    expected_prefix = _KEY_PREFIXES.get(env_var, "")
+    if expected_prefix and not key_value.startswith(expected_prefix):
+        return validation_error(
+            {'key_value': f'Invalid format. {env_var} keys should start with "{expected_prefix}"'},
+            "Invalid key format"
+        )
+    return None
+
+
 @api_v2_bp.route('/settings/api-keys', methods=['POST'])
 @login_required
 def api_save_api_key():
@@ -567,7 +583,7 @@ def api_save_api_key():
         return validation_error(errors)
 
     # Resolve env var name
-    env_var = _API_KEY_NAMES.get(key_name.lower(), key_name.upper())
+    env_var = _resolve_api_env_var(key_name)
 
     if action in {"validate", "test"} and not key_value:
         # If no candidate key is provided, validate currently configured value.
@@ -581,17 +597,9 @@ def api_save_api_key():
             })
 
     # Prefix format validation
-    expected_prefix = _KEY_PREFIXES.get(env_var, "")
-    if expected_prefix and not key_value.startswith(expected_prefix):
-        models.update_setting_metadata(
-            f"api_key.{env_var}",
-            validation_status="invalid",
-            last_error=f'Invalid format. {env_var} keys should start with "{expected_prefix}"',
-        )
-        return validation_error(
-            {'key_value': f'Invalid format. {env_var} keys should start with "{expected_prefix}"'},
-            "Invalid key format"
-        )
+    prefix_error = _validate_api_key_prefix(env_var, key_value)
+    if prefix_error:
+        return prefix_error
 
     # Lightweight format validation mode (used by onboarding flows)
     if action in {"validate", "test"}:
@@ -622,28 +630,55 @@ def api_save_api_key():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-@api_v2_bp.route('/settings/api-keys/revoke', methods=['POST'])
-@api_v2_bp.route('/settings/api-keys/clear', methods=['POST'])
-@api_v2_bp.route('/settings/api-keys/<key_name>', methods=['DELETE'])
+@api_v2_bp.route('/settings/api-keys/<key_name>/rotate', methods=['POST'])
 @login_required
-def api_revoke_api_key(key_name=None):
-    """Clear a stored API key/token and remove it from runner environment."""
+def api_rotate_api_key(key_name):
+    """Rotate an existing API key/token value."""
+    friendly_name = (key_name or '').strip().lower()
+    if friendly_name not in _API_KEY_NAMES:
+        return validation_error({'key_name': 'Unknown API key name'})
+
     data = request.get_json(silent=True) or {}
-    requested_key_name = (key_name or data.get('key_name', '')).strip()
+    key_value = data.get('key_value', '').strip()
+    if not key_value:
+        return validation_error({'key_value': 'API key value is required'})
 
-    if not requested_key_name:
-        return validation_error({'key_name': 'Key name is required'})
-
-    env_var = _resolve_env_var(requested_key_name)
+    env_var = _resolve_api_env_var(friendly_name)
+    prefix_error = _validate_api_key_prefix(env_var, key_value)
+    if prefix_error:
+        return prefix_error
 
     try:
-        _clear_stored_api_key(env_var)
-        os.environ.pop(env_var, None)
+        models.set_setting(f"api_key.{env_var}", key_value)
+        os.environ[env_var] = key_value
+        return jsonify({
+            "status": "ok",
+            "message": f"{env_var} rotated successfully",
+            "key_name": env_var,
+            "action": "rotate",
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
+
+@api_v2_bp.route('/settings/api-keys/<key_name>/revoke', methods=['POST'])
+@login_required
+def api_revoke_api_key(key_name):
+    """Revoke (remove) an API key/token value."""
+    friendly_name = (key_name or '').strip().lower()
+    if friendly_name not in _API_KEY_NAMES:
+        return validation_error({'key_name': 'Unknown API key name'})
+
+    env_var = _resolve_api_env_var(friendly_name)
+
+    try:
+        models.delete_setting(f"api_key.{env_var}")
+        os.environ.pop(env_var, None)
         return jsonify({
             "status": "ok",
             "message": f"{env_var} revoked successfully",
             "key_name": env_var,
+            "action": "revoke",
         })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -656,9 +691,7 @@ def api_key_status():
     try:
         keys_status = {}
         for friendly_name, env_var in _API_KEY_NAMES.items():
-            setting_key = f"api_key.{env_var}"
-            stored_value = models.get_setting(setting_key) or ""
-            value = os.getenv(env_var, "") or stored_value
+            value = os.getenv(env_var, "") or (models.get_setting(f"api_key.{env_var}", "") or "")
             configured = bool(value)
             metadata = models.get_setting_metadata(setting_key)
             # Redact value for display

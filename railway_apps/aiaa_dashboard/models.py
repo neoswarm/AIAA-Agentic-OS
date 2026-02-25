@@ -340,6 +340,53 @@ def get_webhook_stats(webhook_slug: str) -> Dict[str, Any]:
 
 
 # ==============================================================================
+# Settings Operations
+# ==============================================================================
+
+def set_setting(key: str, value: str) -> int:
+    """Create or update a user setting value."""
+    return execute(
+        """INSERT INTO user_settings (setting_key, setting_value, updated_at)
+        VALUES (?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(setting_key) DO UPDATE SET
+            setting_value = excluded.setting_value,
+            updated_at = CURRENT_TIMESTAMP""",
+        (key, value)
+    )
+
+
+def get_setting(key: str, default: Optional[str] = None) -> Optional[str]:
+    """Get a single setting value by key."""
+    row = query_one(
+        "SELECT setting_value FROM user_settings WHERE setting_key = ?",
+        (key,)
+    )
+    if row is None:
+        return default
+    return row["setting_value"]
+
+
+def get_all_settings() -> Dict[str, str]:
+    """Get all user settings as a key/value dictionary."""
+    rows = query("SELECT setting_key, setting_value FROM user_settings ORDER BY setting_key")
+    return {row["setting_key"]: row["setting_value"] for row in rows}
+
+
+def get_settings_by_prefix(prefix: str) -> Dict[str, str]:
+    """Get settings that begin with a key prefix."""
+    rows = query(
+        "SELECT setting_key, setting_value FROM user_settings WHERE setting_key LIKE ? ORDER BY setting_key",
+        (f"{prefix}%",)
+    )
+    return {row["setting_key"]: row["setting_value"] for row in rows}
+
+
+def delete_setting(key: str) -> int:
+    """Delete a setting by key."""
+    return execute("DELETE FROM user_settings WHERE setting_key = ?", (key,))
+
+
+# ==============================================================================
 # API Key Operations
 # ==============================================================================
 

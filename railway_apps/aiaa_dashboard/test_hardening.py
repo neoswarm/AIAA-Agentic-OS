@@ -227,6 +227,56 @@ def test_api_key_status(auth_client):
     assert "keys" in data
 
 
+def test_rotate_api_key_valid(auth_client):
+    """POST /api/v2/settings/api-keys/<key>/rotate rotates token successfully."""
+    resp = auth_client.post("/api/v2/settings/api-keys/openrouter/rotate", json={
+        "key_value": "sk-or-rotated-1234567890abcdef",
+    })
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["status"] == "ok"
+    assert data["action"] == "rotate"
+    assert os.getenv("OPENROUTER_API_KEY", "").startswith("sk-or-rotated-")
+
+
+def test_rotate_api_key_missing_value(auth_client):
+    """POST /api/v2/settings/api-keys/<key>/rotate with empty body returns 400."""
+    resp = auth_client.post("/api/v2/settings/api-keys/openrouter/rotate", json={})
+    assert resp.status_code == 400
+    data = resp.get_json()
+    assert data["status"] == "error"
+    assert "errors" in data
+    assert "key_value" in data["errors"]
+
+
+def test_revoke_api_key_valid(auth_client):
+    """POST /api/v2/settings/api-keys/<key>/revoke removes configured token."""
+    seed = auth_client.post("/api/v2/settings/api-keys/openrouter/rotate", json={
+        "key_value": "sk-or-revoke-1234567890abcdef",
+    })
+    assert seed.status_code == 200
+
+    resp = auth_client.post("/api/v2/settings/api-keys/openrouter/revoke")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["status"] == "ok"
+    assert data["action"] == "revoke"
+
+    status_resp = auth_client.get("/api/v2/settings/api-keys/status")
+    assert status_resp.status_code == 200
+    status_data = status_resp.get_json()
+    assert status_data["keys"]["openrouter"]["configured"] is False
+
+
+def test_settings_page_has_rotate_and_revoke_controls(auth_client):
+    """GET /settings includes rotate/revoke controls for API key rows."""
+    resp = auth_client.get("/settings")
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+    assert "rotateApiKey('openrouter')" in html
+    assert "revokeApiKey('openrouter')" in html
+
+
 # =============================================================================
 # Authenticated: Client Management
 # =============================================================================

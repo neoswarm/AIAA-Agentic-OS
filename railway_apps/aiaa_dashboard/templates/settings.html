@@ -120,12 +120,23 @@
     .api-key-actions {
         display: flex;
         gap: 0.5rem;
+        flex-wrap: wrap;
     }
 
     .btn-sm {
         padding: 0.5rem 0.875rem;
         font-size: 0.8125rem;
         border-radius: 6px;
+    }
+
+    .btn-danger-subtle {
+        background: var(--error-muted);
+        color: var(--error);
+        border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .btn-danger-subtle:hover {
+        background: rgba(239, 68, 68, 0.18);
     }
 
     .api-key-help {
@@ -363,8 +374,10 @@
             <div class="api-key-input-row">
                 <input type="password" class="form-input" id="input-openrouter" placeholder="sk-or-v1-..." autocomplete="off">
                 <div class="api-key-actions">
-                    <button class="btn btn-sm btn-secondary" onclick="testApiKey('openrouter')">Test</button>
-                    <button class="btn btn-sm" onclick="saveApiKey('openrouter')">Save</button>
+                    <button class="btn btn-sm btn-secondary" data-action="test" onclick="testApiKey('openrouter')">Test</button>
+                    <button class="btn btn-sm" data-action="save" onclick="saveApiKey('openrouter')">Save</button>
+                    <button class="btn btn-sm btn-secondary" data-action="rotate" onclick="rotateApiKey('openrouter')">Rotate</button>
+                    <button class="btn btn-sm btn-danger-subtle" data-action="revoke" onclick="revokeApiKey('openrouter')">Revoke</button>
                 </div>
             </div>
             <span class="key-format-error" id="error-openrouter"></span>
@@ -413,8 +426,10 @@
             <div class="api-key-input-row">
                 <input type="password" class="form-input" id="input-perplexity" placeholder="pplx-..." autocomplete="off">
                 <div class="api-key-actions">
-                    <button class="btn btn-sm btn-secondary" onclick="testApiKey('perplexity')">Test</button>
-                    <button class="btn btn-sm" onclick="saveApiKey('perplexity')">Save</button>
+                    <button class="btn btn-sm btn-secondary" data-action="test" onclick="testApiKey('perplexity')">Test</button>
+                    <button class="btn btn-sm" data-action="save" onclick="saveApiKey('perplexity')">Save</button>
+                    <button class="btn btn-sm btn-secondary" data-action="rotate" onclick="rotateApiKey('perplexity')">Rotate</button>
+                    <button class="btn btn-sm btn-danger-subtle" data-action="revoke" onclick="revokeApiKey('perplexity')">Revoke</button>
                 </div>
             </div>
             <span class="key-format-error" id="error-perplexity"></span>
@@ -438,8 +453,10 @@
             <div class="api-key-input-row">
                 <input type="password" class="form-input" id="input-slack" placeholder="https://hooks.slack.com/services/..." autocomplete="off">
                 <div class="api-key-actions">
-                    <button class="btn btn-sm btn-secondary" onclick="testApiKey('slack')">Test</button>
-                    <button class="btn btn-sm" onclick="saveApiKey('slack')">Save</button>
+                    <button class="btn btn-sm btn-secondary" data-action="test" onclick="testApiKey('slack')">Test</button>
+                    <button class="btn btn-sm" data-action="save" onclick="saveApiKey('slack')">Save</button>
+                    <button class="btn btn-sm btn-secondary" data-action="rotate" onclick="rotateApiKey('slack')">Rotate</button>
+                    <button class="btn btn-sm btn-danger-subtle" data-action="revoke" onclick="revokeApiKey('slack')">Revoke</button>
                 </div>
             </div>
             <span class="key-format-error" id="error-slack"></span>
@@ -668,6 +685,22 @@
         }
     });
 
+    function validateKeyInput(keyName, value) {
+        if (!value) {
+            showKeyError(keyName, 'Please enter an API key');
+            return false;
+        }
+
+        // Prefix validation (skip for keys with no prefix requirement like fal)
+        var keyConfig = KEY_PREFIXES[keyName];
+        if (keyConfig && keyConfig.prefix && !value.startsWith(keyConfig.prefix)) {
+            showKeyError(keyName, keyConfig.hint);
+            return false;
+        }
+
+        return true;
+    }
+
     // Save API key with client-side prefix validation
     function saveApiKey(keyName) {
         var input = document.getElementById('input-' + keyName);
@@ -676,20 +709,12 @@
         // Clear previous error
         clearKeyError(keyName);
 
-        // Empty check
-        if (!value) {
-            showKeyError(keyName, 'Please enter an API key');
+        if (!validateKeyInput(keyName, value)) {
             return;
         }
 
-        // Prefix validation (skip for keys with no prefix requirement like fal)
-        var keyConfig = KEY_PREFIXES[keyName];
-        if (keyConfig && keyConfig.prefix && !value.startsWith(keyConfig.prefix)) {
-            showKeyError(keyName, keyConfig.hint);
-            return;
-        }
-
-        var btn = input.closest('.api-key-item').querySelector('.btn:not(.btn-secondary)');
+        var item = input.closest('.api-key-item');
+        var btn = item.querySelector('[data-action="save"]');
         setButtonLoading(btn, true, 'Saving...');
 
         fetch('/api/v2/settings/api-keys', {
@@ -706,20 +731,108 @@
                 input.value = '';
                 input.placeholder = 'Key saved — enter new value to update';
             } else {
-                // Show server-side error inline if it's a format error
-                var msg = data.message || data.error || 'Save failed';
-                if (msg.indexOf('Invalid key format') !== -1 || msg.indexOf('prefix') !== -1) {
-                    showKeyError(keyName, msg);
+                var msg = (data.errors && data.errors.key_value) || data.message || data.error || 'Save failed';
+                if (data.errors && data.errors.key_value) {
+                    showKeyError(keyName, data.errors.key_value);
                 }
                 updateKeyStatus(keyName, 'invalid', msg);
             }
         })
-        .catch(function(err) {
+        .catch(function() {
             setButtonLoading(btn, false);
             updateKeyStatus(keyName, 'invalid', 'Save failed');
-            // Show toast for network errors (the old code silently failed)
             if (typeof showToast === 'function') {
                 showToast('Failed to save API key. Check your connection.', 'error');
+            }
+        });
+    }
+
+    // Rotate API key/token (replace existing value)
+    function rotateApiKey(keyName) {
+        var input = document.getElementById('input-' + keyName);
+        var value = input.value.trim();
+
+        clearKeyError(keyName);
+        if (!validateKeyInput(keyName, value)) {
+            return;
+        }
+
+        if (!confirm('Rotate this token now? The existing value will be replaced.')) {
+            return;
+        }
+
+        var item = input.closest('.api-key-item');
+        var btn = item.querySelector('[data-action="rotate"]');
+        setButtonLoading(btn, true, 'Rotating...');
+
+        fetch('/api/v2/settings/api-keys/' + encodeURIComponent(keyName) + '/rotate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key_value: value })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            setButtonLoading(btn, false);
+            if (data.status === 'ok') {
+                clearKeyError(keyName);
+                updateKeyStatus(keyName, 'valid', 'Connected');
+                input.value = '';
+                input.placeholder = 'Token rotated — enter new value to rotate again';
+                if (typeof showToast === 'function') {
+                    showToast('Token rotated successfully.', 'success');
+                }
+            } else {
+                var msg = (data.errors && data.errors.key_value) || data.message || 'Rotate failed';
+                if (data.errors && data.errors.key_value) {
+                    showKeyError(keyName, data.errors.key_value);
+                }
+                updateKeyStatus(keyName, 'invalid', msg);
+            }
+        })
+        .catch(function() {
+            setButtonLoading(btn, false);
+            updateKeyStatus(keyName, 'invalid', 'Rotate failed');
+            if (typeof showToast === 'function') {
+                showToast('Failed to rotate token. Check your connection.', 'error');
+            }
+        });
+    }
+
+    // Revoke API key/token
+    function revokeApiKey(keyName) {
+        if (!confirm('Revoke this token? This removes the saved value from this dashboard.')) {
+            return;
+        }
+
+        var input = document.getElementById('input-' + keyName);
+        var item = input.closest('.api-key-item');
+        var btn = item.querySelector('[data-action="revoke"]');
+        setButtonLoading(btn, true, 'Revoking...');
+
+        fetch('/api/v2/settings/api-keys/' + encodeURIComponent(keyName) + '/revoke', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            setButtonLoading(btn, false);
+            if (data.status === 'ok') {
+                clearKeyError(keyName);
+                updateKeyStatus(keyName, 'missing', 'Not configured');
+                input.value = '';
+                input.placeholder = 'Token revoked — enter a value to save';
+                if (typeof showToast === 'function') {
+                    showToast('Token revoked.', 'success');
+                }
+            } else {
+                updateKeyStatus(keyName, 'invalid', data.message || 'Revoke failed');
+            }
+        })
+        .catch(function() {
+            setButtonLoading(btn, false);
+            updateKeyStatus(keyName, 'invalid', 'Revoke failed');
+            if (typeof showToast === 'function') {
+                showToast('Failed to revoke token. Check your connection.', 'error');
             }
         });
     }
@@ -727,15 +840,14 @@
     // Test API key
     function testApiKey(keyName) {
         var input = document.getElementById('input-' + keyName);
-        var statusEl = document.getElementById('status-' + keyName);
-        var btn = input.closest('.api-key-item').querySelector('.btn-secondary');
+        var btn = input.closest('.api-key-item').querySelector('[data-action="test"]');
         setButtonLoading(btn, true, 'Testing...');
 
         fetch('/api/v2/settings/api-keys/status')
         .then(function(r) { return r.json(); })
         .then(function(data) {
             setButtonLoading(btn, false);
-            var keyData = (data.keys && data.keys[keyName]) || data[keyName];
+            var keyData = (data.keys || {})[keyName];
             if (keyData && keyData.configured) {
                 updateKeyStatus(keyName, 'valid', 'Connected');
             } else {
@@ -926,9 +1038,8 @@
         fetch('/api/v2/settings/api-keys/status')
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            var keys = data.keys || {};
-            Object.keys(keys).forEach(function(key) {
-                if (keys[key] && keys[key].configured) {
+            Object.keys(data.keys || {}).forEach(function(key) {
+                if (data.keys[key] && data.keys[key].configured) {
                     updateKeyStatus(key, 'valid', 'Connected');
                 }
             });
