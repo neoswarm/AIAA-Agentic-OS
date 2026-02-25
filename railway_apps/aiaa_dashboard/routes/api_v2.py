@@ -23,6 +23,7 @@ from flask import (Blueprint, Response, jsonify, request, session,
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import models
 from config import Config
+from .api_v1 import api_v1_bp
 from .health_utils import get_chat_subsystem_readiness
 from services.skill_execution_service import (
     parse_skill_md,
@@ -43,6 +44,7 @@ from services.run_guard import (
 
 api_v2_bp = Blueprint('api_v2', __name__, url_prefix='/api/v2')
 _TOKEN_ROTATION_LOCK = threading.Lock()
+_PROFILE_REVOCATION_PREFIX = 'profile_revoked.'
 
 
 # =============================================================================
@@ -197,9 +199,50 @@ def get_run_guard_session_key() -> str:
     return "unknown"
 
 
+def _profile_revocation_key(profile_slug: str) -> str:
+    return f"{_PROFILE_REVOCATION_PREFIX}{profile_slug}"
+
+
+def _mark_profile_revoked(profile_slug: str) -> bool:
+    """Persist a profile revocation marker used by resolution checks."""
+    set_setting = getattr(models, "set_setting", None)
+    if not callable(set_setting):
+        return False
+
+    revoked_at = datetime.now(timezone.utc).isoformat()
+    set_setting(_profile_revocation_key(profile_slug), revoked_at)
+    return True
+
+
+def _is_profile_revoked(profile_slug: str) -> bool:
+    """Return True when the profile has an explicit revoke marker."""
+    get_setting = getattr(models, "get_setting", None)
+    if not callable(get_setting):
+        return False
+    try:
+        marker = get_setting(_profile_revocation_key(profile_slug))
+    except Exception:
+        return False
+    return bool(str(marker or "").strip())
+
+
+def _secure_delete_client_profile(profile_slug: str) -> bool:
+    """Attempt to delete a DB-backed profile; return True when a row was removed."""
+    delete_client_profile = getattr(models, "delete_client_profile", None)
+    if not callable(delete_client_profile):
+        return False
+    try:
+        deleted_rows = delete_client_profile(profile_slug)
+    except Exception:
+        return False
+    return bool(deleted_rows)
+
+
 def _is_known_client_profile(profile_slug: str) -> bool:
     """Return True when a client profile slug can be resolved."""
     if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,99}", profile_slug):
+        return False
+    if _is_profile_revoked(profile_slug):
         return False
 
     get_client_profile = getattr(models, "get_client_profile", None)
@@ -248,6 +291,40 @@ def api_v2_health():
         "service": "aiaa-dashboard-gateway",
         "chat_subsystem_ready": chat_subsystem["ready"],
         "chat_subsystem": chat_subsystem,
+    })
+
+
+@api_v1_bp.route('/profiles/revoke', methods=['POST'])
+@login_required
+def api_revoke_profile():
+    """Revoke a profile by secure-delete when possible, otherwise invalidate it."""
+    payload = request.get_json(silent=True) or {}
+    profile_slug = str(
+        payload.get("profile_slug")
+        or payload.get("profile")
+        or payload.get("slug")
+        or ""
+    ).strip()
+
+    if not profile_slug:
+        return validation_error({"profile": "Profile slug is required"})
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,99}", profile_slug):
+        return validation_error({"profile": "Invalid profile slug"})
+
+    deleted = _secure_delete_client_profile(profile_slug)
+    invalidated = _mark_profile_revoked(profile_slug)
+    if not deleted and not invalidated:
+        return jsonify({
+            "status": "error",
+            "message": "Unable to revoke profile",
+        }), 500
+
+    action = "deleted" if deleted else "invalidated"
+    return jsonify({
+        "status": "ok",
+        "message": f"Profile '{profile_slug}' revoked",
+        "profile_slug": profile_slug,
+        "action": action,
     })
 
 
