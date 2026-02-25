@@ -48,6 +48,7 @@ _store_lock = threading.RLock()
 _store: ChatStore | None = None
 _message_rate_lock = threading.RLock()
 _message_rate_windows: dict[str, deque[float]] = {}
+GATEWAY_MODE_FLAG = "CHAT_GATEWAY_MODE_ENABLED"
 
 
 def _get_message_rate_limit_per_minute() -> int:
@@ -191,23 +192,31 @@ def _looks_like_setup_token(token: str) -> bool:
 
 
 def _unsupported_setup_token_message() -> str:
-    return (
-        "Claude setup-token / OAuth auth is not supported for Claude Agent SDK in this "
-        "dashboard. Use an Anthropic API key (sk-ant-...) instead."
-    )
+    return "Gateway mode is disabled. Use an Anthropic API key (sk-ant-...) instead."
+
+
+def _is_gateway_mode_enabled() -> bool:
+    """Return whether setup-token gateway mode is enabled via feature flag."""
+    raw_value = (os.getenv(GATEWAY_MODE_FLAG, "false") or "").strip().lower()
+    return raw_value in {"1", "true", "yes", "on"}
 
 
 def validate_claude_token(token: str) -> Dict[str, Any]:
     """Validate Claude token with compatible checks.
 
-    Note: setup-token / OAuth artifacts are not supported for Claude Agent SDK
-    in third-party dashboards. Require API-key based auth for this app.
+    setup-token / OAuth artifacts are only accepted when gateway mode is enabled.
     """
     candidate = (token or "").strip()
     if not candidate:
         return {"status": "invalid", "http_status": None, "message": "Missing token"}
 
     if _looks_like_setup_token(candidate):
+        if _is_gateway_mode_enabled():
+            return {
+                "status": "unknown",
+                "http_status": None,
+                "message": "Setup token format accepted. Full validity is confirmed on first agent run.",
+            }
         return {
             "status": "unsupported",
             "http_status": None,
@@ -460,7 +469,7 @@ def create_session():
             jsonify({"status": "error", "message": "Claude token not configured"}),
             400,
         )
-    if _looks_like_setup_token(token):
+    if _looks_like_setup_token(token) and not _is_gateway_mode_enabled():
         _log_chat_session_lifecycle(
             action="create",
             status="error",
@@ -510,7 +519,7 @@ def send_message():
             jsonify({"status": "error", "message": "Claude token not configured"}),
             400,
         )
-    if _looks_like_setup_token(token):
+    if _looks_like_setup_token(token) and not _is_gateway_mode_enabled():
         _log_chat_session_lifecycle(
             action="send_message",
             status="error",
