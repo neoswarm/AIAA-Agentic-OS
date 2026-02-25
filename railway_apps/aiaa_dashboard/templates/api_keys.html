@@ -334,7 +334,8 @@ async function createApiKey() {
 }
 
 async function revokeKey(keyId, keyName) {
-    if (!confirm(`Are you sure you want to revoke "${keyName}"? This cannot be undone.`)) {
+    const confirmed = await confirmAction(`Are you sure you want to revoke "${keyName}"? This cannot be undone.`);
+    if (!confirmed) {
         return;
     }
     
