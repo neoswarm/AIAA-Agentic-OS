@@ -245,7 +245,8 @@ def main():
             f"\n[ERROR PATTERN] {script_name} has failed {error_count} times.\n"
             f"Recent errors:\n"
             f"{error_list}\n"
-            f"Consider investigating root cause or updating the directive.\n\n"
+            f"Common causes: 1) API key expired or invalid 2) Service temporarily unavailable 3) Input data format incorrect.\n"
+            f"Check Settings > API Keys to verify your keys.\n\n"
         )
         sys.stderr.write(warning)
 

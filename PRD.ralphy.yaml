@@ -1,0 +1,246 @@
+tasks:
+  - title: Add Redis dependency and config flags for chat storage backend.
+    completed: true
+    parallel_group: 1
+  - title: Add `REDIS_URL` and chat TTL env vars to dashboard config.
+    completed: true
+    parallel_group: 1
+  - title: Create `services/chat_store.py` interface for sessions/messages/events.
+    completed: true
+    parallel_group: 1
+  - title: Implement `InMemoryChatStore` as a fallback backend.
+    completed: true
+    parallel_group: 1
+  - title: Implement `RedisChatStore` with atomic session/message writes.
+    completed: true
+    parallel_group: 1
+  - title: "Add session schema with fields: id, title, status, sdk_session_id,
+      created_at, updated_at."
+    completed: true
+    parallel_group: 1
+  - title: "Add message schema with fields: role, content, timestamp, type, metadata."
+    completed: true
+    parallel_group: 1
+  - title: Add event schema for streamed tool/system/result events.
+    completed: true
+    parallel_group: 1
+  - title: Add Redis key naming convention with clear namespace prefix.
+    completed: true
+    parallel_group: 1
+  - title: Add TTL policy for idle sessions and stale event streams.
+    completed: true
+    parallel_group: 1
+  - title: Wire chat routes to use store abstraction instead of in-memory runner
+      state.
+    completed: true
+    parallel_group: 1
+  - title: Verify cross-process session visibility with two app instances locally.
+    completed: true
+    parallel_group: 1
+  - title: Add encrypted-at-rest storage for `claude_setup_token` in settings table.
+    completed: true
+    parallel_group: 2
+  - title: Add encryption key config (`CHAT_TOKEN_ENCRYPTION_KEY`) with validation.
+    completed: true
+    parallel_group: 2
+  - title: Add token decrypt utility with safe failure handling.
+    completed: true
+    parallel_group: 2
+  - title: Ensure APIs never return raw token values (only redacted form).
+    completed: true
+    parallel_group: 2
+  - title: "Add token metadata fields: `last_validated_at`, `validation_status`,
+      `last_error`."
+    completed: true
+    parallel_group: 2
+  - title: Add token rotation endpoint to replace token atomically.
+    completed: true
+    parallel_group: 2
+  - title: Add token clear/revoke endpoint to remove token and invalidate runner
+      usage.
+    completed: true
+    parallel_group: 2
+  - title: Add settings UI controls for rotate and revoke token actions.
+    completed: true
+    parallel_group: 2
+  - title: Add confirmation modal before token revoke.
+    completed: true
+    parallel_group: 2
+  - title: Persist rotated token to Railway variables in background with retry.
+    completed: true
+    parallel_group: 2
+  - title: Add audit event logging for save/rotate/revoke token actions.
+    completed: true
+    parallel_group: 2
+  - title: Add per-user message rate limiting for `/api/chat/message`.
+    completed: true
+    parallel_group: 3
+  - title: Add per-session max pending/running run guard.
+    completed: true
+    parallel_group: 3
+  - title: Add global max concurrent chat runs per instance.
+    completed: true
+    parallel_group: 3
+  - title: Add clear API errors for limit violations with retry guidance.
+    completed: true
+    parallel_group: 3
+  - title: Add configurable limits in `config.py` with sensible defaults.
+    completed: true
+    parallel_group: 3
+  - title: Add unit tests for each guardrail path.
+    completed: true
+    parallel_group: 3
+  - title: Add paginated session history endpoint (messages + metadata).
+    completed: true
+    parallel_group: 4
+  - title: Add session listing filters (status/date/search).
+    completed: true
+    parallel_group: 4
+  - title: Add session soft-delete endpoint.
+    completed: true
+    parallel_group: 4
+  - title: Add optional transcript export endpoint (markdown/json).
+    completed: true
+    parallel_group: 4
+  - title: Ensure history load is efficient for long conversations.
+    completed: true
+    parallel_group: 4
+  - title: Add DB/Redis integration tests for history consistency.
+    completed: true
+    parallel_group: 4
+  - title: Add server event IDs for SSE messages.
+    completed: true
+    parallel_group: 5
+  - title: Support resume from last event ID on reconnect.
+    completed: true
+    parallel_group: 5
+  - title: Add keepalive strategy and idle timeout behavior docs in code.
+    completed: true
+    parallel_group: 5
+  - title: Add frontend auto-reconnect with backoff for transient disconnects.
+    completed: true
+    parallel_group: 5
+  - title: Add frontend handling for duplicate event IDs on reconnect.
+    completed: true
+    parallel_group: 5
+  - title: Add “runner still active” recovery flow when page reloads mid-run.
+    completed: true
+    parallel_group: 5
+  - title: Add integration test for interrupted stream + resume.
+    completed: true
+    parallel_group: 5
+  - title: "Add named tool profiles: `safe`, `default`, `full`."
+    completed: true
+    parallel_group: 6
+  - title: Map each profile to explicit `allowed_tools` sets.
+    completed: true
+    parallel_group: 6
+  - title: Add settings UI selector for default chat profile.
+    completed: true
+    parallel_group: 6
+  - title: Add per-session override capability on new session creation.
+    completed: true
+    parallel_group: 6
+  - title: Add API validation to reject unknown profiles.
+    completed: true
+    parallel_group: 6
+  - title: Add telemetry field for profile used per run.
+    completed: true
+    parallel_group: 6
+  - title: Add tests for profile resolution and fallback behavior.
+    completed: true
+    parallel_group: 6
+  - title: Add structured logs for session lifecycle events.
+    completed: true
+    parallel_group: 7
+  - title: Add structured logs for tool events and terminal statuses.
+    completed: true
+    parallel_group: 7
+  - title: Add request correlation IDs for chat APIs and streams.
+    completed: true
+    parallel_group: 7
+  - title: Add latency metrics (queue wait, first-token, total runtime).
+    completed: true
+    parallel_group: 7
+  - title: Add token validation metric counters by status
+      (valid/expired/invalid/unreachable).
+    completed: true
+    parallel_group: 7
+  - title: Add health endpoint extension for chat subsystem readiness.
+    completed: true
+    parallel_group: 7
+  - title: Add dashboard-visible admin diagnostics card for chat health.
+    completed: false
+    parallel_group: 7
+  - title: Add parser contract tests for varied SDK event payload shapes.
+    completed: false
+    parallel_group: 8
+  - title: Add mocked SDK streaming tests for success/error/tool-result sequences.
+    completed: false
+    parallel_group: 8
+  - title: Add route auth tests for all new chat endpoints.
+    completed: false
+    parallel_group: 8
+  - title: Add regression tests for settings token UI API interactions.
+    completed: false
+    parallel_group: 8
+  - title: Add CI job running chat-focused test subset on each PR.
+    completed: false
+    parallel_group: 8
+  - title: "Add smoke test script: create session -> send message -> stream done."
+    completed: false
+    parallel_group: 8
+  - title: Add `docs/chat-architecture.md` with sequence diagrams and data flow.
+    completed: false
+    parallel_group: 9
+  - title: Add `docs/chat-token-setup.md` with student setup-token flow.
+    completed: false
+    parallel_group: 9
+  - title: Add `docs/chat-troubleshooting.md` for common validation/stream issues.
+    completed: false
+    parallel_group: 9
+  - title: Update dashboard README with new chat endpoints and env vars.
+    completed: false
+    parallel_group: 9
+  - title: Add Railway deployment notes for Redis and token encryption key setup.
+    completed: false
+    parallel_group: 9
+  - title: Add local dev instructions for running chat with and without Redis.
+    completed: false
+    parallel_group: 9
+  - title: Define acceptance checklist for local, staging, and production gates.
+    completed: false
+    parallel_group: 10
+  - title: Ship to local dev and validate acceptance checklist.
+    completed: false
+    parallel_group: 10
+  - title: Ship to staging Railway environment with Redis enabled.
+    completed: false
+    parallel_group: 10
+  - title: Run pilot with limited users and monitor telemetry/error rates.
+    completed: false
+    parallel_group: 10
+  - title: Address pilot findings and finalize production defaults.
+    completed: false
+    parallel_group: 10
+  - title: Promote to production and monitor first 48h with rollback plan ready.
+    completed: false
+    parallel_group: 10
+  - title: All chat endpoints pass auth, validation, and regression tests.
+    completed: false
+    parallel_group: 10
+  - title: SSE reconnect/resume works under forced network interruption tests.
+    completed: false
+    parallel_group: 10
+  - title: Token storage is encrypted and raw token is never exposed in API responses.
+    completed: false
+    parallel_group: 10
+  - title: Multi-instance session continuity works with Redis-backed store.
+    completed: false
+    parallel_group: 10
+  - title: CI includes chat test gate and passes on default branch.
+    completed: false
+    parallel_group: 10
+  - title: Docs are updated for setup, operations, and troubleshooting.
+    completed: false
+    parallel_group: 10

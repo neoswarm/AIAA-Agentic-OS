@@ -347,21 +347,11 @@
 <script>
 (function() {
     var pollInterval = null;
-    var executionId = getExecutionIdFromUrl();
-    var skillName = getSkillNameFromUrl();
+    var executionId = {{ execution.id | tojson }};
+    var initialExecution = {{ execution | tojson }};
+    var skillMeta = {{ (skill or {}) | tojson }};
+    var skillName = initialExecution.skill_name || skillMeta.name || '';
     var startTime = Date.now();
-
-    function getExecutionIdFromUrl() {
-        var parts = window.location.pathname.split('/');
-        return parts[parts.length - 1] || null;
-    }
-
-    function getSkillNameFromUrl() {
-        var parts = window.location.pathname.split('/');
-        var idx = parts.indexOf('skills');
-        if (idx >= 0 && parts[idx + 1]) return decodeURIComponent(parts[idx + 1]);
-        return null;
-    }
 
     function formatSkillName(name) {
         return (name || '').replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
@@ -381,13 +371,71 @@
         return secs + 's';
     }
 
+    function parseDate(str) {
+        if (!str) return null;
+        var d = new Date(str);
+        return isNaN(d.getTime()) ? null : d;
+    }
+
+    function getElapsedMs(execution) {
+        var start = parseDate(execution.started_at) || parseDate(execution.created_at);
+        var end = parseDate(execution.completed_at);
+        if (!start) return Date.now() - startTime;
+        if (end) return Math.max(end - start, 0);
+        return Math.max(Date.now() - start, 0);
+    }
+
+    function deriveSteps(execution) {
+        var configuredSteps = (skillMeta && skillMeta.process_steps) || [];
+        var status = execution.status || 'queued';
+        if (!configuredSteps.length) {
+            var generic = [
+                { name: 'Queued', status: 'queued' },
+                { name: 'Running', status: 'pending' },
+                { name: 'Completed', status: 'pending' }
+            ];
+            if (status === 'running') {
+                generic[0].status = 'done';
+                generic[1].status = 'running';
+            } else if (status === 'success') {
+                generic[0].status = 'done';
+                generic[1].status = 'done';
+                generic[2].status = 'done';
+            } else if (status === 'error' || status === 'cancelled') {
+                generic[0].status = 'done';
+                generic[1].status = 'error';
+            }
+            return generic;
+        }
+
+        return configuredSteps.map(function(step, index) {
+            var stepStatus = 'pending';
+            if (status === 'running') {
+                stepStatus = index === 0 ? 'running' : 'pending';
+            } else if (status === 'success') {
+                stepStatus = 'done';
+            } else if (status === 'error' || status === 'cancelled') {
+                stepStatus = index === 0 ? 'error' : 'pending';
+            }
+            return { name: step.name || ('Step ' + (index + 1)), status: stepStatus };
+        });
+    }
+
+    function computeProgressPercent(status) {
+        if (status === 'success') return 100;
+        if (status === 'error' || status === 'cancelled') return 100;
+        if (status === 'running') return 65;
+        return 10;
+    }
+
     // Initialize
-    document.getElementById('progress-title').textContent = 'Running: ' + formatSkillName(skillName);
+    document.getElementById('progress-title').textContent = 'Running: ' + formatSkillName(skillName || 'skill');
 
     // Poll for status
     function startPolling() {
         if (!executionId) return;
 
+        updateProgress(initialExecution);
         pollStatus();
         pollInterval = setInterval(pollStatus, 2000);
     }
@@ -396,13 +444,13 @@
         try {
             var res = await fetch('/api/v2/executions/' + encodeURIComponent(executionId) + '/status');
             if (!res.ok) throw new Error('Status request failed');
-            var data = await res.json();
+            var payload = await res.json();
+            var execution = payload.execution || initialExecution;
+            updateProgress(execution);
 
-            updateProgress(data);
-
-            if (data.status === 'success' || data.status === 'error' || data.status === 'cancelled') {
+            if (execution.status === 'success' || execution.status === 'error' || execution.status === 'cancelled') {
                 clearInterval(pollInterval);
-                onComplete(data);
+                onComplete(execution);
             }
         } catch (e) {
             console.warn('Poll error:', e);
@@ -410,20 +458,18 @@
         }
     }
 
-    function updateProgress(data) {
-        var elapsed = formatDuration(Date.now() - startTime);
+    function updateProgress(execution) {
+        var status = execution.status || 'queued';
+        var elapsed = formatDuration(getElapsedMs(execution));
         var metaText = 'Started ' + elapsed + ' ago';
-        if (data.estimated_time) {
-            metaText += ' | Estimated: ~' + data.estimated_time;
-        }
         document.getElementById('progress-meta').textContent = metaText;
 
         // Update progress bar
-        var steps = data.steps || [];
+        var steps = deriveSteps(execution);
         var totalSteps = steps.length || 1;
         var completedSteps = steps.filter(function(s) { return s.status === 'done'; }).length;
         var runningSteps = steps.filter(function(s) { return s.status === 'running'; }).length;
-        var pct = Math.round(((completedSteps + runningSteps * 0.5) / totalSteps) * 100);
+        var pct = computeProgressPercent(status);
 
         var fill = document.getElementById('progress-fill');
         fill.style.width = pct + '%';
@@ -435,11 +481,10 @@
         renderSteps(steps);
 
         // Update live output
-        if (data.output) {
-            var outputEl = document.getElementById('live-output');
-            outputEl.textContent = data.output;
-            outputEl.scrollTop = outputEl.scrollHeight;
-        }
+        var outputEl = document.getElementById('live-output');
+        var content = execution.output_preview || execution.error_message || '';
+        outputEl.textContent = content;
+        outputEl.scrollTop = outputEl.scrollHeight;
     }
 
     function renderSteps(steps) {
@@ -476,7 +521,8 @@
         });
     }
 
-    function onComplete(data) {
+    function onComplete(execution) {
+        var status = execution.status || 'error';
         var banner = document.getElementById('completion-banner');
         var fill = document.getElementById('progress-fill');
         var headerIcon = document.getElementById('header-icon');
@@ -488,7 +534,7 @@
         outputStatus.textContent = 'complete';
         outputStatus.className = 'badge badge-muted';
 
-        if (data.status === 'success') {
+        if (status === 'success') {
             fill.style.width = '100%';
             fill.classList.add('success');
             document.getElementById('progress-percent').textContent = '100%';
@@ -496,7 +542,7 @@
             banner.classList.add('banner-success', 'visible');
             document.getElementById('banner-text').textContent = 'Skill completed successfully!';
             var actionBtn = document.getElementById('banner-action');
-            actionBtn.href = '/skills/' + encodeURIComponent(skillName) + '/output/' + encodeURIComponent(executionId);
+            actionBtn.href = '/executions/' + encodeURIComponent(executionId) + '/output';
             actionBtn.textContent = 'View Output';
 
             headerIcon.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
@@ -505,9 +551,9 @@
         } else {
             fill.classList.add('error');
             banner.classList.add('banner-error', 'visible');
-            document.getElementById('banner-text').textContent = data.error_message || 'Execution failed.';
+            document.getElementById('banner-text').textContent = execution.error_message || 'Execution failed.';
             var actionBtn2 = document.getElementById('banner-action');
-            actionBtn2.href = '/skills/' + encodeURIComponent(skillName) + '/execute';
+            actionBtn2.href = skillName ? ('/skills/' + encodeURIComponent(skillName) + '/run') : '/skills';
             actionBtn2.textContent = 'Try Again';
 
             headerIcon.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
@@ -524,9 +570,12 @@
         btn.textContent = 'Cancelling...';
 
         try {
-            await fetch('/api/v2/executions/' + encodeURIComponent(executionId) + '/cancel', {
+            var res = await fetch('/api/v2/executions/' + encodeURIComponent(executionId) + '/cancel', {
                 method: 'POST'
             });
+            if (!res.ok) throw new Error('cancel failed');
+            showToast('Execution cancelled', 'info');
+            pollStatus();
         } catch (e) {
             console.warn('Cancel error:', e);
             showToast('Failed to cancel execution', 'error');

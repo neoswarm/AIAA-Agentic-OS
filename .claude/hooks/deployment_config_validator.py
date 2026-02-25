@@ -15,8 +15,8 @@ STATE_DIR = Path(".tmp/hooks")
 STATE_FILE = STATE_DIR / "deployment_config_checks.json"
 
 REQUIRED_FILES = {
-    "Procfile": "Railway may not know how to start your app",
-    "requirements.txt": "Python dependencies won't be installed",
+    "Procfile": "Your startup configuration is missing — the server won't know how to start your app",
+    "requirements.txt": "Required software packages are missing — your app's dependencies won't be installed",
 }
 
 RECOMMENDED_FILES = {
@@ -134,6 +134,7 @@ def main():
         sys.stderr.write(f"[deploy-config-check] Deployment directory: {deploy_dir}\n")
         for w in warnings:
             sys.stderr.write(f"  - {w}\n")
+        sys.stderr.write(f"  These files are usually created automatically. If they're missing, ask Claude to set up your deployment.\n")
 
     save_state(state)
     sys.exit(0)

@@ -23,9 +23,9 @@ import time
 from pathlib import Path
 from datetime import datetime
 
-MAX_AGENTS = 5
-STALE_SECONDS = 30 * 60  # 30 minutes
-BASE_DIR = Path(os.path.expanduser("/Users/lucasnolan/Agentic OS"))
+MAX_AGENTS = 15
+STALE_SECONDS = 10 * 60  # 10 minutes — agents rarely run longer
+BASE_DIR = Path(__file__).resolve().parents[2]
 STATE_FILE = BASE_DIR / ".tmp" / "hooks" / "active_agents.json"
 
 

@@ -188,23 +188,22 @@ class DeployWizard {
 
     async checkEnvVars() {
         try {
-            const response = await fetch('/api/env/check');
+            if (!this.config.workflowName) return;
+            const response = await fetch('/api/workflows/' + encodeURIComponent(this.config.workflowName) + '/requirements');
             const data = await response.json();
-            
-            const requiredVars = [
-                'OPENROUTER_API_KEY',
-                'PERPLEXITY_API_KEY',
-                'SLACK_WEBHOOK_URL',
-                'RAILWAY_API_TOKEN'
-            ];
-            
-            this.missingEnvVars = requiredVars.filter(v => !data[v]);
+
+            const requiredVars = data.required_env_vars || [];
+            this.missingEnvVars = data.missing_env_vars || [];
             
             // Populate checklist
             const checklist = document.getElementById('env-vars-checklist');
             if (checklist) {
+                if (requiredVars.length === 0) {
+                    checklist.innerHTML = '<div class="text-muted">No required environment variables detected for this workflow.</div>';
+                    return;
+                }
                 checklist.innerHTML = requiredVars.map(varName => {
-                    const isSet = data[varName];
+                    const isSet = this.missingEnvVars.indexOf(varName) === -1;
                     return `
                         <div class="env-check-item ${isSet ? 'set' : 'missing'}">
                             <div class="env-check-icon">
@@ -293,17 +292,30 @@ class DeployWizard {
         this.showProgress();
         
         try {
+            const payload = {
+                workflow_name: this.config.workflowName,
+                workflow_type: this.config.deployType,
+                config: {
+                    name: this.config.workflowName,
+                    schedule: this.config.cronExpression,
+                    slug: this.config.webhookSlug,
+                    forward_url: this.config.forwardUrl,
+                    slack_notify: this.config.slackNotify,
+                    port: this.config.webPort,
+                    health_path: this.config.healthPath
+                }
+            };
             const response = await fetch('/api/workflows/deploy', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(this.config)
+                body: JSON.stringify(payload)
             });
             
             const result = await response.json();
             
-            if (result.status === 'success' || response.ok) {
+            if (response.ok && (result.status === 'success' || result.status === 'ok')) {
                 await this.simulateProgress();
                 this.showSuccess(result);
             } else {
@@ -353,9 +365,9 @@ class DeployWizard {
         const successEl = document.getElementById('deploy-success');
         successEl.classList.remove('hidden');
         
-        if (result.url) {
+        if (result.service_url || result.url) {
             const urlEl = successEl.querySelector('.success-url');
-            urlEl.textContent = result.url;
+            urlEl.textContent = result.service_url || result.url;
         }
     }
 

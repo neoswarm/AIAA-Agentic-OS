@@ -1188,7 +1188,11 @@
                 return;
             }
             var data = await res.json();
-            showToast('Estimated time: ~' + (data.estimated_time || 'unknown') + ' | Cost: ' + (data.estimated_cost || 'N/A'), 'info');
+            var minutes = data.estimated_seconds ? Math.max(1, Math.round(data.estimated_seconds / 60)) + ' min' : 'unknown';
+            var cost = (data.estimated_cost_usd !== undefined && data.estimated_cost_usd !== null)
+                ? ('$' + Number(data.estimated_cost_usd).toFixed(2))
+                : 'N/A';
+            showToast('Estimated time: ~' + minutes + ' | Cost: ' + cost, 'info');
         } catch (e) {
             showToast('Could not get estimate', 'warning');
         } finally {

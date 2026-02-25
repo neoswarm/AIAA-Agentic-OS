@@ -20,7 +20,7 @@ import database
 import models
 
 # Import blueprints
-from routes import api_bp, views_bp, api_v2_bp
+from routes import api_bp, views_bp, api_v2_bp, chat_bp, init_chat_runner
 
 VERSION = "5.0"
 
@@ -39,6 +39,7 @@ def create_app(config_class=None):
     
     app.config.from_object(config_class)
     app.secret_key = config_class.SECRET_KEY
+    app.config["PROJECT_ROOT"] = str(Path(__file__).resolve().parents[2])
     
     # Configure session cookies
     app.config['SESSION_COOKIE_SECURE'] = config_class.SESSION_COOKIE_SECURE
@@ -69,10 +70,15 @@ def create_app(config_class=None):
     app.register_blueprint(api_bp)
     app.register_blueprint(views_bp)
     app.register_blueprint(api_v2_bp)
+    app.register_blueprint(chat_bp)
+
+    with app.app_context():
+        init_chat_runner(app)
 
     print(f"✅ Registered API blueprint at /api")
     print(f"✅ Registered API v2 blueprint at /api/v2")
     print(f"✅ Registered views blueprint at /")
+    print(f"✅ Registered chat blueprint at /chat and /api/chat/*")
 
     # App-level error handlers
     @app.errorhandler(404)

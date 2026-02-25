@@ -7,16 +7,16 @@ directives and scripts have been read during a session. When an execution script
 is about to run, checks that the corresponding directive was read first.
 
 Dual Mode Detection:
-  - If "tool_result" key exists in stdin JSON -> PostToolUse mode
-  - If "tool_result" key does NOT exist -> PreToolUse mode
+  - If "tool_response" key exists in stdin JSON -> PostToolUse mode
+  - If "tool_response" key does NOT exist -> PreToolUse mode
 
 PostToolUse/Read mode:
   - Logs directive reads (directives/*.md) to session_reads["directives_read"]
-  - Logs script reads (execution/*.py) to session_reads["scripts_read"]
+  - Logs script reads (execution/*.py and .claude/skills/*/*.py) to session_reads["scripts_read"]
   - Always returns {"decision": "ALLOW"}
 
 PreToolUse/Bash mode:
-  - When command runs python3 execution/*.py, checks for matching directive
+  - When command runs python3 execution/*.py or .claude/skills/*/*.py, checks for matching directive
   - Blocks if directives were read but none match the script
   - Warns (doesn't block) if no directives were read at all (fresh session)
 
@@ -33,7 +33,7 @@ import os
 import re
 from pathlib import Path
 
-BASE_DIR = Path(os.path.expanduser("/Users/lucasnolan/Agentic OS"))
+BASE_DIR = Path(__file__).resolve().parents[2]
 STATE_FILE = BASE_DIR / ".tmp" / "hooks" / "session_reads.json"
 
 # Prefixes to strip from script names when deriving directive keywords
@@ -60,7 +60,7 @@ def save_state(state):
 
 def extract_script_name(command):
     """Extract script filename from a bash command like 'python3 execution/foo.py --args'."""
-    match = re.search(r'python3?\s+(?:\S*/)?execution/(\S+\.py)', command)
+    match = re.search(r'python3?\s+(?:\S*/)?(?:execution|\.claude/skills/[^/\s]+)/(\S+\.py)', command)
     if match:
         return match.group(1)
     return None
@@ -139,8 +139,8 @@ def handle_post_tool_use(data):
             state["directives_read"].append(filename)
             save_state(state)
 
-    # Check if it's an execution script
-    if "execution/" in file_path:
+    # Check if it's an execution script (legacy or v5.0 skills)
+    if "execution/" in file_path or "/.claude/skills/" in file_path:
         filename = Path(file_path).name
         if filename not in state["scripts_read"]:
             state["scripts_read"].append(filename)
@@ -165,9 +165,9 @@ def handle_pre_tool_use(data):
     # If no directives have been read at all (fresh session), just warn
     if not directives_read:
         sys.stderr.write(
-            f"[DOE Enforcer] NOTE: Running {script_name} without reading any directives.\n"
-            f"  The DOE pattern recommends reading the directive first.\n"
-            f"  Check: ls directives/ | grep -i '<keyword>'\n"
+            f"[DOE Enforcer] NOTE: Running {script_name} without reading any instructions first.\n"
+            f"  For best results, review the instructions for this script before running it.\n"
+            f"  Ask Claude: 'Show me the instructions for {script_name}' before running it.\n"
         )
         sys.exit(0)
 
@@ -175,11 +175,11 @@ def handle_pre_tool_use(data):
     keywords = derive_keywords(script_name)
     if not check_directive_match(keywords, directives_read):
         sys.stderr.write(
-            f"[DOE Enforcer] BLOCKED: No matching directive read for {script_name}.\n"
+            f"[DOE Enforcer] BLOCKED: No matching instructions found for {script_name}.\n"
             f"  Script keywords: {', '.join(sorted(keywords))}\n"
-            f"  Directives read: {', '.join(directives_read)}\n"
-            f"  Read the relevant directive first before running the script.\n"
-            f"  The DOE pattern requires: Directive -> Orchestration -> Execution\n"
+            f"  Instructions reviewed: {', '.join(directives_read)}\n"
+            f"  Please review the relevant instructions before running this script.\n"
+            f"  Ask Claude: 'Show me the instructions for {script_name}' before running it.\n"
         )
         sys.exit(2)
 
@@ -201,7 +201,7 @@ def main():
         sys.exit(0)
 
     # Detect mode: PostToolUse has "tool_result", PreToolUse does not
-    if "tool_result" in data:
+    if "tool_response" in data:
         handle_post_tool_use(data)
     else:
         handle_pre_tool_use(data)

@@ -16,7 +16,7 @@ Quality rules by file pattern:
 
 Hook Protocol:
   - PostToolUse: reads JSON from stdin, prints JSON to stdout
-  - Returns {"decision": "ALLOW"} or {"decision": "BLOCK", "reason": "..."}
+  - Returns {"decision": "allow"} or {"decision": "block", "reason": "..."}
 
 CLI Flags:
   --status  Show quality rules
@@ -30,7 +30,7 @@ import re
 from pathlib import Path
 from fnmatch import fnmatch
 
-BASE_DIR = Path(os.path.expanduser("/Users/lucasnolan/Agentic OS"))
+BASE_DIR = Path(__file__).resolve().parents[2]
 TMP_DIR = BASE_DIR / ".tmp"
 
 # Quality rules: (pattern, min_words, min_sections, required_keywords)
@@ -171,7 +171,7 @@ def main():
         raw = sys.stdin.read()
         data = json.loads(raw)
     except (json.JSONDecodeError, IOError):
-        print(json.dumps({"decision": "ALLOW"}))
+        print(json.dumps({"decision": "allow"}))
         return
 
     tool_name = data.get("tool_name", "")
@@ -179,7 +179,7 @@ def main():
 
     # Only act on Write tool
     if tool_name != "Write":
-        print(json.dumps({"decision": "ALLOW"}))
+        print(json.dumps({"decision": "allow"}))
         return
 
     file_path = tool_input.get("file_path", "")
@@ -188,31 +188,29 @@ def main():
     try:
         file_p = Path(file_path)
         if not str(file_p).startswith(str(TMP_DIR)):
-            print(json.dumps({"decision": "ALLOW"}))
+            print(json.dumps({"decision": "allow"}))
             return
     except (TypeError, ValueError):
-        print(json.dumps({"decision": "ALLOW"}))
+        print(json.dumps({"decision": "allow"}))
         return
 
     # Skip non-md files
     if not file_path.endswith(".md"):
-        print(json.dumps({"decision": "ALLOW"}))
+        print(json.dumps({"decision": "allow"}))
         return
 
     # Get the quality rule for this file
     filename = Path(file_path).name
     rule = get_rule(filename)
     if not rule:
-        print(json.dumps({"decision": "ALLOW"}))
+        print(json.dumps({"decision": "allow"}))
         return
 
-    # Get content - from tool_result if available, otherwise from tool_input
-    content = data.get("tool_result", "")
-    if not content:
-        content = tool_input.get("content", "")
+    # Get content from tool_input (Write tool provides content in tool_input)
+    content = tool_input.get("content", "")
 
     if not content:
-        print(json.dumps({"decision": "ALLOW"}))
+        print(json.dumps({"decision": "allow"}))
         return
 
     # Validate
@@ -223,11 +221,12 @@ def main():
         reason = (
             f"Quality gate failed for {filename} (rule: {pattern}):\n"
             + "\n".join(f"  - {issue}" for issue in issues)
+            + "\n  The output didn't meet minimum quality standards. This check ensures your deliverables are complete and professional."
             + "\n  Improve the content and try again."
         )
-        print(json.dumps({"decision": "BLOCK", "reason": reason}))
+        print(json.dumps({"decision": "block", "reason": reason}))
     else:
-        print(json.dumps({"decision": "ALLOW"}))
+        print(json.dumps({"decision": "allow"}))
 
 
 if __name__ == "__main__":

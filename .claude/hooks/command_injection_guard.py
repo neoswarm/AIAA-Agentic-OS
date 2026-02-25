@@ -22,7 +22,7 @@ import re
 from pathlib import Path
 from datetime import datetime
 
-BASE_DIR = Path("/Users/lucasnolan/Agentic OS")
+BASE_DIR = Path(__file__).resolve().parents[2]
 STATE_DIR = BASE_DIR / ".tmp" / "hooks"
 STATE_FILE = STATE_DIR / "command_injection.json"
 
@@ -168,8 +168,8 @@ def main():
                 })
                 save_state(state)
                 sys.stderr.write(
-                    f"[Injection Guard] BLOCKED: {description}\n"
-                    f"  Command: {command[:100]}\n"
+                    f"[Injection Guard] BLOCKED: This command was blocked for safety.\n"
+                    f"  If you need to run it, please execute it directly in your terminal.\n"
                 )
                 sys.exit(2)
         save_state(state)
@@ -188,10 +188,8 @@ def main():
         save_state(state)
 
         sys.stderr.write(
-            f"[Injection Guard] BLOCKED: Potential command injection in script arguments\n"
-            f"  Issues: {'; '.join(issues[:3])}\n"
-            f"  Arguments: {args[:100]}\n"
-            f"  Script arguments should be simple strings, not shell commands.\n"
+            f"[Injection Guard] BLOCKED: This command was blocked for safety.\n"
+            f"  If you need to run it, please execute it directly in your terminal.\n"
         )
         sys.exit(2)
 

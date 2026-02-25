@@ -288,6 +288,7 @@
              data-workflow="{{ execution.workflow }}"
              data-status="{{ execution.status }}"
              data-date="{{ execution.date }}"
+             data-is-skill="{{ 'true' if execution.is_skill else 'false' }}"
              role="button"
              tabindex="0"
              aria-expanded="false"
@@ -317,7 +318,7 @@
                         <div class="execution-workflow">{{ execution.workflow }}</div>
                         <div class="execution-time">{{ execution.time }}</div>
                     </div>
-                    <span class="badge badge-{{ 'success' if execution.status == 'success' else 'error' if execution.status == 'error' else 'info' }}">
+                    <span class="badge badge-{{ 'success' if execution.status == 'success' else 'error' if execution.status in ['error', 'cancelled'] else 'info' }}">
                         {{ execution.status }}
                     </span>
                 </div>
@@ -351,7 +352,7 @@
                     {% endif %}
                     
                     <div class="execution-actions">
-                        {% if execution.status == 'error' %}
+                        {% if execution.is_skill and execution.status == 'error' %}
                         <button class="btn btn-retry" onclick="retryExecution('{{ execution.id }}'); event.stopPropagation();">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
@@ -359,12 +360,14 @@
                             Retry
                         </button>
                         {% endif %}
-                        <button class="btn btn-secondary" onclick="viewLogs('{{ execution.id }}'); event.stopPropagation();">
+                        {% if execution.is_skill %}
+                        <button class="btn btn-secondary" onclick="viewExecution('{{ execution.id }}', '{{ execution.status }}'); event.stopPropagation();">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
                             </svg>
-                            View Logs
+                            View Details
                         </button>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -423,24 +426,30 @@ function filterExecutions() {
 
 async function retryExecution(executionId) {
     try {
-        const response = await fetch(`/api/executions/${executionId}/retry`, {
+        const response = await fetch(`/api/v2/executions/${executionId}/retry`, {
             method: 'POST'
         });
-        
-        if (response.ok) {
-            showToast('Execution retried successfully', 'success');
-            window.location.reload();
-        } else {
-            showToast('Failed to retry execution', 'error');
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to retry execution');
         }
+
+        showToast('Execution retried successfully', 'success');
+        if (data.execution_id) {
+            window.location.href = `/executions/${encodeURIComponent(data.execution_id)}/progress`;
+            return;
+        }
+        window.location.reload();
     } catch (error) {
         console.error('Error retrying execution:', error);
         showToast('Failed to retry execution', 'error');
     }
 }
 
-function viewLogs(executionId) {
-    window.open(`/executions/${executionId}/logs`, '_blank');
+function viewExecution(executionId, status) {
+    const page = (status === 'running' || status === 'queued') ? 'progress' : 'output';
+    window.open(`/executions/${executionId}/${page}`, '_blank');
 }
 </script>
 {% endblock %}

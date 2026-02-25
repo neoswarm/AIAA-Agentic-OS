@@ -19,12 +19,12 @@ import json
 import sys
 
 
-DEPLOY_CHECKLIST = """[DEPLOY CHECKLIST]
-- Linked to correct project? (railway link -p <PROJECT_ID>)
-- All env vars set? (OPENROUTER_API_KEY, SLACK_WEBHOOK_URL, etc.)
-- Using --service flag? (required with multiple services)
-- RAILWAY_API_TOKEN set on dashboard? (needed for cron management)
-- Google OAuth token uploaded? (if using Google APIs)"""
+DEPLOY_CHECKLIST = """[DEPLOY CHECKLIST] Before deploying:
+  1) Check your API keys are configured
+  2) Verify your app runs locally
+  3) Make sure Railway CLI is connected
+  4) Confirm you're linked to the correct project (railway link -p <PROJECT_ID>)
+  5) If using multiple services, include the --service flag"""
 
 LINK_WARNING = (
     "[RAILWAY WARNING] Use `railway link -p <PROJECT_ID>` -- "

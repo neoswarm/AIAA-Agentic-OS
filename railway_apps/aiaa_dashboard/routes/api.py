@@ -15,7 +15,11 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import models
 import requests as http_requests
-from services.deployment_service import DeploymentService, check_required_env_vars
+from services.deployment_service import (
+    DeploymentService,
+    check_required_env_vars,
+    get_required_env_vars,
+)
 
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -194,7 +198,7 @@ def api_list_deployable_workflows():
     """
     try:
         # Find all skills
-        project_root = Path(os.getenv("PROJECT_ROOT", os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+        project_root = Path(os.getenv("PROJECT_ROOT") or Path(__file__).resolve().parents[3])
         skills_dir = project_root / ".claude" / "skills"
         
         workflows = []
@@ -228,7 +232,7 @@ def api_list_deployable_workflows():
                             description = line.split(':', 1)[1].strip()
                 
                 # Check required env vars
-                required_vars = check_required_env_vars(skill_dir.name)
+                required_vars = get_required_env_vars(skill_dir.name)
                 missing_vars = [var for var in required_vars if not os.getenv(var)]
                 
                 workflows.append({
@@ -272,7 +276,7 @@ def api_workflow_requirements(workflow_name):
     }
     """
     try:
-        required_vars = check_required_env_vars(workflow_name)
+        required_vars = get_required_env_vars(workflow_name)
         missing_vars = [var for var in required_vars if not os.getenv(var)]
         
         return jsonify({
@@ -287,6 +291,24 @@ def api_workflow_requirements(workflow_name):
             "status": "error",
             "message": str(e)
         }), 500
+
+
+@api_bp.route('/env/check', methods=['GET'])
+@require_auth('read')
+def api_env_check():
+    """Return tracked env var presence for dashboard checks."""
+    tracked = set()
+    for reqs in [
+        get_required_env_vars("cold-email-campaign"),
+        get_required_env_vars("vsl-funnel"),
+        get_required_env_vars("company-research"),
+        get_required_env_vars("google-doc-delivery"),
+        get_required_env_vars("slack-notifier"),
+    ]:
+        tracked.update(reqs)
+    tracked.update(["RAILWAY_API_TOKEN", "RAILWAY_PROJECT_ID"])
+
+    return jsonify({name: bool(os.getenv(name)) for name in sorted(tracked)})
 
 
 @api_bp.route('/workflows/<workflow_name>/rollback', methods=['POST'])

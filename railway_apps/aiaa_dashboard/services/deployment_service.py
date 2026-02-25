@@ -22,6 +22,15 @@ from typing import Dict, List, Optional, Tuple
 import requests
 
 
+ENV_VAR_REQUIREMENTS = {
+    "cold-email-campaign": ["OPENROUTER_API_KEY", "PERPLEXITY_API_KEY"],
+    "vsl-funnel": ["OPENROUTER_API_KEY", "PERPLEXITY_API_KEY"],
+    "company-research": ["PERPLEXITY_API_KEY"],
+    "google-doc-delivery": ["GOOGLE_APPLICATION_CREDENTIALS"],
+    "slack-notifier": ["SLACK_WEBHOOK_URL"],
+}
+
+
 class DeploymentService:
     """Handles programmatic deployment of workflows to Railway."""
     
@@ -84,6 +93,11 @@ class DeploymentService:
             
             # Step 4: Deploy code to service (simplified - would need git push or zip upload)
             deployment = self._deploy_to_service(service["id"], service_dir)
+            if deployment.get("mock"):
+                raise RuntimeError(
+                    "Deployment transport is not configured. "
+                    "Connect Railway CLI/git deploy in DeploymentService._deploy_to_service."
+                )
             
             # Step 5: Set service-specific env vars
             if config.get("env_vars"):
@@ -124,15 +138,8 @@ class DeploymentService:
     
     def _find_skill(self, workflow_name: str) -> Path:
         """Find skill directory and validate it has required files."""
-        # Look in .claude/skills/
-        # Navigate from dashboard/services/ -> dashboard/ -> railway_apps/ -> project root
-        project_root = Path(os.getenv("PROJECT_ROOT", 
-                                      os.path.dirname(  # railway_apps
-                                          os.path.dirname(  # aiaa_dashboard
-                                              os.path.dirname(os.path.abspath(__file__))  # services
-                                          )
-                                      )
-                                     ))
+        # Look in .claude/skills/ from project root.
+        project_root = Path(os.getenv("PROJECT_ROOT") or Path(__file__).resolve().parents[3])
         skill_dir = project_root / ".claude" / "skills" / workflow_name
         
         if not skill_dir.exists():
@@ -380,7 +387,8 @@ if __name__ == "__main__":
         # For now, return a mock deployment
         return {
             "id": f"dep_{int(time.time())}",
-            "status": "BUILDING"
+            "status": "MOCK",
+            "mock": True,
         }
     
     def _set_service_variables(self, service_id: str, env_vars: Dict):
@@ -551,17 +559,12 @@ def check_required_env_vars(workflow_name: str) -> List[str]:
     Returns:
         List of missing environment variable names
     """
-    # Map workflows to required env vars
-    env_var_requirements = {
-        "cold-email-campaign": ["OPENROUTER_API_KEY", "PERPLEXITY_API_KEY"],
-        "vsl-funnel": ["OPENROUTER_API_KEY", "PERPLEXITY_API_KEY"],
-        "company-research": ["PERPLEXITY_API_KEY"],
-        "google-doc-delivery": ["GOOGLE_APPLICATION_CREDENTIALS"],
-        "slack-notifier": ["SLACK_WEBHOOK_URL"],
-        # Add more mappings as needed
-    }
-    
-    required = env_var_requirements.get(workflow_name, [])
+    required = get_required_env_vars(workflow_name)
     missing = [var for var in required if not os.getenv(var)]
     
     return missing
+
+
+def get_required_env_vars(workflow_name: str) -> List[str]:
+    """Return the full list of required environment variables for a workflow."""
+    return ENV_VAR_REQUIREMENTS.get(workflow_name, [])

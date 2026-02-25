@@ -238,7 +238,11 @@ def api_execution_status(execution_id):
         execution = get_execution_status(execution_id)
         if execution is None:
             return jsonify({"status": "error", "message": "Execution not found"}), 404
-        return jsonify({"status": "ok", "execution": execution})
+        return jsonify({
+            "status": "ok",
+            "execution": execution,
+            "execution_status": execution.get("status"),
+        })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -267,6 +271,7 @@ def api_execution_output(execution_id):
 
         return jsonify({
             "status": "ok",
+            "execution": execution,
             "execution_id": execution_id,
             "execution_status": execution.get("status"),
             "skill_name": execution.get("skill_name"),
@@ -274,6 +279,12 @@ def api_execution_output(execution_id):
             "output_path": output_path,
             "output_content": output_content,
             "output_preview": execution.get("output_preview"),
+            "duration_ms": execution.get("duration_ms"),
+            "cost_estimate": execution.get("cost_estimate"),
+            "created_at": execution.get("created_at"),
+            "started_at": execution.get("started_at"),
+            "completed_at": execution.get("completed_at"),
+            "error_message": execution.get("error_message"),
         })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -360,6 +371,33 @@ def api_cancel_execution(execution_id):
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+@api_v2_bp.route('/executions/<execution_id>/retry', methods=['POST'])
+@login_required
+def api_retry_execution(execution_id):
+    """Retry an existing execution using the same skill and parameters."""
+    try:
+        execution = get_execution_status(execution_id)
+        if execution is None:
+            return jsonify({"status": "error", "message": "Execution not found"}), 404
+
+        skill_name = execution.get("skill_name")
+        if not skill_name:
+            return jsonify({"status": "error", "message": "Execution cannot be retried"}), 400
+
+        params = execution.get("params")
+        if not isinstance(params, dict):
+            params = {}
+
+        new_execution_id = execute_skill(skill_name, params)
+        return jsonify({
+            "status": "ok",
+            "execution_id": new_execution_id,
+            "message": "Execution retried",
+        }), 202
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 @api_v2_bp.route('/executions', methods=['GET'])
 @login_required
 def api_list_executions():
@@ -425,12 +463,13 @@ def api_save_api_key():
     data = request.get_json(silent=True) or {}
     key_name = data.get('key_name', '').strip()
     key_value = data.get('key_value', '').strip()
+    action = (data.get('action') or '').strip().lower()
 
     # Field-level validation
     errors = {}
     if not key_name:
         errors['key_name'] = 'Key name is required'
-    if not key_value:
+    if not key_value and action not in {"validate", "test"}:
         errors['key_value'] = 'API key value is required'
 
     if errors:
@@ -439,13 +478,40 @@ def api_save_api_key():
     # Resolve env var name
     env_var = _API_KEY_NAMES.get(key_name.lower(), key_name.upper())
 
+    if action in {"validate", "test"} and not key_value:
+        # If no candidate key is provided, validate currently configured value.
+        key_value = os.getenv(env_var, "")
+        if not key_value:
+            return jsonify({
+                "status": "ok",
+                "valid": False,
+                "message": f"{env_var} is not configured",
+                "key_name": env_var,
+            })
+
     # Prefix format validation
     expected_prefix = _KEY_PREFIXES.get(env_var, "")
     if expected_prefix and not key_value.startswith(expected_prefix):
+        if action in {"validate", "test"}:
+            return jsonify({
+                "status": "ok",
+                "valid": False,
+                "message": f'Invalid format. {env_var} keys should start with "{expected_prefix}"',
+                "key_name": env_var,
+            })
         return validation_error(
             {'key_value': f'Invalid format. {env_var} keys should start with "{expected_prefix}"'},
             "Invalid key format"
         )
+
+    # Lightweight format validation mode (used by onboarding flows)
+    if action in {"validate", "test"}:
+        return jsonify({
+            "status": "ok",
+            "valid": True,
+            "message": f"{env_var} format looks valid",
+            "key_name": env_var,
+        })
 
     try:
         # Save to user_settings table
@@ -485,7 +551,9 @@ def api_key_status():
                 "redacted_value": redacted,
             }
 
-        return jsonify({"status": "ok", "keys": keys_status})
+        payload = {"status": "ok", "keys": keys_status}
+        payload.update(keys_status)
+        return jsonify(payload)
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -651,7 +719,9 @@ def api_get_client(slug):
         client = models.get_client_profile(slug)
         if client is None:
             return jsonify({"status": "error", "message": f"Client not found: {slug}"}), 404
-        return jsonify({"status": "ok", "client": client})
+        payload = {"status": "ok", "client": client}
+        payload.update(client)
+        return jsonify(payload)
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 

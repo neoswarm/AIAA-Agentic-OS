@@ -449,6 +449,274 @@ def is_favorite(workflow_name: str) -> bool:
 
 
 # ==============================================================================
+# Skill Execution Operations
+# ==============================================================================
+
+def create_skill_execution(
+    execution_id: str,
+    skill_name: str,
+    params: Optional[Dict] = None,
+    cost_estimate: Optional[float] = None
+) -> str:
+    """Create a new skill execution record. Returns the execution ID."""
+    params_json = json.dumps(params) if params else None
+    execute(
+        """INSERT INTO skill_executions (id, skill_name, params, status, cost_estimate, created_at)
+        VALUES (?, ?, ?, 'queued', ?, datetime('now'))""",
+        (execution_id, skill_name, params_json, cost_estimate)
+    )
+    return execution_id
+
+
+def update_skill_execution_status(
+    execution_id: str,
+    status: str,
+    output_preview: Optional[str] = None,
+    output_path: Optional[str] = None,
+    error_message: Optional[str] = None
+) -> int:
+    """Update a skill execution status and optional fields."""
+    if status == 'running':
+        return execute(
+            "UPDATE skill_executions SET status = ?, started_at = datetime('now') WHERE id = ?",
+            (status, execution_id)
+        )
+    elif status in ('success', 'error', 'cancelled'):
+        return execute(
+            """UPDATE skill_executions SET
+                status = ?,
+                completed_at = datetime('now'),
+                duration_ms = CAST((julianday(datetime('now')) - julianday(started_at)) * 86400000 AS INTEGER),
+                output_preview = COALESCE(?, output_preview),
+                output_path = COALESCE(?, output_path),
+                error_message = COALESCE(?, error_message)
+            WHERE id = ?""",
+            (status, output_preview, output_path, error_message, execution_id)
+        )
+    else:
+        return execute(
+            "UPDATE skill_executions SET status = ? WHERE id = ?",
+            (status, execution_id)
+        )
+
+
+def get_skill_execution(execution_id: str) -> Optional[Dict[str, Any]]:
+    """Get a single skill execution by ID."""
+    row = query_one("SELECT * FROM skill_executions WHERE id = ?", (execution_id,))
+    return row_to_dict(row)
+
+
+def get_skill_executions(
+    skill_name: Optional[str] = None,
+    status: Optional[str] = None,
+    limit: int = 50
+) -> List[Dict[str, Any]]:
+    """Get skill executions with optional filters."""
+    conditions = []
+    params = []
+    if skill_name:
+        conditions.append("skill_name = ?")
+        params.append(skill_name)
+    if status:
+        conditions.append("status = ?")
+        params.append(status)
+
+    where = " AND ".join(conditions)
+    if where:
+        where = "WHERE " + where
+
+    params.append(limit)
+    rows = query(
+        f"SELECT * FROM skill_executions {where} ORDER BY created_at DESC LIMIT ?",
+        tuple(params)
+    )
+    return rows_to_dicts(rows)
+
+
+def get_recent_skill_executions(limit: int = 10) -> List[Dict[str, Any]]:
+    """Get most recent skill executions."""
+    return get_skill_executions(limit=limit)
+
+
+def cancel_skill_execution(execution_id: str) -> int:
+    """Cancel a queued or running skill execution."""
+    return execute(
+        """UPDATE skill_executions SET
+            status = 'cancelled',
+            completed_at = datetime('now'),
+            duration_ms = CASE
+                WHEN started_at IS NOT NULL
+                THEN CAST((julianday(datetime('now')) - julianday(started_at)) * 86400000 AS INTEGER)
+                ELSE 0
+            END
+        WHERE id = ? AND status IN ('queued', 'running')""",
+        (execution_id,)
+    )
+
+
+def get_skill_execution_stats() -> Dict[str, Any]:
+    """Get skill execution statistics."""
+    stats = {}
+
+    row = query_one("SELECT COUNT(*) as total FROM skill_executions")
+    stats["total"] = row["total"]
+
+    rows = query("SELECT status, COUNT(*) as count FROM skill_executions GROUP BY status")
+    stats["by_status"] = {row["status"]: row["count"] for row in rows}
+
+    success = stats["by_status"].get("success", 0)
+    total = stats["total"]
+    stats["success_rate"] = round(success / total * 100, 2) if total > 0 else 0
+
+    row = query_one(
+        "SELECT AVG(duration_ms) as avg_duration FROM skill_executions WHERE duration_ms IS NOT NULL"
+    )
+    stats["avg_duration_ms"] = int(row["avg_duration"]) if row["avg_duration"] else 0
+
+    rows = query(
+        "SELECT skill_name, COUNT(*) as count FROM skill_executions GROUP BY skill_name ORDER BY count DESC LIMIT 10"
+    )
+    stats["top_skills"] = {row["skill_name"]: row["count"] for row in rows}
+
+    return stats
+
+
+# ==============================================================================
+# Client Profile Operations
+# ==============================================================================
+
+def create_client_profile(
+    name: str,
+    slug: str,
+    industry: Optional[str] = None,
+    website: Optional[str] = None,
+    description: Optional[str] = None,
+    target_audience: Optional[str] = None,
+    goals: Optional[str] = None,
+    competitors: Optional[str] = None,
+    brand_voice: Optional[str] = None,
+    rules: Optional[Dict] = None,
+    preferences: Optional[Dict] = None
+) -> int:
+    """Create a new client profile."""
+    rules_json = json.dumps(rules) if rules else None
+    preferences_json = json.dumps(preferences) if preferences else None
+    return insert(
+        """INSERT INTO client_profiles (
+            name, slug, industry, website, description, target_audience,
+            goals, competitors, brand_voice, rules, preferences
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (name, slug, industry, website, description, target_audience,
+         goals, competitors, brand_voice, rules_json, preferences_json)
+    )
+
+
+def get_client_profile(slug: str) -> Optional[Dict[str, Any]]:
+    """Get a client profile by slug."""
+    row = query_one("SELECT * FROM client_profiles WHERE slug = ?", (slug,))
+    return row_to_dict(row)
+
+
+def get_client_profile_by_name(name: str) -> Optional[Dict[str, Any]]:
+    """Get a client profile by name."""
+    row = query_one("SELECT * FROM client_profiles WHERE name = ?", (name,))
+    return row_to_dict(row)
+
+
+def get_all_client_profiles() -> List[Dict[str, Any]]:
+    """Get all client profiles."""
+    rows = query("SELECT * FROM client_profiles ORDER BY name")
+    return rows_to_dicts(rows)
+
+
+def update_client_profile(slug: str, **kwargs) -> int:
+    """Update a client profile by slug. Pass only the fields to update."""
+    allowed_fields = {
+        'name', 'industry', 'website', 'description', 'target_audience',
+        'goals', 'competitors', 'brand_voice', 'rules', 'preferences'
+    }
+    sets = []
+    params = []
+    for key, value in kwargs.items():
+        if key not in allowed_fields:
+            continue
+        if key in ('rules', 'preferences') and isinstance(value, dict):
+            value = json.dumps(value)
+        sets.append(f"{key} = ?")
+        params.append(value)
+
+    if not sets:
+        return 0
+
+    sets.append("updated_at = datetime('now')")
+    params.append(slug)
+
+    return execute(
+        f"UPDATE client_profiles SET {', '.join(sets)} WHERE slug = ?",
+        tuple(params)
+    )
+
+
+def delete_client_profile(slug: str) -> int:
+    """Delete a client profile by slug."""
+    return execute("DELETE FROM client_profiles WHERE slug = ?", (slug,))
+
+
+def search_client_profiles(query_str: str) -> List[Dict[str, Any]]:
+    """Search client profiles by name, industry, or description."""
+    pattern = f"%{query_str}%"
+    rows = query(
+        """SELECT * FROM client_profiles
+        WHERE name LIKE ? OR industry LIKE ? OR description LIKE ?
+        ORDER BY name""",
+        (pattern, pattern, pattern)
+    )
+    return rows_to_dicts(rows)
+
+
+# ==============================================================================
+# User Settings Operations
+# ==============================================================================
+
+def get_setting(key: str) -> Optional[str]:
+    """Get a user setting value by key."""
+    row = query_one("SELECT value FROM user_settings WHERE key = ?", (key,))
+    return row["value"] if row else None
+
+
+def set_setting(key: str, value: str) -> int:
+    """Set a user setting (upsert)."""
+    return execute(
+        """INSERT INTO user_settings (key, value, updated_at)
+        VALUES (?, ?, datetime('now'))
+        ON CONFLICT(key) DO UPDATE SET
+            value = excluded.value,
+            updated_at = datetime('now')""",
+        (key, value)
+    )
+
+
+def get_all_settings() -> Dict[str, str]:
+    """Get all user settings as a dictionary."""
+    rows = query("SELECT key, value FROM user_settings ORDER BY key")
+    return {row["key"]: row["value"] for row in rows}
+
+
+def delete_setting(key: str) -> int:
+    """Delete a user setting."""
+    return execute("DELETE FROM user_settings WHERE key = ?", (key,))
+
+
+def get_settings_by_prefix(prefix: str) -> Dict[str, str]:
+    """Get all settings matching a key prefix (e.g. 'api_key.')."""
+    rows = query(
+        "SELECT key, value FROM user_settings WHERE key LIKE ? ORDER BY key",
+        (f"{prefix}%",)
+    )
+    return {row["key"]: row["value"] for row in rows}
+
+
+# ==============================================================================
 # Deployment Operations (Phase 3)
 # ==============================================================================
 

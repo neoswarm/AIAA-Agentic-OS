@@ -8,6 +8,31 @@
     <p class="text-muted">Welcome back, {{ username }}. Here's what's happening.</p>
 </div>
 
+{% if workflow_count == 0 and (execution_stats.total_executions or 0) == 0 %}
+<!-- Empty State Welcome -->
+<div class="empty-state-card">
+    <div class="empty-state-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+    </div>
+    <h2 class="empty-state-heading">Welcome to your AI Agency Dashboard</h2>
+    <p class="empty-state-text">Your dashboard is live! Go to Claude Code and run a skill to see results here.</p>
+    <div class="empty-state-example">
+        <span class="empty-state-example-label">Try:</span>
+        <code class="empty-state-command">"Write a cold email for TestCo targeting small businesses"</code>
+    </div>
+    <div style="margin-top: 1.5rem;">
+        <a href="/workflows" class="btn" style="display: inline-flex; align-items: center; gap: 0.5rem; width: auto; padding: 0.75rem 1.5rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+            Browse Workflows
+        </a>
+    </div>
+</div>
+{% else %}
 <!-- Stats Cards -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
     <!-- Total Workflows -->
@@ -64,6 +89,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <!-- Main Content Grid -->
 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
@@ -235,6 +261,64 @@
 .btn-block {
     width: 100%;
     justify-content: center;
+}
+
+.empty-state-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.empty-state-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+}
+
+.empty-state-heading {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.empty-state-text {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.empty-state-example {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 0.75rem 1.25rem;
+}
+
+.empty-state-example-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.empty-state-command {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8125rem;
+    color: var(--primary, #6366f1);
 }
 </style>
 {% endblock %}

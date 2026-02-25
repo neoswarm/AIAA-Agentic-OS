@@ -38,6 +38,12 @@ import pytest
 @pytest.fixture(scope="module")
 def app():
     """Create application for testing."""
+    # Re-assert test env in case another test module mutated process env.
+    os.environ["DASHBOARD_USERNAME"] = "testadmin"
+    os.environ["DASHBOARD_PASSWORD_HASH"] = _test_pw_hash
+    os.environ["FLASK_SECRET_KEY"] = _test_flask_key
+    os.environ["DB_PATH"] = _test_db.name
+
     application = create_app()
     application.config["TESTING"] = True
     application.config["SESSION_COOKIE_SECURE"] = False
@@ -349,6 +355,123 @@ def test_execution_stats(auth_client):
     data = resp.get_json()
     assert data["status"] == "ok"
     assert "stats" in data
+
+
+# =============================================================================
+# Chat Endpoints
+# =============================================================================
+
+def test_chat_page_requires_auth(client):
+    """GET /chat without auth redirects to login."""
+    resp = client.get("/chat", follow_redirects=False)
+    assert resp.status_code == 302
+
+
+def test_chat_token_status_missing(auth_client, monkeypatch):
+    """GET /api/chat/token/status returns missing when token is not configured."""
+    import routes.chat as chat_routes
+
+    monkeypatch.setattr(chat_routes, "get_claude_token", lambda: "")
+    resp = auth_client.get("/api/chat/token/status")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["status"] == "ok"
+    assert data["configured"] is False
+    assert data["validation"] == "missing"
+
+
+def test_chat_save_token_invalid(auth_client, monkeypatch):
+    """POST /api/chat/token returns 400 for invalid token."""
+    import routes.chat as chat_routes
+
+    monkeypatch.setattr(
+        chat_routes,
+        "validate_claude_token",
+        lambda token: {"status": "invalid", "http_status": 401, "message": "bad token"},
+    )
+    resp = auth_client.post("/api/chat/token", json={"token": "bad-token"})
+    assert resp.status_code == 400
+    data = resp.get_json()
+    assert data["status"] == "error"
+    assert data["validation"]["status"] == "invalid"
+
+
+def test_chat_save_token_success(auth_client, monkeypatch):
+    """POST /api/chat/token saves and returns validation metadata."""
+    import routes.chat as chat_routes
+
+    monkeypatch.setattr(
+        chat_routes,
+        "validate_claude_token",
+        lambda token: {"status": "valid", "http_status": 200, "message": "ok"},
+    )
+    monkeypatch.setattr(chat_routes, "_persist_to_railway_async", lambda payload: False)
+
+    resp = auth_client.post("/api/chat/token", json={"token": "eyJ.test.token"})
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["status"] == "ok"
+    assert data["validation"] == "valid"
+    assert data["persisted_to_railway"] is False
+
+
+def test_chat_session_message_and_stream(auth_client, monkeypatch):
+    """Session create -> message send -> stream path works with mocked runner."""
+    import routes.chat as chat_routes
+
+    class FakeRunner:
+        def __init__(self):
+            self._sessions = {}
+
+        def list_sessions(self):
+            return [{"id": sid, "title": v["title"], "status": "idle"} for sid, v in self._sessions.items()]
+
+        def create_session(self, title=None):
+            sid = "abc123"
+            self._sessions[sid] = {"id": sid, "title": title or "New chat", "messages": []}
+            return {"id": sid, "title": title or "New chat", "messages": []}
+
+        def get_session(self, session_id):
+            return self._sessions.get(session_id)
+
+        def has_session(self, session_id):
+            return session_id in self._sessions
+
+        def send_message(self, session_id, user_message):
+            self._sessions[session_id]["messages"].append({"role": "user", "content": user_message})
+
+        def get_stream(self, session_id):
+            yield 'data: {"type":"text","content":"hello"}\n\n'
+            yield 'data: {"type":"done"}\n\n'
+
+    fake_runner = FakeRunner()
+    monkeypatch.setattr(chat_routes, "_get_runner", lambda: fake_runner)
+    monkeypatch.setattr(chat_routes, "get_claude_token", lambda: "eyJ.test.token")
+
+    create_resp = auth_client.post("/api/chat/sessions", json={})
+    assert create_resp.status_code == 201
+    create_data = create_resp.get_json()
+    session_id = create_data["session_id"]
+    assert session_id == "abc123"
+
+    get_resp = auth_client.get(f"/api/chat/sessions/{session_id}")
+    assert get_resp.status_code == 200
+    assert get_resp.get_json()["session"]["id"] == session_id
+
+    bad_resp = auth_client.post("/api/chat/message", json={"session_id": session_id})
+    assert bad_resp.status_code == 400
+
+    send_resp = auth_client.post(
+        "/api/chat/message",
+        json={"session_id": session_id, "message": "hello"},
+    )
+    assert send_resp.status_code == 202
+    assert send_resp.get_json()["status"] == "ok"
+
+    stream_resp = auth_client.get(f"/api/chat/stream/{session_id}")
+    assert stream_resp.status_code == 200
+    assert stream_resp.mimetype == "text/event-stream"
+    assert b'"type":"done"' in stream_resp.data
 
 
 # =============================================================================

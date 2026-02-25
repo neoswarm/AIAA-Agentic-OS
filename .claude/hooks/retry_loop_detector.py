@@ -152,13 +152,11 @@ def main():
                 error_hint = f"\n  Last error: {last_errors[-1][:100]}"
 
             sys.stderr.write(
-                f"[Retry Loop] BLOCKED: {script_name} has failed {consec} consecutive times.\n"
-                f"  Retrying won't help - investigate the root cause:{error_hint}\n"
-                f"  Suggestions:\n"
-                f"    1. Check the script with: python3 execution/{script_name} --help\n"
-                f"    2. Verify required API keys are set\n"
-                f"    3. Check input arguments\n"
-                f"    4. Use --reset to clear failure tracking after fixing the issue\n"
+                f"[Retry Loop] BLOCKED: The same operation has failed {consec} times. Something needs to change before trying again.{error_hint}\n"
+                f"  Common causes:\n"
+                f"    1. Expired API key — check Settings > API Keys to verify your keys are valid\n"
+                f"    2. Service temporarily down — wait a few minutes and try again\n"
+                f"    3. Incorrect input data — double-check the information you provided\n"
             )
             sys.exit(2)
 

@@ -93,6 +93,11 @@
         color: var(--error);
     }
 
+    .api-key-status.warning {
+        background: var(--warning-muted);
+        color: var(--warning);
+    }
+
     .api-key-status-dot {
         width: 6px;
         height: 6px;
@@ -372,6 +377,31 @@
             </div>
         </div>
 
+        <div class="api-key-item" data-key="claude" id="claude-token-card">
+            <div class="api-key-header">
+                <span class="api-key-name">Claude Setup Token</span>
+                <span class="api-key-status missing" id="status-claude">
+                    <span class="api-key-status-dot"></span>
+                    <span class="api-key-status-text">Not configured</span>
+                </span>
+            </div>
+            <div class="api-key-input-row">
+                <input type="password" class="form-input" id="input-claude" placeholder="eyJ..." autocomplete="off">
+                <div class="api-key-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="testClaudeToken()">Verify</button>
+                    <button class="btn btn-sm" onclick="saveClaudeToken()">Save</button>
+                </div>
+            </div>
+            <span class="key-format-error" id="error-claude"></span>
+            <div class="api-key-help">
+                <button class="api-key-help-toggle" onclick="toggleHelp(this)">What is this?</button>
+                <div class="api-key-help-content">
+                    This is the token from <code>claude setup-token</code>. The dashboard uses it to run the full Claude agent loop server-side, so students can chat without opening a terminal or paying per API call.<br><br>
+                    <strong>How to get it:</strong> Run <code>claude setup-token</code> once, complete browser login, then paste the printed token here.
+                </div>
+            </div>
+        </div>
+
         <div class="api-key-item" data-key="perplexity">
             <div class="api-key-header">
                 <span class="api-key-name">Perplexity API Key</span>
@@ -629,7 +659,7 @@
     }
 
     // Attach input listeners to clear errors when user types
-    ['openrouter', 'perplexity', 'slack'].forEach(function(keyName) {
+    ['openrouter', 'perplexity', 'slack', 'claude'].forEach(function(keyName) {
         var input = document.getElementById('input-' + keyName);
         if (input) {
             input.addEventListener('input', function() {
@@ -681,7 +711,7 @@
                 if (msg.indexOf('Invalid key format') !== -1 || msg.indexOf('prefix') !== -1) {
                     showKeyError(keyName, msg);
                 }
-                updateKeyStatus(keyName, 'invalid', data.error || 'Save failed');
+                updateKeyStatus(keyName, 'invalid', msg);
             }
         })
         .catch(function(err) {
@@ -705,7 +735,7 @@
         .then(function(r) { return r.json(); })
         .then(function(data) {
             setButtonLoading(btn, false);
-            var keyData = data[keyName];
+            var keyData = (data.keys && data.keys[keyName]) || data[keyName];
             if (keyData && keyData.configured) {
                 updateKeyStatus(keyName, 'valid', 'Connected');
             } else {
@@ -719,8 +749,114 @@
 
     function updateKeyStatus(keyName, status, text) {
         var el = document.getElementById('status-' + keyName);
+        if (!el) return;
         el.className = 'api-key-status ' + status;
         el.querySelector('.api-key-status-text').textContent = text;
+    }
+
+    function mapClaudeValidation(validation) {
+        switch (validation) {
+            case 'valid':
+                return { statusClass: 'valid', text: 'Connected' };
+            case 'rate_limited':
+                return { statusClass: 'warning', text: 'Rate limited' };
+            case 'unknown':
+                return { statusClass: 'warning', text: 'Validation uncertain' };
+            case 'unreachable':
+                return { statusClass: 'warning', text: 'Validation unreachable' };
+            case 'expired':
+                return { statusClass: 'invalid', text: 'Expired or unauthorized' };
+            case 'invalid':
+                return { statusClass: 'invalid', text: 'Invalid token' };
+            default:
+                return { statusClass: 'missing', text: 'Not configured' };
+        }
+    }
+
+    function saveClaudeToken() {
+        var input = document.getElementById('input-claude');
+        var value = input.value.trim();
+        clearKeyError('claude');
+
+        if (!value) {
+            showKeyError('claude', 'Please paste a Claude setup token.');
+            return;
+        }
+
+        var btn = document.querySelector('#claude-token-card .api-key-actions .btn:not(.btn-secondary)');
+        setButtonLoading(btn, true, 'Saving...');
+
+        fetch('/api/chat/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: value })
+        })
+        .then(function(response) {
+            return response.json().then(function(data) {
+                return { ok: response.ok, data: data };
+            });
+        })
+        .then(function(result) {
+            setButtonLoading(btn, false);
+            if (!result.ok || result.data.status !== 'ok') {
+                var msg = result.data.message || 'Failed to save token';
+                showKeyError('claude', msg);
+                updateKeyStatus('claude', 'invalid', 'Invalid token');
+                if (typeof showToast === 'function') {
+                    showToast(msg, 'error');
+                }
+                return;
+            }
+
+            var mapped = mapClaudeValidation(result.data.validation);
+            updateKeyStatus('claude', mapped.statusClass, mapped.text);
+            input.value = '';
+            input.placeholder = 'Token saved — paste new token to rotate';
+            if (typeof showToast === 'function') {
+                showToast('Claude token saved', 'success');
+            }
+        })
+        .catch(function() {
+            setButtonLoading(btn, false);
+            showKeyError('claude', 'Request failed. Please try again.');
+            if (typeof showToast === 'function') {
+                showToast('Failed to save Claude token.', 'error');
+            }
+        });
+    }
+
+    function testClaudeToken() {
+        var input = document.getElementById('input-claude');
+        var value = input.value.trim();
+        clearKeyError('claude');
+
+        var btn = document.querySelector('#claude-token-card .api-key-actions .btn-secondary');
+        setButtonLoading(btn, true, 'Testing...');
+
+        fetch('/api/chat/token/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: value })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            setButtonLoading(btn, false);
+            var mapped = mapClaudeValidation(data.validation);
+            updateKeyStatus('claude', mapped.statusClass, mapped.text);
+
+            if (data.validation === 'invalid' || data.validation === 'expired') {
+                showKeyError('claude', (data.validation_detail && data.validation_detail.message) || 'Token validation failed.');
+            } else if (typeof showToast === 'function') {
+                showToast('Claude token check complete: ' + mapped.text, 'info');
+            }
+        })
+        .catch(function() {
+            setButtonLoading(btn, false);
+            updateKeyStatus('claude', 'warning', 'Validation failed');
+            if (typeof showToast === 'function') {
+                showToast('Could not validate Claude token.', 'warning');
+            }
+        });
     }
 
     // Save preferences
@@ -790,11 +926,23 @@
         fetch('/api/v2/settings/api-keys/status')
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            Object.keys(data).forEach(function(key) {
-                if (data[key] && data[key].configured) {
+            var keys = data.keys || {};
+            Object.keys(keys).forEach(function(key) {
+                if (keys[key] && keys[key].configured) {
                     updateKeyStatus(key, 'valid', 'Connected');
                 }
             });
+        })
+        .catch(function() {});
+
+        fetch('/api/chat/token/status')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data || !data.configured) {
+                return;
+            }
+            var mapped = mapClaudeValidation(data.validation);
+            updateKeyStatus('claude', mapped.statusClass, mapped.text);
         })
         .catch(function() {});
     })();

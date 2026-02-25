@@ -200,11 +200,13 @@ All archived hooks are in `.claude/hooks/_archived/`. They are fully functional 
 2. **Add its registration** to `.claude/settings.local.json`:
    - Determine if it's PreToolUse or PostToolUse (check the archived hook's original tier above or read its source)
    - Determine which tool it monitors (Task, Read, Write, Edit, or Bash)
-   - Add the entry to the appropriate array:
+   - Find the matching `matcher` group (a regex string matching the tool name, e.g. `"Bash"`, `"Write"`, `"Read"`, `"Write|Edit"`, `"Task"`) and add the hook entry to its `hooks` array:
    ```json
    {
-     "tool": "<Tool>",
-     "command": "python3 .claude/hooks/<hook_name>.py"
+     "matcher": "<Tool>",
+     "hooks": [
+       { "type": "command", "command": "python3 .claude/hooks/<hook_name>.py" }
+     ]
    }
    ```
 

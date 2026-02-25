@@ -9,6 +9,16 @@ from .deployment_service import (
     check_required_env_vars
 )
 
+# Chat Store
+try:
+    from .chat_store import (
+        ChatStore,
+        RedisChatStore,
+    )
+    _has_chat_store = True
+except ImportError:
+    _has_chat_store = False
+
 # Railway API (existing from other agent)
 try:
     from .railway_api import (
@@ -53,6 +63,12 @@ __all__ = [
     "check_required_env_vars",
 ]
 
+if _has_chat_store:
+    __all__.extend([
+        "ChatStore",
+        "RedisChatStore",
+    ])
+
 if _has_railway_api:
     __all__.extend([
         "railway_api_call",
@@ -79,4 +95,35 @@ if _has_webhook_service:
         "load_webhook_config",
         "get_webhook_statistics",
         "get_webhook_recent_logs",
+    ])
+
+# Skill Execution Service
+try:
+    from .skill_execution_service import (
+        parse_skill_md,
+        list_available_skills,
+        execute_skill,
+        get_execution_status,
+        get_skill_categories,
+        search_skills,
+        get_skill_count,
+        get_skill_script_path,
+        SKILLS_DIR,
+    )
+    _has_skill_service = True
+except ImportError as e:
+    print(f"⚠️  Skill execution service import failed: {e}")
+    _has_skill_service = False
+
+if _has_skill_service:
+    __all__.extend([
+        "parse_skill_md",
+        "list_available_skills",
+        "execute_skill",
+        "get_execution_status",
+        "get_skill_categories",
+        "search_skills",
+        "get_skill_count",
+        "get_skill_script_path",
+        "SKILLS_DIR",
     ])

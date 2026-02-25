@@ -490,21 +490,10 @@
 {% block extra_js %}
 <script>
 (function() {
-    var executionId = getExecutionIdFromUrl();
-    var skillName = getSkillNameFromUrl();
+    var executionId = {{ execution.id | tojson }};
+    var initialSkillName = {{ (execution.skill_name or '') | tojson }};
+    var skillName = initialSkillName;
     var rawContent = '';
-
-    function getExecutionIdFromUrl() {
-        var parts = window.location.pathname.split('/');
-        return parts[parts.length - 1] || null;
-    }
-
-    function getSkillNameFromUrl() {
-        var parts = window.location.pathname.split('/');
-        var idx = parts.indexOf('skills');
-        if (idx >= 0 && parts[idx + 1]) return decodeURIComponent(parts[idx + 1]);
-        return null;
-    }
 
     function formatSkillName(name) {
         return (name || '').replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
@@ -517,7 +506,7 @@
     }
 
     function formatDuration(ms) {
-        if (!ms) return '-';
+        if (ms === null || ms === undefined) return '-';
         var secs = Math.floor(ms / 1000);
         var mins = Math.floor(secs / 60);
         secs = secs % 60;
@@ -579,11 +568,12 @@
             if (!res.ok) throw new Error('Failed to load output');
             var data = await res.json();
 
+            skillName = data.skill_name || skillName;
             rawContent = data.output_content || data.output_preview || '';
             var wordCount = countWords(rawContent);
 
             // Set header info
-            document.getElementById('output-title').textContent = 'Completed: ' + formatSkillName(data.skill_name || skillName);
+            document.getElementById('output-title').textContent = 'Completed: ' + formatSkillName(skillName || 'skill');
             document.getElementById('meta-duration').textContent = 'Duration: ' + formatDuration(data.duration_ms);
             if (wordCount > 0) {
                 document.getElementById('meta-words').textContent = 'Words: ' + wordCount.toLocaleString();
@@ -594,14 +584,14 @@
             document.getElementById('raw-output').textContent = rawContent;
 
             // Fill details
-            document.getElementById('detail-skill').textContent = data.skill_name || skillName || '-';
+            document.getElementById('detail-skill').textContent = skillName || '-';
             document.getElementById('detail-exec-id').textContent = executionId;
             document.getElementById('detail-duration').textContent = formatDuration(data.duration_ms);
             document.getElementById('detail-cost').textContent = data.cost_estimate ? '$' + data.cost_estimate.toFixed(2) : 'N/A';
             document.getElementById('detail-files').textContent = data.output_path || '-';
 
             // Set re-run link with pre-fill params
-            var rerunUrl = '/skills/' + encodeURIComponent(data.skill_name || skillName) + '/run';
+            var rerunUrl = skillName ? ('/skills/' + encodeURIComponent(skillName) + '/run') : '/skills';
             if (data.params) {
                 try {
                     var params = typeof data.params === 'string' ? JSON.parse(data.params) : data.params;
@@ -618,7 +608,7 @@
             document.getElementById('output-content').style.display = 'block';
 
             // Handle error state
-            if (data.status === 'error') {
+            if (data.execution_status === 'error' || data.execution_status === 'cancelled') {
                 var icon = document.getElementById('output-icon');
                 icon.style.background = 'var(--error-muted)';
                 icon.style.color = 'var(--error)';
@@ -663,7 +653,7 @@
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
-        a.download = (skillName || 'output') + '.md';
+        a.download = ((skillName || 'output') + '.md').replace(/\s+/g, '-');
         a.click();
         URL.revokeObjectURL(url);
     };

@@ -9,7 +9,7 @@ import json
 import hashlib
 import hmac
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from pathlib import Path
 
@@ -56,7 +56,7 @@ def login_required(f):
 
 def check_password(password: str) -> bool:
     """Check password against configured hash."""
-    password_hash = Config.DASHBOARD_PASSWORD_HASH
+    password_hash = os.getenv('DASHBOARD_PASSWORD_HASH', '') or Config.DASHBOARD_PASSWORD_HASH
     
     if not password_hash:
         return False
@@ -101,6 +101,100 @@ def get_base_url():
 def get_username():
     """Get current username from session."""
     return session.get('username', 'Admin')
+
+
+def _parse_datetime(value):
+    """Parse SQLite/ISO datetime strings into datetime objects."""
+    if not value:
+        return None
+    if isinstance(value, datetime):
+        return value
+    for candidate in (str(value), str(value).replace('Z', '+00:00')):
+        try:
+            return datetime.fromisoformat(candidate)
+        except ValueError:
+            continue
+    return None
+
+
+def _format_duration_ms(duration_ms):
+    """Format duration in ms to short human-readable text."""
+    if duration_ms is None:
+        return None
+    try:
+        total_seconds = max(int(duration_ms) // 1000, 0)
+    except (TypeError, ValueError):
+        return None
+    minutes, seconds = divmod(total_seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    if hours:
+        return f"{hours}h {minutes}m"
+    if minutes:
+        return f"{minutes}m {seconds}s"
+    return f"{seconds}s"
+
+
+def _day_label(dt):
+    """Get relative day label for timeline grouping."""
+    if dt is None:
+        return "Unknown Date"
+    today = datetime.now().date()
+    d = dt.date()
+    if d == today:
+        return "Today"
+    if d == today - timedelta(days=1):
+        return "Yesterday"
+    return dt.strftime("%b %d, %Y")
+
+
+def _normalize_execution(raw):
+    """Normalize legacy and v2 execution records for timeline rendering."""
+    created_dt = _parse_datetime(raw.get('created_at') or raw.get('started_at'))
+    status = (raw.get('status') or 'queued').lower()
+    skill_name = raw.get('skill_name')
+    workflow_name = (
+        raw.get('workflow_name')
+        or raw.get('name')
+        or skill_name
+        or raw.get('workflow_id')
+        or "Unknown Workflow"
+    )
+
+    params = raw.get('params')
+    if not isinstance(params, dict):
+        params = {}
+
+    return {
+        "id": str(raw.get('id')),
+        "workflow": workflow_name,
+        "skill_name": skill_name,
+        "status": status,
+        "time": created_dt.strftime("%I:%M %p").lstrip("0") if created_dt else "Unknown",
+        "date": created_dt.date().isoformat() if created_dt else "",
+        "trigger": raw.get('trigger_type') or ("manual" if skill_name else "system"),
+        "duration": _format_duration_ms(raw.get('duration_ms')),
+        "output": raw.get('output_preview') or raw.get('output_summary'),
+        "error": raw.get('error_message'),
+        "is_skill": bool(skill_name),
+        "params": params,
+        "_created_dt": created_dt,
+    }
+
+
+def _build_execution_timeline(rows):
+    """Build timeline groups and workflow list for execution history template."""
+    normalized = [_normalize_execution(r) for r in rows]
+    normalized.sort(key=lambda r: r.get("_created_dt") or datetime.min, reverse=True)
+
+    executions_by_day = {}
+    for row in normalized:
+        label = _day_label(row.get("_created_dt"))
+        row_copy = dict(row)
+        row_copy.pop("_created_dt", None)
+        executions_by_day.setdefault(label, []).append(row_copy)
+
+    workflows = sorted({r["workflow"] for r in normalized if r.get("workflow")})
+    return normalized, executions_by_day, workflows
 
 
 def persist_to_railway(variables: dict):
@@ -163,7 +257,8 @@ def login():
         username = request.form.get('username', '')
         password = request.form.get('password', '')
         
-        if username == Config.DASHBOARD_USERNAME and check_password(password):
+        expected_user = os.getenv('DASHBOARD_USERNAME', '') or Config.DASHBOARD_USERNAME
+        if username == expected_user and check_password(password):
             session['logged_in'] = True
             session['username'] = username
             session.permanent = True
@@ -365,6 +460,7 @@ def executions():
     workflow_filter = request.args.get('workflow')
     
     execution_list = models.get_executions(workflow_id=workflow_filter, limit=limit)
+    normalized, executions_by_day, workflows = _build_execution_timeline(execution_list)
     
     # Get execution stats
     stats = models.get_execution_stats()
@@ -373,8 +469,11 @@ def executions():
         'execution_history.html',
         username=username,
         active_page='executions',
-        executions=execution_list,
-        stats=stats
+        executions=normalized,
+        executions_by_day=executions_by_day,
+        workflows=workflows,
+        total_executions=len(normalized),
+        stats=stats,
     )
 
 
@@ -399,8 +498,8 @@ def environment():
             # Log event
             models.log_event(
                 event_type="env_var",
-                status="set",
-                data={"variable": var_name, "by": username},
+                status="info",
+                data={"variable": var_name, "action": "set", "by": username},
                 source="web"
             )
             
@@ -523,7 +622,7 @@ def skill_catalog():
         skills = [s for s in skills if s.get('category') == category_filter]
 
     return render_template(
-        'skill_execute.html',
+        'skill_catalog.html',
         username=username,
         active_page='skills',
         skills=skills,
@@ -654,13 +753,17 @@ def outputs():
         status=status_filter,
         limit=limit,
     )
+    normalized, executions_by_day, workflows = _build_execution_timeline(execution_list)
     stats = models.get_skill_execution_stats()
 
     return render_template(
         'execution_history.html',
         username=username,
         active_page='outputs',
-        executions=execution_list,
+        executions=normalized,
+        executions_by_day=executions_by_day,
+        workflows=workflows,
+        total_executions=len(normalized),
         stats=stats,
         is_v2=True,
     )
@@ -678,6 +781,7 @@ def settings_page():
     # Check API key status
     api_key_vars = {
         'openrouter': 'OPENROUTER_API_KEY',
+        'claude': 'CLAUDE_SETUP_TOKEN',
         'perplexity': 'PERPLEXITY_API_KEY',
         'anthropic': 'ANTHROPIC_API_KEY',
         'openai': 'OPENAI_API_KEY',
@@ -743,6 +847,44 @@ def help_page():
         username=username,
         active_page='help',
         total_skills=get_skill_count(),
+    )
+
+
+@views_bp.route('/webhooks')
+@login_required
+def webhooks_page():
+    """Webhook management page."""
+    username = get_username()
+    base_url = get_base_url()
+
+    active = models.get_workflows(workflow_type='webhook', status='active')
+    paused = models.get_workflows(workflow_type='webhook', status='paused')
+
+    webhooks = []
+    for wf in active + paused:
+        slug = wf.get('webhook_slug') or wf.get('id')
+        if not slug:
+            continue
+        webhooks.append({
+            "name": wf.get('name') or slug,
+            "description": wf.get('description') or '',
+            "slug": slug,
+            "enabled": wf.get('status') == 'active',
+            "webhook_url": f"{base_url}/webhook/{slug}",
+            "forward_url": wf.get('forward_url') or '',
+            "slack_notify": bool(wf.get('slack_notify')),
+            "source": wf.get('description') or 'Database',
+        })
+
+    webhooks.sort(key=lambda w: w["name"].lower())
+    recent_logs = models.get_webhook_logs(limit=20)
+
+    return render_template(
+        'webhooks.html',
+        username=username,
+        active_page='webhooks',
+        webhooks=webhooks,
+        recent_logs=recent_logs,
     )
 
 

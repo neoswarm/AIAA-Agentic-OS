@@ -511,18 +511,19 @@
         fetch('/api/v2/clients/' + encodeURIComponent(slug))
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            if (data.name) {
-                document.getElementById('clientName').value = data.name || '';
-                document.getElementById('clientWebsite').value = data.website || '';
-                document.getElementById('clientIndustry').value = data.industry || '';
-                document.getElementById('clientDescription').value = data.description || '';
-                document.getElementById('clientAudience').value = data.target_audience || '';
-                document.getElementById('clientGoals').value = data.goals || '';
-                document.getElementById('clientCompetitors').value = data.competitors || '';
-                document.getElementById('clientWordsToAvoid').value = (data.rules && data.rules.words_to_avoid) || '';
-                document.getElementById('clientContentLength').value = (data.preferences && data.preferences.content_length) || 'medium';
+            var client = data.client || data;
+            if (client && client.name) {
+                document.getElementById('clientName').value = client.name || '';
+                document.getElementById('clientWebsite').value = client.website || '';
+                document.getElementById('clientIndustry').value = client.industry || '';
+                document.getElementById('clientDescription').value = client.description || '';
+                document.getElementById('clientAudience').value = client.target_audience || '';
+                document.getElementById('clientGoals').value = client.goals || '';
+                document.getElementById('clientCompetitors').value = client.competitors || '';
+                document.getElementById('clientWordsToAvoid').value = (client.rules && client.rules.words_to_avoid) || '';
+                document.getElementById('clientContentLength').value = (client.preferences && client.preferences.content_length) || 'medium';
 
-                var voice = data.brand_voice || 'professional';
+                var voice = client.brand_voice || 'professional';
                 document.getElementById('clientBrandVoice').value = voice;
                 document.querySelectorAll('.brand-voice-option').forEach(function(b) {
                     b.classList.toggle('selected', b.dataset.voice === voice);
@@ -629,6 +630,19 @@
         .then(function(r) { return r.json(); })
         .then(function(data) {
             setButtonLoading(btn, false);
+            if (data.status && data.status !== 'ok') {
+                if (data.errors) {
+                    if (data.errors.name) {
+                        showFieldError('clientName', 'clientNameError', data.errors.name);
+                    }
+                    if (data.errors.website) {
+                        showFieldError('clientWebsite', 'clientWebsiteError', data.errors.website);
+                    }
+                } else {
+                    showToast(data.message || 'Failed to save client', 'error');
+                }
+                return;
+            }
             closeClientForm();
             loadClients();
         })
@@ -643,7 +657,7 @@
         fetch('/api/v2/clients')
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            clients = data || [];
+            clients = data.clients || [];
             renderClients();
         })
         .catch(function() {
