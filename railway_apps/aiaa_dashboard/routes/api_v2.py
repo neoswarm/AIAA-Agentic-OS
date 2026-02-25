@@ -508,6 +508,35 @@ _KEY_PREFIXES = {
     "FAL_KEY": "",
 }
 
+_TOKEN_ALIASES = {
+    "runner": "DASHBOARD_API_KEY",
+    "runner_token": "DASHBOARD_API_KEY",
+    "dashboard": "DASHBOARD_API_KEY",
+    "dashboard_api_key": "DASHBOARD_API_KEY",
+}
+
+
+def _resolve_env_var(key_name: str) -> str:
+    """Resolve a friendly key name to an environment variable."""
+    normalized = key_name.lower()
+    if normalized in _TOKEN_ALIASES:
+        return _TOKEN_ALIASES[normalized]
+    return _API_KEY_NAMES.get(normalized, key_name.upper())
+
+
+def _clear_stored_api_key(env_var: str) -> None:
+    """Remove a stored API key value from settings storage."""
+    setting_key = f"api_key.{env_var}"
+    delete_setting = getattr(models, "delete_setting", None)
+    if callable(delete_setting):
+        delete_setting(setting_key)
+        return
+
+    # Backward-compatible fallback if delete_setting is unavailable.
+    set_setting = getattr(models, "set_setting", None)
+    if callable(set_setting):
+        set_setting(setting_key, "")
+
 
 def _redact_token(token: str) -> str:
     """Redact sensitive token values for API responses."""
@@ -587,6 +616,33 @@ def api_save_api_key():
         return jsonify({
             "status": "ok",
             "message": f"{env_var} saved successfully",
+            "key_name": env_var,
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@api_v2_bp.route('/settings/api-keys/revoke', methods=['POST'])
+@api_v2_bp.route('/settings/api-keys/clear', methods=['POST'])
+@api_v2_bp.route('/settings/api-keys/<key_name>', methods=['DELETE'])
+@login_required
+def api_revoke_api_key(key_name=None):
+    """Clear a stored API key/token and remove it from runner environment."""
+    data = request.get_json(silent=True) or {}
+    requested_key_name = (key_name or data.get('key_name', '')).strip()
+
+    if not requested_key_name:
+        return validation_error({'key_name': 'Key name is required'})
+
+    env_var = _resolve_env_var(requested_key_name)
+
+    try:
+        _clear_stored_api_key(env_var)
+        os.environ.pop(env_var, None)
+
+        return jsonify({
+            "status": "ok",
+            "message": f"{env_var} revoked successfully",
             "key_name": env_var,
         })
     except Exception as e:
