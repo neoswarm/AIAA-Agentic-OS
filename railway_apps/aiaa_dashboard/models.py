@@ -1413,11 +1413,24 @@ def count_session_history_messages(session_id: str) -> int:
 # ==============================================================================
 
 _ENCRYPTED_SETTING_PREFIX = "enc:v1:"
+_SETUP_TOKEN_PROFILE_KEY_SUFFIX = ".claude_setup_token"
+_SETUP_TOKEN_PROFILE_DEFAULT_ID = "default"
+_SETUP_TOKEN_PROFILE_STATUSES = {"active", "inactive", "revoked"}
 
 
 def _requires_encryption(setting_key: str) -> bool:
     """Return True for setting keys that must be encrypted at rest."""
-    return setting_key == "claude_setup_token" or setting_key.endswith(".claude_setup_token")
+    return setting_key == "claude_setup_token" or setting_key.endswith(_SETUP_TOKEN_PROFILE_KEY_SUFFIX)
+
+
+def _setup_token_profile_id_from_setting_key(setting_key: str) -> Optional[str]:
+    """Map a setup-token setting key to its profile id."""
+    if setting_key == "claude_setup_token":
+        return _SETUP_TOKEN_PROFILE_DEFAULT_ID
+    if setting_key.endswith(_SETUP_TOKEN_PROFILE_KEY_SUFFIX):
+        profile_id = setting_key[: -len(_SETUP_TOKEN_PROFILE_KEY_SUFFIX)].strip()
+        return profile_id or _SETUP_TOKEN_PROFILE_DEFAULT_ID
+    return None
 
 
 def _get_settings_fernet() -> Fernet:
@@ -1498,6 +1511,55 @@ def _upsert_user_setting(
     )
 
 
+def upsert_setup_token_profile(
+    profile_id: str,
+    token: Optional[str],
+    status: str = "active",
+) -> int:
+    """Create or update a setup-token profile row."""
+    normalized_profile_id = (profile_id or "").strip()
+    if not normalized_profile_id:
+        raise ValueError("profile_id is required")
+
+    normalized_status = (status or "").strip().lower()
+    if normalized_status not in _SETUP_TOKEN_PROFILE_STATUSES:
+        raise ValueError(
+            "status must be one of: active, inactive, revoked"
+        )
+
+    encrypted_token = _encrypt_setting_value("claude_setup_token", token or "")
+    return execute(
+        """INSERT INTO setup_token_profiles (
+            profile_id, encrypted_token, status, created_at, updated_at
+        ) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ON CONFLICT(profile_id) DO UPDATE SET
+            encrypted_token = excluded.encrypted_token,
+            status = excluded.status,
+            updated_at = CURRENT_TIMESTAMP""",
+        (normalized_profile_id, encrypted_token or "", normalized_status),
+    )
+
+
+def get_setup_token_profile(profile_id: str) -> Optional[Dict[str, Optional[str]]]:
+    """Fetch one setup-token profile with decrypted token."""
+    normalized_profile_id = (profile_id or "").strip()
+    if not normalized_profile_id:
+        return None
+
+    row = query_one(
+        """SELECT profile_id, encrypted_token, status, created_at, updated_at
+        FROM setup_token_profiles
+        WHERE profile_id = ?""",
+        (normalized_profile_id,),
+    )
+    payload = row_to_dict(row)
+    if payload is None:
+        return None
+
+    payload["token"] = _decrypt_setting_value("claude_setup_token", payload.pop("encrypted_token"))
+    return payload
+
+
 def set_setting(
     setting_key: str,
     setting_value: Optional[str],
@@ -1519,6 +1581,15 @@ def set_setting(
             updated_at = CURRENT_TIMESTAMP""",
         (setting_key, value_to_store),
     )
+
+    profile_id = _setup_token_profile_id_from_setting_key(setting_key)
+    if profile_id is not None:
+        token_text = (setting_value or "").strip()
+        upsert_setup_token_profile(
+            profile_id=profile_id,
+            token=setting_value,
+            status="active" if token_text else "inactive",
+        )
 
     if not _requires_encryption(setting_key):
         _upsert_user_setting(
@@ -1622,6 +1693,10 @@ def get_all_settings() -> Dict[str, Optional[str]]:
 
 def delete_setting(setting_key: str) -> int:
     """Delete a setting from both legacy and user_settings stores."""
+    profile_id = _setup_token_profile_id_from_setting_key(setting_key)
+    if profile_id is not None:
+        upsert_setup_token_profile(profile_id, token="", status="revoked")
+
     user_deleted = execute(
         "DELETE FROM user_settings WHERE setting_key = ?",
         (setting_key,),
