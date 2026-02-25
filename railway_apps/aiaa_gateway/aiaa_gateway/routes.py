@@ -14,7 +14,6 @@ from .services.responses_service import (
     map_anthropic_to_response,
 )
 
-
 gateway_bp = Blueprint("gateway", __name__)
 
 
