@@ -98,9 +98,19 @@ def init_db(app=None):
                 for statement in cleaned_sql.split(';'):
                     statement = statement.strip()
                     if statement:
-                        conn.execute(statement)
+                        try:
+                            conn.execute(statement)
+                        except sqlite3.OperationalError as exc:
+                            if _should_normalize_user_settings(statement, exc):
+                                _normalize_user_settings_schema(conn)
+                                conn.execute(statement)
+                            else:
+                                raise
             conn.commit()
             print(f"Applied migration: {migration_name}")
+
+    # Final guard: ensure runtime model expectations for user_settings columns.
+    _normalize_user_settings_schema(conn)
     
     # Migrate legacy JSON files if they exist
     _migrate_legacy_workflow_config()
@@ -108,6 +118,81 @@ def init_db(app=None):
     _migrate_legacy_cron_states()
     
     return conn
+
+
+def _should_normalize_user_settings(statement: str, exc: Exception) -> bool:
+    """Return True when user_settings schema should be normalized then retried."""
+    msg = str(exc).lower()
+    stmt = (statement or "").lower()
+    return "user_settings" in stmt and (
+        "no such column: setting_key" in msg
+        or "no such column: setting_value" in msg
+        or "no such column: key" in msg
+        or "no such column: value" in msg
+    )
+
+
+def _normalize_user_settings_schema(conn: sqlite3.Connection):
+    """Upgrade legacy user_settings table variants to the canonical schema."""
+    table_row = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='user_settings'"
+    ).fetchone()
+    if table_row is None:
+        return
+
+    columns = [row[1] for row in conn.execute("PRAGMA table_info(user_settings)").fetchall()]
+    column_set = set(columns)
+
+    # Legacy schema: key/value. Migrate to setting_key/setting_value.
+    if "setting_key" not in column_set and {"key", "value"}.issubset(column_set):
+        conn.execute("DROP TABLE IF EXISTS user_settings_v2")
+        conn.execute(
+            """
+            CREATE TABLE user_settings_v2 (
+                setting_key TEXT PRIMARY KEY,
+                setting_value TEXT NOT NULL,
+                last_validated_at TEXT,
+                validation_status TEXT,
+                last_error TEXT,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+        updated_expr = "updated_at" if "updated_at" in column_set else "CURRENT_TIMESTAMP"
+        conn.execute(
+            f"""
+            INSERT INTO user_settings_v2 (setting_key, setting_value, updated_at)
+            SELECT key, value, {updated_expr}
+            FROM user_settings
+            """
+        )
+        conn.execute("DROP TABLE user_settings")
+        conn.execute("ALTER TABLE user_settings_v2 RENAME TO user_settings")
+        column_set = {
+            "setting_key",
+            "setting_value",
+            "last_validated_at",
+            "validation_status",
+            "last_error",
+            "updated_at",
+        }
+
+    # Ensure metadata columns exist for newer token validation features.
+    if "setting_key" in column_set and "setting_value" in column_set:
+        if "last_validated_at" not in column_set:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN last_validated_at TEXT")
+            column_set.add("last_validated_at")
+        if "validation_status" not in column_set:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN validation_status TEXT")
+            column_set.add("validation_status")
+        if "last_error" not in column_set:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN last_error TEXT")
+            column_set.add("last_error")
+        if "updated_at" not in column_set:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+            column_set.add("updated_at")
+
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_user_settings_key ON user_settings(setting_key)")
 
 
 def _migrate_legacy_workflow_config():
