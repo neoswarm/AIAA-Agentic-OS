@@ -253,6 +253,74 @@ def get_execution_stats() -> Dict[str, Any]:
 
 
 # ==============================================================================
+# Session History Operations
+# ==============================================================================
+
+def upsert_session_history(session_id: str, metadata: Optional[Dict] = None) -> int:
+    """Create or update a session history record."""
+    metadata_json = json.dumps(metadata) if metadata else None
+    return execute(
+        """INSERT INTO session_history_sessions (id, metadata, created_at, updated_at)
+        VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ON CONFLICT(id) DO UPDATE SET
+            metadata = COALESCE(excluded.metadata, session_history_sessions.metadata),
+            updated_at = CURRENT_TIMESTAMP""",
+        (session_id, metadata_json)
+    )
+
+
+def log_session_history_message(
+    session_id: str,
+    role: str,
+    content: str,
+    metadata: Optional[Dict] = None
+) -> int:
+    """Append a message to a session history."""
+    upsert_session_history(session_id)
+    metadata_json = json.dumps(metadata) if metadata else None
+    return insert(
+        """INSERT INTO session_history_messages (
+            session_id, role, content, metadata, created_at
+        ) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)""",
+        (session_id, role, content, metadata_json)
+    )
+
+
+def get_session_history_session(session_id: str) -> Optional[Dict[str, Any]]:
+    """Get one session history metadata record."""
+    row = query_one(
+        "SELECT * FROM session_history_sessions WHERE id = ?",
+        (session_id,)
+    )
+    return row_to_dict(row)
+
+
+def get_session_history_messages(
+    session_id: str,
+    limit: int = 50,
+    offset: int = 0
+) -> List[Dict[str, Any]]:
+    """Get paginated messages for a session history."""
+    rows = query(
+        """SELECT * FROM session_history_messages
+        WHERE session_id = ?
+        ORDER BY id ASC
+        LIMIT ? OFFSET ?""",
+        (session_id, limit, offset)
+    )
+    return rows_to_dicts(rows)
+
+
+def count_session_history_messages(session_id: str) -> int:
+    """Count total messages in a session history."""
+    row = query_one(
+        "SELECT COUNT(*) AS total FROM session_history_messages WHERE session_id = ?",
+        (session_id,)
+    )
+    return int(row["total"]) if row else 0
+
+
+# ==============================================================================
 # Webhook Log Operations
 # ==============================================================================
 
