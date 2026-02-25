@@ -22,6 +22,7 @@ from flask import (
     Blueprint,
     Response,
     current_app,
+    has_app_context,
     jsonify,
     redirect,
     render_template,
@@ -195,6 +196,18 @@ def _unsupported_setup_token_message() -> str:
     )
 
 
+def _chat_backend() -> str:
+    if has_app_context():
+        configured = (current_app.config.get("CHAT_BACKEND") or "").strip()
+        if configured:
+            return configured.lower()
+    return (os.getenv("CHAT_BACKEND", "") or "").strip().lower()
+
+
+def _is_setup_token_hard_blocked() -> bool:
+    return _chat_backend() != "gateway"
+
+
 def validate_claude_token(token: str) -> Dict[str, Any]:
     """Validate Claude token with compatible checks.
 
@@ -205,11 +218,17 @@ def validate_claude_token(token: str) -> Dict[str, Any]:
     if not candidate:
         return {"status": "invalid", "http_status": None, "message": "Missing token"}
 
-    if _looks_like_setup_token(candidate):
+    if _looks_like_setup_token(candidate) and _is_setup_token_hard_blocked():
         return {
             "status": "unsupported",
             "http_status": None,
             "message": _unsupported_setup_token_message(),
+        }
+    if _looks_like_setup_token(candidate):
+        return {
+            "status": "unknown",
+            "http_status": None,
+            "message": "Setup token accepted for gateway backend; direct Anthropic validation skipped.",
         }
 
     headers = {"Accept": "application/json"}
@@ -415,7 +434,7 @@ def create_session():
             jsonify({"status": "error", "message": "Claude token not configured"}),
             400,
         )
-    if _looks_like_setup_token(token):
+    if _looks_like_setup_token(token) and _is_setup_token_hard_blocked():
         return (
             jsonify({"status": "error", "message": _unsupported_setup_token_message()}),
             400,
@@ -450,7 +469,7 @@ def send_message():
             jsonify({"status": "error", "message": "Claude token not configured"}),
             400,
         )
-    if _looks_like_setup_token(token):
+    if _looks_like_setup_token(token) and _is_setup_token_hard_blocked():
         return (
             jsonify({"status": "error", "message": _unsupported_setup_token_message()}),
             400,

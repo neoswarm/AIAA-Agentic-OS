@@ -51,6 +51,8 @@ def auth_client(app):
 
 @pytest.mark.parametrize("token", [SETUP_TOKEN_JWT, SETUP_TOKEN_OAT])
 def test_validate_setup_token_returns_unsupported_without_rest_probe(monkeypatch, token):
+    monkeypatch.delenv("CHAT_BACKEND", raising=False)
+
     def _unexpected_get(*args, **kwargs):
         raise AssertionError("REST endpoint should not be called for setup-token artifacts")
 
@@ -61,6 +63,22 @@ def test_validate_setup_token_returns_unsupported_without_rest_probe(monkeypatch
     assert result["status"] == "unsupported"
     assert result["http_status"] is None
     assert "not supported" in result["message"].lower()
+
+
+@pytest.mark.parametrize("token", [SETUP_TOKEN_JWT, SETUP_TOKEN_OAT])
+def test_validate_setup_token_skips_hard_block_for_gateway(monkeypatch, token):
+    monkeypatch.setenv("CHAT_BACKEND", "gateway")
+
+    def _unexpected_get(*args, **kwargs):
+        raise AssertionError("REST endpoint should not be called for setup-token artifacts")
+
+    monkeypatch.setattr(chat_routes.http_requests, "get", _unexpected_get)
+
+    result = chat_routes.validate_claude_token(token)
+
+    assert result["status"] == "unknown"
+    assert result["http_status"] is None
+    assert "gateway backend" in result["message"].lower()
 
 
 def test_validate_non_setup_token_keeps_rest_behavior(monkeypatch):
@@ -79,6 +97,7 @@ def test_validate_non_setup_token_keeps_rest_behavior(monkeypatch):
 def test_save_token_rejects_setup_token_with_unsupported_validation(
     auth_client, app, monkeypatch, token
 ):
+    monkeypatch.delenv("CHAT_BACKEND", raising=False)
     monkeypatch.setattr(chat_routes, "_persist_to_railway_async", lambda *_: False)
     monkeypatch.setattr(chat_routes, "init_chat_runner", lambda *_: None)
 
@@ -93,8 +112,29 @@ def test_save_token_rejects_setup_token_with_unsupported_validation(
         assert models.get_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY) in ("", None)
 
 
+@pytest.mark.parametrize("token", [SETUP_TOKEN_JWT, SETUP_TOKEN_OAT])
+def test_save_token_accepts_setup_token_when_backend_gateway(
+    auth_client, app, monkeypatch, token
+):
+    monkeypatch.setattr(chat_routes, "_persist_to_railway_async", lambda *_: False)
+    monkeypatch.setattr(chat_routes, "init_chat_runner", lambda *_: None)
+    monkeypatch.setitem(app.config, "CHAT_BACKEND", "gateway")
+
+    resp = auth_client.post("/api/chat/token", json={"token": token})
+
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["status"] == "ok"
+    assert body["validation"] == "unknown"
+
+    with app.app_context():
+        assert models.get_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY) == token
+
+
 @pytest.mark.parametrize("endpoint", ["/api/chat/sessions", "/api/chat/message"])
-def test_chat_endpoints_block_unsupported_setup_token(auth_client, app, endpoint):
+def test_chat_endpoints_block_unsupported_setup_token(auth_client, app, monkeypatch, endpoint):
+    monkeypatch.delenv("CHAT_BACKEND", raising=False)
+    app.config.pop("CHAT_BACKEND", None)
     with app.app_context():
         models.set_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY, SETUP_TOKEN_OAT)
 
@@ -104,3 +144,41 @@ def test_chat_endpoints_block_unsupported_setup_token(auth_client, app, endpoint
     body = resp.get_json()
     assert body["status"] == "error"
     assert "not supported" in body["message"].lower()
+
+
+def test_create_session_does_not_hard_block_setup_token_for_gateway(
+    auth_client, app, monkeypatch
+):
+    monkeypatch.setitem(app.config, "CHAT_BACKEND", "gateway")
+
+    class _Runner:
+        def ensure_session(self, *_args, **_kwargs):
+            return None
+
+    monkeypatch.setattr(chat_routes, "_get_runner", lambda: _Runner())
+
+    with app.app_context():
+        models.set_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY, SETUP_TOKEN_OAT)
+
+    resp = auth_client.post("/api/chat/sessions", json={"title": "Gateway chat"})
+
+    assert resp.status_code == 201
+    body = resp.get_json()
+    assert body["status"] == "ok"
+    assert body["session"]["title"] == "Gateway chat"
+
+
+def test_send_message_does_not_hard_block_setup_token_for_gateway(auth_client, app, monkeypatch):
+    monkeypatch.setitem(app.config, "CHAT_BACKEND", "gateway")
+    with app.app_context():
+        models.set_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY, SETUP_TOKEN_OAT)
+
+    resp = auth_client.post(
+        "/api/chat/message",
+        json={"session_id": "missing-session", "message": "hello"},
+    )
+
+    assert resp.status_code == 404
+    body = resp.get_json()
+    assert body["status"] == "error"
+    assert "not supported" not in body["message"].lower()
