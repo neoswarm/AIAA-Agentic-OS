@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression tests for Claude setup-token validation in chat routes."""
+"""Regression tests for Claude auth token validation in chat routes."""
 
 from __future__ import annotations
 
@@ -50,7 +50,7 @@ def auth_client(app):
 
 
 @pytest.mark.parametrize("token", [SETUP_TOKEN_JWT, SETUP_TOKEN_OAT])
-def test_validate_setup_token_skips_rest_models_probe(monkeypatch, token):
+def test_validate_setup_token_returns_unsupported_without_rest_probe(monkeypatch, token):
     def _unexpected_get(*args, **kwargs):
         raise AssertionError("REST endpoint should not be called for setup-token artifacts")
 
@@ -58,8 +58,9 @@ def test_validate_setup_token_skips_rest_models_probe(monkeypatch, token):
 
     result = chat_routes.validate_claude_token(token)
 
-    assert result["status"] == "unknown"
+    assert result["status"] == "unsupported"
     assert result["http_status"] is None
+    assert "not supported" in result["message"].lower()
 
 
 def test_validate_non_setup_token_keeps_rest_behavior(monkeypatch):
@@ -75,7 +76,7 @@ def test_validate_non_setup_token_keeps_rest_behavior(monkeypatch):
 
 
 @pytest.mark.parametrize("token", [SETUP_TOKEN_JWT, SETUP_TOKEN_OAT])
-def test_save_token_accepts_setup_token_with_unknown_validation(
+def test_save_token_rejects_setup_token_with_unsupported_validation(
     auth_client, app, monkeypatch, token
 ):
     monkeypatch.setattr(chat_routes, "_persist_to_railway_async", lambda *_: False)
@@ -83,10 +84,23 @@ def test_save_token_accepts_setup_token_with_unknown_validation(
 
     resp = auth_client.post("/api/chat/token", json={"token": token})
 
-    assert resp.status_code == 200
+    assert resp.status_code == 400
     body = resp.get_json()
-    assert body["status"] == "ok"
-    assert body["validation"] == "unknown"
+    assert body["status"] == "error"
+    assert body["validation"]["status"] == "unsupported"
 
     with app.app_context():
-        assert models.get_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY) == token
+        assert models.get_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY) in ("", None)
+
+
+@pytest.mark.parametrize("endpoint", ["/api/chat/sessions", "/api/chat/message"])
+def test_chat_endpoints_block_unsupported_setup_token(auth_client, app, endpoint):
+    with app.app_context():
+        models.set_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY, SETUP_TOKEN_OAT)
+
+    payload = {"session_id": "abc", "message": "hello"} if endpoint.endswith("message") else {}
+    resp = auth_client.post(endpoint, json=payload)
+    assert resp.status_code == 400
+    body = resp.get_json()
+    assert body["status"] == "error"
+    assert "not supported" in body["message"].lower()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 AIAA Dashboard - Chat Blueprint
-Chat UI and streaming agent endpoints powered by Claude setup token auth.
+Chat UI and streaming agent endpoints powered by Claude Agent SDK auth.
 """
 
 from __future__ import annotations
@@ -146,7 +146,7 @@ def _redact_token(token: str) -> str:
 
 
 def get_claude_token() -> str:
-    """Resolve Claude setup token from env first, then user settings."""
+    """Resolve Claude auth token from env first, then user settings."""
     token = (os.getenv("CLAUDE_SETUP_TOKEN", "") or "").strip()
     if token:
         return token
@@ -188,12 +188,18 @@ def _looks_like_setup_token(token: str) -> bool:
     return True
 
 
+def _unsupported_setup_token_message() -> str:
+    return (
+        "Claude setup-token / OAuth auth is not supported for Claude Agent SDK in this "
+        "dashboard. Use an Anthropic API key (sk-ant-...) instead."
+    )
+
+
 def validate_claude_token(token: str) -> Dict[str, Any]:
     """Validate Claude token with compatible checks.
 
-    Note: `claude setup-token` values are CLI auth artifacts and are not
-    reliably verifiable via Anthropic's REST API-key endpoint. For those
-    tokens, return `unknown` instead of false-negative `expired/invalid`.
+    Note: setup-token / OAuth artifacts are not supported for Claude Agent SDK
+    in third-party dashboards. Require API-key based auth for this app.
     """
     candidate = (token or "").strip()
     if not candidate:
@@ -201,9 +207,9 @@ def validate_claude_token(token: str) -> Dict[str, Any]:
 
     if _looks_like_setup_token(candidate):
         return {
-            "status": "unknown",
+            "status": "unsupported",
             "http_status": None,
-            "message": "Setup token format accepted. Full validity is confirmed on first agent run.",
+            "message": _unsupported_setup_token_message(),
         }
 
     headers = {"Accept": "application/json"}
@@ -403,9 +409,15 @@ def get_session(session_id: str):
 @_login_required_api
 def create_session():
     """Create a new chat session."""
-    if not get_claude_token():
+    token = get_claude_token()
+    if not token:
         return (
             jsonify({"status": "error", "message": "Claude token not configured"}),
+            400,
+        )
+    if _looks_like_setup_token(token):
+        return (
+            jsonify({"status": "error", "message": _unsupported_setup_token_message()}),
             400,
         )
 
@@ -432,9 +444,15 @@ def create_session():
 @_login_required_api
 def send_message():
     """Send a message into an existing chat session."""
-    if not get_claude_token():
+    token = get_claude_token()
+    if not token:
         return (
             jsonify({"status": "error", "message": "Claude token not configured"}),
+            400,
+        )
+    if _looks_like_setup_token(token):
+        return (
+            jsonify({"status": "error", "message": _unsupported_setup_token_message()}),
             400,
         )
 
@@ -573,7 +591,7 @@ def token_status():
 @chat_bp.route("/api/chat/token", methods=["POST"])
 @_login_required_api
 def save_token():
-    """Save Claude setup token for chat runner usage."""
+    """Save Claude auth token for chat runner usage."""
     payload = request.get_json(silent=True) or {}
     token = (payload.get("token") or "").strip()
 
@@ -581,7 +599,7 @@ def save_token():
         return jsonify({"status": "error", "message": "token is required"}), 400
 
     validation = validate_claude_token(token)
-    if validation["status"] in ("invalid", "expired"):
+    if validation["status"] in ("invalid", "expired", "unsupported"):
         return (
             jsonify(
                 {

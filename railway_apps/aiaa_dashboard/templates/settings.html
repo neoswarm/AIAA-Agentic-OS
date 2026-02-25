@@ -392,14 +392,14 @@
 
         <div class="api-key-item" data-key="claude" id="claude-token-card">
             <div class="api-key-header">
-                <span class="api-key-name">Claude Setup Token</span>
+                <span class="api-key-name">Claude API Key (Anthropic)</span>
                 <span class="api-key-status missing" id="status-claude">
                     <span class="api-key-status-dot"></span>
                     <span class="api-key-status-text">Not configured</span>
                 </span>
             </div>
             <div class="api-key-input-row">
-                <input type="password" class="form-input" id="input-claude" placeholder="eyJ..." autocomplete="off">
+                <input type="password" class="form-input" id="input-claude" placeholder="sk-ant-..." autocomplete="off">
                 <div class="api-key-actions">
                     <button class="btn btn-sm btn-secondary" onclick="testClaudeToken()">Verify</button>
                     <button class="btn btn-sm" onclick="saveClaudeToken()">Save</button>
@@ -409,8 +409,9 @@
             <div class="api-key-help">
                 <button class="api-key-help-toggle" onclick="toggleHelp(this)">What is this?</button>
                 <div class="api-key-help-content">
-                    This is the token from <code>claude setup-token</code>. The dashboard uses it to run the full Claude agent loop server-side, so students can chat without opening a terminal or paying per API call.<br><br>
-                    <strong>How to get it:</strong> Run <code>claude setup-token</code> once, complete browser login, then paste the printed token here.
+                    This key is used by Claude Agent SDK to run chat and tools server-side.<br><br>
+                    <strong>Use:</strong> Anthropic API key format <code>sk-ant-...</code>.<br>
+                    <strong>Note:</strong> <code>claude setup-token</code> / OAuth tokens (<code>sk-ant-oat...</code>) are not supported in this dashboard's SDK runtime.
                 </div>
             </div>
         </div>
@@ -883,6 +884,8 @@
                 return { statusClass: 'valid', text: 'Connected' };
             case 'rate_limited':
                 return { statusClass: 'warning', text: 'Rate limited' };
+            case 'unsupported':
+                return { statusClass: 'invalid', text: 'Unsupported auth type' };
             case 'unknown':
                 return { statusClass: 'warning', text: 'Accepted (runtime verify)' };
             case 'unreachable':
@@ -902,7 +905,7 @@
         clearKeyError('claude');
 
         if (!value) {
-            showKeyError('claude', 'Please paste a Claude setup token.');
+            showKeyError('claude', 'Please paste an Anthropic API key (sk-ant-...).');
             return;
         }
 
@@ -934,9 +937,9 @@
             var mapped = mapClaudeValidation(result.data.validation);
             updateKeyStatus('claude', mapped.statusClass, mapped.text);
             input.value = '';
-            input.placeholder = 'Token saved — paste new token to rotate';
+            input.placeholder = 'API key saved — paste new key to rotate';
             if (typeof showToast === 'function') {
-                showToast('Claude token saved', 'success');
+                showToast('Claude API key saved', 'success');
             }
         })
         .catch(function() {
@@ -967,7 +970,7 @@
             var mapped = mapClaudeValidation(data.validation);
             updateKeyStatus('claude', mapped.statusClass, mapped.text);
 
-            if (data.validation === 'invalid' || data.validation === 'expired') {
+            if (data.validation === 'invalid' || data.validation === 'expired' || data.validation === 'unsupported') {
                 showKeyError('claude', (data.validation_detail && data.validation_detail.message) || 'Token validation failed.');
             } else if (typeof showToast === 'function') {
                 showToast('Claude token check complete: ' + mapped.text, 'info');
