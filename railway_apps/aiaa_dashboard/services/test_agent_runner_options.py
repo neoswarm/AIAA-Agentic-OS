@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import asyncio
+import itertools
 import json
 
 import pytest
@@ -340,6 +341,99 @@ def test_run_agent_prefers_streamed_error_over_generic_process_error():
     assert session_state is not None
     assert session_state["status"] == "error"
     assert session_state["last_error"] == "Authentication failed"
+
+
+def _set_perf_counter_values(monkeypatch, values):
+    counter = itertools.chain(values)
+    monkeypatch.setattr(
+        "services.agent_runner.time.perf_counter",
+        lambda: next(counter),
+    )
+
+
+def test_run_agent_emits_timing_metrics_for_success(monkeypatch):
+    runner = AgentRunner(cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token")
+    session = runner.create_session()
+    session_id = session["id"]
+
+    with runner._lock:
+        runner._sessions[session_id]["status"] = "running"
+        runner._run_timing[session_id] = {
+            "enqueued_at": 10.0,
+            "started_at": None,
+            "first_event_recorded": False,
+        }
+
+    _set_perf_counter_values(monkeypatch, [10.25, 10.75, 13.25])
+
+    class DummyOptions:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+    async def fake_query(*, prompt, options):
+        del prompt, options
+        yield {"type": "assistant", "content": "Hello"}
+
+    runner._load_sdk = lambda: {"query": fake_query, "options_cls": DummyOptions}
+    runner._run_agent(session_id, "test")
+
+    session_state = runner.get_session(session_id)
+    assert session_state is not None
+    assert session_state["queue_wait_ms"] == 250
+    assert session_state["first_event_latency_ms"] == 750
+    assert session_state["total_runtime_ms"] == 3000
+    assert session_state["status"] == "idle"
+
+    events = _drain_queue(runner, session_id)
+    done = next(event for event in events if event.get("type") == "done")
+    assert done["metrics"] == {
+        "queue_wait_ms": 250,
+        "first_event_latency_ms": 750,
+        "total_runtime_ms": 3000,
+    }
+
+
+def test_run_agent_emits_timing_metrics_for_error_without_events(monkeypatch):
+    runner = AgentRunner(cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token")
+    session = runner.create_session()
+    session_id = session["id"]
+
+    with runner._lock:
+        runner._sessions[session_id]["status"] = "running"
+        runner._run_timing[session_id] = {
+            "enqueued_at": 5.0,
+            "started_at": None,
+            "first_event_recorded": False,
+        }
+
+    _set_perf_counter_values(monkeypatch, [5.25, 6.0])
+
+    class DummyOptions:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+    async def fake_query(*, prompt, options):
+        del prompt, options
+        raise RuntimeError("boom")
+        yield  # pragma: no cover
+
+    runner._load_sdk = lambda: {"query": fake_query, "options_cls": DummyOptions}
+    runner._run_agent(session_id, "test")
+
+    session_state = runner.get_session(session_id)
+    assert session_state is not None
+    assert session_state["status"] == "error"
+    assert session_state["queue_wait_ms"] == 250
+    assert session_state["first_event_latency_ms"] is None
+    assert session_state["total_runtime_ms"] == 750
+
+    events = _drain_queue(runner, session_id)
+    error_event = next(event for event in events if event.get("type") == "error")
+    assert error_event["metrics"] == {
+        "queue_wait_ms": 250,
+        "first_event_latency_ms": None,
+        "total_runtime_ms": 750,
+    }
 
 
 def test_run_agent_streams_success_sequence_from_mocked_sdk_payloads():
