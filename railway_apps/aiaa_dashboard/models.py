@@ -4,10 +4,7 @@ All database operations for workflows, events, webhooks, and executions.
 """
 
 import json
-import base64
-import hashlib
-import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from cryptography.fernet import Fernet, InvalidToken
 from database import query, query_one, execute, insert, row_to_dict, rows_to_dicts
@@ -390,104 +387,106 @@ def delete_api_key(key_id: int) -> int:
 
 
 # ==============================================================================
-# Settings Operations
+# User Settings Operations
 # ==============================================================================
 
-_ENCRYPTED_SETTING_PREFIX = "enc:v1:"
+def set_setting(
+    setting_key: str,
+    setting_value: str,
+    last_validated_at: Optional[str] = None,
+    validation_status: Optional[str] = None,
+    last_error: Optional[str] = None
+) -> int:
+    """Create or update a user setting, with optional token metadata."""
+    if validation_status is not None and last_validated_at is None:
+        last_validated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
-
-def _requires_encryption(setting_key: str) -> bool:
-    """Return True for setting keys that must be encrypted at rest."""
-    return setting_key == "claude_setup_token" or setting_key.endswith(".claude_setup_token")
-
-
-def _get_settings_fernet() -> Fernet:
-    """Build a Fernet cipher from explicit key or Flask secret."""
-    raw_key = (
-        os.getenv("SETTINGS_ENCRYPTION_KEY")
-        or os.getenv("FLASK_SECRET_KEY")
-        or os.getenv("SECRET_KEY")
-    )
-    if not raw_key:
-        raise RuntimeError(
-            "Missing encryption key. Set SETTINGS_ENCRYPTION_KEY or FLASK_SECRET_KEY."
-        )
-
-    try:
-        return Fernet(raw_key.encode("utf-8"))
-    except Exception:
-        derived = base64.urlsafe_b64encode(hashlib.sha256(raw_key.encode("utf-8")).digest())
-        return Fernet(derived)
-
-
-def _encrypt_setting_value(setting_key: str, setting_value: Optional[str]) -> Optional[str]:
-    """Encrypt sensitive setting values before persisting to storage."""
-    if setting_value is None or not _requires_encryption(setting_key):
-        return setting_value
-    if setting_value.startswith(_ENCRYPTED_SETTING_PREFIX):
-        return setting_value
-
-    cipher = _get_settings_fernet()
-    encrypted = cipher.encrypt(setting_value.encode("utf-8")).decode("utf-8")
-    return f"{_ENCRYPTED_SETTING_PREFIX}{encrypted}"
-
-
-def _decrypt_setting_value(setting_key: str, stored_value: Optional[str]) -> Optional[str]:
-    """Decrypt sensitive setting values after reading from storage."""
-    if stored_value is None or not _requires_encryption(setting_key):
-        return stored_value
-    if not stored_value.startswith(_ENCRYPTED_SETTING_PREFIX):
-        # Backward compatibility for pre-encryption rows.
-        return stored_value
-
-    cipher = _get_settings_fernet()
-    token = stored_value[len(_ENCRYPTED_SETTING_PREFIX):]
-    try:
-        return cipher.decrypt(token.encode("utf-8")).decode("utf-8")
-    except InvalidToken as exc:
-        raise RuntimeError("Unable to decrypt claude_setup_token setting value.") from exc
-
-
-def set_setting(setting_key: str, setting_value: Optional[str]) -> int:
-    """Insert or update a setting value."""
-    value_to_store = _encrypt_setting_value(setting_key, setting_value)
     return execute(
-        """INSERT INTO settings (key, value, updated_at)
-        VALUES (?, ?, CURRENT_TIMESTAMP)
-        ON CONFLICT(key) DO UPDATE SET
-            value = excluded.value,
+        """INSERT INTO user_settings (
+            setting_key, setting_value, last_validated_at, validation_status, last_error, updated_at
+        ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(setting_key) DO UPDATE SET
+            setting_value = excluded.setting_value,
+            last_validated_at = CASE
+                WHEN excluded.validation_status IS NOT NULL THEN excluded.last_validated_at
+                ELSE user_settings.last_validated_at
+            END,
+            validation_status = COALESCE(excluded.validation_status, user_settings.validation_status),
+            last_error = CASE
+                WHEN excluded.validation_status IS NOT NULL THEN excluded.last_error
+                ELSE user_settings.last_error
+            END,
             updated_at = CURRENT_TIMESTAMP""",
-        (setting_key, value_to_store),
+        (setting_key, setting_value, last_validated_at, validation_status, last_error)
     )
 
 
-def get_setting(setting_key: str, default: Optional[str] = None) -> Optional[str]:
-    """Get a single setting value by key."""
-    row = query_one("SELECT value FROM settings WHERE key = ?", (setting_key,))
-    if row is None:
-        return default
-    return _decrypt_setting_value(setting_key, row["value"])
+def get_setting(setting_key: str) -> Optional[str]:
+    """Get a setting value by key."""
+    row = query_one("SELECT setting_value FROM user_settings WHERE setting_key = ?", (setting_key,))
+    return row["setting_value"] if row else None
 
 
-def get_all_settings() -> Dict[str, Optional[str]]:
-    """Get all settings as a key/value dictionary."""
-    rows = query("SELECT key, value FROM settings ORDER BY key")
+def get_setting_metadata(setting_key: str) -> Dict[str, Optional[str]]:
+    """Get token validation metadata for a setting key."""
+    row = query_one(
+        """SELECT last_validated_at, validation_status, last_error
+        FROM user_settings
+        WHERE setting_key = ?""",
+        (setting_key,)
+    )
+    if not row:
+        return {
+            "last_validated_at": None,
+            "validation_status": None,
+            "last_error": None,
+        }
+
     return {
-        row["key"]: _decrypt_setting_value(row["key"], row["value"])
-        for row in rows
+        "last_validated_at": row["last_validated_at"],
+        "validation_status": row["validation_status"],
+        "last_error": row["last_error"],
     }
 
 
-def get_settings_by_prefix(prefix: str) -> Dict[str, Optional[str]]:
-    """Get settings with keys starting with the given prefix."""
+def update_setting_metadata(
+    setting_key: str,
+    validation_status: str,
+    last_error: Optional[str] = None,
+    last_validated_at: Optional[str] = None
+) -> int:
+    """Update token metadata for an existing setting key."""
+    if last_validated_at is None:
+        last_validated_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+    return execute(
+        """UPDATE user_settings
+        SET
+            last_validated_at = ?,
+            validation_status = ?,
+            last_error = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE setting_key = ?""",
+        (last_validated_at, validation_status, last_error, setting_key)
+    )
+
+
+def get_settings_by_prefix(prefix: str) -> Dict[str, str]:
+    """Get all settings that start with the given prefix."""
     rows = query(
-        "SELECT key, value FROM settings WHERE key LIKE ? ORDER BY key",
-        (f"{prefix}%",),
+        """SELECT setting_key, setting_value
+        FROM user_settings
+        WHERE setting_key LIKE ?
+        ORDER BY setting_key""",
+        (f"{prefix}%",)
     )
-    return {
-        row["key"]: _decrypt_setting_value(row["key"], row["value"])
-        for row in rows
-    }
+    return {row["setting_key"]: row["setting_value"] for row in rows}
+
+
+def get_all_settings() -> Dict[str, str]:
+    """Get all settings."""
+    rows = query("SELECT setting_key, setting_value FROM user_settings ORDER BY setting_key")
+    return {row["setting_key"]: row["setting_value"] for row in rows}
 
 
 # ==============================================================================
