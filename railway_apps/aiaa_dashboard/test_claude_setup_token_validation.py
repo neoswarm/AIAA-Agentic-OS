@@ -54,6 +54,7 @@ def test_validate_setup_token_returns_unsupported_without_rest_probe(
     monkeypatch, token
 ):
     monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "false")
+    monkeypatch.delenv("CHAT_BACKEND", raising=False)
 
     def _unexpected_get(*args, **kwargs):
         raise AssertionError(
@@ -74,6 +75,7 @@ def test_validate_setup_token_returns_unknown_when_gateway_mode_enabled(
     monkeypatch, token
 ):
     monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "true")
+    monkeypatch.delenv("CHAT_BACKEND", raising=False)
 
     def _unexpected_get(*args, **kwargs):
         raise AssertionError(
@@ -86,7 +88,26 @@ def test_validate_setup_token_returns_unknown_when_gateway_mode_enabled(
 
     assert result["status"] == "unknown"
     assert result["http_status"] is None
-    assert "format accepted" in result["message"].lower()
+    assert "gateway mode" in result["message"].lower()
+
+
+@pytest.mark.parametrize("token", [SETUP_TOKEN_JWT, SETUP_TOKEN_OAT])
+def test_validate_setup_token_skips_hard_block_for_gateway_backend(monkeypatch, token):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "false")
+    monkeypatch.setenv("CHAT_BACKEND", "gateway")
+
+    def _unexpected_get(*args, **kwargs):
+        raise AssertionError(
+            "REST endpoint should not be called for setup-token artifacts"
+        )
+
+    monkeypatch.setattr(chat_routes.http_requests, "get", _unexpected_get)
+
+    result = chat_routes.validate_claude_token(token)
+
+    assert result["status"] == "unknown"
+    assert result["http_status"] is None
+    assert "gateway mode" in result["message"].lower()
 
 
 def test_validate_non_setup_token_keeps_rest_behavior(monkeypatch):
@@ -108,6 +129,8 @@ def test_save_token_rejects_setup_token_with_unsupported_validation(
     auth_client, app, monkeypatch, token
 ):
     monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "false")
+    monkeypatch.delenv("CHAT_BACKEND", raising=False)
+    app.config.pop("CHAT_BACKEND", None)
     monkeypatch.setattr(chat_routes, "_persist_to_railway_async", lambda *_: False)
     monkeypatch.setattr(chat_routes, "init_chat_runner", lambda *_: None)
 
@@ -127,6 +150,29 @@ def test_save_token_accepts_setup_token_when_gateway_mode_enabled(
     auth_client, app, monkeypatch, token
 ):
     monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "true")
+    monkeypatch.delenv("CHAT_BACKEND", raising=False)
+    app.config.pop("CHAT_BACKEND", None)
+    monkeypatch.setattr(chat_routes, "_persist_to_railway_async", lambda *_: False)
+    monkeypatch.setattr(chat_routes, "init_chat_runner", lambda *_: None)
+
+    resp = auth_client.post("/api/chat/token", json={"token": token})
+
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["status"] == "ok"
+    assert body["validation"] == "unknown"
+
+    with app.app_context():
+        assert models.get_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY) == token
+
+
+@pytest.mark.parametrize("token", [SETUP_TOKEN_JWT, SETUP_TOKEN_OAT])
+def test_save_token_accepts_setup_token_when_backend_gateway(
+    auth_client, app, monkeypatch, token
+):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "false")
+    monkeypatch.delenv("CHAT_BACKEND", raising=False)
+    monkeypatch.setitem(app.config, "CHAT_BACKEND", "gateway")
     monkeypatch.setattr(chat_routes, "_persist_to_railway_async", lambda *_: False)
     monkeypatch.setattr(chat_routes, "init_chat_runner", lambda *_: None)
 
@@ -146,6 +192,8 @@ def test_chat_endpoints_block_unsupported_setup_token(
     auth_client, app, endpoint, monkeypatch
 ):
     monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "false")
+    monkeypatch.delenv("CHAT_BACKEND", raising=False)
+    app.config.pop("CHAT_BACKEND", None)
     with app.app_context():
         models.set_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY, SETUP_TOKEN_OAT)
 
@@ -165,10 +213,60 @@ def test_create_session_allows_setup_token_when_gateway_mode_enabled(
     auth_client, app, monkeypatch
 ):
     monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "true")
+    monkeypatch.delenv("CHAT_BACKEND", raising=False)
+    app.config.pop("CHAT_BACKEND", None)
+
+    class _Runner:
+        def ensure_session(self, *_args, **_kwargs):
+            return None
+
+    monkeypatch.setattr(chat_routes, "_get_runner", lambda: _Runner())
+
     with app.app_context():
         models.set_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY, SETUP_TOKEN_OAT)
 
-    resp = auth_client.post("/api/chat/sessions", json={})
+    resp = auth_client.post("/api/chat/sessions", json={"title": "Flag chat"})
     assert resp.status_code == 201
     body = resp.get_json()
     assert body["status"] == "ok"
+    assert body["session"]["title"] == "Flag chat"
+
+
+def test_create_session_does_not_hard_block_setup_token_for_gateway(
+    auth_client, app, monkeypatch
+):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "false")
+    monkeypatch.setitem(app.config, "CHAT_BACKEND", "gateway")
+
+    class _Runner:
+        def ensure_session(self, *_args, **_kwargs):
+            return None
+
+    monkeypatch.setattr(chat_routes, "_get_runner", lambda: _Runner())
+
+    with app.app_context():
+        models.set_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY, SETUP_TOKEN_OAT)
+
+    resp = auth_client.post("/api/chat/sessions", json={"title": "Gateway chat"})
+
+    assert resp.status_code == 201
+    body = resp.get_json()
+    assert body["status"] == "ok"
+    assert body["session"]["title"] == "Gateway chat"
+
+
+def test_send_message_does_not_hard_block_setup_token_for_gateway(auth_client, app, monkeypatch):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "false")
+    monkeypatch.setitem(app.config, "CHAT_BACKEND", "gateway")
+    with app.app_context():
+        models.set_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY, SETUP_TOKEN_OAT)
+
+    resp = auth_client.post(
+        "/api/chat/message",
+        json={"session_id": "missing-session", "message": "hello"},
+    )
+
+    assert resp.status_code == 404
+    body = resp.get_json()
+    assert body["status"] == "error"
+    assert "gateway mode is disabled" not in body["message"].lower()

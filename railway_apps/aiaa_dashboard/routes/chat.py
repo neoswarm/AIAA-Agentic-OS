@@ -23,6 +23,7 @@ from flask import (
     Blueprint,
     Response,
     current_app,
+    has_app_context,
     jsonify,
     redirect,
     render_template,
@@ -201,26 +202,41 @@ def _is_gateway_mode_enabled() -> bool:
     return raw_value in {"1", "true", "yes", "on"}
 
 
+def _chat_backend() -> str:
+    if has_app_context():
+        configured = (current_app.config.get("CHAT_BACKEND") or "").strip()
+        if configured:
+            return configured.lower()
+    return (os.getenv("CHAT_BACKEND", "") or "").strip().lower()
+
+
+def _is_setup_token_hard_blocked() -> bool:
+    if _is_gateway_mode_enabled():
+        return False
+    return _chat_backend() != "gateway"
+
+
 def validate_claude_token(token: str) -> Dict[str, Any]:
     """Validate Claude token with compatible checks.
 
-    setup-token / OAuth artifacts are only accepted when gateway mode is enabled.
+    setup-token / OAuth artifacts are only accepted when gateway mode is enabled,
+    either via feature flag or gateway backend.
     """
     candidate = (token or "").strip()
     if not candidate:
         return {"status": "invalid", "http_status": None, "message": "Missing token"}
 
-    if _looks_like_setup_token(candidate):
-        if _is_gateway_mode_enabled():
-            return {
-                "status": "unknown",
-                "http_status": None,
-                "message": "Setup token format accepted. Full validity is confirmed on first agent run.",
-            }
+    if _looks_like_setup_token(candidate) and _is_setup_token_hard_blocked():
         return {
             "status": "unsupported",
             "http_status": None,
             "message": _unsupported_setup_token_message(),
+        }
+    if _looks_like_setup_token(candidate):
+        return {
+            "status": "unknown",
+            "http_status": None,
+            "message": "Setup token accepted for gateway mode; direct Anthropic validation skipped.",
         }
 
     headers = {"Accept": "application/json"}
@@ -469,7 +485,7 @@ def create_session():
             jsonify({"status": "error", "message": "Claude token not configured"}),
             400,
         )
-    if _looks_like_setup_token(token) and not _is_gateway_mode_enabled():
+    if _looks_like_setup_token(token) and _is_setup_token_hard_blocked():
         _log_chat_session_lifecycle(
             action="create",
             status="error",
@@ -519,7 +535,7 @@ def send_message():
             jsonify({"status": "error", "message": "Claude token not configured"}),
             400,
         )
-    if _looks_like_setup_token(token) and not _is_gateway_mode_enabled():
+    if _looks_like_setup_token(token) and _is_setup_token_hard_blocked():
         _log_chat_session_lifecycle(
             action="send_message",
             status="error",
