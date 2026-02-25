@@ -213,6 +213,12 @@ WEBHOOK_TIMEOUT_SECONDS = 30
 - ✅ No breaking changes to existing webhooks
 - ✅ Can gradually migrate old code to use webhook_service.py
 
+### Default Backend Rollout Strategy
+- ✅ Default path (no `REDIS_URL`): keep `InMemoryChatStore` with 1 Gunicorn worker for safe single-process session consistency
+- ✅ Opt-in path (`REDIS_URL` set): enable `RedisChatStore` and allow 2 Gunicorn workers for multi-worker scaling
+- ✅ Migration plan: roll out Redis per environment by setting `REDIS_URL`; rollback is immediate by unsetting it
+- ✅ No code migration required for rollout/rollback; behavior is controlled by environment configuration only
+
 ### Database Schema
 All webhook operations use existing `workflows` table:
 - `type = "webhook"`
