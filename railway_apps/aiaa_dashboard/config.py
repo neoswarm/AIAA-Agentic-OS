@@ -15,6 +15,11 @@ class Config:
     # Flask Configuration
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", secrets.token_hex(32))
     CHAT_TOKEN_ENCRYPTION_KEY = os.getenv("CHAT_TOKEN_ENCRYPTION_KEY", "")
+    CHAT_BACKEND = os.getenv("CHAT_BACKEND", "provider").strip().lower()
+    GATEWAY_BASE_URL = os.getenv("GATEWAY_BASE_URL", "")
+    GATEWAY_API_KEY = os.getenv("GATEWAY_API_KEY", "")
+    SUPPORTED_CHAT_BACKENDS = ("provider", "gateway")
+    GATEWAY_REQUIRED_ENV_VARS = ("GATEWAY_BASE_URL", "GATEWAY_API_KEY")
     
     # Dashboard Authentication
     DASHBOARD_USERNAME = os.getenv("DASHBOARD_USERNAME", "admin")
@@ -34,6 +39,9 @@ class Config:
     
     # Tracked Environment Variables
     TRACKED_ENV_VARS = [
+        "CHAT_BACKEND",
+        "GATEWAY_BASE_URL",
+        "GATEWAY_API_KEY",
         "OPENROUTER_API_KEY",
         "PERPLEXITY_API_KEY",
         "SLACK_WEBHOOK_URL",
@@ -147,6 +155,20 @@ class Config:
             issues.append("CHAT_TOKEN_ENCRYPTION_KEY is not set - chat token encryption is insecure!")
         elif len(cls.CHAT_TOKEN_ENCRYPTION_KEY) < 32:
             issues.append("CHAT_TOKEN_ENCRYPTION_KEY must be at least 32 characters long")
+
+        chat_backend = (cls.get_env_var_value("CHAT_BACKEND") or cls.CHAT_BACKEND or "provider").strip().lower()
+        if chat_backend not in cls.SUPPORTED_CHAT_BACKENDS:
+            supported = ", ".join(cls.SUPPORTED_CHAT_BACKENDS)
+            issues.append(f"CHAT_BACKEND must be one of: {supported}")
+        elif chat_backend == "gateway":
+            missing_gateway_vars = [
+                var for var in cls.GATEWAY_REQUIRED_ENV_VARS if not cls.get_env_var_value(var)
+            ]
+            if missing_gateway_vars:
+                issues.append(
+                    "CHAT_BACKEND is set to 'gateway' but missing required env vars: "
+                    + ", ".join(missing_gateway_vars)
+                )
         
         if not cls.RAILWAY_API_TOKEN:
             warnings.append("RAILWAY_API_TOKEN not set - Railway features disabled")
