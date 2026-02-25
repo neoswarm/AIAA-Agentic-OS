@@ -130,6 +130,37 @@ def _login_required_api(f):
     return decorated
 
 
+def _api_key_authorized() -> bool:
+    expected_key = (os.getenv("DASHBOARD_API_KEY") or "").strip()
+    if not expected_key:
+        return False
+
+    provided_key = (request.headers.get("X-API-Key") or "").strip()
+    if provided_key and secrets.compare_digest(provided_key, expected_key):
+        return True
+
+    auth_header = (request.headers.get("Authorization") or "").strip()
+    if auth_header.lower().startswith("bearer "):
+        bearer = auth_header[7:].strip()
+        if bearer and secrets.compare_digest(bearer, expected_key):
+            return True
+
+    return False
+
+
+def _login_or_api_key_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if session.get("logged_in") or _api_key_authorized():
+            return f(*args, **kwargs)
+        response = jsonify({"error": {"message": "Authentication required"}})
+        response.status_code = 401
+        response.headers["WWW-Authenticate"] = "Bearer"
+        return response
+
+    return decorated
+
+
 def _project_root() -> str:
     configured = current_app.config.get("PROJECT_ROOT")
     if configured:
@@ -312,6 +343,49 @@ def _persist_to_railway_async(variables: Dict[str, str]) -> bool:
 def _derive_title(message: str) -> str:
     first_line = (message or "").strip().splitlines()[0] if message else "New chat"
     return (first_line[:57] + "...") if len(first_line) > 60 else first_line
+
+
+def _extract_response_input_text(raw_input: Any) -> str:
+    chunks: list[str] = []
+
+    def _collect(value: Any) -> None:
+        if isinstance(value, str):
+            text = value.strip()
+            if text:
+                chunks.append(text)
+            return
+        if isinstance(value, list):
+            for item in value:
+                _collect(item)
+            return
+        if isinstance(value, dict):
+            # Responses input may be text blocks or message-like structures.
+            for key in ("text", "content", "message", "value"):
+                if key in value:
+                    _collect(value.get(key))
+
+    _collect(raw_input)
+    return "\n".join(chunks).strip()
+
+
+def _parse_runner_sse_event(raw_event: str) -> dict[str, Any] | None:
+    for line in (raw_event or "").splitlines():
+        if not line.startswith("data:"):
+            continue
+        payload = line[5:].strip()
+        if not payload or payload == "[DONE]":
+            continue
+        try:
+            parsed = json.loads(payload)
+        except json.JSONDecodeError:
+            return None
+        if isinstance(parsed, dict):
+            return parsed
+    return None
+
+
+def _format_sse_data(payload: dict[str, Any]) -> str:
+    return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
 
 
 def init_chat_store(app=None) -> ChatStore:
@@ -553,6 +627,183 @@ def stream_response(session_id: str):
 
     response = Response(
         stream_with_context(runner.get_stream(session_id)),
+        mimetype="text/event-stream",
+    )
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["X-Accel-Buffering"] = "no"
+    response.headers["Connection"] = "keep-alive"
+    return response
+
+
+@chat_bp.route("/v1/responses", methods=["POST"])
+@_login_or_api_key_required
+def create_response():
+    """OpenAI-style Responses endpoint with stream mode over SSE."""
+    token = get_claude_token()
+    if not token:
+        return jsonify({"error": {"message": "Claude token not configured"}}), 400
+    if _looks_like_setup_token(token):
+        return jsonify({"error": {"message": _unsupported_setup_token_message()}}), 400
+
+    payload = request.get_json(silent=True) or {}
+    if not bool(payload.get("stream")):
+        return (
+            jsonify(
+                {
+                    "error": {
+                        "message": "Only stream=true is currently supported on /v1/responses"
+                    }
+                }
+            ),
+            400,
+        )
+
+    prompt_text = _extract_response_input_text(payload.get("input"))
+    if not prompt_text:
+        return jsonify({"error": {"message": "input is required"}}), 400
+
+    model = str(payload.get("model") or "claude-agent")
+    store = _get_chat_store()
+    runner = _get_runner()
+    session_id = secrets.token_hex(16)
+    response_id = f"resp_{secrets.token_hex(12)}"
+    created_ts = int(time.time())
+
+    session_obj = store.create_session(
+        session_id,
+        title=_derive_title(prompt_text),
+        status="idle",
+    )
+    store.append_message(
+        session_id,
+        {
+            "role": "user",
+            "content": prompt_text,
+            "type": "message",
+            "metadata": {"source": "v1.responses"},
+        },
+        session_updates={"status": "running", "last_error": None},
+    )
+    runner.ensure_session(
+        session_id,
+        title=session_obj.get("title"),
+        sdk_session_id=session_obj.get("sdk_session_id"),
+    )
+
+    try:
+        runner.send_message(session_id=session_id, user_message=prompt_text)
+    except ValueError as exc:
+        store.update_session(session_id, {"status": "idle", "last_error": str(exc)})
+        return jsonify({"error": {"message": str(exc)}}), 400
+    except RunnerError as exc:
+        store.update_session(session_id, {"status": "error", "last_error": str(exc)})
+        return jsonify({"error": {"message": str(exc)}}), 409
+    except Exception as exc:
+        message = f"Failed to send message: {exc}"
+        store.update_session(session_id, {"status": "error", "last_error": message})
+        return jsonify({"error": {"message": message}}), 500
+
+    def responses_sse():
+        text_parts: list[str] = []
+        yield _format_sse_data(
+            {
+                "type": "response.created",
+                "response": {
+                    "id": response_id,
+                    "object": "response",
+                    "created": created_ts,
+                    "model": model,
+                    "status": "in_progress",
+                    "output": [],
+                },
+            }
+        )
+
+        for raw_event in runner.get_stream(session_id):
+            event = _parse_runner_sse_event(raw_event)
+            if not event:
+                continue
+
+            event_type = str(event.get("type") or "")
+            if event_type in ("ping", "tool_use", "tool_result", "system"):
+                continue
+
+            if event_type in ("text", "result"):
+                chunk = str(event.get("content") or "")
+                if not chunk:
+                    continue
+                text_parts.append(chunk)
+                yield _format_sse_data(
+                    {
+                        "type": "response.output_text.delta",
+                        "response_id": response_id,
+                        "output_index": 0,
+                        "content_index": 0,
+                        "delta": chunk,
+                    }
+                )
+                continue
+
+            if event_type == "error":
+                message = str(event.get("content") or "Agent execution failed")
+                yield _format_sse_data(
+                    {
+                        "type": "response.failed",
+                        "response": {
+                            "id": response_id,
+                            "object": "response",
+                            "created": created_ts,
+                            "model": model,
+                            "status": "failed",
+                            "error": {"message": message},
+                        },
+                    }
+                )
+                yield "data: [DONE]\n\n"
+                return
+
+            if event_type == "done":
+                break
+
+        final_text = "".join(text_parts)
+        yield _format_sse_data(
+            {
+                "type": "response.output_text.done",
+                "response_id": response_id,
+                "output_index": 0,
+                "content_index": 0,
+                "text": final_text,
+            }
+        )
+        yield _format_sse_data(
+            {
+                "type": "response.completed",
+                "response": {
+                    "id": response_id,
+                    "object": "response",
+                    "created": created_ts,
+                    "model": model,
+                    "status": "completed",
+                    "output": [
+                        {
+                            "type": "message",
+                            "role": "assistant",
+                            "content": [
+                                {
+                                    "type": "output_text",
+                                    "text": final_text,
+                                    "annotations": [],
+                                }
+                            ],
+                        }
+                    ],
+                },
+            }
+        )
+        yield "data: [DONE]\n\n"
+
+    response = Response(
+        stream_with_context(responses_sse()),
         mimetype="text/event-stream",
     )
     response.headers["Cache-Control"] = "no-cache"

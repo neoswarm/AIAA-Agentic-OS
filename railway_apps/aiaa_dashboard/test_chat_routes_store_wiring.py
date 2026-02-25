@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import tempfile
 from typing import Any
@@ -346,3 +347,86 @@ def test_stream_uses_store_for_session_lookup(auth_client, monkeypatch):
     assert b'"type":"done"' in resp.data
     assert ("get_session", "s-4") in store.calls
     assert ("ensure_session", "s-4") in runner.calls
+
+
+def test_v1_responses_stream_requires_auth(app):
+    client = app.test_client()
+    resp = client.post("/v1/responses", json={"input": "hi", "stream": True})
+    assert resp.status_code == 401
+    assert resp.headers["WWW-Authenticate"] == "Bearer"
+
+
+def test_v1_responses_stream_returns_sse_events(auth_client, monkeypatch):
+    store = FakeStore()
+    runner = FakeRunner()
+
+    def fake_stream(session_id: str):
+        runner.calls.append(("get_stream", session_id))
+        yield 'data: {"type":"text","content":"Hello"}\n\n'
+        yield 'data: {"type":"done"}\n\n'
+
+    monkeypatch.setattr(chat_routes, "_get_chat_store", lambda: store)
+    monkeypatch.setattr(chat_routes, "_get_runner", lambda: runner)
+    monkeypatch.setattr(chat_routes, "get_claude_token", lambda: "sk-ant-test-token")
+    monkeypatch.setattr(runner, "get_stream", fake_stream)
+
+    token_values = iter(["session-v1-1", "response-v1-1"])
+    monkeypatch.setattr(chat_routes.secrets, "token_hex", lambda _: next(token_values))
+
+    resp = auth_client.post(
+        "/v1/responses",
+        json={"model": "claude-3-7-sonnet", "input": "Say hello", "stream": True},
+    )
+    assert resp.status_code == 200
+    assert resp.mimetype == "text/event-stream"
+
+    payloads = []
+    for line in resp.get_data(as_text=True).splitlines():
+        if not line.startswith("data: "):
+            continue
+        chunk = line[6:]
+        if chunk == "[DONE]":
+            payloads.append(chunk)
+            continue
+        payloads.append(json.loads(chunk))
+
+    assert payloads[-1] == "[DONE]"
+    typed_events = [event for event in payloads if isinstance(event, dict)]
+    assert typed_events[0]["type"] == "response.created"
+    assert typed_events[-1]["type"] == "response.completed"
+    assert any(
+        event.get("type") == "response.output_text.delta" and event.get("delta") == "Hello"
+        for event in typed_events
+    )
+    assert ("create_session", "session-v1-1") in store.calls
+    assert ("send_message", "session-v1-1", "Say hello") in runner.calls
+
+
+def test_v1_responses_stream_accepts_bearer_api_key(app, monkeypatch):
+    store = FakeStore()
+    runner = FakeRunner()
+    monkeypatch.setenv("DASHBOARD_API_KEY", "dashboard-key-123")
+
+    monkeypatch.setattr(chat_routes, "_get_chat_store", lambda: store)
+    monkeypatch.setattr(chat_routes, "_get_runner", lambda: runner)
+    monkeypatch.setattr(chat_routes, "get_claude_token", lambda: "sk-ant-test-token")
+
+    client = app.test_client()
+    resp = client.post(
+        "/v1/responses",
+        headers={"Authorization": "Bearer dashboard-key-123"},
+        json={"input": "hi", "stream": True},
+    )
+    assert resp.status_code == 200
+    assert resp.mimetype == "text/event-stream"
+
+
+def test_v1_responses_rejects_non_stream_mode(auth_client, monkeypatch):
+    monkeypatch.setattr(chat_routes, "get_claude_token", lambda: "sk-ant-test-token")
+    resp = auth_client.post(
+        "/v1/responses",
+        json={"input": "hi", "stream": False},
+    )
+    assert resp.status_code == 400
+    payload = resp.get_json()
+    assert "stream=true" in payload["error"]["message"]
