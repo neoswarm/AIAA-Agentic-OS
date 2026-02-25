@@ -9,4 +9,11 @@ from .api_v2 import api_v2_bp
 from .views import views_bp
 from .chat import chat_bp, init_chat_runner
 
-__all__ = ["api_bp", "api_v1_bp", "api_v2_bp", "views_bp"]
+__all__ = [
+    "api_bp",
+    "api_v1_bp",
+    "api_v2_bp",
+    "views_bp",
+    "chat_bp",
+    "init_chat_runner",
+]
