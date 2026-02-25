@@ -10,6 +10,7 @@ import hashlib
 import hmac
 import logging
 import threading
+import uuid
 from datetime import datetime, timedelta
 from functools import wraps
 from pathlib import Path
@@ -37,6 +38,8 @@ from .health_utils import get_chat_subsystem_readiness
 
 views_bp = Blueprint('views', __name__)
 logger = logging.getLogger(__name__)
+CORRELATION_HEADER = "X-Correlation-ID"
+REQUEST_ID_HEADER = "X-Request-ID"
 
 
 # =============================================================================
@@ -104,6 +107,16 @@ def send_slack_message(text: str, blocks=None) -> bool:
 def get_base_url():
     """Get base URL for webhooks."""
     return request.host_url.rstrip('/')
+
+
+def get_request_correlation_id() -> str:
+    """Get correlation ID from request headers, creating one when absent."""
+    incoming = (
+        request.headers.get(CORRELATION_HEADER)
+        or request.headers.get(REQUEST_ID_HEADER)
+        or ""
+    ).strip()
+    return incoming or uuid.uuid4().hex
 
 
 def get_username():
@@ -871,6 +884,8 @@ def webhook_handler(slug):
     # POST - handle webhook
     payload = request.get_json() or {}
     headers = dict(request.headers)
+    correlation_id = get_request_correlation_id()
+    headers[CORRELATION_HEADER] = correlation_id
     
     # Log webhook call to database
     webhook_log_id = models.log_webhook_call(
@@ -884,14 +899,31 @@ def webhook_handler(slug):
     
     if not workflow:
         models.complete_webhook_log(webhook_log_id, 404, "Webhook not found")
-        return jsonify({"error": "Webhook not found", "slug": slug}), 404
+        response = jsonify({
+            "error": "Webhook not found",
+            "slug": slug,
+            "correlation_id": correlation_id,
+        })
+        response.headers[CORRELATION_HEADER] = correlation_id
+        return response, 404
     
     if workflow['status'] != 'active':
         models.complete_webhook_log(webhook_log_id, 403, "Webhook disabled")
-        return jsonify({"error": "Webhook disabled", "slug": slug}), 403
+        response = jsonify({
+            "error": "Webhook disabled",
+            "slug": slug,
+            "correlation_id": correlation_id,
+        })
+        response.headers[CORRELATION_HEADER] = correlation_id
+        return response, 403
     
     # Handle webhook
-    result = {"status": "received", "webhook": slug, "timestamp": datetime.utcnow().isoformat()}
+    result = {
+        "status": "received",
+        "webhook": slug,
+        "timestamp": datetime.utcnow().isoformat(),
+        "correlation_id": correlation_id,
+    }
     
     # Forward to external URL if configured
     forward_url = workflow.get('forward_url')
@@ -900,7 +932,11 @@ def webhook_handler(slug):
             resp = http_requests.post(
                 forward_url,
                 json=payload,
-                headers={"Content-Type": "application/json"},
+                headers={
+                    "Content-Type": "application/json",
+                    CORRELATION_HEADER: correlation_id,
+                    REQUEST_ID_HEADER: correlation_id,
+                },
                 timeout=30
             )
             result["forwarded"] = True
@@ -927,11 +963,13 @@ def webhook_handler(slug):
     models.log_event(
         event_type=f"webhook:{slug}",
         status="success",
-        data={"payload_size": len(json.dumps(payload))},
+        data={"payload_size": len(json.dumps(payload)), "correlation_id": correlation_id},
         source="webhook"
     )
     
-    return jsonify(result), 200
+    response = jsonify(result)
+    response.headers[CORRELATION_HEADER] = correlation_id
+    return response, 200
 
 
 # =============================================================================
