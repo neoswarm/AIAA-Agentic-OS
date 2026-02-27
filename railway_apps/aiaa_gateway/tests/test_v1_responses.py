@@ -6,6 +6,8 @@ from pathlib import Path
 import sys
 from typing import Any
 
+import pytest
+
 
 APP_DIR = Path(__file__).resolve().parents[1]
 if str(APP_DIR) not in sys.path:
@@ -27,6 +29,11 @@ class FakeResponse:
 
     def json(self) -> dict[str, Any] | list[Any]:
         return self._body
+
+
+@pytest.fixture(autouse=True)
+def _set_required_encryption_key(monkeypatch):
+    monkeypatch.setenv("CHAT_TOKEN_ENCRYPTION_KEY", "gateway-startup-test-key")
 
 
 def _make_client():
