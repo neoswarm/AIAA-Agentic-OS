@@ -140,6 +140,30 @@ def log_session_lifecycle(action: str, username: str, status: str):
     logger.info(json.dumps(payload, sort_keys=True))
 
 
+def log_webhook_lifecycle(
+    action: str,
+    status: str,
+    slug: str,
+    correlation_id: str,
+    **details,
+):
+    """Emit a structured JSON log for webhook lifecycle events."""
+    forwarded_for = request.headers.get("X-Forwarded-For", "")
+    ip_address = forwarded_for.split(",")[0].strip() if forwarded_for else request.remote_addr
+    payload = {
+        "event": "webhook_lifecycle",
+        "action": action,
+        "status": status,
+        "slug": slug,
+        "correlation_id": correlation_id,
+        "ip": ip_address,
+        "method": request.method,
+        "path": request.path,
+    }
+    payload.update(details)
+    logger.info(json.dumps(payload, sort_keys=True))
+
+
 def persist_to_railway(variables: dict):
     """Persist environment variables to Railway via GraphQL API.
 
@@ -886,6 +910,13 @@ def webhook_handler(slug):
     headers = dict(request.headers)
     correlation_id = get_request_correlation_id()
     headers[CORRELATION_HEADER] = correlation_id
+    log_webhook_lifecycle(
+        action="received",
+        status="accepted",
+        slug=slug,
+        correlation_id=correlation_id,
+        payload_size=len(json.dumps(payload)),
+    )
     
     # Log webhook call to database
     webhook_log_id = models.log_webhook_call(
@@ -898,6 +929,13 @@ def webhook_handler(slug):
     workflow = models.get_workflow_by_slug(slug)
     
     if not workflow:
+        log_webhook_lifecycle(
+            action="lookup",
+            status="error",
+            slug=slug,
+            correlation_id=correlation_id,
+            reason="not_found",
+        )
         models.complete_webhook_log(webhook_log_id, 404, "Webhook not found")
         response = jsonify({
             "error": "Webhook not found",
@@ -908,6 +946,13 @@ def webhook_handler(slug):
         return response, 404
     
     if workflow['status'] != 'active':
+        log_webhook_lifecycle(
+            action="lookup",
+            status="error",
+            slug=slug,
+            correlation_id=correlation_id,
+            reason="disabled",
+        )
         models.complete_webhook_log(webhook_log_id, 403, "Webhook disabled")
         response = jsonify({
             "error": "Webhook disabled",
@@ -942,9 +987,25 @@ def webhook_handler(slug):
             result["forwarded"] = True
             result["forward_status"] = resp.status_code
             result["forward_response"] = resp.text[:500]  # Truncate
+            log_webhook_lifecycle(
+                action="forward",
+                status="success",
+                slug=slug,
+                correlation_id=correlation_id,
+                forward_url=forward_url,
+                forward_status=resp.status_code,
+            )
         except Exception as e:
             result["forwarded"] = False
             result["forward_error"] = str(e)
+            log_webhook_lifecycle(
+                action="forward",
+                status="error",
+                slug=slug,
+                correlation_id=correlation_id,
+                forward_url=forward_url,
+                reason=str(e),
+            )
     
     # Send Slack notification if enabled
     if workflow.get('slack_notify'):

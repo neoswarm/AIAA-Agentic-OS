@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import json
+import logging
 import os
+import uuid
 from datetime import UTC, datetime
 from typing import Any
 
 import requests as http_requests
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, current_app, g, jsonify, request
 
 from .services.responses_service import (
     build_anthropic_messages_payload,
@@ -15,6 +18,47 @@ from .services.responses_service import (
 )
 
 gateway_bp = Blueprint("gateway", __name__)
+logger = logging.getLogger(__name__)
+CORRELATION_HEADER = "X-Correlation-ID"
+REQUEST_ID_HEADER = "X-Request-ID"
+
+
+def _resolve_correlation_id() -> str:
+    incoming = (
+        request.headers.get(CORRELATION_HEADER)
+        or request.headers.get(REQUEST_ID_HEADER)
+        or ""
+    ).strip()
+    return incoming or uuid.uuid4().hex
+
+
+def get_correlation_id() -> str:
+    return str(getattr(g, "correlation_id", "") or "")
+
+
+@gateway_bp.before_request
+def _assign_correlation_id() -> None:
+    g.correlation_id = _resolve_correlation_id()
+
+
+@gateway_bp.after_request
+def _add_correlation_header(response):
+    correlation_id = get_correlation_id()
+    if correlation_id:
+        response.headers[CORRELATION_HEADER] = correlation_id
+    return response
+
+
+def _log_gateway_event(event: str, status: str, **details: Any) -> None:
+    payload: dict[str, Any] = {
+        "event": event,
+        "status": status,
+        "path": request.path,
+        "method": request.method,
+        "correlation_id": get_correlation_id(),
+    }
+    payload.update(details)
+    logger.info(json.dumps(payload, sort_keys=True))
 
 
 def _json_error(
@@ -32,6 +76,9 @@ def _json_error(
     }
     if details:
         payload["error"]["details"] = details
+    correlation_id = get_correlation_id()
+    if correlation_id:
+        payload["correlation_id"] = correlation_id
     return jsonify(payload), status_code
 
 
@@ -62,6 +109,7 @@ def index():
 
 @gateway_bp.get("/health")
 def health():
+    _log_gateway_event("gateway.health", "success")
     return jsonify(
         {
             "service": current_app.config["SERVICE_NAME"],
@@ -74,11 +122,14 @@ def health():
 @gateway_bp.post("/v1/responses")
 def create_response():
     """OpenAI-compatible responses endpoint (non-stream mode only)."""
+    _log_gateway_event("gateway.responses", "received")
     body = request.get_json(silent=True)
     if not isinstance(body, dict):
+        _log_gateway_event("gateway.responses", "error", reason="invalid_json_body")
         return _json_error("Request body must be a JSON object.", 400)
 
     if body.get("stream") is True:
+        _log_gateway_event("gateway.responses", "error", reason="stream_not_supported")
         return _json_error(
             "stream=true is not supported on POST /v1/responses in non-stream mode.",
             400,
@@ -91,16 +142,21 @@ def create_response():
             default_max_tokens=int(current_app.config["DEFAULT_MAX_OUTPUT_TOKENS"]),
         )
     except ValueError as exc:
+        _log_gateway_event(
+            "gateway.responses", "error", reason="invalid_request", detail=str(exc)
+        )
         return _json_error(str(exc), 400)
 
     api_key = _resolve_anthropic_api_key()
     if not api_key:
+        _log_gateway_event("gateway.responses", "error", reason="missing_api_key")
         return _json_error(
             "Missing Anthropic API key.",
             401,
             error_type="authentication_error",
         )
 
+    correlation_id = get_correlation_id()
     base_url = str(current_app.config["ANTHROPIC_BASE_URL"]).rstrip("/")
     timeout_seconds = float(current_app.config["UPSTREAM_REQUEST_TIMEOUT_SECONDS"])
     headers = {
@@ -109,6 +165,9 @@ def create_response():
         "content-type": "application/json",
         "accept": "application/json",
     }
+    if correlation_id:
+        headers[CORRELATION_HEADER] = correlation_id
+        headers[REQUEST_ID_HEADER] = correlation_id
 
     try:
         upstream_response = http_requests.post(
@@ -118,6 +177,12 @@ def create_response():
             timeout=timeout_seconds,
         )
     except http_requests.RequestException as exc:
+        _log_gateway_event(
+            "gateway.responses",
+            "error",
+            reason="upstream_request_failed",
+            detail=str(exc),
+        )
         return _json_error(
             f"Upstream provider request failed: {exc}",
             502,
@@ -133,6 +198,12 @@ def create_response():
             details = {
                 "body": upstream_response.text.strip() or "Unknown upstream error"
             }
+        _log_gateway_event(
+            "gateway.responses",
+            "error",
+            reason="upstream_error",
+            upstream_status=upstream_response.status_code,
+        )
         return _json_error(
             "Upstream provider returned an error.",
             502,
@@ -150,6 +221,11 @@ def create_response():
         )
 
     if not isinstance(upstream_json, dict):
+        _log_gateway_event(
+            "gateway.responses",
+            "error",
+            reason="upstream_invalid_payload_type",
+        )
         return _json_error(
             "Upstream provider returned invalid payload.",
             502,
@@ -160,4 +236,5 @@ def create_response():
         upstream_payload=upstream_json,
         requested_model=str(upstream_payload["model"]),
     )
+    _log_gateway_event("gateway.responses", "success")
     return jsonify(response_payload)

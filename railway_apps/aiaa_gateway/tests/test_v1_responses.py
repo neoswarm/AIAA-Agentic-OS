@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import logging
 from pathlib import Path
 import sys
 from typing import Any
@@ -40,6 +42,18 @@ def _make_client():
         }
     )
     return app.test_client()
+
+
+def _gateway_log_payloads(caplog, event_name: str) -> list[dict[str, Any]]:
+    payloads: list[dict[str, Any]] = []
+    for record in caplog.records:
+        try:
+            payload = json.loads(record.getMessage())
+        except (TypeError, json.JSONDecodeError):
+            continue
+        if payload.get("event") == event_name:
+            payloads.append(payload)
+    return payloads
 
 
 def test_post_v1_responses_non_stream_success(monkeypatch):
@@ -95,6 +109,104 @@ def test_post_v1_responses_non_stream_success(monkeypatch):
     assert captured["json"]["messages"] == [{"role": "user", "content": "Say hello"}]
     assert captured["json"]["max_tokens"] == 256
     assert captured["headers"]["x-api-key"] == "test-anthropic-key"
+
+
+def test_post_v1_responses_propagates_correlation_id_and_logs(
+    monkeypatch, caplog
+):
+    client = _make_client()
+    captured: dict[str, Any] = {}
+
+    def fake_post(
+        url: str, *, json: dict[str, Any], headers: dict[str, str], timeout: float
+    ):
+        captured["url"] = url
+        captured["json"] = json
+        captured["headers"] = headers
+        captured["timeout"] = timeout
+        return FakeResponse(
+            200,
+            {
+                "id": "msg_upstream_123",
+                "model": "claude-3-5-sonnet-latest",
+                "content": [{"type": "text", "text": "Hello from Anthropic"}],
+                "usage": {"input_tokens": 9, "output_tokens": 4},
+                "stop_reason": "end_turn",
+            },
+        )
+
+    monkeypatch.setattr(routes.http_requests, "post", fake_post)
+    caplog.set_level(logging.INFO, logger="aiaa_gateway.routes")
+    caplog.clear()
+
+    response = client.post(
+        "/v1/responses",
+        json={
+            "model": "claude-3-5-sonnet-latest",
+            "input": "Say hello",
+            "stream": False,
+        },
+        headers={routes.CORRELATION_HEADER: "corr-123"},
+    )
+
+    assert response.status_code == 200
+    assert response.headers.get(routes.CORRELATION_HEADER) == "corr-123"
+    assert captured["headers"][routes.CORRELATION_HEADER] == "corr-123"
+    assert captured["headers"][routes.REQUEST_ID_HEADER] == "corr-123"
+
+    payloads = _gateway_log_payloads(caplog, "gateway.responses")
+    assert any(
+        payload.get("status") == "received"
+        and payload.get("correlation_id") == "corr-123"
+        and payload.get("path") == "/v1/responses"
+        for payload in payloads
+    )
+    assert any(
+        payload.get("status") == "success"
+        and payload.get("correlation_id") == "corr-123"
+        for payload in payloads
+    )
+
+
+def test_post_v1_responses_generates_correlation_id_when_missing(monkeypatch):
+    client = _make_client()
+    captured: dict[str, Any] = {}
+
+    def fake_post(
+        url: str, *, json: dict[str, Any], headers: dict[str, str], timeout: float
+    ):
+        captured["url"] = url
+        captured["json"] = json
+        captured["headers"] = headers
+        captured["timeout"] = timeout
+        return FakeResponse(
+            200,
+            {
+                "id": "msg_upstream_123",
+                "model": "claude-3-5-sonnet-latest",
+                "content": [{"type": "text", "text": "Hello from Anthropic"}],
+                "usage": {"input_tokens": 9, "output_tokens": 4},
+                "stop_reason": "end_turn",
+            },
+        )
+
+    monkeypatch.setattr(routes.http_requests, "post", fake_post)
+
+    response = client.post(
+        "/v1/responses",
+        json={
+            "model": "claude-3-5-sonnet-latest",
+            "input": "Say hello",
+            "stream": False,
+        },
+    )
+
+    assert response.status_code == 200
+    correlation_id = response.headers.get(routes.CORRELATION_HEADER)
+    assert correlation_id
+    assert len(correlation_id) == 32
+    assert captured["headers"][routes.CORRELATION_HEADER] == correlation_id
+    assert captured["headers"][routes.REQUEST_ID_HEADER] == correlation_id
 
 
 def test_post_v1_responses_rejects_stream_true(monkeypatch):
