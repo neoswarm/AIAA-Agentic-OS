@@ -431,6 +431,75 @@ def test_v1_responses_stream_accepts_bearer_api_key(app, monkeypatch):
     assert resp.mimetype == "text/event-stream"
 
 
+def test_v1_responses_delegation_preserves_session_auth_context(auth_client, monkeypatch):
+    store = FakeStore()
+    captured: dict[str, Any] = {}
+
+    class GatewayDelegatingRunner(FakeRunner):
+        def set_runtime_auth_context(
+            self, *, session_id: str, auth_context: dict[str, str]
+        ) -> None:
+            captured["session_id"] = session_id
+            captured["auth_context"] = dict(auth_context)
+
+    runner = GatewayDelegatingRunner()
+    monkeypatch.setattr(chat_routes, "_get_chat_store", lambda: store)
+    monkeypatch.setattr(chat_routes, "_get_runner", lambda: runner)
+    monkeypatch.setattr(chat_routes, "get_claude_token", lambda: "sk-ant-test-token")
+
+    token_values = iter(["session-v1-auth-1", "response-v1-auth-1"])
+    monkeypatch.setattr(chat_routes.secrets, "token_hex", lambda _: next(token_values))
+
+    resp = auth_client.post(
+        "/v1/responses",
+        json={"model": "claude-3-7-sonnet", "input": "Auth context", "stream": True},
+    )
+
+    assert resp.status_code == 200
+    assert captured["session_id"] == "session-v1-auth-1"
+    assert captured["auth_context"]["mode"] == "session"
+    assert captured["auth_context"]["username"] == "testadmin"
+    message = store.messages["session-v1-auth-1"][0]
+    assert message["metadata"]["auth_mode"] == "session"
+    assert message["metadata"]["username"] == "testadmin"
+
+
+def test_v1_responses_delegation_preserves_api_key_auth_context(app, monkeypatch):
+    store = FakeStore()
+    captured: dict[str, Any] = {}
+
+    class GatewayDelegatingRunner(FakeRunner):
+        def set_runtime_auth_context(
+            self, *, session_id: str, auth_context: dict[str, str]
+        ) -> None:
+            captured["session_id"] = session_id
+            captured["auth_context"] = dict(auth_context)
+
+    runner = GatewayDelegatingRunner()
+    monkeypatch.setenv("DASHBOARD_API_KEY", "dashboard-key-123")
+    monkeypatch.setattr(chat_routes, "_get_chat_store", lambda: store)
+    monkeypatch.setattr(chat_routes, "_get_runner", lambda: runner)
+    monkeypatch.setattr(chat_routes, "get_claude_token", lambda: "sk-ant-test-token")
+
+    token_values = iter(["session-v1-auth-2", "response-v1-auth-2"])
+    monkeypatch.setattr(chat_routes.secrets, "token_hex", lambda _: next(token_values))
+
+    client = app.test_client()
+    resp = client.post(
+        "/v1/responses",
+        headers={"X-API-Key": "dashboard-key-123"},
+        json={"model": "claude-3-7-sonnet", "input": "Auth context", "stream": True},
+    )
+
+    assert resp.status_code == 200
+    assert captured["session_id"] == "session-v1-auth-2"
+    assert captured["auth_context"]["mode"] == "api_key"
+    assert "username" not in captured["auth_context"]
+    message = store.messages["session-v1-auth-2"][0]
+    assert message["metadata"]["auth_mode"] == "api_key"
+    assert "username" not in message["metadata"]
+
+
 def test_v1_responses_rejects_non_stream_mode(auth_client, monkeypatch):
     monkeypatch.setattr(chat_routes, "get_claude_token", lambda: "sk-ant-test-token")
     resp = auth_client.post(
