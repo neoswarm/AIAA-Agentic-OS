@@ -23,6 +23,8 @@ def create_app(test_config: dict | None = None) -> Flask:
     app.config.from_mapping(
         SERVICE_NAME="aiaa_gateway",
         JSON_SORT_KEYS=False,
+        GATEWAY_API_KEY=os.getenv("GATEWAY_API_KEY", ""),
+        GATEWAY_INTERNAL_TOKEN=os.getenv("GATEWAY_INTERNAL_TOKEN", ""),
         ANTHROPIC_BASE_URL=os.getenv("ANTHROPIC_BASE_URL", "https://api.anthropic.com"),
         ANTHROPIC_API_VERSION=os.getenv("ANTHROPIC_API_VERSION", "2023-06-01"),
         ANTHROPIC_API_KEY=os.getenv("ANTHROPIC_API_KEY", ""),

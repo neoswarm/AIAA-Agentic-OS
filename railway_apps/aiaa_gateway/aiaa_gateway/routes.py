@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
+import hmac
 import os
-import secrets
 import shutil
 import time
 import uuid
@@ -66,6 +66,8 @@ _RUNTIME_WORKSPACE_REQUIRED_PATHS = (
 logger = logging.getLogger(__name__)
 CORRELATION_HEADER = "X-Correlation-ID"
 REQUEST_ID_HEADER = "X-Request-ID"
+_PUBLIC_ENDPOINTS = frozenset({"/", "/health"})
+_PRIVATE_ENDPOINT_PATH_PREFIX = "/v1/"
 
 
 def _resolve_correlation_id() -> str:
@@ -128,19 +130,69 @@ def _json_error(
     return jsonify(payload), status_code
 
 
+def _resolve_bearer_token() -> str:
+    auth_header = (request.headers.get("Authorization") or "").strip()
+    if not auth_header.lower().startswith("bearer "):
+        return ""
+    return auth_header[7:].strip()
+
+
+def _resolve_internal_bearer_token() -> str:
+    configured = (current_app.config.get("GATEWAY_INTERNAL_TOKEN") or "").strip()
+    if configured:
+        return configured
+
+    fallback = (current_app.config.get("GATEWAY_API_KEY") or "").strip()
+    if fallback:
+        return fallback
+
+    return (
+        os.getenv("GATEWAY_INTERNAL_TOKEN") or os.getenv("GATEWAY_API_KEY") or ""
+    ).strip()
+
+
 def _resolve_anthropic_api_key() -> str:
     header_key = (request.headers.get("X-Anthropic-Api-Key") or "").strip()
     if header_key:
         return header_key
 
-    auth_header = (request.headers.get("Authorization") or "").strip()
-    if auth_header.lower().startswith("bearer "):
-        return auth_header[7:].strip()
-
     configured = (current_app.config.get("ANTHROPIC_API_KEY") or "").strip()
     if configured:
         return configured
     return (os.getenv("ANTHROPIC_API_KEY") or "").strip()
+
+
+@gateway_bp.before_request
+def require_internal_bearer_auth():
+    if request.path in _PUBLIC_ENDPOINTS:
+        return None
+    if not request.path.startswith(_PRIVATE_ENDPOINT_PATH_PREFIX):
+        return None
+
+    expected_token = _resolve_internal_bearer_token()
+    if not expected_token:
+        return _json_error(
+            "Gateway internal bearer token is not configured.",
+            503,
+            error_type="configuration_error",
+        )
+
+    bearer_token = _resolve_bearer_token()
+    if not bearer_token:
+        return _json_error(
+            "Missing internal bearer token.",
+            401,
+            error_type="authentication_error",
+        )
+
+    if not hmac.compare_digest(bearer_token, expected_token):
+        return _json_error(
+            "Invalid internal bearer token.",
+            401,
+            error_type="authentication_error",
+        )
+
+    return None
 
 
 def _get_profile_store_readiness() -> dict[str, Any]:
@@ -187,36 +239,6 @@ def _get_runtime_readiness() -> dict[str, Any]:
         "workspace_accessible": workspace_accessible,
         "missing_workspace_paths": missing_workspace_paths,
     }
-
-
-def _resolve_internal_gateway_token() -> str:
-    configured = (current_app.config.get("GATEWAY_INTERNAL_TOKEN") or "").strip()
-    if configured:
-        return configured
-    return (os.getenv("GATEWAY_INTERNAL_TOKEN") or "").strip()
-
-
-def _require_internal_bearer_auth():
-    expected_token = _resolve_internal_gateway_token()
-    if not expected_token:
-        return None
-
-    auth_header = (request.headers.get("Authorization") or "").strip()
-    if not auth_header.lower().startswith("bearer "):
-        return _json_error(
-            "Missing gateway bearer token.",
-            401,
-            error_type="authentication_error",
-        )
-
-    provided_token = auth_header[7:].strip()
-    if not provided_token or not secrets.compare_digest(provided_token, expected_token):
-        return _json_error(
-            "Invalid gateway bearer token.",
-            401,
-            error_type="authentication_error",
-        )
-    return None
 
 
 def _resolve_profile_store() -> MutableMapping[str, dict[str, Any]]:
@@ -485,10 +507,6 @@ def health():
 @gateway_bp.post("/v1/profiles/revoke")
 def revoke_gateway_profile():
     """Invalidate a profile and remove any persisted token material."""
-    auth_error = _require_internal_bearer_auth()
-    if auth_error is not None:
-        return auth_error
-
     body = request.get_json(silent=True)
     if not isinstance(body, dict):
         return _json_error("Request body must be a JSON object.", 400)

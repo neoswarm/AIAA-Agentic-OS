@@ -61,10 +61,11 @@ class FakeStreamResponse(FakeResponse):
         self.closed = True
 
 
-def _make_client():
+def _make_client(*, internal_token: str = "internal-gateway-token"):
     app = create_app(
         {
             "TESTING": True,
+            "GATEWAY_INTERNAL_TOKEN": internal_token,
             "ANTHROPIC_API_KEY": "test-anthropic-key",
             "DEFAULT_ANTHROPIC_MODEL": "claude-3-5-sonnet-latest",
             "DEFAULT_MAX_OUTPUT_TOKENS": 256,
@@ -84,6 +85,10 @@ def _gateway_log_payloads(caplog, event_name: str) -> list[dict[str, Any]]:
         if payload.get("event") == event_name:
             payloads.append(payload)
     return payloads
+
+
+def _auth_headers(token: str = "internal-gateway-token") -> dict[str, str]:
+    return {"Authorization": f"Bearer {token}"}
 
 
 def test_post_v1_responses_non_stream_success(monkeypatch):
@@ -128,6 +133,7 @@ def test_post_v1_responses_non_stream_success(monkeypatch):
             ],
             "stream": False,
         },
+        headers=_auth_headers(),
     )
 
     assert response.status_code == 200
@@ -182,7 +188,10 @@ def test_post_v1_responses_propagates_correlation_id_and_logs(
             "input": "Say hello",
             "stream": False,
         },
-        headers={routes.CORRELATION_HEADER: "corr-123"},
+        headers={
+            **_auth_headers(),
+            routes.CORRELATION_HEADER: "corr-123",
+        },
     )
 
     assert response.status_code == 200
@@ -235,6 +244,7 @@ def test_post_v1_responses_generates_correlation_id_when_missing(monkeypatch):
             "input": "Say hello",
             "stream": False,
         },
+        headers=_auth_headers(),
     )
 
     assert response.status_code == 200
@@ -289,6 +299,7 @@ def test_post_v1_responses_stream_success(monkeypatch):
     response = client.post(
         "/v1/responses",
         json={"model": "claude-3-5-sonnet-latest", "input": "hello", "stream": True},
+        headers=_auth_headers(),
     )
 
     assert response.status_code == 200
@@ -355,6 +366,7 @@ def test_post_v1_responses_stream_emits_failed_terminal_event(monkeypatch):
     response = client.post(
         "/v1/responses",
         json={"model": "claude-3-5-sonnet-latest", "input": "hello", "stream": True},
+        headers=_auth_headers(),
     )
 
     assert response.status_code == 200
@@ -402,6 +414,7 @@ def test_post_v1_responses_stream_surfaces_upstream_http_errors(monkeypatch):
     response = client.post(
         "/v1/responses",
         json={"model": "claude-3-5-sonnet-latest", "input": "hello", "stream": True},
+        headers=_auth_headers(),
     )
 
     assert response.status_code == 502
@@ -457,6 +470,7 @@ def test_post_v1_responses_handles_normalized_upstream_payload(monkeypatch):
     response = client.post(
         "/v1/responses",
         json={"model": "claude-3-5-sonnet-latest", "input": "hello"},
+        headers=_auth_headers(),
     )
 
     assert response.status_code == 200
@@ -472,7 +486,11 @@ def test_post_v1_responses_handles_normalized_upstream_payload(monkeypatch):
 def test_post_v1_responses_requires_input():
     client = _make_client()
 
-    response = client.post("/v1/responses", json={"model": "claude-3-5-sonnet-latest"})
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-3-5-sonnet-latest"},
+        headers=_auth_headers(),
+    )
 
     assert response.status_code == 400
     body = response.get_json()
@@ -502,6 +520,7 @@ def test_post_v1_responses_surfaces_upstream_errors(monkeypatch):
     response = client.post(
         "/v1/responses",
         json={"model": "claude-3-5-sonnet-latest", "input": "hello"},
+        headers=_auth_headers(),
     )
 
     assert response.status_code == 502
@@ -526,6 +545,7 @@ def test_post_v1_responses_redacts_token_from_request_exceptions(monkeypatch, ca
         response = client.post(
             "/v1/responses",
             json={"model": "claude-3-5-sonnet-latest", "input": "hello"},
+            headers=_auth_headers(),
         )
 
     assert response.status_code == 502
@@ -572,6 +592,7 @@ def test_post_v1_responses_forwards_gateway_request_fields(monkeypatch):
             "cwd": "/workspace/project",
             "tools_profile": "safe",
         },
+        headers=_auth_headers(),
     )
 
     assert response.status_code == 200
@@ -607,6 +628,7 @@ def test_post_v1_responses_applies_gateway_field_defaults(monkeypatch):
     response = client.post(
         "/v1/responses",
         json={"model": "claude-3-5-sonnet-latest", "input": "hello"},
+        headers=_auth_headers(),
     )
 
     assert response.status_code == 200
@@ -623,9 +645,69 @@ def test_post_v1_responses_rejects_non_string_gateway_fields():
     response = client.post(
         "/v1/responses",
         json={"model": "claude-3-5-sonnet-latest", "input": "hello", "cwd": 123},
+        headers=_auth_headers(),
     )
 
     assert response.status_code == 400
     body = response.get_json()
     assert body["error"]["type"] == "invalid_request_error"
     assert body["error"]["message"] == "cwd must be a string when provided."
+
+
+def test_post_v1_responses_requires_internal_bearer_token(monkeypatch):
+    client = _make_client()
+
+    def fail_if_called(*args, **kwargs):  # pragma: no cover - safety guard
+        raise AssertionError("Upstream call should not happen without bearer auth")
+
+    monkeypatch.setattr(routes.http_requests, "post", fail_if_called)
+
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-3-5-sonnet-latest", "input": "hello"},
+    )
+
+    assert response.status_code == 401
+    body = response.get_json()
+    assert body["error"]["type"] == "authentication_error"
+    assert body["error"]["message"] == "Missing internal bearer token."
+
+
+def test_post_v1_responses_rejects_invalid_internal_bearer_token(monkeypatch):
+    client = _make_client()
+
+    def fail_if_called(*args, **kwargs):  # pragma: no cover - safety guard
+        raise AssertionError("Upstream call should not happen with invalid bearer auth")
+
+    monkeypatch.setattr(routes.http_requests, "post", fail_if_called)
+
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-3-5-sonnet-latest", "input": "hello"},
+        headers=_auth_headers("wrong-token"),
+    )
+
+    assert response.status_code == 401
+    body = response.get_json()
+    assert body["error"]["type"] == "authentication_error"
+    assert body["error"]["message"] == "Invalid internal bearer token."
+
+
+def test_post_v1_responses_requires_internal_token_configuration(monkeypatch):
+    client = _make_client(internal_token="")
+
+    def fail_if_called(*args, **kwargs):  # pragma: no cover - safety guard
+        raise AssertionError("Upstream call should not happen without auth config")
+
+    monkeypatch.setattr(routes.http_requests, "post", fail_if_called)
+
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-3-5-sonnet-latest", "input": "hello"},
+        headers=_auth_headers(),
+    )
+
+    assert response.status_code == 503
+    body = response.get_json()
+    assert body["error"]["type"] == "configuration_error"
+    assert body["error"]["message"] == "Gateway internal bearer token is not configured."
