@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import secrets
 import shutil
@@ -23,6 +24,7 @@ from flask import (
     stream_with_context,
 )
 
+from .redaction import redact_exception_message, redact_token_like_text
 from .services.profile_service import revoke_profile
 from .services.responses_service import (
     build_anthropic_messages_payload,
@@ -56,6 +58,7 @@ _RUNTIME_WORKSPACE_REQUIRED_PATHS = (
     "execution",
     ".tmp",
 )
+logger = logging.getLogger(__name__)
 
 
 def _json_error(
@@ -65,10 +68,11 @@ def _json_error(
     error_type: str = "invalid_request_error",
     details: dict[str, Any] | None = None,
 ):
+    safe_message = redact_token_like_text(message)
     payload: dict[str, Any] = {
         "error": {
             "type": error_type,
-            "message": message,
+            "message": safe_message,
         }
     }
     if details:
@@ -617,8 +621,10 @@ def create_response():
             timeout=timeout_seconds,
         )
     except http_requests.RequestException as exc:
+        safe_error = redact_exception_message(exc)
+        logger.error("Upstream provider request failed: %s", safe_error)
         return _json_error(
-            f"Upstream provider request failed: {exc}",
+            f"Upstream provider request failed: {safe_error}",
             502,
             error_type="upstream_error",
         )
