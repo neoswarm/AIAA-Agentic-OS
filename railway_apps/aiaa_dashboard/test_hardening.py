@@ -28,6 +28,7 @@ os.environ["DB_PATH"] = _test_db.name
 from app import create_app
 import database
 import models
+import routes.api_v1 as api_v1_routes
 
 import pytest
 
@@ -553,3 +554,61 @@ def test_e2e_smoke(app):
     data = resp.get_json()
     assert data["status"] == "ok"
     assert "keys" in data
+
+
+def test_e2e_rotate_auth_token_invalidates_old_profile_api_key(app, monkeypatch):
+    """End-to-end: rotated auth token immediately invalidates old profile API key access."""
+    old_token = "old-token-123456"
+    new_token = "new-token-abcdef"
+    monkeypatch.setenv("DASHBOARD_API_KEY", old_token)
+    monkeypatch.setattr(
+        api_v1_routes,
+        "run_gateway_runtime_canary",
+        lambda _token: {
+            "status": "valid",
+            "message": "Gateway runtime canary succeeded",
+            "output": "OK",
+        },
+    )
+
+    profile_payload = {"profile_id": "default", "token": "profile-token-abc"}
+
+    old_key_before_rotate = app.test_client().post(
+        "/v1/profiles/validate",
+        headers={"X-API-Key": old_token},
+        json=profile_payload,
+    )
+    assert old_key_before_rotate.status_code == 200
+    assert old_key_before_rotate.get_json()["validation"] == "valid"
+
+    session_client = app.test_client()
+    login_resp = session_client.post(
+        "/login",
+        data={"username": "testadmin", "password": "testpass123"},
+        follow_redirects=False,
+    )
+    assert login_resp.status_code == 302
+
+    rotate_resp = session_client.post(
+        "/api/v2/settings/auth-token/rotate",
+        json={"current_token": old_token, "new_token": new_token},
+    )
+    assert rotate_resp.status_code == 200
+
+    old_key_after_rotate = app.test_client().post(
+        "/v1/profiles/validate",
+        headers={"X-API-Key": old_token},
+        json=profile_payload,
+    )
+    assert old_key_after_rotate.status_code == 401
+
+    new_key_after_rotate = app.test_client().post(
+        "/v1/profiles/validate",
+        headers={"X-API-Key": new_token},
+        json=profile_payload,
+    )
+    assert new_key_after_rotate.status_code == 200
+    new_key_payload = new_key_after_rotate.get_json()
+    assert new_key_payload["status"] == "ok"
+    assert new_key_payload["profile_id"] == "default"
+    assert new_key_payload["validation"] == "valid"
