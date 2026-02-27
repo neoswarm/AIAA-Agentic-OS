@@ -23,7 +23,7 @@ from flask import (Blueprint, Response, jsonify, request, session,
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import models
 from config import Config
-from .api_v1 import api_v1_bp
+from .api_v1 import api_v1_bp, _record_profile_lifecycle_outcome
 from .health_utils import get_chat_subsystem_readiness
 from services.skill_execution_service import (
     parse_skill_md,
@@ -329,19 +329,31 @@ def api_revoke_profile():
     ).strip()
 
     if not profile_slug:
+        _record_profile_lifecycle_outcome(
+            "revoke",
+            "validation_failed",
+            source="api_v2",
+        )
         return validation_error({"profile": "Profile slug is required"})
     if not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,99}", profile_slug):
+        _record_profile_lifecycle_outcome(
+            "revoke",
+            "validation_failed",
+            source="api_v2",
+        )
         return validation_error({"profile": "Invalid profile slug"})
 
     deleted = _secure_delete_client_profile(profile_slug)
     invalidated = _mark_profile_revoked(profile_slug)
     if not deleted and not invalidated:
+        _record_profile_lifecycle_outcome("revoke", "error", source="api_v2")
         return jsonify({
             "status": "error",
             "message": "Unable to revoke profile",
         }), 500
 
     action = "deleted" if deleted else "invalidated"
+    _record_profile_lifecycle_outcome("revoke", action, source="api_v2")
     return jsonify({
         "status": "ok",
         "message": f"Profile '{profile_slug}' revoked",
@@ -997,6 +1009,19 @@ _STREAM_FAILURE_MARKERS = (
     "connection aborted",
     "client disconnected",
 )
+_PROFILE_LIFECYCLE_EVENT_TYPE = "gateway_profile_lifecycle"
+_PROFILE_LIFECYCLE_METRIC_BUCKETS = {
+    "upsert": ("created", "updated", "validation_failed", "conflict", "error"),
+    "validate": (
+        "valid",
+        "invalid",
+        "runtime_unavailable",
+        "runtime_error",
+        "validation_failed",
+        "error",
+    ),
+    "revoke": ("deleted", "invalidated", "validation_failed", "error"),
+}
 
 
 def _normalize_token_validation_status(raw_status, configured):
@@ -1120,6 +1145,42 @@ def _collect_chat_latency_metrics():
         "first_event_latency_samples": counts["first_event_latency_ms"],
         "total_runtime_samples": counts["total_runtime_ms"],
     }
+
+def _collect_gateway_profile_lifecycle_metrics():
+    """Aggregate counters for gateway profile lifecycle outcomes."""
+    metrics = {
+        action: {outcome: 0 for outcome in outcomes}
+        for action, outcomes in _PROFILE_LIFECYCLE_METRIC_BUCKETS.items()
+    }
+
+    get_events_by_type = getattr(models, "get_events_by_type", None)
+    if not callable(get_events_by_type):
+        return metrics
+
+    try:
+        events = get_events_by_type(_PROFILE_LIFECYCLE_EVENT_TYPE, limit=5000) or []
+    except TypeError:
+        try:
+            events = get_events_by_type(_PROFILE_LIFECYCLE_EVENT_TYPE) or []
+        except Exception:
+            return metrics
+    except Exception:
+        return metrics
+
+    for event in events:
+        if not isinstance(event, dict):
+            continue
+
+        data = event.get("data") or {}
+        if not isinstance(data, dict):
+            continue
+
+        action = str(data.get("action") or "").strip().lower()
+        outcome = str(data.get("outcome") or "").strip().lower()
+        if action in metrics and outcome in metrics[action]:
+            metrics[action][outcome] += 1
+
+    return metrics
 
 
 @api_v2_bp.route('/settings/api-keys', methods=['POST'])
@@ -1305,6 +1366,7 @@ def api_key_status():
         token_validation_metrics = {status: 0 for status in _TOKEN_VALIDATION_STATUSES}
         chat_failure_metrics = _collect_chat_failure_metrics()
         chat_latency_metrics = _collect_chat_latency_metrics()
+        profile_lifecycle_metrics = _collect_gateway_profile_lifecycle_metrics()
 
         for friendly_name, env_var in _API_KEY_NAMES.items():
             setting_key = f"api_key.{env_var}"
@@ -1349,10 +1411,12 @@ def api_key_status():
             "stream_failure_count": chat_failure_metrics["stream_failures"],
             "runtime_error_count": chat_failure_metrics["runtime_errors"],
             "chat_latency_metrics": chat_latency_metrics,
+            "gateway_profile_lifecycle_metrics": profile_lifecycle_metrics,
             "metrics": {
                 "token_validation_by_status": token_validation_metrics,
                 "stream_failures": chat_failure_metrics["stream_failures"],
                 "runtime_errors": chat_failure_metrics["runtime_errors"],
+                "gateway_profile_lifecycle": profile_lifecycle_metrics,
                 "chat_latency": chat_latency_metrics,
             },
         })

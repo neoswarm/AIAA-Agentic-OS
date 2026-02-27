@@ -17,6 +17,10 @@ from services.gateway_runtime_canary import run_gateway_runtime_canary
 api_v1_bp = Blueprint("api_v1", __name__, url_prefix="/v1")
 
 _PROFILE_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{0,99}$")
+_PROFILE_LIFECYCLE_EVENT_TYPE = "gateway_profile_lifecycle"
+_PROFILE_LIFECYCLE_SUCCESS_OUTCOMES = frozenset(
+    {"created", "updated", "valid", "invalid", "deleted", "invalidated"}
+)
 
 
 def _validation_error(errors: dict[str, str]):
@@ -37,6 +41,35 @@ def _token_setting_key(profile_id: str) -> str:
     if normalized == "default":
         return "claude_setup_token"
     return f"{normalized}.claude_setup_token"
+
+
+def _record_profile_lifecycle_outcome(
+    action: str,
+    outcome: str,
+    *,
+    source: str = "api_v1",
+) -> None:
+    """Best-effort metrics event for gateway profile lifecycle outcomes."""
+    normalized_action = str(action or "").strip().lower()
+    normalized_outcome = str(outcome or "").strip().lower()
+    if not normalized_action or not normalized_outcome:
+        return
+
+    status = (
+        "success"
+        if normalized_outcome in _PROFILE_LIFECYCLE_SUCCESS_OUTCOMES
+        else "error"
+    )
+    try:
+        models.log_event(
+            event_type=_PROFILE_LIFECYCLE_EVENT_TYPE,
+            status=status,
+            data={"action": normalized_action, "outcome": normalized_outcome},
+            source=source,
+        )
+    except Exception:
+        # Metrics must not affect endpoint responses.
+        pass
 
 
 def login_required(f):
@@ -108,15 +141,24 @@ def api_upsert_profile():
     try:
         result = upsert_profile(data)
         status_code = 201 if result.get("action") == "created" else 200
+        _record_profile_lifecycle_outcome(
+            "upsert",
+            str(result.get("action") or "updated"),
+        )
         payload = {"status": "ok"}
         payload.update(result)
         return jsonify(payload), status_code
     except ProfileServiceError as exc:
+        outcome = "validation_failed" if exc.status_code == 400 else "conflict"
+        if exc.status_code >= 500:
+            outcome = "error"
+        _record_profile_lifecycle_outcome("upsert", outcome)
         payload = {"status": "error", "message": exc.message}
         if exc.errors:
             payload["errors"] = exc.errors
         return jsonify(payload), exc.status_code
     except Exception as exc:
+        _record_profile_lifecycle_outcome("upsert", "error")
         return jsonify({"status": "error", "message": str(exc)}), 500
 
 
@@ -128,6 +170,7 @@ def api_validate_profile():
     if payload is None:
         payload = {}
     if not isinstance(payload, dict):
+        _record_profile_lifecycle_outcome("validate", "validation_failed")
         return _validation_error({"body": "Request body must be a JSON object"})
 
     profile_id = str(payload.get("profile_id") or "").strip().lower()
@@ -150,10 +193,16 @@ def api_validate_profile():
             errors["token"] = f"No token configured for profile: {profile_id}"
 
     if errors:
+        _record_profile_lifecycle_outcome("validate", "validation_failed")
         return _validation_error(errors)
 
-    validation = run_gateway_runtime_canary(token)
+    try:
+        validation = run_gateway_runtime_canary(token)
+    except Exception:
+        _record_profile_lifecycle_outcome("validate", "error")
+        raise
     validation_status = str(validation.get("status") or "invalid")
+    _record_profile_lifecycle_outcome("validate", validation_status)
     last_error = (
         str(validation.get("error") or "").strip()
         or str(validation.get("message") or "").strip()
