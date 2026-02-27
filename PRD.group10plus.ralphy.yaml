@@ -1,0 +1,185 @@
+tasks:
+  # Group 10: backend wiring
+  - title: "Wire services/chat_runner.py to instantiate GatewayRunner when backend resolves to gateway."
+    completed: false
+    parallel_group: 10
+  - title: "Implement concrete GatewayRunner transport path using GatewayClient instead of stub-only inheritance."
+    completed: false
+    parallel_group: 10
+  - title: "Add session_id and correlation_id mapping in GatewayRunner for stable stream continuity."
+    completed: false
+    parallel_group: 10
+  - title: "Update routes/chat.py runner init path to respect backend resolver and avoid hard-coded AgentRunner behavior."
+    completed: false
+    parallel_group: 10
+  - title: "Remove setup-token hard-blocking in chat routes when backend is gateway mode."
+    completed: false
+    parallel_group: 10
+  - title: "Add unit tests for backend selection and runner factory behavior in gateway mode."
+    completed: false
+    parallel_group: 10
+
+  # Group 11: gateway profile API
+  - title: "Add internal bearer auth middleware for gateway private endpoints."
+    completed: false
+    parallel_group: 11
+  - title: "Implement persistent profile storage model for profile_id, encrypted token, status, and timestamps."
+    completed: false
+    parallel_group: 11
+  - title: "Implement POST /v1/profiles/upsert with encrypted token write and update behavior."
+    completed: false
+    parallel_group: 11
+  - title: "Implement POST /v1/profiles/validate running runtime canary against stored profile token."
+    completed: false
+    parallel_group: 11
+  - title: "Implement POST /v1/profiles/revoke with profile invalidation and token removal semantics."
+    completed: false
+    parallel_group: 11
+  - title: "Add endpoint tests for profile upsert validate revoke auth and payload validation."
+    completed: false
+    parallel_group: 11
+
+  # Group 12: real streaming responses
+  - title: "Implement POST /v1/responses support for stream=true SSE output in gateway service."
+    completed: false
+    parallel_group: 12
+  - title: "Keep non-stream POST /v1/responses mode working with normalized response payloads."
+    completed: false
+    parallel_group: 12
+  - title: "Add runtime adapter emitting normalized events tool_use tool_result text result error and done."
+    completed: false
+    parallel_group: 12
+  - title: "Support profile_id session_id input cwd and tools_profile request fields in gateway responses flow."
+    completed: false
+    parallel_group: 12
+  - title: "Enforce /app workspace defaults and deny unsafe cwd traversal in gateway runtime calls."
+    completed: false
+    parallel_group: 12
+  - title: "Add streaming contract tests for success error and terminal done behavior."
+    completed: false
+    parallel_group: 12
+
+  # Group 13: dashboard token lifecycle integration
+  - title: "Update POST /api/chat/token to call gateway profiles/upsert and store profile status metadata."
+    completed: false
+    parallel_group: 13
+  - title: "Update POST /api/chat/token/validate to use gateway profiles/validate instead of direct provider checks."
+    completed: false
+    parallel_group: 13
+  - title: "Update token revoke endpoint to call gateway profiles/revoke and sync local metadata."
+    completed: false
+    parallel_group: 13
+  - title: "Update token rotate flow for atomic gateway update with rollback-safe behavior."
+    completed: false
+    parallel_group: 13
+  - title: "Ensure token status endpoints report gateway-derived validation states consistently."
+    completed: false
+    parallel_group: 13
+  - title: "Add route tests for save validate revoke rotate using mocked gateway client."
+    completed: false
+    parallel_group: 13
+
+  # Group 14: message and stream integration
+  - title: "Route /api/chat/message gateway-mode sends through GatewayRunner."
+    completed: false
+    parallel_group: 14
+  - title: "Translate gateway stream events into existing dashboard SSE event model."
+    completed: false
+    parallel_group: 14
+  - title: "Persist translated gateway events and messages through ChatStore without schema regressions."
+    completed: false
+    parallel_group: 14
+  - title: "Add reconnect-safe handling for duplicate or delayed stream chunks in gateway mode."
+    completed: false
+    parallel_group: 14
+  - title: "Ensure runner prevents concurrent sends per session in gateway mode."
+    completed: false
+    parallel_group: 14
+  - title: "Add integration tests for message to stream to done lifecycle via gateway mocks."
+    completed: false
+    parallel_group: 14
+
+  # Group 15: compatibility API
+  - title: "Update dashboard /v1/responses compatibility route to proxy gateway-mode execution when enabled."
+    completed: false
+    parallel_group: 15
+  - title: "Preserve session or API key auth while delegating runtime execution to gateway."
+    completed: false
+    parallel_group: 15
+  - title: "Ensure setup-token is accepted in gateway mode for /v1/responses path."
+    completed: false
+    parallel_group: 15
+  - title: "Ensure stream=true returns compliant SSE chunks and DONE terminal event."
+    completed: false
+    parallel_group: 15
+  - title: "Keep clear error responses for unsupported /v1/responses payloads."
+    completed: false
+    parallel_group: 15
+  - title: "Add contract tests for /v1/responses behavior in gateway mode."
+    completed: false
+    parallel_group: 15
+
+  # Group 16: security hardening
+  - title: "Add gateway-side token redaction utility for logs and exceptions."
+    completed: false
+    parallel_group: 16
+  - title: "Prevent token leakage in gateway error payloads and SSE events."
+    completed: false
+    parallel_group: 16
+  - title: "Enforce startup validation for required gateway secrets and encryption key."
+    completed: false
+    parallel_group: 16
+  - title: "Add cross-service redaction tests for token-like patterns in errors and logs."
+    completed: false
+    parallel_group: 16
+  - title: "Add auth-failure throttling for repeated invalid gateway bearer tokens."
+    completed: false
+    parallel_group: 16
+  - title: "Add tests for unauthorized and malformed gateway auth requests."
+    completed: false
+    parallel_group: 16
+
+  # Group 17: observability and readiness
+  - title: "Propagate correlation IDs from dashboard to gateway and include them in logs."
+    completed: false
+    parallel_group: 17
+  - title: "Add metrics counters for gateway profile lifecycle outcomes."
+    completed: false
+    parallel_group: 17
+  - title: "Add chat latency metrics in gateway path for queue wait first event and total runtime."
+    completed: false
+    parallel_group: 17
+  - title: "Extend gateway /health with profile store and runtime readiness details."
+    completed: false
+    parallel_group: 17
+  - title: "Extend dashboard chat readiness to include gateway connectivity status."
+    completed: false
+    parallel_group: 17
+  - title: "Add tests for readiness payload contracts across dashboard and gateway."
+    completed: false
+    parallel_group: 17
+
+  # Group 18: e2e validation
+  - title: "Add end-to-end test save setup-token create session send message and stream complete."
+    completed: false
+    parallel_group: 18
+  - title: "Add end-to-end test rotate token invalidates old profile behavior."
+    completed: false
+    parallel_group: 18
+  - title: "Add end-to-end test revoke token blocks new runs with clear user error."
+    completed: false
+    parallel_group: 18
+  - title: "Add smoke test covering tool event visibility in chat stream."
+    completed: false
+    parallel_group: 18
+
+  # Group 19: rollout
+  - title: "Add Railway runbook for gateway deploy env wiring and rollback toggle."
+    completed: false
+    parallel_group: 19
+  - title: "Add staged canary checklist and failure triage steps for gateway rollout."
+    completed: false
+    parallel_group: 19
+  - title: "Add post-deploy verification checklist for token leakage and readiness metrics."
+    completed: false
+    parallel_group: 19
