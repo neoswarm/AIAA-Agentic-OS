@@ -72,6 +72,24 @@ This runbook is the initial deployment path for the new gateway service on Railw
    - `backend: gateway`
    - `missing_env_vars: []`
 
+## Post-Deploy Verification Checklist
+
+- [ ] Run a token leakage log scan and confirm no raw token values are emitted:
+  ```bash
+  railway logs --service gateway-service --lines 200 | rg -i "sk-|Bearer |token="
+  ```
+- [ ] Trigger an expected auth failure on `/v1/responses` and confirm the JSON error payload contains no raw token values.
+- [ ] Run one streaming request and confirm SSE events do not leak token-like strings.
+- [ ] Validate gateway readiness output includes healthy status and readiness metadata:
+  ```bash
+  curl -fsS https://<gateway-service-domain>/health
+  ```
+- [ ] Validate dashboard readiness includes gateway connectivity status:
+  ```bash
+  curl -fsS https://<dashboard-domain>/api/v2/health
+  ```
+- [ ] Confirm readiness metrics (profile store and runtime readiness counters) report expected healthy values after smoke traffic.
+
 ## Rollback
 
 1. Toggle gateway mode off immediately in dashboard (fast rollback path):

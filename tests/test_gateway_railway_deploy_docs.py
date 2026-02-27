@@ -36,3 +36,17 @@ def test_gateway_railway_deploy_doc_covers_dashboard_env_wiring_and_rollback_tog
     ]
     for item in required_items:
         assert item in content, f"Missing required wiring/rollback item: {item}"
+
+
+def test_gateway_railway_deploy_doc_has_post_deploy_security_readiness_checklist():
+    content = DOC_PATH.read_text(encoding="utf-8")
+    required_entries = [
+        "## Post-Deploy Verification Checklist",
+        "token leakage",
+        "/v1/responses",
+        "SSE events",
+        "/api/v2/health",
+        "readiness metrics",
+    ]
+    for entry in required_entries:
+        assert entry in content, f"Missing post-deploy checklist entry: {entry}"
