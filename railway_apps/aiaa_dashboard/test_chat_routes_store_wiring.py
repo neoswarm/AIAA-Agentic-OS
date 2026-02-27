@@ -366,6 +366,36 @@ def test_v1_responses_stream_requires_auth(app):
     assert resp.headers["WWW-Authenticate"] == "Bearer"
 
 
+def test_v1_responses_stream_rejects_unauthorized_bearer_api_key(app, monkeypatch):
+    monkeypatch.setenv("DASHBOARD_API_KEY", "dashboard-key-123")
+    client = app.test_client()
+
+    resp = client.post(
+        "/v1/responses",
+        headers={"Authorization": "Bearer wrong-key"},
+        json={"input": "hi", "stream": True},
+    )
+
+    assert resp.status_code == 401
+    assert resp.headers["WWW-Authenticate"] == "Bearer"
+    assert resp.get_json()["error"]["message"] == "Authentication required"
+
+
+def test_v1_responses_stream_rejects_malformed_bearer_auth_header(app, monkeypatch):
+    monkeypatch.setenv("DASHBOARD_API_KEY", "dashboard-key-123")
+    client = app.test_client()
+
+    resp = client.post(
+        "/v1/responses",
+        headers={"Authorization": "Bearer"},
+        json={"input": "hi", "stream": True},
+    )
+
+    assert resp.status_code == 401
+    assert resp.headers["WWW-Authenticate"] == "Bearer"
+    assert resp.get_json()["error"]["message"] == "Authentication required"
+
+
 def test_v1_responses_stream_returns_sse_events(auth_client, monkeypatch):
     store = FakeStore()
     runner = FakeRunner()
@@ -405,7 +435,8 @@ def test_v1_responses_stream_returns_sse_events(auth_client, monkeypatch):
     assert typed_events[0]["type"] == "response.created"
     assert typed_events[-1]["type"] == "response.completed"
     assert any(
-        event.get("type") == "response.output_text.delta" and event.get("delta") == "Hello"
+        event.get("type") == "response.output_text.delta"
+        and event.get("delta") == "Hello"
         for event in typed_events
     )
     assert ("create_session", "session-v1-1") in store.calls
