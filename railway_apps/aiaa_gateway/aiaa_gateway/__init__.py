@@ -25,6 +25,10 @@ def create_app(test_config: dict | None = None) -> Flask:
         UPSTREAM_REQUEST_TIMEOUT_SECONDS=float(
             os.getenv("UPSTREAM_REQUEST_TIMEOUT_SECONDS", "30")
         ),
+        GATEWAY_RUNTIME_CANARY_TIMEOUT_SECONDS=float(
+            os.getenv("GATEWAY_RUNTIME_CANARY_TIMEOUT_SECONDS", "12")
+        ),
+        PROFILE_TOKEN_STORE={},
     )
 
     if test_config:
