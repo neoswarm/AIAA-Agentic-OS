@@ -320,7 +320,11 @@ def api_v2_health():
 @login_required
 def api_revoke_profile():
     """Revoke a profile by secure-delete when possible, otherwise invalidate it."""
-    payload = request.get_json(silent=True) or {}
+    payload = request.get_json(silent=True)
+    if payload is None:
+        payload = {}
+    if not isinstance(payload, dict):
+        return validation_error({"body": "Request body must be a JSON object"})
     profile_slug = str(
         payload.get("profile_slug")
         or payload.get("profile")

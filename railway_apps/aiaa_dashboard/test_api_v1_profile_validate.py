@@ -41,6 +41,15 @@ def test_validate_profile_requires_auth(client):
     assert data["message"] == "Authentication required"
 
 
+def test_validate_profile_requires_json_object_payload(auth_client):
+    resp = auth_client.post("/v1/profiles/validate", json=["not", "an", "object"])
+    assert resp.status_code == 400
+    data = resp.get_json()
+    assert data["status"] == "error"
+    assert data["message"] == "Validation failed"
+    assert data["errors"]["body"] == "Request body must be a JSON object"
+
+
 def test_validate_profile_requires_profile_id(auth_client):
     resp = auth_client.post("/v1/profiles/validate", json={"token": "token-123"})
     assert resp.status_code == 400
@@ -59,7 +68,9 @@ def test_validate_profile_loads_token_from_profile_setting(auth_client, monkeypa
         captured["last_error"] = last_error
         return 1
 
-    monkeypatch.setattr(api_v1_routes.models, "update_setting_metadata", _capture_metadata)
+    monkeypatch.setattr(
+        api_v1_routes.models, "update_setting_metadata", _capture_metadata
+    )
     monkeypatch.setattr(
         api_v1_routes,
         "run_gateway_runtime_canary",
