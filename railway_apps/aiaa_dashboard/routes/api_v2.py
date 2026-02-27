@@ -119,9 +119,13 @@ _SENSITIVE_KEY_PATTERN = re.compile(
     r"(token|api[_-]?key|secret|password|authorization|credential)",
     re.IGNORECASE,
 )
+_TOKEN_KEY_VALUE_PATTERN = re.compile(
+    r"(?i)\b(api[_-]?key|token|secret|password|authorization|credential)\b(\s*[:=]\s*)([^\s\"',;]{8,})"
+)
 _TOKEN_VALUE_PATTERNS = [
-    re.compile(r"(?i)bearer\s+([A-Za-z0-9._\-]{8,})"),
+    re.compile(r"(?i)\b(bearer)(\s+)([A-Za-z0-9._\-]{8,})\b"),
     re.compile(r"\b(?:sk-or-|pplx-|sk-ant-|sk-|xox[baprs]-|ghp_|github_pat_)[A-Za-z0-9._\-]{8,}\b"),
+    re.compile(r"\beyJ[A-Za-z0-9_-]{5,}\.[A-Za-z0-9._\-]{5,}\.[A-Za-z0-9._\-]{5,}\b"),
 ]
 
 
@@ -143,8 +147,15 @@ def _redact_embedded_tokens(value):
     if not isinstance(value, str) or not value:
         return value
 
-    redacted = value
-    for pattern in _TOKEN_VALUE_PATTERNS:
+    redacted = _TOKEN_KEY_VALUE_PATTERN.sub(
+        lambda m: f"{m.group(1)}{m.group(2)}{_redact_value(m.group(3))}",
+        value,
+    )
+    redacted = _TOKEN_VALUE_PATTERNS[0].sub(
+        lambda m: f"{m.group(1)}{m.group(2)}{_redact_value(m.group(3))}",
+        redacted,
+    )
+    for pattern in _TOKEN_VALUE_PATTERNS[1:]:
         redacted = pattern.sub(lambda m: _redact_value(m.group(0)), redacted)
     return redacted
 
@@ -171,6 +182,11 @@ def _redact_sensitive_tokens(payload, key_name="", force_redact=False):
         return _redact_embedded_tokens(payload)
 
     return payload
+
+
+def _redact_error_message(error):
+    """Redact token-like material from exception strings."""
+    return _redact_embedded_tokens(str(error or "Unexpected error"))
 
 
 def _redact_token(token: str) -> str:
@@ -383,7 +399,7 @@ def api_list_skills():
             "skills": skills,
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/skills/search', methods=['GET'])
@@ -399,7 +415,7 @@ def api_search_skills():
             "skills": results,
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/skills/categories', methods=['GET'])
@@ -413,7 +429,7 @@ def api_skill_categories():
             "total_skills": get_skill_count(),
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/skills/recommended', methods=['GET'])
@@ -445,7 +461,7 @@ def api_recommended_skills():
             "skills": skills,
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/skills/<skill_name>', methods=['GET'])
@@ -457,7 +473,7 @@ def api_get_skill(skill_name):
             return jsonify({"status": "error", "message": f"Skill not found: {skill_name}"}), 404
         return jsonify({"status": "ok", "skill": skill})
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/skills/<skill_name>/execute', methods=['POST'])
@@ -542,11 +558,11 @@ def api_execute_skill(skill_name):
     except ValueError as e:
         if release_reservation:
             release_run_reservation(run_guard_session_key, reservation_id)
-        return jsonify({"status": "error", "message": str(e)}), 404
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 404
     except Exception as e:
         if release_reservation:
             release_run_reservation(run_guard_session_key, reservation_id)
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/skills/<skill_name>/estimate', methods=['GET'])
@@ -571,7 +587,7 @@ def api_estimate_skill(skill_name):
             "steps": steps,
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 # =============================================================================
@@ -591,7 +607,7 @@ def api_execution_status(execution_id):
             "execution": _redact_sensitive_tokens(execution),
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/executions/<execution_id>/stream', methods=['GET'])
@@ -618,7 +634,7 @@ def api_execution_stream(execution_id):
         response.headers["X-Accel-Buffering"] = "no"
         return response
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/executions/<execution_id>/output', methods=['GET'])
@@ -655,7 +671,7 @@ def api_execution_output(execution_id):
         }
         return jsonify(_redact_sensitive_tokens(response_payload))
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/executions/<execution_id>/deliver/gdocs', methods=['POST'])
@@ -718,7 +734,7 @@ def api_deliver_gdocs(execution_id):
             "message": "Google Docs delivery timed out",
         }), 504
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/executions/<execution_id>/cancel', methods=['POST'])
@@ -738,7 +754,7 @@ def api_cancel_execution(execution_id):
             "execution_id": execution_id,
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/executions/<execution_id>/retry', methods=['POST'])
@@ -765,7 +781,7 @@ def api_retry_execution(execution_id):
             "message": "Execution retried",
         }), 202
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/executions', methods=['GET'])
@@ -809,7 +825,7 @@ def api_list_executions():
             "executions": _redact_sensitive_tokens(executions),
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/executions/stats', methods=['GET'])
@@ -820,7 +836,7 @@ def api_execution_stats():
         stats = models.get_skill_execution_stats()
         return jsonify({"status": "ok", "stats": stats})
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 # =============================================================================
@@ -877,7 +893,7 @@ def api_session_history(session_id):
             },
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 # =============================================================================
@@ -1183,7 +1199,7 @@ def api_save_api_key():
             key_name=env_var,
             reason="exception",
         )
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/settings/api-keys/revoke', methods=['POST'])
@@ -1220,7 +1236,7 @@ def api_revoke_api_key(key_name=None):
             key_name=env_var,
             reason="exception",
         )
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/settings/api-keys/<key_name>/rotate', methods=['POST'])
@@ -1251,7 +1267,7 @@ def api_rotate_api_key(key_name):
             "action": "rotate",
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/settings/api-keys/<key_name>/revoke', methods=['POST'])
@@ -1274,7 +1290,7 @@ def api_revoke_api_key_by_name(key_name):
             "action": "revoke",
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/settings/api-keys/status', methods=['GET'])
@@ -1341,7 +1357,7 @@ def api_key_status():
             },
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/settings/auth-token/rotate', methods=['POST'])
@@ -1424,7 +1440,7 @@ def api_get_preferences():
         prefs = models.get_settings_by_prefix("pref.")
         return jsonify({"status": "ok", "preferences": prefs})
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/settings/preferences', methods=['POST'])
@@ -1441,7 +1457,7 @@ def api_save_preferences():
             models.set_setting(f"pref.{key}", str(value))
         return jsonify({"status": "ok", "message": "Preferences saved"})
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/settings/profile', methods=['GET'])
@@ -1452,7 +1468,7 @@ def api_get_profile():
         profile = models.get_settings_by_prefix("profile.")
         return jsonify({"status": "ok", "profile": profile})
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/settings/profile', methods=['POST'])
@@ -1469,7 +1485,7 @@ def api_save_profile():
             models.set_setting(f"profile.{key}", str(value))
         return jsonify({"status": "ok", "message": "Profile saved"})
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 # =============================================================================
@@ -1547,7 +1563,7 @@ def api_create_client():
             "slug": slug,
         }), 201
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/clients', methods=['GET'])
@@ -1566,7 +1582,7 @@ def api_list_clients():
             "clients": clients,
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/clients/<slug>', methods=['GET'])
@@ -1581,7 +1597,7 @@ def api_get_client(slug):
         payload.update(client)
         return jsonify(payload)
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 @api_v2_bp.route('/clients/<slug>', methods=['PUT'])
@@ -1623,7 +1639,7 @@ def api_update_client(slug):
         models.update_client_profile(slug, **data)
         return jsonify({"status": "ok", "message": f"Client '{slug}' updated"})
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": _redact_error_message(e)}), 500
 
 
 # =============================================================================

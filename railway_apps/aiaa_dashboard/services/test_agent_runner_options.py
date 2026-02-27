@@ -552,6 +552,64 @@ def test_run_agent_redacts_token_like_values_from_runtime_errors():
     assert leaked_error not in session_state["last_error"]
 
 
+@pytest.mark.parametrize(
+    ("leaked_stderr", "leaked_error", "raw_values"),
+    [
+        (
+            "stderr: Authorization: Bearer sk-ant-api03-super-secret-token-123456",
+            "gateway failed: api_key=token-value-1234567890abcdef",
+            [
+                "sk-ant-api03-super-secret-token-123456",
+                "token-value-1234567890abcdef",
+            ],
+        ),
+        (
+            "stderr: token=github_pat_1234567890abcdefghijklmno",
+            "gateway failed: bearer pplx-secret-token-1234567890",
+            [
+                "github_pat_1234567890abcdefghijklmno",
+                "pplx-secret-token-1234567890",
+            ],
+        ),
+    ],
+)
+def test_run_agent_logs_redacted_token_like_runtime_errors(
+    caplog, leaked_stderr, leaked_error, raw_values
+):
+    runner = AgentRunner(cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token")
+    session = runner.create_session()
+    session_id = session["id"]
+
+    class DummyOptions:
+        def __init__(self, *, stderr=None, **kwargs):
+            self.kwargs = {"stderr": stderr}
+            self.kwargs.update(kwargs)
+
+    async def fake_query(*, prompt, options):
+        del prompt
+        stderr_callback = options.kwargs.get("stderr")
+        if callable(stderr_callback):
+            stderr_callback(leaked_stderr)
+        if False:  # pragma: no cover - keeps async-generator shape
+            yield {}
+        raise RuntimeError(leaked_error)
+
+    caplog.clear()
+    caplog.set_level("ERROR", logger="services.agent_runner")
+    runner._load_sdk = lambda: {"query": fake_query, "options_cls": DummyOptions}
+    runner._run_agent(session_id, "test")
+
+    log_text = "\n".join(record.getMessage() for record in caplog.records)
+    error_events = [
+        event for event in _drain_queue(runner, session_id) if event.get("type") == "error"
+    ]
+    assert len(error_events) == 1
+
+    for raw in raw_values:
+        assert raw not in error_events[0]["content"]
+        assert raw not in log_text
+
+
 def _set_perf_counter_values(monkeypatch, values):
     counter = itertools.chain(values)
     monkeypatch.setattr(
