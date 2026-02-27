@@ -606,6 +606,98 @@ def test_v1_responses_stream_accepts_bearer_api_key(app, monkeypatch):
     assert resp.mimetype == "text/event-stream"
 
 
+def test_v1_responses_stream_proxies_gateway_mode_when_enabled(
+    auth_client, app, monkeypatch
+):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "true")
+    monkeypatch.setitem(app.config, "GATEWAY_BASE_URL", "https://gateway.example")
+    monkeypatch.setitem(app.config, "GATEWAY_API_KEY", "gateway-internal-key")
+    monkeypatch.setattr(
+        chat_routes, "get_claude_token", lambda: "sk-ant-oat-setup-token"
+    )
+    monkeypatch.setattr(
+        chat_routes,
+        "_get_chat_store",
+        lambda: (_ for _ in ()).throw(AssertionError("store should not be used")),
+    )
+    monkeypatch.setattr(
+        chat_routes,
+        "_get_runner",
+        lambda: (_ for _ in ()).throw(AssertionError("runner should not be used")),
+    )
+
+    captured: dict[str, Any] = {}
+
+    class FakeUpstreamResponse:
+        status_code = 200
+        headers = {"Content-Type": "text/event-stream"}
+        text = ""
+
+        def iter_content(self, chunk_size: int = 1):
+            captured["chunk_size"] = chunk_size
+            yield b'data: {"type":"response.created"}\n\n'
+            yield b"data: [DONE]\n\n"
+
+        def json(self):
+            return {}
+
+        def close(self) -> None:
+            captured["closed"] = True
+
+    def fake_post(url: str, **kwargs):
+        captured["url"] = url
+        captured["kwargs"] = dict(kwargs)
+        return FakeUpstreamResponse()
+
+    monkeypatch.setattr(chat_routes.http_requests, "post", fake_post)
+
+    resp = auth_client.post(
+        "/v1/responses",
+        headers={"X-Correlation-ID": "corr-test-123"},
+        json={"input": "Gateway hello", "stream": True},
+    )
+
+    assert resp.status_code == 200
+    assert resp.mimetype == "text/event-stream"
+    body = resp.get_data(as_text=True)
+    assert 'data: {"type":"response.created"}' in body
+    assert "data: [DONE]" in body
+    assert captured["url"] == "https://gateway.example/v1/responses"
+    assert captured["kwargs"]["stream"] is True
+    assert captured["kwargs"]["json"] == {"input": "Gateway hello", "stream": True}
+    assert (
+        captured["kwargs"]["headers"]["Authorization"] == "Bearer gateway-internal-key"
+    )
+    assert (
+        captured["kwargs"]["headers"]["X-Anthropic-Api-Key"] == "sk-ant-oat-setup-token"
+    )
+    assert captured["kwargs"]["headers"]["X-Correlation-ID"] == "corr-test-123"
+
+
+def test_v1_responses_stream_gateway_proxy_handles_request_failure(
+    auth_client, app, monkeypatch
+):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "true")
+    monkeypatch.setitem(app.config, "GATEWAY_BASE_URL", "https://gateway.example")
+    monkeypatch.setattr(
+        chat_routes, "get_claude_token", lambda: "sk-ant-oat-setup-token"
+    )
+
+    def fake_post(_url: str, **_kwargs):
+        raise chat_routes.http_requests.RequestException("gateway timeout")
+
+    monkeypatch.setattr(chat_routes.http_requests, "post", fake_post)
+
+    resp = auth_client.post(
+        "/v1/responses",
+        json={"input": "Gateway hello", "stream": True},
+    )
+
+    assert resp.status_code == 502
+    payload = resp.get_json()
+    assert "failed to reach gateway" in payload["error"]["message"].lower()
+
+
 def test_v1_responses_rejects_non_stream_mode(auth_client, monkeypatch):
     monkeypatch.setattr(chat_routes, "get_claude_token", lambda: "sk-ant-test-token")
     resp = auth_client.post(
