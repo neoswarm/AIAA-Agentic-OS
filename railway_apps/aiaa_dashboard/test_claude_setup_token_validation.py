@@ -187,6 +187,80 @@ def test_save_token_accepts_setup_token_when_backend_gateway(
         assert models.get_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY) == token
 
 
+def test_save_token_calls_gateway_profiles_upsert_and_stores_status_metadata(
+    auth_client, app, monkeypatch
+):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "true")
+    monkeypatch.delenv("CHAT_BACKEND", raising=False)
+    app.config.pop("CHAT_BACKEND", None)
+    monkeypatch.setattr(chat_routes, "_persist_to_railway_async", lambda *_: False)
+    monkeypatch.setattr(chat_routes, "init_chat_runner", lambda *_: None)
+
+    captured = {}
+
+    def _fake_gateway_upsert(token: str):
+        captured["token"] = token
+        return {
+            "status": "ok",
+            "profile_id": "default",
+            "profile_status": "active",
+            "token_status": "active",
+        }
+
+    monkeypatch.setattr(
+        chat_routes,
+        "_upsert_gateway_setup_token_profile",
+        _fake_gateway_upsert,
+    )
+
+    response = auth_client.post("/api/chat/token", json={"token": SETUP_TOKEN_OAT})
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["status"] == "ok"
+    assert payload["gateway_upserted"] is True
+    assert payload["profile_status"] == "active"
+    assert payload["token_status"] == "active"
+    assert payload["profile_metadata_stored"] is True
+    assert captured["token"] == SETUP_TOKEN_OAT
+
+    with app.app_context():
+        metadata = models.get_setting_metadata(chat_routes.CLAUDE_TOKEN_SETTING_KEY)
+        assert metadata["validation_status"] == "active"
+        assert metadata["last_error"] is None
+
+        profile = models.get_setup_token_profile("default")
+        assert profile is not None
+        assert profile["status"] == "active"
+
+
+def test_save_token_returns_502_when_gateway_upsert_fails(
+    auth_client, app, monkeypatch
+):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "true")
+    monkeypatch.delenv("CHAT_BACKEND", raising=False)
+    app.config.pop("CHAT_BACKEND", None)
+    monkeypatch.setattr(chat_routes, "_persist_to_railway_async", lambda *_: False)
+    monkeypatch.setattr(chat_routes, "init_chat_runner", lambda *_: None)
+    with app.app_context():
+        models.delete_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY)
+
+    def _boom(_token: str):
+        raise chat_routes.GatewayClientError("gateway unavailable")
+
+    monkeypatch.setattr(chat_routes, "_upsert_gateway_setup_token_profile", _boom)
+
+    response = auth_client.post("/api/chat/token", json={"token": SETUP_TOKEN_OAT})
+
+    assert response.status_code == 502
+    payload = response.get_json()
+    assert payload["status"] == "error"
+    assert payload["message"] == "Gateway profile upsert failed"
+
+    with app.app_context():
+        assert models.get_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY) in ("", None)
+
+
 @pytest.mark.parametrize("endpoint", ["/api/chat/sessions", "/api/chat/message"])
 def test_chat_endpoints_block_unsupported_setup_token(
     auth_client, app, endpoint, monkeypatch
@@ -255,7 +329,9 @@ def test_create_session_does_not_hard_block_setup_token_for_gateway(
     assert body["session"]["title"] == "Gateway chat"
 
 
-def test_send_message_does_not_hard_block_setup_token_for_gateway(auth_client, app, monkeypatch):
+def test_send_message_does_not_hard_block_setup_token_for_gateway(
+    auth_client, app, monkeypatch
+):
     monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "false")
     monkeypatch.setitem(app.config, "CHAT_BACKEND", "gateway")
     with app.app_context():
