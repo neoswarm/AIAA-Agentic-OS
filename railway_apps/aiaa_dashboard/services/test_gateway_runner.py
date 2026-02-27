@@ -92,3 +92,86 @@ def test_gateway_runner_stream_emits_sse_payload() -> None:
     assert chunk.startswith("data: ")
     payload = json.loads(chunk[len("data: ") :].strip())
     assert payload["type"] == "done"
+
+
+def test_gateway_runner_maps_gateway_session_and_correlation_ids() -> None:
+    runner = _runner()
+    local_session_id = "dashboard-session-1"
+    runner.ensure_session(local_session_id)
+
+    runner._capture_sdk_session_id(
+        local_session_id,
+        raw_message=object(),
+        payload={
+            "session_id": "gateway-session-1",
+            "correlation_id": "corr-1",
+        },
+    )
+
+    assert runner.has_session("gateway-session-1")
+    assert runner.has_session("corr-1")
+
+    mapped_by_session = runner.get_session("gateway-session-1")
+    assert mapped_by_session is not None
+    assert mapped_by_session["id"] == local_session_id
+    assert mapped_by_session["sdk_session_id"] == "gateway-session-1"
+
+    mapped_by_correlation = runner.get_session("corr-1")
+    assert mapped_by_correlation is not None
+    assert mapped_by_correlation["id"] == local_session_id
+
+
+def test_gateway_runner_parse_message_includes_mapped_ids() -> None:
+    runner = _runner()
+    local_session_id = "dashboard-session-2"
+    runner.ensure_session(local_session_id)
+    runner._capture_sdk_session_id(
+        local_session_id,
+        raw_message=object(),
+        payload={
+            "session_id": "gateway-session-2",
+            "correlation_id": "corr-2",
+        },
+    )
+
+    event = runner._parse_message(
+        {
+            "type": "assistant_message",
+            "content": "hello",
+            "session_id": "gateway-session-2",
+            "correlation_id": "corr-2",
+        }
+    )
+
+    assert event is not None
+    assert event["type"] == "text"
+    assert event["session_id"] == local_session_id
+    assert event["correlation_id"] == "corr-2"
+
+
+def test_gateway_runner_stream_continues_with_correlation_alias() -> None:
+    runner = _runner()
+    local_session_id = "dashboard-session-3"
+    runner.ensure_session(local_session_id)
+    runner._capture_sdk_session_id(
+        local_session_id,
+        raw_message=object(),
+        payload={
+            "session_id": "gateway-session-3",
+            "correlation_id": "corr-3",
+        },
+    )
+
+    runner._output_queues[local_session_id].put(
+        {
+            "type": "text",
+            "content": "continuing stream",
+            "timestamp": "2026-01-01T00:00:00Z",
+        }
+    )
+
+    chunk = next(runner.get_stream("corr-3"))
+    assert chunk.startswith("data: ")
+    payload = json.loads(chunk[len("data: ") :].strip())
+    assert payload["type"] == "text"
+    assert payload["content"] == "continuing stream"
