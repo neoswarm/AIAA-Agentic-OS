@@ -14,6 +14,7 @@ import base64
 import json
 import logging
 from collections import deque
+from datetime import datetime, timezone
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict
@@ -36,7 +37,12 @@ from flask import (
 import models
 from services.chat_backend import build_chat_runner
 from services.chat_runner import ChatRunnerBackend, RunnerError, create_chat_runner
-from services.chat_store import ChatStore, InMemoryChatStore, RedisChatStore
+from services.chat_store import (
+    ChatStore,
+    InMemoryChatStore,
+    RedisChatStore,
+    normalize_gateway_event_type,
+)
 from services.gateway_client import GatewayClient, GatewayClientError, GatewayHTTPError
 
 
@@ -63,6 +69,10 @@ _GATEWAY_VALIDATION_MESSAGES = {
     "runtime_error": "Gateway runtime canary crashed",
     "timeout": "Gateway runtime canary timed out",
 }
+
+
+def _utc_now_iso() -> str:
+    return datetime.now(tz=timezone.utc).isoformat()
 
 
 def _get_message_rate_limit_per_minute() -> int:
@@ -777,6 +787,231 @@ def _parse_runner_sse_event(raw_event: str) -> dict[str, Any] | None:
     return None
 
 
+def _stream_contains_done_sentinel(raw_event: str) -> bool:
+    for line in (raw_event or "").splitlines():
+        if line.strip() == "data: [DONE]":
+            return True
+    return False
+
+
+def _as_object(value: Any) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return value
+    return {}
+
+
+def _first_non_empty_string(*values: Any) -> str:
+    for value in values:
+        if isinstance(value, str):
+            text = value.strip()
+            if text:
+                return text
+    return ""
+
+
+def _extract_response_output_text(response: dict[str, Any]) -> str:
+    output = response.get("output")
+    if not isinstance(output, list):
+        return ""
+
+    parts: list[str] = []
+    for item in output:
+        if not isinstance(item, dict):
+            continue
+        content = item.get("content")
+        if not isinstance(content, list):
+            continue
+        for block in content:
+            if not isinstance(block, dict):
+                continue
+            if block.get("type") not in ("output_text", "text"):
+                continue
+            text = _first_non_empty_string(block.get("text"), block.get("content"))
+            if text:
+                parts.append(text)
+    return "\n".join(parts).strip()
+
+
+def _extract_stream_error_message(
+    event: dict[str, Any], payload: dict[str, Any] | None = None
+) -> str:
+    payload_obj = payload or {}
+    response_obj = _as_object(event.get("response"))
+    response_error = _as_object(response_obj.get("error"))
+    payload_error = _as_object(payload_obj.get("error"))
+    event_error = _as_object(event.get("error"))
+
+    message = _first_non_empty_string(
+        event.get("content"),
+        event.get("message"),
+        payload_obj.get("content"),
+        payload_obj.get("message"),
+        response_error.get("message"),
+        payload_error.get("message"),
+        event_error.get("message"),
+    )
+    return message or "Agent execution failed"
+
+
+def _translate_response_output_item_event(
+    event: dict[str, Any], payload: dict[str, Any]
+) -> dict[str, Any] | None:
+    item = _as_object(event.get("item")) or _as_object(payload.get("item"))
+    if not item:
+        return None
+
+    item_type = str(item.get("type") or "").strip().lower()
+    timestamp = event.get("timestamp")
+
+    if item_type in ("function_call", "tool_call"):
+        tool = (
+            _first_non_empty_string(
+                item.get("name"),
+                item.get("tool_name"),
+                payload.get("tool"),
+            )
+            or "Tool"
+        )
+        tool_input = _first_non_empty_string(
+            item.get("arguments"),
+            item.get("input"),
+            payload.get("input"),
+        )
+        translated: dict[str, Any] = {
+            "type": "tool_use",
+            "tool": tool,
+            "input": tool_input,
+        }
+        if timestamp:
+            translated["timestamp"] = timestamp
+        return translated
+
+    if item_type in ("function_call_output", "tool_result"):
+        content = _first_non_empty_string(
+            item.get("output"),
+            item.get("content"),
+            payload.get("content"),
+        )
+        translated = {"type": "tool_result", "content": content}
+        if timestamp:
+            translated["timestamp"] = timestamp
+        return translated
+
+    if item_type == "message":
+        content = _first_non_empty_string(
+            _extract_response_output_text({"output": [item]})
+        )
+        if not content:
+            return None
+        translated = {"type": "text", "content": content}
+        if timestamp:
+            translated["timestamp"] = timestamp
+        return translated
+
+    return None
+
+
+def _translate_gateway_stream_event(event: dict[str, Any]) -> dict[str, Any] | None:
+    raw_type = str(event.get("type") or "").strip()
+    if not raw_type:
+        return None
+
+    raw_type_lower = raw_type.lower()
+    payload = _as_object(event.get("payload"))
+
+    if raw_type_lower in ("response.output_item.added", "response.output_item.done"):
+        translated = _translate_response_output_item_event(event, payload)
+        if translated is not None:
+            return translated
+
+    normalized_type = normalize_gateway_event_type(raw_type, payload)
+    if normalized_type is None:
+        if raw_type_lower in (
+            "response.created",
+            "response.in_progress",
+            "response.content_part.added",
+            "response.content_part.done",
+        ):
+            return None
+        return event
+
+    translated = dict(event)
+    translated["type"] = normalized_type
+
+    if normalized_type == "tool_use":
+        translated["tool"] = (
+            _first_non_empty_string(
+                event.get("tool"),
+                payload.get("tool"),
+                payload.get("name"),
+                translated.get("tool"),
+            )
+            or "Tool"
+        )
+        translated["input"] = _first_non_empty_string(
+            event.get("input"),
+            payload.get("input"),
+            payload.get("content"),
+            translated.get("input"),
+        )
+        return translated
+
+    if normalized_type == "tool_result":
+        translated["content"] = _first_non_empty_string(
+            event.get("content"),
+            payload.get("content"),
+            payload.get("output"),
+            translated.get("content"),
+        )
+        return translated
+
+    if normalized_type in ("text", "result", "system"):
+        content = _first_non_empty_string(
+            event.get("content"),
+            event.get("delta"),
+            event.get("text"),
+            payload.get("content"),
+            payload.get("delta"),
+            payload.get("text"),
+            translated.get("content"),
+        )
+        if not content and raw_type_lower == "response.completed":
+            content = _extract_response_output_text(_as_object(event.get("response")))
+        if content:
+            translated["content"] = content
+        return translated
+
+    if normalized_type == "error":
+        translated["content"] = _extract_stream_error_message(event, payload)
+        return translated
+
+    return translated
+
+
+def _translate_runner_stream(raw_stream: Any):
+    for raw_event in raw_stream:
+        if _stream_contains_done_sentinel(raw_event):
+            yield _format_sse_data({"type": "done", "timestamp": _utc_now_iso()})
+            continue
+
+        event = _parse_runner_sse_event(raw_event)
+        if event is None:
+            yield raw_event
+            continue
+
+        translated = _translate_gateway_stream_event(event)
+        if translated is None:
+            continue
+
+        if translated == event:
+            yield raw_event
+            continue
+
+        if "timestamp" not in translated:
+            translated["timestamp"] = _utc_now_iso()
+        yield _format_sse_data(translated)
+
+
 def _format_sse_data(payload: dict[str, Any]) -> str:
     return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
 
@@ -1119,7 +1354,7 @@ def stream_response(session_id: str):
     _log_chat_session_lifecycle(action="stream", status="opened", session_id=session_id)
 
     response = Response(
-        stream_with_context(runner.get_stream(session_id)),
+        stream_with_context(_translate_runner_stream(runner.get_stream(session_id))),
         mimetype="text/event-stream",
     )
     response.headers["Cache-Control"] = "no-cache"
@@ -1220,12 +1455,16 @@ def create_response():
             if not event:
                 continue
 
-            event_type = str(event.get("type") or "")
+            translated = _translate_gateway_stream_event(event)
+            if not translated:
+                continue
+
+            event_type = str(translated.get("type") or "")
             if event_type in ("ping", "tool_use", "tool_result", "system"):
                 continue
 
             if event_type in ("text", "result"):
-                chunk = str(event.get("content") or "")
+                chunk = str(translated.get("content") or "")
                 if not chunk:
                     continue
                 text_parts.append(chunk)
@@ -1241,7 +1480,7 @@ def create_response():
                 continue
 
             if event_type == "error":
-                message = str(event.get("content") or "Agent execution failed")
+                message = str(translated.get("content") or "Agent execution failed")
                 yield _format_sse_data(
                     {
                         "type": "response.failed",

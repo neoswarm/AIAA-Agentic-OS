@@ -271,6 +271,11 @@ def test_event_schema_defaults_required_fields() -> None:
         ({"type": "system"}, "text"),
         ({"type": "result", "payload": {"kind": "error"}}, "error"),
         ({"type": "result", "payload": {"kind": "done"}}, "done"),
+        ({"type": "response.output_text.delta"}, "text"),
+        ({"type": "response.output_text.done"}, "text"),
+        ({"type": "response.failed"}, "error"),
+        ({"type": "response.error"}, "error"),
+        ({"type": "response.completed"}, "done"),
     ],
 )
 def test_event_schema_normalizes_legacy_gateway_event_types(
