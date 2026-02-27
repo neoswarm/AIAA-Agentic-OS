@@ -5,6 +5,7 @@ from __future__ import annotations
 import inspect
 import json
 from typing import Any
+import threading
 
 import pytest
 
@@ -374,3 +375,48 @@ def test_gateway_runner_stream_keeps_chunks_without_reconnect_metadata() -> None
 
     text_payloads = [payload for payload in payloads if payload.get("type") == "text"]
     assert [payload.get("content") for payload in text_payloads] == ["ha", "ha"]
+
+
+def test_gateway_runner_blocks_concurrent_send_for_same_session() -> None:
+    call_count = {"value": 0}
+    run_started = threading.Event()
+    allow_finish = threading.Event()
+
+    class BlockingGatewayClient:
+        def post_json(
+            self,
+            path: str,
+            *,
+            payload: dict[str, Any] | None = None,
+            params: Any = None,
+            headers: dict[str, str] | None = None,
+            timeout_seconds: float | None = None,
+        ) -> dict[str, Any]:
+            del path, payload, params, headers, timeout_seconds
+            call_count["value"] += 1
+            if call_count["value"] == 1:
+                with runner._lock:
+                    runner._sessions[session_id]["status"] = "idle"
+                run_started.set()
+                allow_finish.wait(timeout=3)
+            return {"output_text": "ok"}
+
+    runner = GatewayRunner(
+        cwd="/tmp",
+        token_provider=lambda: "sk-ant-test-token",
+        gateway_client=BlockingGatewayClient(),
+    )
+    session_id = runner.create_session()["id"]
+
+    runner.send_message(session_id, "first")
+    assert run_started.wait(timeout=2)
+
+    with pytest.raises(RunnerError, match="already running"):
+        runner.send_message(session_id, "second")
+
+    allow_finish.set()
+    list(runner.get_stream(session_id, keepalive_seconds=1))
+
+    runner.send_message(session_id, "third")
+    list(runner.get_stream(session_id, keepalive_seconds=1))
+    assert call_count["value"] == 2

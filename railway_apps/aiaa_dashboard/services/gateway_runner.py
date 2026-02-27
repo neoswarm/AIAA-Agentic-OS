@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import threading
 from typing import Any, Dict, Generator, Mapping, Optional
 
 from services.agent_runner import (
@@ -55,6 +56,8 @@ class GatewayRunner(AgentRunner):
         self._gateway_client = gateway_client
         self._session_aliases: Dict[str, str] = {}
         self._correlation_aliases: Dict[str, str] = {}
+        self._send_guard_lock = threading.RLock()
+        self._inflight_sends: set[str] = set()
 
     def create_session(self, title: Optional[str] = None) -> Dict[str, Any]:
         session = super().create_session(title=title)
@@ -86,7 +89,18 @@ class GatewayRunner(AgentRunner):
         return super().get_session(self._resolve_session_id(session_id))
 
     def send_message(self, session_id: str, user_message: str) -> None:
-        super().send_message(self._resolve_session_id(session_id), user_message)
+        resolved_session_id = self._resolve_session_id(session_id)
+        with self._send_guard_lock:
+            if resolved_session_id in self._inflight_sends:
+                raise RunnerError("Session is already running")
+            self._inflight_sends.add(resolved_session_id)
+
+        try:
+            super().send_message(resolved_session_id, user_message)
+        except Exception:
+            with self._send_guard_lock:
+                self._inflight_sends.discard(resolved_session_id)
+            raise
 
     def get_stream(
         self, session_id: str, keepalive_seconds: int = 20
@@ -356,6 +370,9 @@ class GatewayRunner(AgentRunner):
                     "metrics": self._record_total_runtime(local_session_id),
                 }
             )
+        finally:
+            with self._send_guard_lock:
+                self._inflight_sends.discard(local_session_id)
 
     def _resolve_session_id(self, session_id: str) -> str:
         candidate = self._normalize_identifier(session_id)
