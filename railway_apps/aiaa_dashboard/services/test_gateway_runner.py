@@ -27,6 +27,11 @@ def _runner() -> GatewayRunner:
     return GatewayRunner(cwd="/tmp", token_provider=lambda: "test-token")
 
 
+def _parse_sse_payload(chunk: str) -> dict[str, object]:
+    assert chunk.startswith("data: ")
+    return json.loads(chunk[len("data: ") :].strip())
+
+
 @pytest.mark.parametrize("method_name", CONTRACT_METHODS)
 def test_gateway_runner_matches_agent_runner_method_signatures(
     method_name: str,
@@ -92,3 +97,62 @@ def test_gateway_runner_stream_emits_sse_payload() -> None:
     assert chunk.startswith("data: ")
     payload = json.loads(chunk[len("data: ") :].strip())
     assert payload["type"] == "done"
+
+
+def test_gateway_runner_stream_suppresses_duplicate_and_delayed_chunks() -> None:
+    runner = _runner()
+    session_id = runner.create_session()["id"]
+    queue = runner._output_queues[session_id]
+
+    queue.put(
+        {
+            "type": "text",
+            "content": "Hel",
+            "payload": {"chunk_id": "chunk-1", "sequence": 1},
+        }
+    )
+    queue.put(
+        {
+            "type": "text",
+            "content": "Hel",
+            "payload": {"chunk_id": "chunk-1", "sequence": 1},
+        }
+    )
+    queue.put(
+        {
+            "type": "text",
+            "content": "lo",
+            "payload": {"chunk_id": "chunk-0", "sequence": 0},
+        }
+    )
+    queue.put(
+        {
+            "type": "text",
+            "content": "lo",
+            "payload": {"chunk_id": "chunk-2", "sequence": 2},
+        }
+    )
+    queue.put({"type": "done", "timestamp": "2026-01-01T00:00:00Z"})
+
+    frames = list(runner.get_stream(session_id, keepalive_seconds=1))
+    payloads = [_parse_sse_payload(frame) for frame in frames]
+
+    text_payloads = [payload for payload in payloads if payload.get("type") == "text"]
+    assert [payload.get("content") for payload in text_payloads] == ["Hel", "lo"]
+    assert payloads[-1]["type"] == "done"
+
+
+def test_gateway_runner_stream_keeps_chunks_without_reconnect_metadata() -> None:
+    runner = _runner()
+    session_id = runner.create_session()["id"]
+    queue = runner._output_queues[session_id]
+
+    queue.put({"type": "text", "content": "ha"})
+    queue.put({"type": "text", "content": "ha"})
+    queue.put({"type": "done", "timestamp": "2026-01-01T00:00:00Z"})
+
+    frames = list(runner.get_stream(session_id, keepalive_seconds=1))
+    payloads = [_parse_sse_payload(frame) for frame in frames]
+
+    text_payloads = [payload for payload in payloads if payload.get("type") == "text"]
+    assert [payload.get("content") for payload in text_payloads] == ["ha", "ha"]
