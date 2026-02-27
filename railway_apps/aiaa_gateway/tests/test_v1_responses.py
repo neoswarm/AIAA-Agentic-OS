@@ -149,3 +149,32 @@ def test_post_v1_responses_surfaces_upstream_errors(monkeypatch):
     body = response.get_json()
     assert body["error"]["type"] == "upstream_error"
     assert body["error"]["details"]["upstream_status"] == 429
+
+
+def test_post_v1_responses_redacts_token_from_request_exceptions(monkeypatch, caplog):
+    client = _make_client()
+    raw_token = "sk-ant-api03-super-secret-token-1234567890"
+    leaked_message = f"Authorization: Bearer {raw_token}"
+
+    def fake_post(
+        url: str, *, json: dict[str, Any], headers: dict[str, str], timeout: float
+    ):
+        del url, json, headers, timeout
+        raise routes.http_requests.RequestException(leaked_message)
+
+    monkeypatch.setattr(routes.http_requests, "post", fake_post)
+
+    with caplog.at_level("ERROR"):
+        response = client.post(
+            "/v1/responses",
+            json={"model": "claude-3-5-sonnet-latest", "input": "hello"},
+        )
+
+    assert response.status_code == 502
+    body = response.get_json()
+    assert body["error"]["type"] == "upstream_error"
+    assert raw_token not in body["error"]["message"]
+    assert "Bearer " in body["error"]["message"]
+
+    assert raw_token not in caplog.text
+    assert "Bearer " in caplog.text

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from datetime import UTC, datetime
 from typing import Any
@@ -9,12 +10,14 @@ from typing import Any
 import requests as http_requests
 from flask import Blueprint, current_app, jsonify, request
 
+from .redaction import redact_exception_message, redact_token_like_text
 from .services.responses_service import (
     build_anthropic_messages_payload,
     map_anthropic_to_response,
 )
 
 gateway_bp = Blueprint("gateway", __name__)
+logger = logging.getLogger(__name__)
 
 
 def _json_error(
@@ -24,10 +27,11 @@ def _json_error(
     error_type: str = "invalid_request_error",
     details: dict[str, Any] | None = None,
 ):
+    safe_message = redact_token_like_text(message)
     payload: dict[str, Any] = {
         "error": {
             "type": error_type,
-            "message": message,
+            "message": safe_message,
         }
     }
     if details:
@@ -118,8 +122,10 @@ def create_response():
             timeout=timeout_seconds,
         )
     except http_requests.RequestException as exc:
+        safe_error = redact_exception_message(exc)
+        logger.error("Upstream provider request failed: %s", safe_error)
         return _json_error(
-            f"Upstream provider request failed: {exc}",
+            f"Upstream provider request failed: {safe_error}",
             502,
             error_type="upstream_error",
         )
