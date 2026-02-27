@@ -9,10 +9,14 @@ from flask import Flask
 
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+from routes import health_utils
 from routes.api_v2 import api_v2_bp
 
 
 _CHAT_ENV_KEYS = (
+    "CHAT_BACKEND",
+    "GATEWAY_BASE_URL",
+    "GATEWAY_API_KEY",
     "OPENROUTER_API_KEY",
     "OPENAI_API_KEY",
     "ANTHROPIC_API_KEY",
@@ -64,3 +68,34 @@ def test_api_v2_health_reports_ready_when_provider_configured(client, monkeypatc
     assert payload["chat_subsystem"]["ready"] is True
     assert payload["chat_subsystem"]["status"] == "ready"
     assert "openrouter" in payload["chat_subsystem"]["providers"]
+
+
+def test_api_v2_health_gateway_backend_includes_connectivity(client, monkeypatch):
+    _clear_chat_env(monkeypatch)
+    monkeypatch.setenv("CHAT_BACKEND", "gateway")
+    monkeypatch.setenv("GATEWAY_BASE_URL", "https://gateway.example.test")
+    monkeypatch.setenv("GATEWAY_API_KEY", "gateway-test-key")
+    monkeypatch.setattr(
+        health_utils,
+        "_check_gateway_connectivity",
+        lambda *_: {
+            "connected": False,
+            "status": "unreachable",
+            "http_status": 502,
+            "error": "Gateway health check returned HTTP 502",
+        },
+    )
+
+    response = client.get("/api/v2/health")
+    assert response.status_code == 200
+
+    payload = response.get_json()
+    assert payload["ready"] is False
+    assert payload["chat_subsystem_ready"] is False
+    assert payload["chat_subsystem"]["backend"] == "gateway"
+    assert payload["chat_subsystem"]["gateway_connectivity"] == {
+        "connected": False,
+        "status": "unreachable",
+        "http_status": 502,
+        "error": "Gateway health check returned HTTP 502",
+    }
