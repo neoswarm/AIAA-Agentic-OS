@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import os
+import shutil
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import requests as http_requests
@@ -15,6 +17,23 @@ from .services.responses_service import (
 )
 
 gateway_bp = Blueprint("gateway", __name__)
+
+_PROFILE_STORE_KEY_ENV_VARS = (
+    "CHAT_TOKEN_ENCRYPTION_KEY",
+    "SETTINGS_ENCRYPTION_KEY",
+    "FLASK_SECRET_KEY",
+    "SECRET_KEY",
+)
+_RUNTIME_WORKSPACE_REQUIRED_PATHS = (
+    ".claude/skills",
+    ".claude/rules",
+    ".claude/hooks",
+    ".claude/agents",
+    "context",
+    "clients",
+    "execution",
+    ".tmp",
+)
 
 
 def _json_error(
@@ -50,6 +69,52 @@ def _resolve_anthropic_api_key() -> str:
     return (os.getenv("ANTHROPIC_API_KEY") or "").strip()
 
 
+def _get_profile_store_readiness() -> dict[str, Any]:
+    configured_key_env = next(
+        (
+            env_var
+            for env_var in _PROFILE_STORE_KEY_ENV_VARS
+            if (os.getenv(env_var) or "").strip()
+        ),
+        None,
+    )
+    ready = configured_key_env is not None
+    return {
+        "ready": ready,
+        "status": "ready" if ready else "not_ready",
+        "encryption_key_source": configured_key_env,
+        "missing_env_vars": [] if ready else list(_PROFILE_STORE_KEY_ENV_VARS),
+    }
+
+
+def _get_runtime_readiness() -> dict[str, Any]:
+    workspace_root = (os.getenv("GATEWAY_WORKSPACE_ROOT") or "/app").strip() or "/app"
+    workspace_path = Path(workspace_root)
+    workspace_accessible = workspace_path.is_dir()
+    missing_workspace_paths: list[str] = []
+    if workspace_accessible:
+        missing_workspace_paths = [
+            relative_path
+            for relative_path in _RUNTIME_WORKSPACE_REQUIRED_PATHS
+            if not (workspace_path / relative_path).exists()
+        ]
+
+    claude_cli_path = shutil.which("claude")
+    ready = (
+        bool(claude_cli_path)
+        and workspace_accessible
+        and not missing_workspace_paths
+    )
+    return {
+        "ready": ready,
+        "status": "ready" if ready else "not_ready",
+        "claude_cli_available": bool(claude_cli_path),
+        "workspace_root": workspace_root,
+        "workspace_accessible": workspace_accessible,
+        "missing_workspace_paths": missing_workspace_paths,
+    }
+
+
 @gateway_bp.get("/")
 def index():
     return jsonify(
@@ -62,11 +127,19 @@ def index():
 
 @gateway_bp.get("/health")
 def health():
+    profile_store = _get_profile_store_readiness()
+    runtime = _get_runtime_readiness()
+    ready = bool(profile_store["ready"] and runtime["ready"])
     return jsonify(
         {
             "service": current_app.config["SERVICE_NAME"],
             "status": "healthy",
             "timestamp": datetime.now(UTC).isoformat(),
+            "ready": ready,
+            "profile_store_ready": profile_store["ready"],
+            "runtime_ready": runtime["ready"],
+            "profile_store": profile_store,
+            "runtime": runtime,
         }
     )
 
