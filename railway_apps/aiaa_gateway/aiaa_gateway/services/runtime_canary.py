@@ -13,9 +13,16 @@ CreateSubprocessExec = Callable[..., Awaitable[asyncio.subprocess.Process]]
 
 _CANARY_PROMPT = "Reply with the single word OK."
 _MAX_ERROR_LEN = 500
+_AUTH_ENV_KEYS = (
+    "CLAUDE_SETUP_TOKEN",
+    "CLAUDE_CODE_OAUTH_TOKEN",
+    "ANTHROPIC_AUTH_TOKEN",
+    "ANTHROPIC_API_KEY",
+    "CLAUDE_API_KEY",
+)
 
 
-def _build_runtime_auth_env(token: str) -> dict[str, str]:
+def build_runtime_auth_env(token: str) -> dict[str, str]:
     """Map token format to auth env vars recognized by Claude runtime."""
     candidate = (token or "").strip()
     if not candidate:
@@ -43,7 +50,9 @@ async def _run_canary(
     create_subprocess_exec: CreateSubprocessExec,
 ) -> dict[str, Any]:
     env = dict(os.environ)
-    env.update(_build_runtime_auth_env(token))
+    for key in _AUTH_ENV_KEYS:
+        env.pop(key, None)
+    env.update(build_runtime_auth_env(token))
 
     process = await create_subprocess_exec(
         "claude",

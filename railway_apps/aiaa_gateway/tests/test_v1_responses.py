@@ -543,6 +543,111 @@ def test_post_v1_responses_rejects_unsupported_input_payload(monkeypatch):
     )
 
 
+def test_post_v1_responses_routes_setup_tokens_to_runtime(monkeypatch):
+    client = _make_client()
+    captured: dict[str, Any] = {}
+
+    def fail_if_called(*args, **kwargs):  # pragma: no cover - safety guard
+        raise AssertionError("Anthropic HTTP path should not run for setup-token requests")
+
+    def fake_runtime_query(**kwargs):
+        captured.update(kwargs)
+        return {
+            "status": "ok",
+            "output_text": "Hello from Claude runtime",
+            "model": "claude-sonnet-4-6",
+        }
+
+    monkeypatch.setattr(routes.http_requests, "post", fail_if_called)
+    monkeypatch.setattr(routes, "run_gateway_runtime_query", fake_runtime_query)
+
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-sonnet-4-6", "input": "Say hello"},
+        headers={
+            **_auth_headers(),
+            "X-Anthropic-Api-Key": "sk-ant-oat01-test-setup-token",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.get_json()
+    assert body["status"] == "completed"
+    assert body["model"] == "claude-sonnet-4-6"
+    assert body["output_text"] == "Hello from Claude runtime"
+    assert captured["token"] == "sk-ant-oat01-test-setup-token"
+    assert captured["cwd"] == "/app"
+    assert captured["messages"] == [{"role": "user", "content": "Say hello"}]
+
+
+def test_post_v1_responses_streams_setup_token_runtime_result(monkeypatch):
+    client = _make_client()
+
+    def fake_runtime_query(**kwargs):
+        del kwargs
+        return {
+            "status": "ok",
+            "output_text": "runtime stream text",
+            "model": "claude-sonnet-4-6",
+        }
+
+    monkeypatch.setattr(routes, "run_gateway_runtime_query", fake_runtime_query)
+
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-sonnet-4-6", "input": "Stream me", "stream": True},
+        headers={
+            **_auth_headers(),
+            "X-Anthropic-Api-Key": "sk-ant-oat01-test-setup-token",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.mimetype == "text/event-stream"
+    chunks = [
+        line[6:]
+        for line in response.get_data(as_text=True).splitlines()
+        if line.startswith("data: ")
+    ]
+    assert chunks[-1] == "[DONE]"
+    typed_events = [json.loads(item) for item in chunks if item != "[DONE]"]
+    assert typed_events[0]["type"] == "response.created"
+    assert any(
+        event.get("type") == "response.output_text.delta"
+        and event.get("delta") == "runtime stream text"
+        for event in typed_events
+    )
+    assert typed_events[-1]["type"] == "response.completed"
+
+
+def test_post_v1_responses_returns_error_when_setup_token_runtime_fails(monkeypatch):
+    client = _make_client()
+
+    monkeypatch.setattr(
+        routes,
+        "run_gateway_runtime_query",
+        lambda **kwargs: {
+            "status": "runtime_error",
+            "message": "Claude runtime execution failed",
+            "error": "authentication failed",
+        },
+    )
+
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-sonnet-4-6", "input": "hello"},
+        headers={
+            **_auth_headers(),
+            "X-Anthropic-Api-Key": "sk-ant-oat01-test-setup-token",
+        },
+    )
+
+    assert response.status_code == 502
+    body = response.get_json()
+    assert body["error"]["type"] == "upstream_error"
+    assert "authentication failed" in body["error"]["message"]
+
+
 def test_post_v1_responses_surfaces_upstream_errors(monkeypatch):
     client = _make_client()
 

@@ -41,6 +41,7 @@ from .services.responses_service import (
     normalize_gateway_request_fields,
 )
 from .services.runtime_canary import run_gateway_runtime_canary
+from .services.runtime_query import is_setup_token, run_gateway_runtime_query
 
 gateway_bp = Blueprint("gateway", __name__)
 _SUPPORTED_PROFILE_VALIDATION_STATES = {
@@ -597,6 +598,98 @@ def _stream_openai_response_events(
     yield _format_sse_data("[DONE]")
 
 
+def _runtime_text_to_response_payload(text: str, *, model: str) -> dict[str, Any]:
+    response_id = f"resp_{uuid.uuid4().hex}"
+    created_at = int(time.time())
+    output = [
+        {
+            "type": "message",
+            "role": "assistant",
+            "content": [
+                {
+                    "type": "output_text",
+                    "text": text,
+                    "annotations": [],
+                }
+            ],
+        }
+    ]
+    return {
+        "id": response_id,
+        "object": "response",
+        "created_at": created_at,
+        "status": "completed",
+        "model": model,
+        "output": output,
+        "output_text": text,
+        "usage": {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0},
+    }
+
+
+def _stream_runtime_response_events(text: str, *, model: str):
+    response_id = f"resp_{uuid.uuid4().hex}"
+    created_ts = int(time.time())
+    yield _format_sse_data(
+        {
+            "type": "response.created",
+            "response": {
+                "id": response_id,
+                "object": "response",
+                "created": created_ts,
+                "model": model,
+                "status": "in_progress",
+                "output": [],
+            },
+        }
+    )
+    if text:
+        yield _format_sse_data(
+            {
+                "type": "response.output_text.delta",
+                "response_id": response_id,
+                "output_index": 0,
+                "content_index": 0,
+                "delta": text,
+            }
+        )
+        yield _format_sse_data(
+            {
+                "type": "response.output_text.done",
+                "response_id": response_id,
+                "output_index": 0,
+                "content_index": 0,
+                "text": text,
+            }
+        )
+    yield _format_sse_data(
+        {
+            "type": "response.completed",
+            "response": {
+                "id": response_id,
+                "object": "response",
+                "created": created_ts,
+                "model": model,
+                "status": "completed",
+                "output": [
+                    {
+                        "type": "message",
+                        "role": "assistant",
+                        "content": [
+                            {
+                                "type": "output_text",
+                                "text": text,
+                                "annotations": [],
+                            }
+                        ],
+                    }
+                ],
+                "usage": {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0},
+            },
+        }
+    )
+    yield _format_sse_data("[DONE]")
+
+
 @gateway_bp.get("/")
 def index():
     return jsonify(
@@ -859,6 +952,81 @@ def create_response():
             "gateway.responses", "error", reason="invalid_request", detail=str(exc)
         )
         return _json_error(str(exc), 400)
+
+    runtime_token = (request.headers.get("X-Anthropic-Api-Key") or "").strip()
+    normalized_profile_id = normalize_profile_id(str(gateway_fields["profile_id"] or ""))
+    if not runtime_token and normalized_profile_id:
+        runtime_token = (
+            resolve_stored_profile_token(
+                normalized_profile_id,
+                profile_store=_resolve_profile_token_store(),
+            )
+            or ""
+        ).strip()
+
+    if is_setup_token(runtime_token):
+        timeout_seconds = float(current_app.config["UPSTREAM_REQUEST_TIMEOUT_SECONDS"])
+        runtime_result = run_gateway_runtime_query(
+            token=runtime_token,
+            messages=list(upstream_payload.get("messages") or []),
+            cwd=str(gateway_fields["cwd"]),
+            timeout_seconds=timeout_seconds,
+            model=str(upstream_payload.get("model") or ""),
+            system_prompt=str(upstream_payload.get("system") or "").strip() or None,
+            session_id=str(gateway_fields["session_id"] or "").strip() or None,
+        )
+        runtime_status = str(runtime_result.get("status") or "").strip().lower()
+        if runtime_status != "ok":
+            detail = redact_token_like_text(
+                str(runtime_result.get("error") or runtime_result.get("message") or "").strip()
+            )
+            reason = runtime_status or "runtime_error"
+            if reason == "invalid_request":
+                status_code = 400
+            elif reason == "runtime_unavailable":
+                status_code = 503
+            elif reason == "timeout":
+                status_code = 504
+            else:
+                status_code = 502
+            _log_gateway_event(
+                "gateway.responses",
+                "error",
+                reason=reason,
+                detail=detail,
+                stream=stream_mode,
+                backend="claude_runtime",
+            )
+            return _json_error(
+                detail or "Claude runtime execution failed.",
+                status_code,
+                error_type="upstream_error",
+            )
+
+        response_text = str(runtime_result.get("output_text") or "").strip()
+        response_model = (
+            str(runtime_result.get("model") or "").strip()
+            or str(upstream_payload.get("model") or "").strip()
+            or str(current_app.config["DEFAULT_ANTHROPIC_MODEL"])
+        )
+        _log_gateway_event(
+            "gateway.responses",
+            "success",
+            stream=stream_mode,
+            backend="claude_runtime",
+        )
+        if stream_mode:
+            response = Response(
+                stream_with_context(
+                    _stream_runtime_response_events(response_text, model=response_model)
+                ),
+                mimetype="text/event-stream",
+            )
+            response.headers["Cache-Control"] = "no-cache"
+            response.headers["X-Accel-Buffering"] = "no"
+            response.headers["Connection"] = "keep-alive"
+            return response
+        return jsonify(_runtime_text_to_response_payload(response_text, model=response_model))
 
     api_key = _resolve_anthropic_api_key()
     if not api_key:
