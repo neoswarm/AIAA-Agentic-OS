@@ -247,6 +247,110 @@ def _is_setup_token_hard_blocked() -> bool:
     return _chat_backend() != "gateway"
 
 
+def _is_gateway_execution_enabled() -> bool:
+    return _is_gateway_mode_enabled() or _chat_backend() == "gateway"
+
+
+def _gateway_base_url() -> str:
+    if has_app_context():
+        configured = (current_app.config.get("GATEWAY_BASE_URL") or "").strip()
+        if configured:
+            return configured.rstrip("/")
+    return (os.getenv("GATEWAY_BASE_URL", "") or "").strip().rstrip("/")
+
+
+def _gateway_api_key() -> str:
+    if has_app_context():
+        configured = (current_app.config.get("GATEWAY_API_KEY") or "").strip()
+        if configured:
+            return configured
+    return (os.getenv("GATEWAY_API_KEY", "") or "").strip()
+
+
+def _proxy_gateway_responses(payload: dict[str, Any], token: str):
+    base_url = _gateway_base_url()
+    if not base_url:
+        return (
+            jsonify(
+                {
+                    "error": {
+                        "message": "Gateway mode is enabled but GATEWAY_BASE_URL is not configured"
+                    }
+                }
+            ),
+            503,
+        )
+
+    headers = {
+        "Accept": "text/event-stream",
+        "Content-Type": "application/json",
+        "X-Anthropic-Api-Key": token,
+    }
+    gateway_api_key = _gateway_api_key()
+    if gateway_api_key:
+        headers["Authorization"] = f"Bearer {gateway_api_key}"
+
+    correlation_id = (request.headers.get("X-Correlation-ID") or "").strip()
+    if correlation_id:
+        headers["X-Correlation-ID"] = correlation_id
+
+    try:
+        upstream_response = http_requests.post(
+            f"{base_url}/v1/responses",
+            json=payload,
+            headers=headers,
+            stream=True,
+            timeout=65,
+        )
+    except Exception as exc:
+        return (
+            jsonify(
+                {"error": {"message": f"Failed to reach gateway /v1/responses: {exc}"}}
+            ),
+            502,
+        )
+
+    if upstream_response.status_code >= 400:
+        message = f"Gateway /v1/responses returned HTTP {upstream_response.status_code}"
+        try:
+            body = upstream_response.json()
+        except ValueError:
+            body = None
+        if isinstance(body, dict):
+            error = body.get("error")
+            if isinstance(error, dict):
+                candidate = str(error.get("message") or "").strip()
+                if candidate:
+                    message = candidate
+            else:
+                candidate = str(body.get("message") or "").strip()
+                if candidate:
+                    message = candidate
+        elif isinstance(upstream_response.text, str) and upstream_response.text.strip():
+            message = upstream_response.text.strip()
+
+        upstream_response.close()
+        return jsonify({"error": {"message": message}}), upstream_response.status_code
+
+    def _stream_upstream():
+        try:
+            for chunk in upstream_response.iter_content(chunk_size=8192):
+                if chunk:
+                    yield chunk
+        finally:
+            upstream_response.close()
+
+    response = Response(
+        stream_with_context(_stream_upstream()),
+        status=upstream_response.status_code,
+        content_type=upstream_response.headers.get("Content-Type", "text/event-stream"),
+    )
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["X-Accel-Buffering"] = "no"
+    response.headers["Connection"] = "keep-alive"
+    return response
+
+
 def validate_claude_token(token: str) -> Dict[str, Any]:
     """Validate Claude token with compatible checks.
 
@@ -783,7 +887,7 @@ def create_response():
     token = get_claude_token()
     if not token:
         return jsonify({"error": {"message": "Claude token not configured"}}), 400
-    if _looks_like_setup_token(token):
+    if _looks_like_setup_token(token) and _is_setup_token_hard_blocked():
         return jsonify({"error": {"message": _unsupported_setup_token_message()}}), 400
 
     payload = request.get_json(silent=True) or {}
@@ -802,6 +906,9 @@ def create_response():
     prompt_text = _extract_response_input_text(payload.get("input"))
     if not prompt_text:
         return jsonify({"error": {"message": "input is required"}}), 400
+
+    if _is_gateway_execution_enabled():
+        return _proxy_gateway_responses(payload, token)
 
     model = str(payload.get("model") or "claude-agent")
     store = _get_chat_store()
