@@ -148,6 +148,7 @@ class LegacyOptions:
 def _runner() -> AgentRunner:
     return AgentRunner(cwd="/app", token_provider=lambda: "unused")
 
+
 def _drain_queue(runner: AgentRunner, session_id: str):
     events = []
     q = runner._output_queues[session_id]
@@ -240,6 +241,7 @@ def test_build_options_includes_stderr_and_debug_flag_when_supported():
     assert options.kwargs["stderr"] is callback
     assert options.kwargs["extra_args"] == {"debug-to-stderr": None}
 
+
 def test_build_options_sets_workspace_when_sdk_supports_it():
     runner = _runner()
 
@@ -307,6 +309,27 @@ def test_parse_message_maps_is_error_result_to_error_event():
     assert event["content"] == "Auth failed"
 
 
+def test_parse_message_normalizes_system_events_to_text():
+    runner = _runner()
+
+    event = runner._parse_message(
+        {"type": "system", "content": "Using profile default"}
+    )
+
+    assert event is not None
+    assert event["type"] == "text"
+    assert event["content"] == "Using profile default"
+
+
+def test_parse_message_normalizes_completed_events_to_done():
+    runner = _runner()
+
+    event = runner._parse_message({"type": "completed"})
+
+    assert event is not None
+    assert event["type"] == "done"
+
+
 def test_run_agent_prefers_streamed_error_over_generic_process_error():
     runner = AgentRunner(
         cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token"
@@ -372,6 +395,22 @@ def test_persist_event_normalizes_gateway_event_types():
     ]
 
 
+def test_persist_event_normalizes_legacy_system_type_to_text():
+    store = InMemoryChatStore()
+    runner = AgentRunner(
+        cwd="/app", token_provider=lambda: "unused", session_store=store
+    )
+    session_id = "persist-system-to-text"
+
+    runner._persist_event(session_id, {"type": "system", "content": "status update"})
+
+    events = store.get_events(session_id)
+    assert len(events) == 1
+    assert events[0]["type"] == "text"
+    assert events[0]["payload"]["kind"] == "text"
+    assert events[0]["payload"]["content"] == "status update"
+
+
 def test_persist_event_skips_unknown_types():
     store = InMemoryChatStore()
     runner = AgentRunner(
@@ -417,7 +456,9 @@ def test_parse_message_redacts_token_like_result_content():
 
 
 def test_run_agent_redacts_token_like_values_from_runtime_errors():
-    runner = AgentRunner(cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token")
+    runner = AgentRunner(
+        cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token"
+    )
     session = runner.create_session()
     session_id = session["id"]
     leaked_stderr = "Authorization: Bearer sk-ant-api03-super-secret-token-123456"
@@ -462,7 +503,9 @@ def _set_perf_counter_values(monkeypatch, values):
 
 
 def test_run_agent_emits_timing_metrics_for_success(monkeypatch):
-    runner = AgentRunner(cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token")
+    runner = AgentRunner(
+        cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token"
+    )
     session = runner.create_session()
     session_id = session["id"]
 
@@ -504,7 +547,9 @@ def test_run_agent_emits_timing_metrics_for_success(monkeypatch):
 
 
 def test_run_agent_emits_timing_metrics_for_error_without_events(monkeypatch):
-    runner = AgentRunner(cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token")
+    runner = AgentRunner(
+        cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token"
+    )
     session = runner.create_session()
     session_id = session["id"]
 
@@ -608,7 +653,9 @@ def test_run_agent_streams_success_sequence_from_mocked_sdk_payloads():
 
 
 def test_run_agent_uses_cli_stream_error_payload_once():
-    runner = AgentRunner(cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token")
+    runner = AgentRunner(
+        cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token"
+    )
     session_id = runner.create_session()["id"]
 
     class DummyOptions:
@@ -634,6 +681,28 @@ def test_run_agent_uses_cli_stream_error_payload_once():
     assert session_state is not None
     assert session_state["status"] == "error"
     assert session_state["last_error"] == "CLI auth failed"
+
+
+def test_run_agent_emits_single_terminal_done_when_runtime_reports_completed():
+    runner = AgentRunner(
+        cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token"
+    )
+    session_id = runner.create_session()["id"]
+
+    class DummyOptions:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+    async def fake_query(*, prompt, options):
+        del prompt, options
+        yield {"type": "assistant_message", "content": "Hello"}
+        yield {"type": "completed"}
+
+    runner._load_sdk = lambda: {"query": fake_query, "options_cls": DummyOptions}
+    runner._run_agent(session_id, "test")
+
+    events = _drain_queue(runner, session_id)
+    assert [event.get("type") for event in events] == ["text", "done"]
 
 
 def test_ensure_session_updates_title_without_overwriting_sdk_session_id():

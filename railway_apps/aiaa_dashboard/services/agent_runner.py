@@ -422,6 +422,8 @@ class AgentRunner:
                     event = self._parse_message(payload)
                     if not event:
                         continue
+                    if event["type"] == "done":
+                        continue
 
                     self._record_first_event_latency(session_id)
                     q.put(event)
@@ -592,7 +594,9 @@ class AgentRunner:
         """Create a runtime launcher that injects dashboard token auth env."""
         auth_env = self._build_auth_env(token)
 
-        async def _runtime_launcher(*args: Any, **kwargs: Any) -> asyncio.subprocess.Process:
+        async def _runtime_launcher(
+            *args: Any, **kwargs: Any
+        ) -> asyncio.subprocess.Process:
             runtime_args = list(args)
             if len(runtime_args) == 1 and isinstance(runtime_args[0], (list, tuple)):
                 runtime_args = list(runtime_args[0])
@@ -685,8 +689,15 @@ class AgentRunner:
         return payload
 
     def _parse_message(self, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        return self._adapt_runtime_event(payload)
+
+    def _adapt_runtime_event(self, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Normalize runtime payloads into canonical stream event types."""
         msg_type = str(payload.get("type", "")).lower()
         role = str(payload.get("role", "")).lower()
+
+        if msg_type in ("done", "complete", "completed"):
+            return {"type": "done", "timestamp": _utc_now_iso()}
 
         if payload.get("tool_name"):
             return {
@@ -698,6 +709,18 @@ class AgentRunner:
                 "timestamp": _utc_now_iso(),
             }
 
+        if msg_type == "tool_use":
+            tool_name = str(payload.get("tool") or payload.get("tool_name") or "")
+            tool_input = payload.get("input")
+            if tool_input is None:
+                tool_input = payload.get("tool_input")
+            return {
+                "type": "tool_use",
+                "tool": tool_name,
+                "input": self._summarize_tool_input(tool_name, tool_input),
+                "timestamp": _utc_now_iso(),
+            }
+
         if payload.get("tool_result") is not None:
             tool_result = _redact_token_like_text(
                 self._stringify(payload.get("tool_result"))
@@ -705,6 +728,17 @@ class AgentRunner:
             return {
                 "type": "tool_result",
                 "content": self._truncate(tool_result, 600),
+                "timestamp": _utc_now_iso(),
+            }
+
+        if msg_type == "tool_result":
+            tool_result = payload.get("content")
+            if tool_result is None:
+                tool_result = payload.get("tool_result")
+            redacted = _redact_token_like_text(self._stringify(tool_result))
+            return {
+                "type": "tool_result",
+                "content": self._truncate(redacted, 600),
                 "timestamp": _utc_now_iso(),
             }
 
@@ -727,16 +761,25 @@ class AgentRunner:
         text = self._extract_text(payload)
         if text:
             text = _redact_token_like_text(text)
-            if msg_type in ("assistant", "assistant_message") or role == "assistant":
+            if (
+                msg_type in ("assistant", "assistant_message", "text")
+                or role == "assistant"
+            ):
                 return {"type": "text", "content": text, "timestamp": _utc_now_iso()}
             if msg_type in ("system", "status"):
-                return {"type": "system", "content": text, "timestamp": _utc_now_iso()}
+                return {"type": "text", "content": text, "timestamp": _utc_now_iso()}
+            if msg_type == "result":
+                return {"type": "result", "content": text, "timestamp": _utc_now_iso()}
 
         if msg_type in ("error", "exception"):
             content = text or self._truncate(
                 _redact_token_like_text(self._stringify(payload)),
                 500,
             )
+            return {"type": "error", "content": content, "timestamp": _utc_now_iso()}
+
+        if payload.get("error") is not None:
+            content = _redact_token_like_text(self._stringify(payload.get("error")))
             return {"type": "error", "content": content, "timestamp": _utc_now_iso()}
 
         return None
@@ -911,13 +954,18 @@ class AgentRunner:
             started_at = state.get("started_at") if state else None
             total_runtime_ms: Optional[int] = None
             if isinstance(started_at, (int, float)):
-                total_runtime_ms = max(0, int((time.perf_counter() - started_at) * 1000))
+                total_runtime_ms = max(
+                    0, int((time.perf_counter() - started_at) * 1000)
+                )
 
             session = self._sessions.get(session_id)
             if session is not None:
                 if total_runtime_ms is not None:
                     session["total_runtime_ms"] = total_runtime_ms
-                    updates = {"total_runtime_ms": total_runtime_ms, "updated_at": now_iso}
+                    updates = {
+                        "total_runtime_ms": total_runtime_ms,
+                        "updated_at": now_iso,
+                    }
                     session["updated_at"] = now_iso
                 metrics = {
                     "queue_wait_ms": session.get("queue_wait_ms"),
@@ -972,8 +1020,11 @@ class AgentRunner:
                 "kind": "tool_result",
                 "content": event.get("content"),
             }
-        elif raw_type in ("text", "result", "error", "system"):
+        elif raw_type in ("text", "result", "error"):
             payload = {"content": event.get("content"), "kind": raw_type}
+        elif raw_type == "system":
+            event_type = "text"
+            payload = {"content": event.get("content"), "kind": "text"}
         elif raw_type == "done":
             payload = {"kind": "done"}
         else:
