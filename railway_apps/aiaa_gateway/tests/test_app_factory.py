@@ -135,9 +135,16 @@ def test_health_endpoint_uses_factory_config():
     assert data["timestamp"]
 
 
-def test_create_app_raises_when_anthropic_secret_missing():
-    with pytest.raises(RuntimeError, match="ANTHROPIC_API_KEY"):
-        create_app({"TESTING": True, "ANTHROPIC_API_KEY": "   "})
+def test_create_app_allows_missing_anthropic_secret_with_warning(caplog):
+    caplog.set_level("WARNING")
+
+    app = create_app({"TESTING": True, "ANTHROPIC_API_KEY": "   "})
+
+    assert isinstance(app, Flask)
+    assert any(
+        "ANTHROPIC_API_KEY is not configured" in record.getMessage()
+        for record in caplog.records
+    )
 
 
 def test_create_app_raises_when_encryption_key_missing(monkeypatch):

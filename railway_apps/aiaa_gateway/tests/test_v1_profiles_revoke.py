@@ -6,12 +6,20 @@ from pathlib import Path
 import sys
 from typing import Any
 
+import pytest
+
 
 APP_DIR = Path(__file__).resolve().parents[1]
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
 from aiaa_gateway import create_app
+
+
+@pytest.fixture(autouse=True)
+def _set_required_encryption_key(monkeypatch, tmp_path):
+    monkeypatch.setenv("CHAT_TOKEN_ENCRYPTION_KEY", "gateway-startup-test-key")
+    monkeypatch.setenv("GATEWAY_PROFILE_DB_PATH", str(tmp_path / "gateway_profiles.db"))
 
 
 def _make_client(

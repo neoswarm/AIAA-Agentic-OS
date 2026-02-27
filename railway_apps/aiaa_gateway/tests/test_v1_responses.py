@@ -531,6 +531,7 @@ def test_post_v1_responses_rejects_unsupported_input_payload(monkeypatch):
                 }
             ],
         },
+        headers=_auth_headers(),
     )
 
     assert response.status_code == 400

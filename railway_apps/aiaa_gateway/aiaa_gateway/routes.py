@@ -33,6 +33,7 @@ from .services.profile_service import (
     normalize_profile_id,
     resolve_stored_profile_token,
     revoke_profile,
+    upsert_profile_record,
 )
 from .services.responses_service import (
     build_anthropic_messages_payload,
@@ -363,6 +364,16 @@ def _resolve_profile_store() -> MutableMapping[str, dict[str, Any]]:
     return initialized_store
 
 
+def _resolve_profile_token_store() -> MutableMapping[str, dict[str, Any]]:
+    store = current_app.config.get("PROFILE_TOKEN_STORE")
+    if isinstance(store, MutableMapping):
+        return store
+
+    initialized_store: dict[str, dict[str, Any]] = {}
+    current_app.config["PROFILE_TOKEN_STORE"] = initialized_store
+    return initialized_store
+
+
 def _format_sse_data(payload: dict[str, Any] | str) -> str:
     if isinstance(payload, str):
         return f"data: {payload}\n\n"
@@ -650,6 +661,112 @@ def _map_canary_validation(canary_result: dict[str, Any]) -> str:
     if "unsupported" in detail:
         return "unsupported"
     return "invalid"
+
+
+@gateway_bp.post("/v1/profiles/upsert")
+def upsert_profile():
+    """Create or update a gateway profile token and validate it with runtime canary."""
+    body = request.get_json(silent=True)
+    if body is None:
+        body = {}
+    if not isinstance(body, dict):
+        return _json_error("Request body must be a JSON object.", 400)
+
+    raw_profile_id = str(body.get("profile_id") or "")
+    token = str(body.get("token") or "").strip()
+    status = str(body.get("status") or "active").strip().lower()
+
+    if not raw_profile_id.strip():
+        return _json_error(
+            "Validation failed.",
+            400,
+            details={"profile_id": "profile_id is required"},
+        )
+
+    profile_id = normalize_profile_id(raw_profile_id)
+    if not profile_id:
+        return _json_error(
+            "Validation failed.",
+            400,
+            details={
+                "profile_id": (
+                    "profile_id must use lowercase letters, numbers, and hyphens only"
+                )
+            },
+        )
+
+    if not token:
+        return _json_error(
+            "Validation failed.",
+            400,
+            details={"token": "token is required"},
+        )
+
+    existing_token = resolve_stored_profile_token(
+        profile_id,
+        profile_store=_resolve_profile_token_store(),
+    )
+
+    try:
+        record = upsert_profile_record(profile_id, token, status=status)
+    except ValueError as exc:
+        return _json_error(str(exc), 400)
+    except Exception as exc:
+        safe_message = redact_token_like_text(str(exc) or "Profile upsert failed.")
+        return _json_error(safe_message, 500, error_type="server_error")
+
+    # Keep in-memory mirrors hot for fast lookups in validate/revoke routes.
+    token_store = _resolve_profile_token_store()
+    token_store[profile_id] = {
+        "profile_id": record.profile_id,
+        "encrypted_token": record.encrypted_token,
+        "status": record.status,
+        "created_at": record.created_at,
+        "updated_at": record.updated_at,
+    }
+    _resolve_profile_store()[profile_id] = {
+        "profile_id": record.profile_id,
+        "status": record.status,
+        "created_at": record.created_at,
+        "updated_at": record.updated_at,
+    }
+
+    raw_timeout = current_app.config.get("GATEWAY_RUNTIME_CANARY_TIMEOUT_SECONDS")
+    timeout_seconds: float | None = None
+    if raw_timeout is not None:
+        try:
+            timeout_seconds = max(1.0, float(raw_timeout))
+        except (TypeError, ValueError):
+            timeout_seconds = None
+
+    canary_result = run_gateway_runtime_canary(token, timeout_seconds=timeout_seconds)
+    if not isinstance(canary_result, dict):
+        canary_result = {"status": "runtime_error", "message": "Invalid canary result"}
+
+    validation = _map_canary_validation(canary_result)
+    action = "updated" if existing_token else "created"
+    http_status = 200 if action == "updated" else 201
+
+    return (
+        jsonify(
+            {
+                "status": "ok",
+                "action": action,
+                "profile_id": profile_id,
+                "profile": {
+                    "profile_id": record.profile_id,
+                    "status": record.status,
+                    "created_at": record.created_at,
+                    "updated_at": record.updated_at,
+                },
+                "profile_status": record.status,
+                "token_status": validation,
+                "validation": validation,
+                "detail": canary_result,
+            }
+        ),
+        http_status,
+    )
 
 
 @gateway_bp.post("/v1/profiles/validate")
