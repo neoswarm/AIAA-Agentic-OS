@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import threading
+import uuid
 from typing import Any, Dict, Generator, Mapping, Optional
 
 from services.agent_runner import (
@@ -42,6 +43,7 @@ class GatewayRunner(AgentRunner):
         gateway_client: GatewayClient | None = None,
         gateway_base_url: str | None = None,
         gateway_api_key: str | None = None,
+        gateway_timeout_seconds: float | None = None,
     ) -> None:
         super().__init__(
             cwd=cwd,
@@ -53,9 +55,19 @@ class GatewayRunner(AgentRunner):
         )
         self._gateway_base_url = (gateway_base_url or os.getenv("GATEWAY_BASE_URL", "")).strip()
         self._gateway_api_key = (gateway_api_key or os.getenv("GATEWAY_API_KEY", "")).strip()
+        timeout_raw = (
+            gateway_timeout_seconds
+            if gateway_timeout_seconds is not None
+            else os.getenv("GATEWAY_REQUEST_TIMEOUT_SECONDS", "120")
+        )
+        try:
+            self._gateway_timeout_seconds = max(1.0, float(timeout_raw))
+        except (TypeError, ValueError):
+            self._gateway_timeout_seconds = 120.0
         self._gateway_client = gateway_client
         self._session_aliases: Dict[str, str] = {}
         self._correlation_aliases: Dict[str, str] = {}
+        self._runtime_session_ids: Dict[str, str] = {}
         self._send_guard_lock = threading.RLock()
         self._inflight_sends: set[str] = set()
 
@@ -266,8 +278,22 @@ class GatewayRunner(AgentRunner):
         self._gateway_client = GatewayClient(
             self._gateway_base_url,
             api_key=self._gateway_api_key or None,
+            timeout_seconds=self._gateway_timeout_seconds,
         )
         return self._gateway_client
+
+    def _resolve_runtime_session_id(self, session_id: str) -> str:
+        normalized = self._normalize_identifier(session_id)
+        if not normalized:
+            return str(uuid.uuid4())
+
+        with self._lock:
+            existing = self._runtime_session_ids.get(normalized)
+            if existing:
+                return existing
+            generated = str(uuid.uuid5(uuid.NAMESPACE_URL, f"aiaa-gateway:{normalized}"))
+            self._runtime_session_ids[normalized] = generated
+            return generated
 
     @staticmethod
     def _extract_gateway_error(payload: Mapping[str, Any]) -> str:
@@ -323,10 +349,18 @@ class GatewayRunner(AgentRunner):
                 raise RunnerError("Claude token is not configured")
 
             client = self._resolve_gateway_client()
+            runtime_session_id = self._resolve_runtime_session_id(local_session_id)
             response = client.post_json(
                 self.RESPONSES_PATH,
-                payload={"input": user_message, "stream": False},
+                payload={
+                    "input": user_message,
+                    "stream": False,
+                    "session_id": runtime_session_id,
+                    "cwd": self.cwd,
+                    "tools_profile": "full",
+                },
                 headers={"X-Anthropic-Api-Key": token},
+                timeout_seconds=self._gateway_timeout_seconds,
             )
 
             if not isinstance(response, dict):

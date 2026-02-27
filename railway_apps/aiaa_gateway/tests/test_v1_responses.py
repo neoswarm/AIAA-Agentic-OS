@@ -77,6 +77,7 @@ def _make_client(*, internal_token: str = "internal-gateway-token"):
             "DEFAULT_ANTHROPIC_MODEL": "claude-3-5-sonnet-latest",
             "DEFAULT_MAX_OUTPUT_TOKENS": 256,
             "UPSTREAM_REQUEST_TIMEOUT_SECONDS": 5,
+            "SETUP_TOKEN_EXECUTION_MODE": "runtime",
         }
     )
     return app.test_client()
@@ -543,52 +544,23 @@ def test_post_v1_responses_rejects_unsupported_input_payload(monkeypatch):
     )
 
 
-def test_post_v1_responses_routes_setup_tokens_through_oauth_headers(monkeypatch):
+def test_post_v1_responses_routes_setup_tokens_through_runtime(monkeypatch):
     client = _make_client()
     captured: dict[str, Any] = {}
-
-    def fake_post(
-        url: str,
-        *,
-        json: dict[str, Any],
-        headers: dict[str, str],
-        timeout: float,
-        stream: bool = False,
-    ):
-        assert stream is False
-        captured["url"] = url
-        captured["json"] = json
-        captured["headers"] = headers
-        captured["timeout"] = timeout
+    def fake_runtime_query(**kwargs):
+        captured["kwargs"] = kwargs
         return {
-            "status_code": 200,
-            "json": lambda: {
-                "id": "msg_upstream_oauth_123",
-                "model": "claude-sonnet-4-6",
-                "content": [{"type": "text", "text": "Hello from Anthropic OAuth"}],
-                "usage": {"input_tokens": 9, "output_tokens": 4},
-                "stop_reason": "end_turn",
-            },
+            "status": "ok",
+            "output_text": "Hello from Claude runtime",
+            "model": "claude-sonnet-4-6",
         }
 
-    class WrappedResponse:
-        def __init__(self, payload):
-            self.status_code = payload["status_code"]
-            self._json_fn = payload["json"]
-
-        def json(self):
-            return self._json_fn()
-
+    monkeypatch.setattr(routes, "run_gateway_runtime_query", fake_runtime_query)
     monkeypatch.setattr(
         routes.http_requests,
         "post",
-        lambda *args, **kwargs: WrappedResponse(fake_post(*args, **kwargs)),
-    )
-    monkeypatch.setattr(
-        routes,
-        "run_gateway_runtime_query",
-        lambda **kwargs: (_ for _ in ()).throw(
-            AssertionError("Runtime fallback should not run on OAuth success")
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("Direct Anthropic /v1/messages should not run for setup tokens")
         ),
     )
 
@@ -605,46 +577,29 @@ def test_post_v1_responses_routes_setup_tokens_through_oauth_headers(monkeypatch
     body = response.get_json()
     assert body["status"] == "completed"
     assert body["model"] == "claude-sonnet-4-6"
-    assert body["output_text"] == "Hello from Anthropic OAuth"
-    assert captured["headers"]["authorization"] == "Bearer sk-ant-oat01-test-setup-token"
-    assert "oauth-2025-04-20" in captured["headers"]["anthropic-beta"]
-    assert "x-api-key" not in captured["headers"]
-    assert captured["json"]["messages"] == [{"role": "user", "content": "Say hello"}]
+    assert body["output_text"] == "Hello from Claude runtime"
+    assert captured["kwargs"]["token"] == "sk-ant-oat01-test-setup-token"
+    assert captured["kwargs"]["messages"] == [{"role": "user", "content": "Say hello"}]
 
 
-def test_post_v1_responses_streams_setup_token_oauth_result(monkeypatch):
+def test_post_v1_responses_streams_setup_token_runtime_result(monkeypatch):
     client = _make_client()
-
-    stream_response = FakeStreamResponse(
-        200,
-        [
-            "event: message_start",
-            'data: {"type":"message_start","message":{"model":"claude-sonnet-4-6","usage":{"input_tokens":7}}}',
-            "",
-            "event: content_block_start",
-            'data: {"type":"content_block_start","content_block":{"type":"text","text":"runtime stream text"}}',
-            "",
-            "event: message_delta",
-            'data: {"type":"message_delta","usage":{"output_tokens":2}}',
-            "",
-            "event: message_stop",
-            'data: {"type":"message_stop"}',
-            "",
-        ],
+    monkeypatch.setattr(
+        routes,
+        "run_gateway_runtime_query",
+        lambda **kwargs: {
+            "status": "ok",
+            "output_text": "runtime stream text",
+            "model": "claude-sonnet-4-6",
+        },
     )
-
-    def fake_post(
-        url: str,
-        *,
-        json: dict[str, Any],
-        headers: dict[str, str],
-        timeout: float,
-        stream: bool,
-    ):
-        del url, json, headers, timeout, stream
-        return stream_response
-
-    monkeypatch.setattr(routes.http_requests, "post", fake_post)
+    monkeypatch.setattr(
+        routes.http_requests,
+        "post",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("Direct Anthropic /v1/messages should not run for setup tokens")
+        ),
+    )
 
     response = client.post(
         "/v1/responses",
@@ -676,21 +631,6 @@ def test_post_v1_responses_streams_setup_token_oauth_result(monkeypatch):
 def test_post_v1_responses_returns_error_when_setup_token_runtime_fails(monkeypatch):
     client = _make_client()
 
-    monkeypatch.setattr(
-        routes.http_requests,
-        "post",
-        lambda *args, **kwargs: FakeResponse(
-            401,
-            {
-                "type": "error",
-                "error": {
-                    "type": "authentication_error",
-                    "message": "OAuth authentication is currently not supported.",
-                },
-            },
-            text="oauth unsupported",
-        ),
-    )
     monkeypatch.setattr(
         routes,
         "run_gateway_runtime_query",

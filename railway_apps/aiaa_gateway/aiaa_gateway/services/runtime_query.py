@@ -141,6 +141,15 @@ async def _run_runtime_query(
 
     if process.returncode != 0:
         detail = stderr or stdout or "Claude runtime exited with a non-zero status."
+        # Claude can return non-zero while still producing usable output text.
+        # Prefer a degraded success over dropping the entire chat turn.
+        if stdout:
+            return {
+                "status": "ok",
+                "output_text": stdout,
+                "model": normalized_model or "",
+                "warning": detail[:_MAX_ERROR_LEN],
+            }
         return {
             "status": "runtime_error",
             "message": "Claude runtime execution failed",

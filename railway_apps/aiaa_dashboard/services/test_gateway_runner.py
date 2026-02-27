@@ -199,7 +199,12 @@ def test_gateway_runner_transport_calls_gateway_client_and_emits_result() -> Non
     assert len(gateway_client.calls) == 1
     call = gateway_client.calls[0]
     assert call["path"] == "/v1/responses"
-    assert call["payload"] == {"input": "hello", "stream": False}
+    assert call["payload"]["input"] == "hello"
+    assert call["payload"]["stream"] is False
+    assert call["payload"]["cwd"] == "/app"
+    assert call["payload"]["tools_profile"] == "full"
+    assert isinstance(call["payload"]["session_id"], str)
+    assert len(call["payload"]["session_id"]) == 36
     assert call["headers"]["X-Anthropic-Api-Key"] == "sk-ant-test-token"
 
     events = _drain_events(runner, session_id)

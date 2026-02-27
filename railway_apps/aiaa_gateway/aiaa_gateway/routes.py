@@ -75,6 +75,8 @@ _PUBLIC_ENDPOINTS = frozenset({"/", "/health"})
 _PRIVATE_ENDPOINT_PATH_PREFIX = "/v1/"
 _auth_failure_lock = threading.RLock()
 _auth_failure_windows: dict[str, deque[float]] = {}
+_project_context_lock = threading.RLock()
+_project_context_prompt_cache: str | None = None
 
 
 def _resolve_correlation_id() -> str:
@@ -690,6 +692,187 @@ def _stream_runtime_response_events(text: str, *, model: str):
     yield _format_sse_data("[DONE]")
 
 
+def _resolve_runtime_query_timeout_seconds() -> float:
+    configured = current_app.config.get("GATEWAY_RUNTIME_QUERY_TIMEOUT_SECONDS")
+    if configured is None:
+        configured = current_app.config.get("UPSTREAM_REQUEST_TIMEOUT_SECONDS", 30)
+    try:
+        return max(1.0, float(configured))
+    except (TypeError, ValueError):
+        return 30.0
+
+
+def _resolve_runtime_query_max_attempts() -> int:
+    configured = current_app.config.get("GATEWAY_RUNTIME_QUERY_MAX_ATTEMPTS", 2)
+    try:
+        return max(1, int(configured))
+    except (TypeError, ValueError):
+        return 2
+
+
+def _runtime_error_status_code(reason: str) -> int:
+    if reason == "invalid_request":
+        return 400
+    if reason == "runtime_unavailable":
+        return 503
+    if reason == "timeout":
+        return 504
+    return 502
+
+
+def _run_setup_token_runtime_response(
+    *,
+    runtime_token: str,
+    gateway_fields: dict[str, str | None],
+    upstream_payload: dict[str, Any],
+    stream_mode: bool,
+):
+    timeout_seconds = _resolve_runtime_query_timeout_seconds()
+    max_attempts = _resolve_runtime_query_max_attempts()
+    runtime_result: dict[str, Any] = {}
+
+    for attempt in range(1, max_attempts + 1):
+        runtime_result = run_gateway_runtime_query(
+            token=runtime_token,
+            messages=list(upstream_payload.get("messages") or []),
+            cwd=str(gateway_fields["cwd"]),
+            timeout_seconds=timeout_seconds,
+            model=str(upstream_payload.get("model") or ""),
+            system_prompt=str(upstream_payload.get("system") or "").strip() or None,
+            session_id=str(gateway_fields["session_id"] or "").strip() or None,
+        )
+        runtime_status = str(runtime_result.get("status") or "").strip().lower()
+        if runtime_status == "ok":
+            break
+        # Retry transient runtime failures once before surfacing upstream errors.
+        if attempt >= max_attempts or runtime_status not in {"timeout", "runtime_error"}:
+            break
+
+    runtime_status = str(runtime_result.get("status") or "").strip().lower()
+    if runtime_status != "ok":
+        detail = redact_token_like_text(
+            str(runtime_result.get("error") or runtime_result.get("message") or "").strip()
+        )
+        reason = runtime_status or "runtime_error"
+        status_code = _runtime_error_status_code(reason)
+        _log_gateway_event(
+            "gateway.responses",
+            "error",
+            reason=reason,
+            detail=detail,
+            stream=stream_mode,
+            backend="claude_runtime",
+        )
+        return _json_error(
+            detail or "Claude runtime execution failed.",
+            status_code,
+            error_type="upstream_error",
+        )
+
+    response_text = str(runtime_result.get("output_text") or "").strip()
+    response_model = (
+        str(runtime_result.get("model") or "").strip()
+        or str(upstream_payload.get("model") or "").strip()
+        or str(current_app.config["DEFAULT_ANTHROPIC_MODEL"])
+    )
+    _log_gateway_event(
+        "gateway.responses",
+        "success",
+        stream=stream_mode,
+        backend="claude_runtime",
+    )
+    if stream_mode:
+        response = Response(
+            stream_with_context(
+                _stream_runtime_response_events(response_text, model=response_model)
+            ),
+            mimetype="text/event-stream",
+        )
+        response.headers["Cache-Control"] = "no-cache"
+        response.headers["X-Accel-Buffering"] = "no"
+        response.headers["Connection"] = "keep-alive"
+        return response
+
+    return jsonify(_runtime_text_to_response_payload(response_text, model=response_model))
+
+
+def _read_prompt_snippet(path: Path, *, max_chars: int) -> str:
+    try:
+        if not path.is_file():
+            return ""
+        text = path.read_text(encoding="utf-8", errors="replace").strip()
+        if not text:
+            return ""
+        if len(text) > max_chars:
+            return text[:max_chars].rstrip() + "\n...[truncated]"
+        return text
+    except OSError:
+        return ""
+
+
+def _build_project_context_prompt() -> str:
+    workspace_root = (
+        str(current_app.config.get("GATEWAY_WORKSPACE_ROOT") or os.getenv("GATEWAY_WORKSPACE_ROOT") or "/app")
+        .strip()
+        or "/app"
+    )
+    workspace = Path(workspace_root)
+    if not workspace.is_dir():
+        return ""
+
+    claude_md = _read_prompt_snippet(workspace / "CLAUDE.md", max_chars=3500)
+    agents_md = _read_prompt_snippet(workspace / "AGENTS.md", max_chars=5500)
+    skill_names: list[str] = []
+    skills_root = workspace / ".claude" / "skills"
+    try:
+        if skills_root.is_dir():
+            skill_names = sorted(
+                entry.name
+                for entry in skills_root.iterdir()
+                if entry.is_dir() and not entry.name.startswith("_")
+            )
+    except OSError:
+        skill_names = []
+
+    sections: list[str] = [
+        "You are answering for the AIAA Agentic OS workspace. Respect the project operating model and available capabilities.",
+        "Assume this repository is the active project root and prioritize its documented workflows.",
+    ]
+    if skill_names:
+        sections.append(
+            "Available native skills (from .claude/skills): "
+            + ", ".join(skill_names)
+        )
+    if claude_md:
+        sections.append("CLAUDE.md excerpt:\n" + claude_md)
+    if agents_md:
+        sections.append("AGENTS.md excerpt:\n" + agents_md)
+    return "\n\n".join(section for section in sections if section).strip()
+
+
+def _resolve_project_context_prompt() -> str:
+    global _project_context_prompt_cache
+    with _project_context_lock:
+        if _project_context_prompt_cache is None:
+            _project_context_prompt_cache = _build_project_context_prompt()
+        return _project_context_prompt_cache
+
+
+def _inject_project_context_into_upstream_payload(
+    upstream_payload: dict[str, Any],
+) -> dict[str, Any]:
+    prompt_context = _resolve_project_context_prompt()
+    if not prompt_context:
+        return upstream_payload
+
+    existing_system = str(upstream_payload.get("system") or "").strip()
+    if existing_system:
+        upstream_payload["system"] = f"{prompt_context}\n\n{existing_system}"
+    else:
+        upstream_payload["system"] = prompt_context
+    return upstream_payload
+
+
 @gateway_bp.get("/")
 def index():
     return jsonify(
@@ -965,6 +1148,20 @@ def create_response():
         ).strip()
 
     if is_setup_token(runtime_token):
+        upstream_payload = _inject_project_context_into_upstream_payload(
+            dict(upstream_payload)
+        )
+        execution_mode = str(
+            current_app.config.get("SETUP_TOKEN_EXECUTION_MODE", "anthropic_oauth")
+        ).strip().lower()
+        if execution_mode != "anthropic_oauth":
+            return _run_setup_token_runtime_response(
+                runtime_token=runtime_token,
+                gateway_fields=gateway_fields,
+                upstream_payload=upstream_payload,
+                stream_mode=stream_mode,
+            )
+
         correlation_id = get_correlation_id()
         base_url = str(current_app.config["ANTHROPIC_BASE_URL"]).rstrip("/")
         timeout_seconds = float(current_app.config["UPSTREAM_REQUEST_TIMEOUT_SECONDS"])
@@ -1101,67 +1298,12 @@ def create_response():
                 details=details,
             )
 
-        runtime_result = run_gateway_runtime_query(
-            token=runtime_token,
-            messages=list(upstream_payload.get("messages") or []),
-            cwd=str(gateway_fields["cwd"]),
-            timeout_seconds=timeout_seconds,
-            model=str(upstream_payload.get("model") or ""),
-            system_prompt=str(upstream_payload.get("system") or "").strip() or None,
-            session_id=str(gateway_fields["session_id"] or "").strip() or None,
+        return _run_setup_token_runtime_response(
+            runtime_token=runtime_token,
+            gateway_fields=gateway_fields,
+            upstream_payload=upstream_payload,
+            stream_mode=stream_mode,
         )
-        runtime_status = str(runtime_result.get("status") or "").strip().lower()
-        if runtime_status != "ok":
-            detail = redact_token_like_text(
-                str(runtime_result.get("error") or runtime_result.get("message") or "").strip()
-            )
-            reason = runtime_status or "runtime_error"
-            if reason == "invalid_request":
-                status_code = 400
-            elif reason == "runtime_unavailable":
-                status_code = 503
-            elif reason == "timeout":
-                status_code = 504
-            else:
-                status_code = 502
-            _log_gateway_event(
-                "gateway.responses",
-                "error",
-                reason=reason,
-                detail=detail,
-                stream=stream_mode,
-                backend="claude_runtime",
-            )
-            return _json_error(
-                detail or "Claude runtime execution failed.",
-                status_code,
-                error_type="upstream_error",
-            )
-
-        response_text = str(runtime_result.get("output_text") or "").strip()
-        response_model = (
-            str(runtime_result.get("model") or "").strip()
-            or str(upstream_payload.get("model") or "").strip()
-            or str(current_app.config["DEFAULT_ANTHROPIC_MODEL"])
-        )
-        _log_gateway_event(
-            "gateway.responses",
-            "success",
-            stream=stream_mode,
-            backend="claude_runtime",
-        )
-        if stream_mode:
-            response = Response(
-                stream_with_context(
-                    _stream_runtime_response_events(response_text, model=response_model)
-                ),
-                mimetype="text/event-stream",
-            )
-            response.headers["Cache-Control"] = "no-cache"
-            response.headers["X-Accel-Buffering"] = "no"
-            response.headers["Connection"] = "keep-alive"
-            return response
-        return jsonify(_runtime_text_to_response_payload(response_text, model=response_model))
 
     api_key = _resolve_anthropic_api_key()
     if not api_key:

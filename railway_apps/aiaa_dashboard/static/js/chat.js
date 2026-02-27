@@ -109,6 +109,55 @@ function normalizeStreamEvent(eventData) {
     return eventData;
 }
 
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = String(text || '');
+    return div.innerHTML;
+}
+
+function renderChatMarkdown(text) {
+    if (!text) {
+        return '';
+    }
+
+    let html = escapeHtml(text);
+
+    // Code fences
+    html = html.replace(/```([\w-]*)\n?([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
+    // Inline code
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+    // Headings
+    html = html.replace(/^### (.+)$/gm, '<h4>$1</h4>');
+    html = html.replace(/^## (.+)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^# (.+)$/gm, '<h2>$1</h2>');
+
+    // Emphasis
+    html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+    // Links
+    html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+    // Blockquotes and horizontal rules
+    html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+    html = html.replace(/^---$/gm, '<hr>');
+
+    // Lists
+    html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+    html = html.replace(/<\/ul>\s*<ul>/g, '');
+
+    // Paragraphs and line breaks
+    html = html.replace(/^(?!<h\d|<ul>|<li>|<pre>|<blockquote>|<hr>|<\/)(.+)$/gm, '<p>$1</p>');
+    html = html.replace(/<p><\/p>/g, '');
+    html = html.replace(/\n/g, '<br>');
+    html = html.replace(/<\/(h2|h3|h4|ul|pre|blockquote|hr)><br>/g, '</$1>');
+
+    return html;
+}
+
 if (typeof globalThis !== 'undefined') {
     globalThis.ChatUIErrorMessages = {
         isGatewayAuthFailure,
@@ -320,7 +369,14 @@ class ChatUI {
 
         const bubble = document.createElement('div');
         bubble.className = 'chat-bubble';
-        bubble.textContent = text || '';
+        const content = text || '';
+        if (role === 'assistant') {
+            bubble.classList.add('markdown');
+            bubble.dataset.rawContent = content;
+            bubble.innerHTML = renderChatMarkdown(content);
+        } else {
+            bubble.textContent = content;
+        }
 
         row.appendChild(bubble);
         this.messagesEl.appendChild(row);
@@ -336,7 +392,9 @@ class ChatUI {
 
         const bubble = document.createElement('div');
         bubble.className = 'chat-bubble';
-        bubble.textContent = '';
+        bubble.classList.add('markdown');
+        bubble.dataset.rawContent = '';
+        bubble.innerHTML = '';
 
         const steps = document.createElement('div');
         steps.className = 'chat-tool-steps';
@@ -352,8 +410,10 @@ class ChatUI {
         if (!agentBubble || !content) {
             return;
         }
-        const existing = agentBubble.bubble.textContent || '';
-        agentBubble.bubble.textContent = existing + content;
+        const existing = agentBubble.bubble.dataset.rawContent || '';
+        const next = existing + content;
+        agentBubble.bubble.dataset.rawContent = next;
+        agentBubble.bubble.innerHTML = renderChatMarkdown(next);
         this.scrollToBottom();
     }
 
@@ -372,6 +432,7 @@ class ChatUI {
         const message = formatChatErrorMessage(content);
         if (agentBubble && agentBubble.bubble) {
             agentBubble.row.classList.add('error');
+            agentBubble.bubble.classList.remove('markdown');
             agentBubble.bubble.textContent = message;
             this.scrollToBottom();
             return;
@@ -383,8 +444,10 @@ class ChatUI {
         if (!agentBubble) {
             return;
         }
-        if (!agentBubble.bubble.textContent.trim()) {
-            agentBubble.bubble.textContent = 'Completed.';
+        const raw = String(agentBubble.bubble.dataset.rawContent || '').trim();
+        if (!raw) {
+            agentBubble.bubble.dataset.rawContent = 'Completed.';
+            agentBubble.bubble.innerHTML = renderChatMarkdown('Completed.');
         }
     }
 
