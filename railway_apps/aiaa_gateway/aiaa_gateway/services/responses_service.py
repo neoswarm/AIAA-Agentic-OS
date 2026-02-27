@@ -7,6 +7,9 @@ import uuid
 from collections.abc import Mapping
 from typing import Any
 
+DEFAULT_GATEWAY_CWD = "/app"
+DEFAULT_TOOLS_PROFILE = "full"
+
 
 def _coerce_content_to_text(content: Any) -> str:
     if isinstance(content, str):
@@ -76,6 +79,53 @@ def _normalize_input_to_messages(request_input: Any) -> list[dict[str, str]]:
         messages.append({"role": role, "content": text_value})
 
     return messages
+
+
+def normalize_gateway_request_fields(
+    body: Mapping[str, Any],
+    *,
+    default_cwd: str = DEFAULT_GATEWAY_CWD,
+    default_tools_profile: str = DEFAULT_TOOLS_PROFILE,
+) -> dict[str, str | None]:
+    """Validate and normalize gateway request fields carried by /v1/responses."""
+    profile_id_raw = body.get("profile_id")
+    if profile_id_raw is None:
+        profile_id = None
+    elif isinstance(profile_id_raw, str):
+        profile_id = profile_id_raw.strip() or None
+    else:
+        raise ValueError("profile_id must be a string when provided.")
+
+    session_id_raw = body.get("session_id")
+    if session_id_raw is None:
+        session_id = None
+    elif isinstance(session_id_raw, str):
+        session_id = session_id_raw.strip() or None
+    else:
+        raise ValueError("session_id must be a string when provided.")
+
+    cwd_raw = body.get("cwd")
+    if cwd_raw is None:
+        cwd = default_cwd
+    elif isinstance(cwd_raw, str):
+        cwd = cwd_raw.strip() or default_cwd
+    else:
+        raise ValueError("cwd must be a string when provided.")
+
+    tools_profile_raw = body.get("tools_profile")
+    if tools_profile_raw is None:
+        tools_profile = default_tools_profile
+    elif isinstance(tools_profile_raw, str):
+        tools_profile = tools_profile_raw.strip() or default_tools_profile
+    else:
+        raise ValueError("tools_profile must be a string when provided.")
+
+    return {
+        "profile_id": profile_id,
+        "session_id": session_id,
+        "cwd": cwd,
+        "tools_profile": tools_profile,
+    }
 
 
 def build_anthropic_messages_payload(

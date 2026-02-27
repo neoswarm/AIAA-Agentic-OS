@@ -509,7 +509,6 @@ def test_post_v1_responses_surfaces_upstream_errors(monkeypatch):
     assert body["error"]["type"] == "upstream_error"
     assert body["error"]["details"]["upstream_status"] == 429
 
-
 def test_post_v1_responses_redacts_token_from_request_exceptions(monkeypatch, caplog):
     client = _make_client()
     raw_token = "sk-ant-api03-super-secret-token-1234567890"
@@ -537,3 +536,96 @@ def test_post_v1_responses_redacts_token_from_request_exceptions(monkeypatch, ca
 
     assert raw_token not in caplog.text
     assert "Bearer " in caplog.text
+
+
+def test_post_v1_responses_forwards_gateway_request_fields(monkeypatch):
+    client = _make_client()
+    captured: dict[str, Any] = {}
+
+    def fake_post(
+        url: str, *, json: dict[str, Any], headers: dict[str, str], timeout: float
+    ):
+        captured["url"] = url
+        captured["json"] = json
+        captured["headers"] = headers
+        captured["timeout"] = timeout
+        return FakeResponse(
+            200,
+            {
+                "id": "msg_upstream_789",
+                "model": "claude-3-5-sonnet-latest",
+                "content": [{"type": "text", "text": "ok"}],
+                "usage": {"input_tokens": 1, "output_tokens": 1},
+                "stop_reason": "end_turn",
+            },
+        )
+
+    monkeypatch.setattr(routes.http_requests, "post", fake_post)
+
+    response = client.post(
+        "/v1/responses",
+        json={
+            "model": "claude-3-5-sonnet-latest",
+            "input": "hello",
+            "profile_id": "student-a",
+            "session_id": "session-123",
+            "cwd": "/workspace/project",
+            "tools_profile": "safe",
+        },
+    )
+
+    assert response.status_code == 200
+    headers = captured["headers"]
+    assert headers["x-aiaa-profile-id"] == "student-a"
+    assert headers["x-aiaa-session-id"] == "session-123"
+    assert headers["x-aiaa-cwd"] == "/workspace/project"
+    assert headers["x-aiaa-tools-profile"] == "safe"
+
+
+def test_post_v1_responses_applies_gateway_field_defaults(monkeypatch):
+    client = _make_client()
+    captured: dict[str, Any] = {}
+
+    def fake_post(
+        url: str, *, json: dict[str, Any], headers: dict[str, str], timeout: float
+    ):
+        del url, json, timeout
+        captured["headers"] = headers
+        return FakeResponse(
+            200,
+            {
+                "id": "msg_upstream_790",
+                "model": "claude-3-5-sonnet-latest",
+                "content": [{"type": "text", "text": "ok"}],
+                "usage": {"input_tokens": 1, "output_tokens": 1},
+                "stop_reason": "end_turn",
+            },
+        )
+
+    monkeypatch.setattr(routes.http_requests, "post", fake_post)
+
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-3-5-sonnet-latest", "input": "hello"},
+    )
+
+    assert response.status_code == 200
+    headers = captured["headers"]
+    assert headers["x-aiaa-cwd"] == "/app"
+    assert headers["x-aiaa-tools-profile"] == "full"
+    assert "x-aiaa-profile-id" not in headers
+    assert "x-aiaa-session-id" not in headers
+
+
+def test_post_v1_responses_rejects_non_string_gateway_fields():
+    client = _make_client()
+
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-3-5-sonnet-latest", "input": "hello", "cwd": 123},
+    )
+
+    assert response.status_code == 400
+    body = response.get_json()
+    assert body["error"]["type"] == "invalid_request_error"
+    assert body["error"]["message"] == "cwd must be a string when provided."

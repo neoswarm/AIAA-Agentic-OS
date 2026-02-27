@@ -34,6 +34,7 @@ from .services.profile_service import (
 from .services.responses_service import (
     build_anthropic_messages_payload,
     map_anthropic_to_response,
+    normalize_gateway_request_fields,
 )
 from .services.runtime_canary import run_gateway_runtime_canary
 
@@ -596,6 +597,11 @@ def create_response():
     _log_gateway_event("gateway.responses", "received", stream=stream_mode)
 
     try:
+        gateway_fields = normalize_gateway_request_fields(body)
+    except ValueError as exc:
+        return _json_error(str(exc), 400)
+
+    try:
         upstream_payload = build_anthropic_messages_payload(
             body,
             default_model=str(current_app.config["DEFAULT_ANTHROPIC_MODEL"]),
@@ -623,10 +629,17 @@ def create_response():
         "x-api-key": api_key,
         "anthropic-version": str(current_app.config["ANTHROPIC_API_VERSION"]),
         "content-type": "application/json",
+        "accept": "application/json",
+        "x-aiaa-cwd": str(gateway_fields["cwd"]),
+        "x-aiaa-tools-profile": str(gateway_fields["tools_profile"]),
     }
     if correlation_id:
         headers[CORRELATION_HEADER] = correlation_id
         headers[REQUEST_ID_HEADER] = correlation_id
+    if gateway_fields["profile_id"]:
+        headers["x-aiaa-profile-id"] = str(gateway_fields["profile_id"])
+    if gateway_fields["session_id"]:
+        headers["x-aiaa-session-id"] = str(gateway_fields["session_id"])
 
     if stream_mode:
         headers["accept"] = "text/event-stream"
