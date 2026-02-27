@@ -71,8 +71,14 @@ def test_post_v1_responses_non_stream_success(monkeypatch):
     captured: dict[str, Any] = {}
 
     def fake_post(
-        url: str, *, json: dict[str, Any], headers: dict[str, str], timeout: float
+        url: str,
+        *,
+        json: dict[str, Any],
+        headers: dict[str, str],
+        timeout: float,
+        stream: bool = False,
     ):
+        assert stream is False
         captured["url"] = url
         captured["json"] = json
         captured["headers"] = headers
@@ -130,11 +136,11 @@ def test_post_v1_responses_stream_success(monkeypatch):
             "event: message_start",
             'data: {"type":"message_start","message":{"model":"claude-3-5-sonnet-latest","usage":{"input_tokens":7}}}',
             "",
-            "event: content_block_delta",
-            'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Hello"}}',
+            "event: content_block_start",
+            'data: {"type":"content_block_start","content_block":{"type":"text","text":"Hello "}}',
             "",
             "event: content_block_delta",
-            'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":" world"}}',
+            'data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"world"}}',
             "",
             "event: message_delta",
             'data: {"type":"message_delta","usage":{"output_tokens":2}}',
@@ -183,7 +189,7 @@ def test_post_v1_responses_stream_success(monkeypatch):
         event["delta"]
         for event in typed_events
         if event.get("type") == "response.output_text.delta"
-    ] == ["Hello", " world"]
+    ] == ["Hello ", "world"]
     assert any(
         event.get("type") == "response.output_text.done"
         and event.get("text") == "Hello world"
@@ -292,8 +298,14 @@ def test_post_v1_responses_handles_normalized_upstream_payload(monkeypatch):
     client = _make_client()
 
     def fake_post(
-        url: str, *, json: dict[str, Any], headers: dict[str, str], timeout: float
+        url: str,
+        *,
+        json: dict[str, Any],
+        headers: dict[str, str],
+        timeout: float,
+        stream: bool = False,
     ):
+        assert stream is False
         del url, json, headers, timeout
         return FakeResponse(
             200,
@@ -354,8 +366,14 @@ def test_post_v1_responses_surfaces_upstream_errors(monkeypatch):
     client = _make_client()
 
     def fake_post(
-        url: str, *, json: dict[str, Any], headers: dict[str, str], timeout: float
+        url: str,
+        *,
+        json: dict[str, Any],
+        headers: dict[str, str],
+        timeout: float,
+        stream: bool = False,
     ):
+        assert stream is False
         del url, json, headers, timeout
         return FakeResponse(
             429, {"error": {"message": "rate limit exceeded"}}, text="rate limited"

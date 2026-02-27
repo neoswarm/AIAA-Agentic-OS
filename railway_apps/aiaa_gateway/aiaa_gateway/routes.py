@@ -180,7 +180,9 @@ def _resolve_profile_store() -> MutableMapping[str, dict[str, Any]]:
 def _format_sse_data(payload: dict[str, Any] | str) -> str:
     if isinstance(payload, str):
         return f"data: {payload}\n\n"
-    return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
+    return (
+        f"data: {json.dumps(payload, ensure_ascii=False, separators=(',', ':'))}\n\n"
+    )
 
 
 def _parse_upstream_error_details(upstream_response: Any) -> dict[str, Any]:
@@ -205,6 +207,27 @@ def _extract_error_message(event: Mapping[str, Any]) -> str:
         return direct_message.strip()
 
     return "Upstream provider stream failed."
+
+
+def _extract_text_delta(event: Mapping[str, Any]) -> str:
+    event_type = str(event.get("type") or "")
+    if event_type == "content_block_start":
+        block = event.get("content_block")
+        if isinstance(block, Mapping) and str(block.get("type") or "") == "text":
+            text = block.get("text")
+            if isinstance(text, str):
+                return text
+        return ""
+
+    if event_type != "content_block_delta":
+        return ""
+
+    delta = event.get("delta")
+    if not isinstance(delta, Mapping) or str(delta.get("type") or "") != "text_delta":
+        return ""
+
+    text = delta.get("text")
+    return text if isinstance(text, str) else ""
 
 
 def _stream_openai_response_events(
@@ -278,14 +301,9 @@ def _stream_openai_response_events(
                         output_tokens = 0
                 continue
 
-            if event_type == "content_block_delta":
-                delta = event.get("delta")
-                if not isinstance(delta, Mapping):
-                    continue
-                if delta.get("type") != "text_delta":
-                    continue
-                text_chunk = delta.get("text")
-                if not isinstance(text_chunk, str) or not text_chunk:
+            if event_type in {"content_block_start", "content_block_delta"}:
+                text_chunk = _extract_text_delta(event)
+                if not text_chunk:
                     continue
                 text_parts.append(text_chunk)
                 yield _format_sse_data(
