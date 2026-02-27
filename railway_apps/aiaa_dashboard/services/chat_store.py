@@ -46,15 +46,22 @@ def normalize_gateway_event_type(
     payload_kind = ""
     if payload is not None:
         payload_kind = str(payload.get("kind", "")).strip().lower()
-        if payload_kind in ALLOWED_STREAM_EVENT_TYPES and raw_type in (
-            "tool",
-            "result",
-            "system",
+        if payload_kind in ALLOWED_STREAM_EVENT_TYPES and (
+            raw_type in ("tool", "result", "system") or raw_type.startswith("response.")
         ):
             return payload_kind
 
     if raw_type in ALLOWED_STREAM_EVENT_TYPES:
         return raw_type
+
+    if raw_type in ("response.output_text.delta", "response.output_text.done"):
+        return "text"
+
+    if raw_type in ("response.failed", "response.error"):
+        return "error"
+
+    if raw_type in ("response.completed", "response.done"):
+        return "done"
 
     if raw_type == "tool":
         if payload_kind in ("tool_use", "tool_result"):
