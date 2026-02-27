@@ -3,17 +3,22 @@
 from __future__ import annotations
 
 import os
+import logging
 
 from flask import Flask
 
 from .routes import gateway_bp
 from .services.profile_service import validate_token_encryption_key
 
+logger = logging.getLogger(__name__)
+
 
 def _validate_startup_configuration(app: Flask) -> None:
     """Validate required secrets before serving requests."""
     if not str(app.config.get("ANTHROPIC_API_KEY", "")).strip():
-        raise RuntimeError("Missing required gateway secret: ANTHROPIC_API_KEY.")
+        logger.warning(
+            "ANTHROPIC_API_KEY is not configured; gateway will require setup/profile tokens."
+        )
     validate_token_encryption_key()
 
 
