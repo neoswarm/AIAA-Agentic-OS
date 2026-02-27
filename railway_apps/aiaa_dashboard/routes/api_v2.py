@@ -1038,6 +1038,68 @@ def _collect_chat_failure_metrics():
     return metrics
 
 
+def _coerce_non_negative_int(value):
+    """Best-effort numeric coercion for session latency values."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        coerced = int(value)
+        return coerced if coerced >= 0 else None
+    if isinstance(value, str):
+        candidate = value.strip()
+        if not candidate:
+            return None
+        try:
+            coerced = int(float(candidate))
+            return coerced if coerced >= 0 else None
+        except (TypeError, ValueError):
+            return None
+    return None
+
+
+def _collect_chat_latency_metrics():
+    """Aggregate chat latency metrics from stored session snapshots."""
+    metric_keys = ("queue_wait_ms", "first_event_latency_ms", "total_runtime_ms")
+    totals = {key: 0 for key in metric_keys}
+    counts = {key: 0 for key in metric_keys}
+
+    try:
+        sessions = _list_chat_sessions_for_metrics()
+    except Exception:
+        sessions = []
+
+    for session_data in sessions:
+        if not isinstance(session_data, dict):
+            continue
+        for key in metric_keys:
+            value = _coerce_non_negative_int(session_data.get(key))
+            if value is None:
+                continue
+            totals[key] += value
+            counts[key] += 1
+
+    return {
+        "avg_queue_wait_ms": (
+            int(totals["queue_wait_ms"] / counts["queue_wait_ms"])
+            if counts["queue_wait_ms"]
+            else 0
+        ),
+        "avg_first_event_latency_ms": (
+            int(totals["first_event_latency_ms"] / counts["first_event_latency_ms"])
+            if counts["first_event_latency_ms"]
+            else 0
+        ),
+        "avg_total_runtime_ms": (
+            int(totals["total_runtime_ms"] / counts["total_runtime_ms"])
+            if counts["total_runtime_ms"]
+            else 0
+        ),
+        "queue_wait_samples": counts["queue_wait_ms"],
+        "first_event_latency_samples": counts["first_event_latency_ms"],
+        "total_runtime_samples": counts["total_runtime_ms"],
+    }
+
+
 @api_v2_bp.route('/settings/api-keys', methods=['POST'])
 @login_required
 def api_save_api_key():
@@ -1220,6 +1282,7 @@ def api_key_status():
         keys_status = {}
         token_validation_metrics = {status: 0 for status in _TOKEN_VALIDATION_STATUSES}
         chat_failure_metrics = _collect_chat_failure_metrics()
+        chat_latency_metrics = _collect_chat_latency_metrics()
 
         for friendly_name, env_var in _API_KEY_NAMES.items():
             setting_key = f"api_key.{env_var}"
@@ -1263,10 +1326,12 @@ def api_key_status():
             "token_validation_metrics": token_validation_metrics,
             "stream_failure_count": chat_failure_metrics["stream_failures"],
             "runtime_error_count": chat_failure_metrics["runtime_errors"],
+            "chat_latency_metrics": chat_latency_metrics,
             "metrics": {
                 "token_validation_by_status": token_validation_metrics,
                 "stream_failures": chat_failure_metrics["stream_failures"],
                 "runtime_errors": chat_failure_metrics["runtime_errors"],
+                "chat_latency": chat_latency_metrics,
             },
         })
     except Exception as e:
