@@ -27,6 +27,10 @@ def create_app(test_config: dict | None = None) -> Flask:
         ),
         GATEWAY_INTERNAL_TOKEN=os.getenv("GATEWAY_INTERNAL_TOKEN", ""),
         PROFILE_STORE={},
+        GATEWAY_RUNTIME_CANARY_TIMEOUT_SECONDS=float(
+            os.getenv("GATEWAY_RUNTIME_CANARY_TIMEOUT_SECONDS", "12")
+        ),
+        PROFILE_TOKEN_STORE={},
     )
 
     if test_config:

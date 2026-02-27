@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import secrets
 import shutil
-from collections.abc import MutableMapping
+from collections.abc import Mapping, MutableMapping
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -18,8 +18,17 @@ from .services.responses_service import (
     build_anthropic_messages_payload,
     map_anthropic_to_response,
 )
+from .services.profile_service import normalize_profile_id, resolve_stored_profile_token
+from .services.runtime_canary import run_gateway_runtime_canary
 
 gateway_bp = Blueprint("gateway", __name__)
+_SUPPORTED_PROFILE_VALIDATION_STATES = {
+    "valid",
+    "expired",
+    "invalid",
+    "unreachable",
+    "unsupported",
+}
 
 _PROFILE_STORE_KEY_ENV_VARS = (
     "CHAT_TOKEN_ENCRYPTION_KEY",
@@ -208,6 +217,86 @@ def revoke_gateway_profile():
         return _json_error(str(exc), 400)
 
     return jsonify({"status": "ok", "revoked": True})
+
+
+def _map_canary_validation(canary_result: dict[str, Any]) -> str:
+    raw_status = str(canary_result.get("status") or "").strip().lower()
+    if raw_status in _SUPPORTED_PROFILE_VALIDATION_STATES:
+        return raw_status
+    if raw_status in {"runtime_unavailable", "runtime_error", "timeout"}:
+        return "unreachable"
+
+    detail = (
+        f"{canary_result.get('error', '')} {canary_result.get('message', '')}"
+    ).lower()
+    if "expired" in detail:
+        return "expired"
+    if "unsupported" in detail:
+        return "unsupported"
+    return "invalid"
+
+
+@gateway_bp.post("/v1/profiles/validate")
+def validate_profile():
+    """Validate a stored setup-token profile with a runtime canary."""
+    body = request.get_json(silent=True)
+    if body is None:
+        body = {}
+    if not isinstance(body, dict):
+        return _json_error("Request body must be a JSON object.", 400)
+
+    raw_profile_id = str(body.get("profile_id") or "")
+    if not raw_profile_id.strip():
+        return _json_error(
+            "Validation failed.",
+            400,
+            details={"profile_id": "profile_id is required"},
+        )
+
+    profile_id = normalize_profile_id(raw_profile_id)
+    if not profile_id:
+        return _json_error(
+            "Validation failed.",
+            400,
+            details={
+                "profile_id": (
+                    "profile_id must use lowercase letters, numbers, and hyphens only"
+                )
+            },
+        )
+
+    profile_store = current_app.config.get("PROFILE_TOKEN_STORE")
+    token = resolve_stored_profile_token(
+        profile_id,
+        profile_store=profile_store if isinstance(profile_store, Mapping) else None,
+    )
+    if not token:
+        return _json_error(
+            "Validation failed.",
+            400,
+            details={"token": f"No token configured for profile: {profile_id}"},
+        )
+
+    raw_timeout = current_app.config.get("GATEWAY_RUNTIME_CANARY_TIMEOUT_SECONDS")
+    timeout_seconds: float | None = None
+    if raw_timeout is not None:
+        try:
+            timeout_seconds = max(1.0, float(raw_timeout))
+        except (TypeError, ValueError):
+            timeout_seconds = None
+
+    canary_result = run_gateway_runtime_canary(token, timeout_seconds=timeout_seconds)
+    if not isinstance(canary_result, dict):
+        canary_result = {"status": "runtime_error", "message": "Invalid canary result"}
+
+    return jsonify(
+        {
+            "status": "ok",
+            "profile_id": profile_id,
+            "validation": _map_canary_validation(canary_result),
+            "detail": canary_result,
+        }
+    )
 
 
 @gateway_bp.post("/v1/responses")

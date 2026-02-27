@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import base64
+from collections.abc import Mapping
+from contextlib import contextmanager
 from datetime import UTC, datetime
 import hashlib
 import os
+from pathlib import Path
 import re
 import sqlite3
-from contextlib import contextmanager
-from pathlib import Path
 from typing import Any, Iterator, MutableMapping, NamedTuple, Optional
 
 from cryptography.fernet import Fernet, InvalidToken
@@ -21,6 +22,7 @@ DEFAULT_PROFILE_DB_PATH = (
     Path(__file__).resolve().parents[2] / "data" / "gateway_profiles.db"
 )
 PROFILE_ID_PATTERN = re.compile(r"[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}")
+NORMALIZED_PROFILE_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{0,99}$")
 
 
 class ProfileRecord(NamedTuple):
@@ -240,3 +242,70 @@ def revoke_profile(
     record["updated_at"] = revoked_at
     profile_store[normalized_profile_id] = record
     return record
+
+
+def normalize_profile_id(profile_id: Optional[str]) -> str:
+    """Normalize and validate a profile_id for gateway profile lookups."""
+    normalized = (profile_id or "").strip().lower()
+    if not normalized:
+        return ""
+    if not NORMALIZED_PROFILE_ID_PATTERN.fullmatch(normalized):
+        return ""
+    return normalized
+
+
+def _token_from_profile_record(record: Any) -> Optional[str]:
+    """Extract stored token text from a profile-store record value."""
+    if isinstance(record, str):
+        return record
+    if isinstance(record, Mapping):
+        encrypted = record.get("encrypted_token")
+        if isinstance(encrypted, str) and encrypted.strip():
+            return encrypted
+        token = record.get("token")
+        if isinstance(token, str) and token.strip():
+            return token
+    return None
+
+
+def _profile_token_env_keys(profile_id: str) -> tuple[str, ...]:
+    suffix = profile_id.upper().replace("-", "_")
+    keys = [f"GATEWAY_PROFILE_TOKEN_{suffix}"]
+    if profile_id == "default":
+        keys.extend(["GATEWAY_PROFILE_TOKEN_DEFAULT", "GATEWAY_PROFILE_TOKEN"])
+        keys.append("CLAUDE_SETUP_TOKEN")
+    return tuple(keys)
+
+
+def resolve_stored_profile_token(
+    profile_id: str,
+    *,
+    profile_store: Mapping[str, Any] | None = None,
+) -> Optional[str]:
+    """Resolve and decrypt the stored setup-token for a profile if available."""
+    normalized_profile_id = normalize_profile_id(profile_id)
+    if not normalized_profile_id:
+        return None
+
+    stored_token: Optional[str] = None
+    if profile_store is not None:
+        stored_token = _token_from_profile_record(profile_store.get(normalized_profile_id))
+
+    if not stored_token:
+        for env_key in _profile_token_env_keys(normalized_profile_id):
+            candidate = (os.getenv(env_key) or "").strip()
+            if candidate:
+                stored_token = candidate
+                break
+
+    if not stored_token:
+        return None
+
+    try:
+        token = decrypt_token_from_storage(stored_token)
+    except RuntimeError:
+        return None
+
+    if not token:
+        return None
+    return token.strip() or None

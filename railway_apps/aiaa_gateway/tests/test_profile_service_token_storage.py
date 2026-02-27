@@ -73,3 +73,27 @@ def test_flask_secret_key_fallback_supports_round_trip(monkeypatch):
     encrypted = profile_service.encrypt_token_for_storage(token)
 
     assert profile_service.decrypt_token_from_storage(encrypted) == token
+
+
+def test_resolve_stored_profile_token_from_profile_store_plain_value():
+    profile_store = {"default": {"token": "stored-token"}}
+
+    assert (
+        profile_service.resolve_stored_profile_token(
+            "default", profile_store=profile_store
+        )
+        == "stored-token"
+    )
+
+
+def test_resolve_stored_profile_token_from_profile_store_encrypted(monkeypatch):
+    monkeypatch.setenv("CHAT_TOKEN_ENCRYPTION_KEY", "gateway-profile-token-secret")
+    encrypted = profile_service.encrypt_token_for_storage("stored-token")
+    profile_store = {"default": {"encrypted_token": encrypted}}
+
+    assert (
+        profile_service.resolve_stored_profile_token(
+            "default", profile_store=profile_store
+        )
+        == "stored-token"
+    )
