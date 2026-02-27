@@ -65,3 +65,54 @@ def test_build_chat_runner_uses_resolved_runner_class(monkeypatch):
     assert captured["token_provider"] is token_provider
     assert captured["session_store"] is store
 
+
+def test_build_chat_runner_selects_gateway_backend_from_env(monkeypatch):
+    captured = {}
+
+    class DummyRunner:
+        def __init__(self, **kwargs):
+            captured["kwargs"] = kwargs
+
+    monkeypatch.setenv("CHAT_BACKEND", "gateway")
+
+    def _capture_backend(backend):
+        captured["backend"] = backend
+        return DummyRunner
+
+    monkeypatch.setattr(chat_backend, "resolve_chat_runner", _capture_backend)
+
+    token_provider = lambda: "token"
+    runner = chat_backend.build_chat_runner(
+        cwd="/tmp/project",
+        token_provider=token_provider,
+    )
+
+    assert isinstance(runner, DummyRunner)
+    assert captured["backend"] == "gateway"
+    assert captured["kwargs"]["cwd"] == "/tmp/project"
+    assert captured["kwargs"]["token_provider"] is token_provider
+    assert captured["kwargs"]["session_store"] is None
+
+
+def test_build_chat_runner_invalid_env_falls_back_to_sdk(monkeypatch):
+    captured = {}
+
+    class DummyRunner:
+        def __init__(self, **kwargs):
+            captured["kwargs"] = kwargs
+
+    monkeypatch.setenv("CHAT_BACKEND", "unsupported-backend")
+
+    def _capture_backend(backend):
+        captured["backend"] = backend
+        return DummyRunner
+
+    monkeypatch.setattr(chat_backend, "resolve_chat_runner", _capture_backend)
+
+    runner = chat_backend.build_chat_runner(
+        cwd="/tmp/project",
+        token_provider=lambda: "token",
+    )
+
+    assert isinstance(runner, DummyRunner)
+    assert captured["backend"] == "sdk"
