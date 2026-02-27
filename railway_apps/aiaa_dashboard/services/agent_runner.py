@@ -592,7 +592,9 @@ class AgentRunner:
         """Create a runtime launcher that injects dashboard token auth env."""
         auth_env = self._build_auth_env(token)
 
-        async def _runtime_launcher(*args: Any, **kwargs: Any) -> asyncio.subprocess.Process:
+        async def _runtime_launcher(
+            *args: Any, **kwargs: Any
+        ) -> asyncio.subprocess.Process:
             runtime_args = list(args)
             if len(runtime_args) == 1 and isinstance(runtime_args[0], (list, tuple)):
                 runtime_args = list(runtime_args[0])
@@ -687,6 +689,65 @@ class AgentRunner:
     def _parse_message(self, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         msg_type = str(payload.get("type", "")).lower()
         role = str(payload.get("role", "")).lower()
+        timestamp = payload.get("timestamp") or _utc_now_iso()
+
+        nested_payload = payload.get("payload")
+        if isinstance(nested_payload, dict):
+            nested_kind = str(nested_payload.get("kind", "")).lower()
+
+            if msg_type == "tool" and nested_kind in ("tool_use", "tool_result"):
+                if nested_kind == "tool_use":
+                    tool_name = str(
+                        payload.get("tool")
+                        or nested_payload.get("tool")
+                        or payload.get("tool_name")
+                        or ""
+                    )
+                    tool_input = payload.get("input")
+                    if tool_input is None:
+                        tool_input = nested_payload.get(
+                            "input", nested_payload.get("content")
+                        )
+                    return {
+                        "type": "tool_use",
+                        "tool": tool_name,
+                        "input": self._summarize_tool_input(tool_name, tool_input),
+                        "timestamp": timestamp,
+                    }
+
+                content = payload.get("content")
+                if content is None:
+                    content = nested_payload.get("content")
+                tool_result = _redact_token_like_text(self._stringify(content))
+                return {
+                    "type": "tool_result",
+                    "content": self._truncate(tool_result, 600),
+                    "timestamp": timestamp,
+                }
+
+            if msg_type in ("result", "system", "error", "text"):
+                raw_content = payload.get("content")
+                if raw_content is None:
+                    raw_content = nested_payload.get("content")
+                text_content = _redact_token_like_text(
+                    self._stringify(raw_content)
+                ).strip()
+                if msg_type == "error":
+                    return {
+                        "type": "error",
+                        "content": text_content or "Agent execution failed",
+                        "timestamp": timestamp,
+                    }
+                if text_content:
+                    return {
+                        "type": msg_type,
+                        "content": text_content,
+                        "timestamp": timestamp,
+                    }
+                return None
+
+            if msg_type == "done" or nested_kind == "done":
+                return {"type": "done", "timestamp": timestamp}
 
         if payload.get("tool_name"):
             return {
@@ -695,7 +756,19 @@ class AgentRunner:
                 "input": self._summarize_tool_input(
                     payload.get("tool_name"), payload.get("tool_input")
                 ),
-                "timestamp": _utc_now_iso(),
+                "timestamp": timestamp,
+            }
+
+        if msg_type == "tool_use":
+            tool_name = str(payload.get("tool") or payload.get("tool_name") or "")
+            tool_input = payload.get("input")
+            if tool_input is None:
+                tool_input = payload.get("tool_input")
+            return {
+                "type": "tool_use",
+                "tool": tool_name,
+                "input": self._summarize_tool_input(tool_name, tool_input),
+                "timestamp": timestamp,
             }
 
         if payload.get("tool_result") is not None:
@@ -705,7 +778,17 @@ class AgentRunner:
             return {
                 "type": "tool_result",
                 "content": self._truncate(tool_result, 600),
-                "timestamp": _utc_now_iso(),
+                "timestamp": timestamp,
+            }
+
+        if msg_type == "tool_result":
+            tool_result = _redact_token_like_text(
+                self._stringify(payload.get("content"))
+            )
+            return {
+                "type": "tool_result",
+                "content": self._truncate(tool_result, 600),
+                "timestamp": timestamp,
             }
 
         if payload.get("result") is not None:
@@ -716,28 +799,31 @@ class AgentRunner:
                 return {
                     "type": "error",
                     "content": result_content,
-                    "timestamp": _utc_now_iso(),
+                    "timestamp": timestamp,
                 }
             return {
                 "type": "result",
                 "content": result_content,
-                "timestamp": _utc_now_iso(),
+                "timestamp": timestamp,
             }
 
         text = self._extract_text(payload)
         if text:
             text = _redact_token_like_text(text)
             if msg_type in ("assistant", "assistant_message") or role == "assistant":
-                return {"type": "text", "content": text, "timestamp": _utc_now_iso()}
+                return {"type": "text", "content": text, "timestamp": timestamp}
             if msg_type in ("system", "status"):
-                return {"type": "system", "content": text, "timestamp": _utc_now_iso()}
+                return {"type": "system", "content": text, "timestamp": timestamp}
 
         if msg_type in ("error", "exception"):
             content = text or self._truncate(
                 _redact_token_like_text(self._stringify(payload)),
                 500,
             )
-            return {"type": "error", "content": content, "timestamp": _utc_now_iso()}
+            return {"type": "error", "content": content, "timestamp": timestamp}
+
+        if msg_type == "done":
+            return {"type": "done", "timestamp": timestamp}
 
         return None
 
@@ -911,13 +997,18 @@ class AgentRunner:
             started_at = state.get("started_at") if state else None
             total_runtime_ms: Optional[int] = None
             if isinstance(started_at, (int, float)):
-                total_runtime_ms = max(0, int((time.perf_counter() - started_at) * 1000))
+                total_runtime_ms = max(
+                    0, int((time.perf_counter() - started_at) * 1000)
+                )
 
             session = self._sessions.get(session_id)
             if session is not None:
                 if total_runtime_ms is not None:
                     session["total_runtime_ms"] = total_runtime_ms
-                    updates = {"total_runtime_ms": total_runtime_ms, "updated_at": now_iso}
+                    updates = {
+                        "total_runtime_ms": total_runtime_ms,
+                        "updated_at": now_iso,
+                    }
                     session["updated_at"] = now_iso
                 metrics = {
                     "queue_wait_ms": session.get("queue_wait_ms"),
@@ -959,21 +1050,71 @@ class AgentRunner:
         if not raw_type:
             return
 
+        raw_payload = event.get("payload")
+        payload_source = raw_payload if isinstance(raw_payload, dict) else {}
+
         event_type = raw_type
         payload: Dict[str, Any] = {}
-        if raw_type == "tool_use":
+        if raw_type == "tool":
+            payload_kind = str(payload_source.get("kind", "")).strip().lower()
+            if payload_kind == "tool_use":
+                payload = {
+                    "kind": "tool_use",
+                    "tool": event.get("tool") or payload_source.get("tool"),
+                    "input": event.get("input")
+                    or payload_source.get("input")
+                    or payload_source.get("content"),
+                }
+            elif payload_kind == "tool_result":
+                payload = {
+                    "kind": "tool_result",
+                    "content": (
+                        event.get("content")
+                        if event.get("content") is not None
+                        else payload_source.get("content")
+                    ),
+                }
+            elif event.get("tool") is not None or event.get("input") is not None:
+                payload = {
+                    "kind": "tool_use",
+                    "tool": event.get("tool"),
+                    "input": event.get("input"),
+                }
+            else:
+                payload = {
+                    "kind": "tool_result",
+                    "content": (
+                        event.get("content")
+                        if event.get("content") is not None
+                        else payload_source.get("content")
+                    ),
+                }
+        elif raw_type == "tool_use":
             payload = {
                 "kind": "tool_use",
-                "tool": event.get("tool"),
-                "input": event.get("input"),
+                "tool": event.get("tool") or payload_source.get("tool"),
+                "input": event.get("input")
+                or payload_source.get("input")
+                or payload_source.get("content"),
             }
         elif raw_type == "tool_result":
             payload = {
                 "kind": "tool_result",
-                "content": event.get("content"),
+                "content": (
+                    event.get("content")
+                    if event.get("content") is not None
+                    else payload_source.get("content")
+                ),
             }
         elif raw_type in ("text", "result", "error", "system"):
-            payload = {"content": event.get("content"), "kind": raw_type}
+            payload = {
+                "content": (
+                    event.get("content")
+                    if event.get("content") is not None
+                    else payload_source.get("content")
+                ),
+                "kind": raw_type,
+            }
         elif raw_type == "done":
             payload = {"kind": "done"}
         else:
