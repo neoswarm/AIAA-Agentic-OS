@@ -965,7 +965,142 @@ def create_response():
         ).strip()
 
     if is_setup_token(runtime_token):
+        correlation_id = get_correlation_id()
+        base_url = str(current_app.config["ANTHROPIC_BASE_URL"]).rstrip("/")
         timeout_seconds = float(current_app.config["UPSTREAM_REQUEST_TIMEOUT_SECONDS"])
+        oauth_headers: dict[str, str] = {
+            "authorization": f"Bearer {runtime_token}",
+            "anthropic-version": str(current_app.config["ANTHROPIC_API_VERSION"]),
+            "anthropic-beta": (
+                "claude-code-20250219,"
+                "oauth-2025-04-20,"
+                "fine-grained-tool-streaming-2025-05-14,"
+                "interleaved-thinking-2025-05-14"
+            ),
+            "content-type": "application/json",
+            "accept": "application/json",
+            "x-aiaa-cwd": str(gateway_fields["cwd"]),
+            "x-aiaa-tools-profile": str(gateway_fields["tools_profile"]),
+        }
+        if correlation_id:
+            oauth_headers[CORRELATION_HEADER] = correlation_id
+            oauth_headers[REQUEST_ID_HEADER] = correlation_id
+        if gateway_fields["profile_id"]:
+            oauth_headers["x-aiaa-profile-id"] = str(gateway_fields["profile_id"])
+        if gateway_fields["session_id"]:
+            oauth_headers["x-aiaa-session-id"] = str(gateway_fields["session_id"])
+
+        oauth_response: Any | None = None
+        oauth_failed_with_unsupported_auth = False
+        try:
+            if stream_mode:
+                oauth_headers["accept"] = "text/event-stream"
+                upstream_payload["stream"] = True
+                oauth_response = http_requests.post(
+                    f"{base_url}/v1/messages",
+                    json=upstream_payload,
+                    headers=oauth_headers,
+                    timeout=timeout_seconds,
+                    stream=True,
+                )
+                if oauth_response.status_code < 400:
+                    _log_gateway_event(
+                        "gateway.responses",
+                        "success",
+                        stream=True,
+                        backend="anthropic_oauth",
+                    )
+                    response = Response(
+                        stream_with_context(
+                            _stream_openai_response_events(
+                                oauth_response,
+                                requested_model=str(upstream_payload["model"]),
+                            )
+                        ),
+                        mimetype="text/event-stream",
+                    )
+                    response.headers["Cache-Control"] = "no-cache"
+                    response.headers["X-Accel-Buffering"] = "no"
+                    response.headers["Connection"] = "keep-alive"
+                    return response
+            else:
+                oauth_response = http_requests.post(
+                    f"{base_url}/v1/messages",
+                    json=upstream_payload,
+                    headers=oauth_headers,
+                    timeout=timeout_seconds,
+                )
+                if oauth_response.status_code < 400:
+                    try:
+                        upstream_json = oauth_response.json()
+                    except ValueError:
+                        return _json_error(
+                            "Upstream provider returned non-JSON response.",
+                            502,
+                            error_type="upstream_error",
+                        )
+                    if not isinstance(upstream_json, dict):
+                        return _json_error(
+                            "Upstream provider returned invalid payload.",
+                            502,
+                            error_type="upstream_error",
+                        )
+                    response_payload = map_anthropic_to_response(
+                        upstream_payload=upstream_json,
+                        requested_model=str(upstream_payload["model"]),
+                    )
+                    _log_gateway_event(
+                        "gateway.responses",
+                        "success",
+                        stream=False,
+                        backend="anthropic_oauth",
+                    )
+                    return jsonify(response_payload)
+        except http_requests.RequestException as exc:
+            safe_error = redact_exception_message(exc)
+            _log_gateway_event(
+                "gateway.responses",
+                "error",
+                reason="upstream_request_failed",
+                detail=safe_error,
+                stream=stream_mode,
+                backend="anthropic_oauth",
+            )
+            return _json_error(
+                f"Upstream provider request failed: {safe_error}",
+                502,
+                error_type="upstream_error",
+            )
+
+        details: dict[str, Any] = {}
+        if oauth_response is not None:
+            details = _parse_upstream_error_details(oauth_response)
+            close = getattr(oauth_response, "close", None)
+            if callable(close):
+                close()
+            error_blob = json.dumps(details, ensure_ascii=False).lower()
+            oauth_failed_with_unsupported_auth = (
+                "oauth authentication is currently not supported" in error_blob
+            )
+
+        if not oauth_failed_with_unsupported_auth:
+            _log_gateway_event(
+                "gateway.responses",
+                "error",
+                reason="upstream_error",
+                upstream_status=(
+                    getattr(oauth_response, "status_code", None) if oauth_response else None
+                ),
+                stream=stream_mode,
+                backend="anthropic_oauth",
+            )
+            return _json_error(
+                "Upstream provider returned an error.",
+                502,
+                error_type="upstream_error",
+                details=details,
+            )
+
         runtime_result = run_gateway_runtime_query(
             token=runtime_token,
             messages=list(upstream_payload.get("messages") or []),
