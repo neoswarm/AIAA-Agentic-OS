@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
 import os
+import secrets
+import threading
+import time
+from collections import deque
 from datetime import UTC, datetime
 from typing import Any
 
@@ -15,6 +20,8 @@ from .services.responses_service import (
 )
 
 gateway_bp = Blueprint("gateway", __name__)
+_auth_failure_lock = threading.RLock()
+_auth_failure_windows: dict[str, deque[float]] = {}
 
 
 def _json_error(
@@ -40,14 +47,142 @@ def _resolve_anthropic_api_key() -> str:
     if header_key:
         return header_key
 
+    gateway_api_key = (current_app.config.get("GATEWAY_API_KEY") or "").strip()
     auth_header = (request.headers.get("Authorization") or "").strip()
-    if auth_header.lower().startswith("bearer "):
+    if not gateway_api_key and auth_header.lower().startswith("bearer "):
         return auth_header[7:].strip()
 
     configured = (current_app.config.get("ANTHROPIC_API_KEY") or "").strip()
     if configured:
         return configured
     return (os.getenv("ANTHROPIC_API_KEY") or "").strip()
+
+
+def _extract_bearer_token() -> str:
+    auth_header = (request.headers.get("Authorization") or "").strip()
+    if not auth_header.lower().startswith("bearer "):
+        return ""
+    return auth_header[7:].strip()
+
+
+def _get_auth_failure_limit() -> int:
+    raw_value = current_app.config.get("GATEWAY_AUTH_FAILURE_MAX_ATTEMPTS", 5)
+    try:
+        return max(1, int(raw_value))
+    except (TypeError, ValueError):
+        return 5
+
+
+def _get_auth_failure_window_seconds() -> int:
+    raw_value = current_app.config.get("GATEWAY_AUTH_FAILURE_WINDOW_SECONDS", 60)
+    try:
+        return max(1, int(raw_value))
+    except (TypeError, ValueError):
+        return 60
+
+
+def _auth_failure_bucket_key(token: str) -> str:
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    client = (request.remote_addr or "unknown").strip() or "unknown"
+    return f"{client}:{token_hash}"
+
+
+def _is_auth_failure_throttled(token: str) -> tuple[bool, int, int, int]:
+    limit = _get_auth_failure_limit()
+    window_seconds = _get_auth_failure_window_seconds()
+    now = time.monotonic()
+    cutoff = now - window_seconds
+    bucket_key = _auth_failure_bucket_key(token)
+
+    with _auth_failure_lock:
+        history = _auth_failure_windows.setdefault(bucket_key, deque())
+        while history and history[0] <= cutoff:
+            history.popleft()
+        if len(history) >= limit:
+            retry_after = max(1, int(history[0] + window_seconds - now))
+            return True, retry_after, limit, window_seconds
+    return False, 0, limit, window_seconds
+
+
+def _record_auth_failure(token: str) -> None:
+    window_seconds = _get_auth_failure_window_seconds()
+    now = time.monotonic()
+    cutoff = now - window_seconds
+    bucket_key = _auth_failure_bucket_key(token)
+
+    with _auth_failure_lock:
+        history = _auth_failure_windows.setdefault(bucket_key, deque())
+        while history and history[0] <= cutoff:
+            history.popleft()
+        history.append(now)
+
+
+def _reset_auth_failure_throttle_state() -> None:
+    """Testing helper to clear in-memory auth throttle state."""
+    with _auth_failure_lock:
+        _auth_failure_windows.clear()
+
+
+def _require_gateway_bearer_auth():
+    expected_token = (current_app.config.get("GATEWAY_API_KEY") or "").strip()
+    if not expected_token:
+        return None
+
+    provided_token = _extract_bearer_token()
+    if not provided_token:
+        response, status_code = _json_error(
+            "Missing gateway bearer token.",
+            401,
+            error_type="authentication_error",
+        )
+        response.headers["WWW-Authenticate"] = "Bearer"
+        return response, status_code
+
+    throttled, retry_after, limit, window_seconds = _is_auth_failure_throttled(
+        provided_token
+    )
+    if throttled:
+        response, status_code = _json_error(
+            "Too many invalid gateway bearer token attempts.",
+            429,
+            error_type="rate_limit_error",
+            details={
+                "retry_after_seconds": retry_after,
+                "limit": limit,
+                "window_seconds": window_seconds,
+            },
+        )
+        response.headers["Retry-After"] = str(retry_after)
+        return response, status_code
+
+    if not secrets.compare_digest(provided_token, expected_token):
+        _record_auth_failure(provided_token)
+        throttled, retry_after, limit, window_seconds = _is_auth_failure_throttled(
+            provided_token
+        )
+        if throttled:
+            response, status_code = _json_error(
+                "Too many invalid gateway bearer token attempts.",
+                429,
+                error_type="rate_limit_error",
+                details={
+                    "retry_after_seconds": retry_after,
+                    "limit": limit,
+                    "window_seconds": window_seconds,
+                },
+            )
+            response.headers["Retry-After"] = str(retry_after)
+            return response, status_code
+
+        response, status_code = _json_error(
+            "Invalid gateway bearer token.",
+            401,
+            error_type="authentication_error",
+        )
+        response.headers["WWW-Authenticate"] = "Bearer"
+        return response, status_code
+
+    return None
 
 
 @gateway_bp.get("/")
@@ -74,6 +209,10 @@ def health():
 @gateway_bp.post("/v1/responses")
 def create_response():
     """OpenAI-compatible responses endpoint (non-stream mode only)."""
+    auth_failure = _require_gateway_bearer_auth()
+    if auth_failure is not None:
+        return auth_failure
+
     body = request.get_json(silent=True)
     if not isinstance(body, dict):
         return _json_error("Request body must be a JSON object.", 400)
