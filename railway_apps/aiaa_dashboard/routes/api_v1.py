@@ -39,6 +39,73 @@ def _token_setting_key(profile_id: str) -> str:
     return f"{normalized}.claude_setup_token"
 
 
+def validate_profile_token(profile_id: str, token: str = "") -> tuple[dict, int]:
+    """Validate a setup-token profile token using gateway runtime canary checks."""
+    normalized_profile_id = str(profile_id or "").strip().lower()
+    candidate_token = str(token or "").strip()
+    errors: dict[str, str] = {}
+
+    if not normalized_profile_id:
+        errors["profile_id"] = "profile_id is required"
+    elif not _PROFILE_ID_PATTERN.fullmatch(normalized_profile_id):
+        errors["profile_id"] = (
+            "profile_id must use lowercase letters, numbers, and hyphens only"
+        )
+
+    setting_key = ""
+    if normalized_profile_id:
+        setting_key = _token_setting_key(normalized_profile_id)
+        if not candidate_token:
+            candidate_token = (models.get_setting(setting_key) or "").strip()
+        if not candidate_token:
+            errors["token"] = (
+                f"No token configured for profile: {normalized_profile_id}"
+            )
+
+    if errors:
+        return (
+            {
+                "status": "error",
+                "message": "Validation failed",
+                "errors": errors,
+            },
+            400,
+        )
+
+    validation = run_gateway_runtime_canary(candidate_token)
+    validation_status = str(validation.get("status") or "invalid")
+    last_error = (
+        str(validation.get("error") or "").strip()
+        or str(validation.get("message") or "").strip()
+    )
+    if validation_status == "valid":
+        last_error = None
+
+    try:
+        models.update_setting_metadata(
+            setting_key,
+            validation_status=validation_status,
+            last_error=last_error,
+        )
+    except Exception:
+        # Validation response should still be returned even if metadata update fails.
+        pass
+
+    response_payload = {
+        "status": "ok",
+        "profile_id": normalized_profile_id,
+        "validation": validation_status,
+        "validation_detail": validation,
+    }
+
+    if validation_status in {"runtime_unavailable", "runtime_error"}:
+        response_payload["status"] = "error"
+        response_payload["message"] = "Gateway runtime canary failed"
+        return response_payload, 502
+
+    return response_payload, 200
+
+
 def login_required(f):
     """Require session login or API key auth for v1 API endpoints."""
 
@@ -85,57 +152,10 @@ def api_validate_profile():
     if not isinstance(payload, dict):
         return _validation_error({"body": "Request body must be a JSON object"})
 
-    profile_id = str(payload.get("profile_id") or "").strip().lower()
-    token = str(payload.get("token") or "").strip()
-    errors: dict[str, str] = {}
-
-    if not profile_id:
-        errors["profile_id"] = "profile_id is required"
-    elif not _PROFILE_ID_PATTERN.fullmatch(profile_id):
-        errors["profile_id"] = (
-            "profile_id must use lowercase letters, numbers, and hyphens only"
-        )
-
-    setting_key = ""
-    if profile_id:
-        setting_key = _token_setting_key(profile_id)
-        if not token:
-            token = (models.get_setting(setting_key) or "").strip()
-        if not token:
-            errors["token"] = f"No token configured for profile: {profile_id}"
-
-    if errors:
-        return _validation_error(errors)
-
-    validation = run_gateway_runtime_canary(token)
-    validation_status = str(validation.get("status") or "invalid")
-    last_error = (
-        str(validation.get("error") or "").strip()
-        or str(validation.get("message") or "").strip()
+    response_payload, status_code = validate_profile_token(
+        profile_id=str(payload.get("profile_id") or ""),
+        token=str(payload.get("token") or ""),
     )
-    if validation_status == "valid":
-        last_error = None
-
-    try:
-        models.update_setting_metadata(
-            setting_key,
-            validation_status=validation_status,
-            last_error=last_error,
-        )
-    except Exception:
-        # Validation response should still be returned even if metadata update fails.
-        pass
-
-    response_payload = {
-        "status": "ok",
-        "profile_id": profile_id,
-        "validation": validation_status,
-        "validation_detail": validation,
-    }
-
-    if validation_status in {"runtime_unavailable", "runtime_error"}:
-        response_payload["status"] = "error"
-        response_payload["message"] = "Gateway runtime canary failed"
-        return jsonify(response_payload), 502
-
-    return jsonify(response_payload), 200
+    if status_code == 400 and response_payload.get("errors"):
+        return _validation_error(response_payload["errors"])
+    return jsonify(response_payload), status_code

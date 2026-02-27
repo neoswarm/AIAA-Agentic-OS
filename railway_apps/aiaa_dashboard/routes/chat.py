@@ -1084,20 +1084,35 @@ def validate_token():
             }
         )
 
-    validation = validate_claude_token(token)
+    from routes.api_v1 import validate_profile_token
+
+    profile_payload, status_code = validate_profile_token(
+        profile_id="default",
+        token=token,
+    )
+    validation = profile_payload.get("validation_detail") or {}
+    validation_status = str(
+        profile_payload.get("validation")
+        or validation.get("status")
+        or "invalid"
+    )
+
     _log_token_lifecycle(
         action="validate",
-        status="success",
+        status="success" if status_code < 500 else "error",
         configured=True,
-        validation=validation["status"],
+        validation=validation_status,
         redacted=_redact_token(token),
     )
-    return jsonify(
-        {
-            "status": "ok",
-            "configured": True,
-            "validation": validation["status"],
-            "validation_detail": validation,
-            "redacted": _redact_token(token),
-        }
-    )
+
+    response_payload = {
+        "status": profile_payload.get("status", "ok"),
+        "configured": True,
+        "validation": validation_status,
+        "validation_detail": validation,
+        "redacted": _redact_token(token),
+    }
+    if profile_payload.get("message"):
+        response_payload["message"] = profile_payload["message"]
+
+    return jsonify(response_payload), status_code
