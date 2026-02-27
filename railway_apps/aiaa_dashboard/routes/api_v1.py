@@ -57,8 +57,53 @@ def login_required(f):
 @api_v1_bp.route("/profiles/upsert", methods=["POST"])
 @login_required
 def api_upsert_profile():
-    """Create or update a client profile."""
-    data = request.get_json(silent=True) or {}
+    """Create or update a setup-token profile or client profile."""
+    data = request.get_json(silent=True)
+    if data is None:
+        data = {}
+    if not isinstance(data, dict):
+        return _validation_error({"body": "Request body must be a JSON object"})
+
+    if "profile_id" in data or "token" in data:
+        profile_id = str(data.get("profile_id") or "").strip().lower()
+        token = str(data.get("token") or "").strip()
+        errors: dict[str, str] = {}
+
+        if not profile_id:
+            errors["profile_id"] = "profile_id is required"
+        elif not _PROFILE_ID_PATTERN.fullmatch(profile_id):
+            errors["profile_id"] = (
+                "profile_id must use lowercase letters, numbers, and hyphens only"
+            )
+
+        if not token:
+            errors["token"] = "token is required"
+
+        if errors:
+            return _validation_error(errors)
+
+        try:
+            setting_key = _token_setting_key(profile_id)
+            existing_profile = models.get_setup_token_profile(profile_id)
+            models.set_setting(setting_key, token)
+            stored_profile = models.get_setup_token_profile(profile_id) or {}
+            stored_profile.pop("token", None)
+
+            action = "created" if existing_profile is None else "updated"
+            status_code = 201 if action == "created" else 200
+            return (
+                jsonify(
+                    {
+                        "status": "ok",
+                        "action": action,
+                        "profile_id": profile_id,
+                        "profile": stored_profile,
+                    }
+                ),
+                status_code,
+            )
+        except Exception as exc:
+            return jsonify({"status": "error", "message": str(exc)}), 500
 
     try:
         result = upsert_profile(data)

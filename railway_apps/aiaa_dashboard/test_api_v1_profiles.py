@@ -112,3 +112,82 @@ def test_upsert_profile_rejects_invalid_payload(auth_client):
     assert data["status"] == "error"
     assert data["message"] == "Validation failed"
     assert "website" in data["errors"]
+
+
+def test_upsert_profile_writes_encrypted_setup_token(auth_client, monkeypatch):
+    monkeypatch.setenv("FLASK_SECRET_KEY", "profile-upsert-token-secret")
+
+    token = "setup-token-abc123"
+    resp = auth_client.post(
+        "/v1/profiles/upsert",
+        json={"profile_id": "student-a", "token": token},
+    )
+
+    assert resp.status_code == 201
+    data = resp.get_json()
+    assert data["status"] == "ok"
+    assert data["action"] == "created"
+    assert data["profile_id"] == "student-a"
+    assert data["profile"]["profile_id"] == "student-a"
+    assert data["profile"]["status"] == "active"
+    assert "token" not in data["profile"]
+
+    raw_setting = database.query_one(
+        "SELECT value FROM settings WHERE key = ?",
+        ("student-a.claude_setup_token",),
+    )
+    assert raw_setting is not None
+    assert raw_setting["value"] != token
+    assert raw_setting["value"].startswith("enc:v1:")
+
+    raw_profile = database.query_one(
+        "SELECT encrypted_token FROM setup_token_profiles WHERE profile_id = ?",
+        ("student-a",),
+    )
+    assert raw_profile is not None
+    assert raw_profile["encrypted_token"] != token
+    assert raw_profile["encrypted_token"].startswith("enc:v1:")
+
+
+def test_upsert_profile_updates_existing_setup_token(auth_client, monkeypatch):
+    monkeypatch.setenv("FLASK_SECRET_KEY", "profile-upsert-token-secret")
+
+    first = auth_client.post(
+        "/v1/profiles/upsert",
+        json={"profile_id": "student-b", "token": "setup-token-one"},
+    )
+    assert first.status_code == 201
+
+    first_raw = database.query_one(
+        "SELECT encrypted_token FROM setup_token_profiles WHERE profile_id = ?",
+        ("student-b",),
+    )
+    assert first_raw is not None
+
+    second = auth_client.post(
+        "/v1/profiles/upsert",
+        json={"profile_id": "student-b", "token": "setup-token-two"},
+    )
+    assert second.status_code == 200
+
+    data = second.get_json()
+    assert data["status"] == "ok"
+    assert data["action"] == "updated"
+    assert data["profile_id"] == "student-b"
+    assert data["profile"]["status"] == "active"
+
+    second_raw = database.query_one(
+        "SELECT encrypted_token FROM setup_token_profiles WHERE profile_id = ?",
+        ("student-b",),
+    )
+    assert second_raw is not None
+    assert second_raw["encrypted_token"] != first_raw["encrypted_token"]
+    assert models.get_setting("student-b.claude_setup_token") == "setup-token-two"
+
+
+def test_upsert_profile_setup_token_requires_profile_id_and_token(auth_client):
+    resp = auth_client.post("/v1/profiles/upsert", json={"profile_id": "student-a"})
+    assert resp.status_code == 400
+    data = resp.get_json()
+    assert data["status"] == "error"
+    assert data["errors"]["token"] == "token is required"
