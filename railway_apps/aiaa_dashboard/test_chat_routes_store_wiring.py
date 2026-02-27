@@ -431,6 +431,33 @@ def test_v1_responses_stream_accepts_bearer_api_key(app, monkeypatch):
     assert resp.mimetype == "text/event-stream"
 
 
+def test_v1_responses_stream_accepts_setup_token_for_gateway_backend(
+    auth_client, app, monkeypatch
+):
+    store = FakeStore()
+    runner = FakeRunner()
+
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "false")
+    monkeypatch.setitem(app.config, "CHAT_BACKEND", "gateway")
+    monkeypatch.setattr(chat_routes, "_get_chat_store", lambda: store)
+    monkeypatch.setattr(chat_routes, "_get_runner", lambda: runner)
+    monkeypatch.setattr(
+        chat_routes, "get_claude_token", lambda: "sk-ant-oat01-example-example"
+    )
+
+    token_values = iter(["session-v1-setup", "response-v1-setup"])
+    monkeypatch.setattr(chat_routes.secrets, "token_hex", lambda _: next(token_values))
+
+    resp = auth_client.post(
+        "/v1/responses",
+        json={"input": "hi", "stream": True},
+    )
+
+    assert resp.status_code == 200
+    assert resp.mimetype == "text/event-stream"
+    assert ("send_message", "session-v1-setup", "hi") in runner.calls
+
+
 def test_v1_responses_rejects_non_stream_mode(auth_client, monkeypatch):
     monkeypatch.setattr(chat_routes, "get_claude_token", lambda: "sk-ant-test-token")
     resp = auth_client.post(
