@@ -40,7 +40,7 @@ def create_app(test_config: dict | None = None) -> Flask:
         ANTHROPIC_API_VERSION=os.getenv("ANTHROPIC_API_VERSION", "2023-06-01"),
         ANTHROPIC_API_KEY=os.getenv("ANTHROPIC_API_KEY", ""),
         DEFAULT_ANTHROPIC_MODEL=os.getenv(
-            "DEFAULT_ANTHROPIC_MODEL", "claude-3-5-sonnet-latest"
+            "DEFAULT_ANTHROPIC_MODEL", "claude-sonnet-4-6"
         ),
         DEFAULT_MAX_OUTPUT_TOKENS=int(os.getenv("DEFAULT_MAX_OUTPUT_TOKENS", "1024")),
         UPSTREAM_REQUEST_TIMEOUT_SECONDS=float(
