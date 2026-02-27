@@ -188,6 +188,21 @@ def _login_or_api_key_required(f):
     return decorated
 
 
+def _responses_auth_context() -> dict[str, str]:
+    """Resolve request auth context for delegated runtime execution."""
+    if session.get("logged_in"):
+        context = {"mode": "session"}
+        username = (session.get("username") or "").strip()
+        if username:
+            context["username"] = username
+        return context
+
+    if _api_key_authorized():
+        return {"mode": "api_key"}
+
+    return {"mode": "unknown"}
+
+
 def _project_root() -> str:
     configured = current_app.config.get("PROJECT_ROOT")
     if configured:
@@ -1397,6 +1412,7 @@ def create_response():
     model = str(payload.get("model") or "claude-agent")
     store = _get_chat_store()
     runner = _get_runner()
+    auth_context = _responses_auth_context()
     session_id = secrets.token_hex(16)
     response_id = f"resp_{secrets.token_hex(12)}"
     created_ts = int(time.time())
@@ -1412,7 +1428,15 @@ def create_response():
             "role": "user",
             "content": prompt_text,
             "type": "message",
-            "metadata": {"source": "v1.responses"},
+            "metadata": {
+                "source": "v1.responses",
+                "auth_mode": auth_context.get("mode", "unknown"),
+                **(
+                    {"username": auth_context["username"]}
+                    if auth_context.get("username")
+                    else {}
+                ),
+            },
         },
         session_updates={"status": "running", "last_error": None},
     )
@@ -1421,6 +1445,13 @@ def create_response():
         title=session_obj.get("title"),
         sdk_session_id=session_obj.get("sdk_session_id"),
     )
+    if hasattr(runner, "set_runtime_auth_context"):
+        set_runtime_auth_context = getattr(runner, "set_runtime_auth_context")
+        if callable(set_runtime_auth_context):
+            set_runtime_auth_context(
+                session_id=session_id,
+                auth_context=dict(auth_context),
+            )
 
     try:
         runner.send_message(session_id=session_id, user_message=prompt_text)
