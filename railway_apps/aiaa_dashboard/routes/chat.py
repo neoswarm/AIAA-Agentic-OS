@@ -1500,51 +1500,90 @@ def validate_token():
             or "unknown"
         ).strip().lower()
 
+        status_code = (
+            502
+            if validation_status in {"runtime_unavailable", "runtime_error"}
+            else 200
+        )
         response_payload = {
-            "status": "ok",
+            "status": "error" if status_code >= 500 else "ok",
             "configured": True,
             "validation": validation_status,
             "validation_detail": validation_detail,
             "redacted": _redact_token(token),
         }
-        if validation_status in {"runtime_unavailable", "runtime_error"}:
-            response_payload["status"] = "error"
+        if gateway_response.get("message"):
+            response_payload["message"] = gateway_response["message"]
+        elif status_code >= 500:
             response_payload["message"] = "Gateway runtime canary failed"
-            _log_token_lifecycle(
-                action="validate",
-                status="error",
-                configured=True,
-                validation=validation_status,
-                redacted=_redact_token(token),
-            )
-            return jsonify(response_payload), 502
 
         _log_token_lifecycle(
             action="validate",
-            status="success",
+            status="success" if status_code < 500 else "error",
             configured=True,
             validation=validation_status,
             redacted=_redact_token(token),
         )
-        return jsonify(response_payload)
+        return jsonify(response_payload), status_code
 
-    validation = validate_claude_token(token)
+    from routes.api_v1 import validate_profile_token
+
+    try:
+        profile_payload, status_code = validate_profile_token(
+            profile_id=CLAUDE_TOKEN_PROFILE_ID,
+            token=token,
+        )
+    except Exception as exc:
+        _log_token_lifecycle(
+            action="validate",
+            status="error",
+            reason="gateway_runtime_exception",
+            configured=True,
+            error=str(exc),
+            redacted=_redact_token(token),
+        )
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "configured": True,
+                    "validation": "runtime_error",
+                    "message": f"Gateway runtime canary failed: {exc}",
+                    "validation_detail": {
+                        "status": "runtime_error",
+                        "message": str(exc),
+                    },
+                    "redacted": _redact_token(token),
+                }
+            ),
+            502,
+        )
+
+    validation = profile_payload.get("validation_detail") or {}
+    validation_status = str(
+        profile_payload.get("validation")
+        or (validation.get("status") if isinstance(validation, dict) else "")
+        or "invalid"
+    )
     _log_token_lifecycle(
         action="validate",
-        status="success",
+        status="success" if status_code < 500 else "error",
         configured=True,
-        validation=validation["status"],
+        validation=validation_status,
         redacted=_redact_token(token),
     )
-    return jsonify(
-        {
-            "status": "ok",
-            "configured": True,
-            "validation": validation["status"],
-            "validation_detail": validation,
-            "redacted": _redact_token(token),
-        }
-    )
+
+    response_payload = {
+        "status": profile_payload.get("status", "ok"),
+        "configured": True,
+        "validation": validation_status,
+        "validation_detail": validation,
+        "redacted": _redact_token(token),
+    }
+    if profile_payload.get("message"):
+        response_payload["message"] = profile_payload["message"]
+
+    return jsonify(response_payload), status_code
 
 
 @chat_bp.route("/api/chat/token/revoke", methods=["POST"])
