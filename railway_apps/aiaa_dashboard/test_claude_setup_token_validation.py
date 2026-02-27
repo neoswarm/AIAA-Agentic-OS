@@ -270,3 +270,79 @@ def test_send_message_does_not_hard_block_setup_token_for_gateway(auth_client, a
     body = resp.get_json()
     assert body["status"] == "error"
     assert "gateway mode is disabled" not in body["message"].lower()
+
+
+def test_setup_token_e2e_save_create_send_and_stream_complete(
+    auth_client, app, monkeypatch
+):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "true")
+    monkeypatch.delenv("CHAT_BACKEND", raising=False)
+    monkeypatch.setenv("CLAUDE_SETUP_TOKEN", "")
+    app.config.pop("CHAT_BACKEND", None)
+
+    store = chat_routes.InMemoryChatStore()
+
+    class _Runner:
+        def __init__(self) -> None:
+            self._sessions: set[str] = set()
+            self.sent_messages: list[tuple[str, str]] = []
+
+        def ensure_session(
+            self,
+            session_id: str,
+            *,
+            title: str | None = None,
+            sdk_session_id: str | None = None,
+        ):
+            self._sessions.add(session_id)
+            return {"id": session_id, "title": title, "sdk_session_id": sdk_session_id}
+
+        def has_session(self, session_id: str) -> bool:
+            return session_id in self._sessions
+
+        def send_message(self, session_id: str, user_message: str) -> None:
+            self.sent_messages.append((session_id, user_message))
+
+        def get_stream(self, session_id: str):
+            if session_id in self._sessions:
+                yield 'data: {"type":"text","content":"hello"}\n\n'
+                yield 'data: {"type":"done"}\n\n'
+
+    runner = _Runner()
+    monkeypatch.setattr(chat_routes, "_get_chat_store", lambda: store)
+    monkeypatch.setattr(chat_routes, "_get_runner", lambda: runner)
+    monkeypatch.setattr(chat_routes, "_persist_to_railway_async", lambda *_: False)
+    monkeypatch.setattr(chat_routes, "init_chat_runner", lambda *_: runner)
+
+    save_resp = auth_client.post("/api/chat/token", json={"token": SETUP_TOKEN_OAT})
+    assert save_resp.status_code == 200
+    save_payload = save_resp.get_json()
+    assert save_payload["status"] == "ok"
+    assert save_payload["validation"] == "unknown"
+
+    create_resp = auth_client.post(
+        "/api/chat/sessions", json={"title": "Setup token E2E"}
+    )
+    assert create_resp.status_code == 201
+    create_payload = create_resp.get_json()
+    session_id = create_payload["session_id"]
+
+    send_resp = auth_client.post(
+        "/api/chat/message",
+        json={"session_id": session_id, "message": "hello from setup token"},
+    )
+    assert send_resp.status_code == 202
+    assert send_resp.get_json()["status"] == "ok"
+
+    stream_resp = auth_client.get(f"/api/chat/stream/{session_id}")
+    assert stream_resp.status_code == 200
+    assert stream_resp.mimetype == "text/event-stream"
+    stream_body = stream_resp.get_data(as_text=True)
+    assert 'data: {"type":"done"}' in stream_body
+
+    assert (session_id, "hello from setup token") in runner.sent_messages
+    stored_messages = store.get_messages(session_id)
+    assert stored_messages[0]["content"] == "hello from setup token"
+
+    with app.app_context():
+        assert models.get_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY) == SETUP_TOKEN_OAT
