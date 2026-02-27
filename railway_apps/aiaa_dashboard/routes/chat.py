@@ -50,6 +50,13 @@ _store: ChatStore | None = None
 _message_rate_lock = threading.RLock()
 _message_rate_windows: dict[str, deque[float]] = {}
 GATEWAY_MODE_FLAG = "CHAT_GATEWAY_MODE_ENABLED"
+_GATEWAY_VALIDATION_MESSAGES = {
+    "valid": "Gateway runtime canary succeeded",
+    "invalid": "Gateway runtime canary failed",
+    "runtime_unavailable": "Claude runtime is not installed on this host",
+    "runtime_error": "Gateway runtime canary crashed",
+    "timeout": "Gateway runtime canary timed out",
+}
 
 
 def _get_message_rate_limit_per_minute() -> int:
@@ -245,6 +252,57 @@ def _is_setup_token_hard_blocked() -> bool:
     if _is_gateway_mode_enabled():
         return False
     return _chat_backend() != "gateway"
+
+
+def _gateway_validation_message(status: str, last_error: str) -> str:
+    if last_error:
+        return last_error
+    return _GATEWAY_VALIDATION_MESSAGES.get(
+        status, "Gateway validation status is available."
+    )
+
+
+def _gateway_validation_detail(
+    setting_key: str = CLAUDE_TOKEN_SETTING_KEY,
+) -> Dict[str, Any] | None:
+    get_setting_metadata = getattr(models, "get_setting_metadata", None)
+    if not callable(get_setting_metadata):
+        return None
+
+    metadata = get_setting_metadata(setting_key) or {}
+    validation_status = str(metadata.get("validation_status") or "").strip()
+    if not validation_status:
+        return None
+
+    last_error = str(metadata.get("last_error") or "").strip()
+    validation: Dict[str, Any] = {
+        "status": validation_status,
+        "http_status": None,
+        "message": _gateway_validation_message(validation_status, last_error),
+        "source": "gateway",
+        "last_validated_at": metadata.get("last_validated_at"),
+    }
+    if last_error:
+        validation["error"] = last_error
+    return validation
+
+
+def _resolve_token_validation(
+    token: str,
+    *,
+    allow_gateway_metadata: bool = False,
+) -> Dict[str, Any]:
+    candidate = (token or "").strip()
+    if (
+        allow_gateway_metadata
+        and candidate
+        and _looks_like_setup_token(candidate)
+        and not _is_setup_token_hard_blocked()
+    ):
+        gateway_validation = _gateway_validation_detail()
+        if gateway_validation is not None:
+            return gateway_validation
+    return validate_claude_token(candidate)
 
 
 def validate_claude_token(token: str) -> Dict[str, Any]:
@@ -975,7 +1033,7 @@ def token_status():
             }
         )
 
-    validation = validate_claude_token(token)
+    validation = _resolve_token_validation(token, allow_gateway_metadata=True)
     _log_token_lifecycle(
         action="status",
         status="success",
@@ -1062,7 +1120,9 @@ def save_token():
 def validate_token():
     """Validate a provided token (or the currently stored token) without saving."""
     payload = request.get_json(silent=True) or {}
-    token = (payload.get("token") or "").strip() or get_claude_token()
+    provided_token = (payload.get("token") or "").strip()
+    stored_token = get_claude_token()
+    token = provided_token or stored_token
 
     if not token:
         _log_token_lifecycle(
@@ -1084,7 +1144,10 @@ def validate_token():
             }
         )
 
-    validation = validate_claude_token(token)
+    validation = _resolve_token_validation(
+        token,
+        allow_gateway_metadata=bool(stored_token) and token == stored_token,
+    )
     _log_token_lifecycle(
         action="validate",
         status="success",

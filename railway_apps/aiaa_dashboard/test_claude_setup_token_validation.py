@@ -124,6 +124,99 @@ def test_validate_non_setup_token_keeps_rest_behavior(monkeypatch):
     assert result["http_status"] == 401
 
 
+def test_token_status_uses_gateway_validation_metadata_for_stored_setup_token(
+    auth_client, monkeypatch
+):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "true")
+    monkeypatch.setattr(chat_routes, "get_claude_token", lambda: SETUP_TOKEN_OAT)
+    monkeypatch.setattr(
+        chat_routes.models,
+        "get_setting_metadata",
+        lambda _key: {
+            "validation_status": "invalid",
+            "last_error": "auth failed",
+            "last_validated_at": "2026-02-18T12:00:00+00:00",
+        },
+    )
+    monkeypatch.setattr(
+        chat_routes,
+        "validate_claude_token",
+        lambda _token: (_ for _ in ()).throw(
+            AssertionError("status endpoint should use gateway metadata")
+        ),
+    )
+
+    resp = auth_client.get("/api/chat/token/status")
+
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["validation"] == "invalid"
+    assert body["validation_detail"]["status"] == "invalid"
+    assert body["validation_detail"]["source"] == "gateway"
+    assert body["validation_detail"]["error"] == "auth failed"
+
+
+def test_validate_endpoint_uses_gateway_validation_metadata_for_stored_setup_token(
+    auth_client, monkeypatch
+):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "true")
+    monkeypatch.setattr(chat_routes, "get_claude_token", lambda: SETUP_TOKEN_OAT)
+    monkeypatch.setattr(
+        chat_routes.models,
+        "get_setting_metadata",
+        lambda _key: {
+            "validation_status": "runtime_unavailable",
+            "last_error": "Claude runtime is not installed on this host",
+            "last_validated_at": "2026-02-19T08:00:00+00:00",
+        },
+    )
+    monkeypatch.setattr(
+        chat_routes,
+        "validate_claude_token",
+        lambda _token: (_ for _ in ()).throw(
+            AssertionError("validate endpoint should use gateway metadata for stored token")
+        ),
+    )
+
+    resp = auth_client.post("/api/chat/token/validate", json={})
+
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["validation"] == "runtime_unavailable"
+    assert body["validation_detail"]["status"] == "runtime_unavailable"
+    assert body["validation_detail"]["source"] == "gateway"
+
+
+def test_validate_endpoint_with_explicit_token_keeps_direct_validation(
+    auth_client, monkeypatch
+):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "true")
+    monkeypatch.setattr(chat_routes, "get_claude_token", lambda: SETUP_TOKEN_OAT)
+    monkeypatch.setattr(
+        chat_routes.models,
+        "get_setting_metadata",
+        lambda _key: {"validation_status": "invalid", "last_error": "auth failed"},
+    )
+
+    captured = {}
+
+    def _validate(token):
+        captured["token"] = token
+        return {"status": "valid", "http_status": 200, "message": "Token is valid"}
+
+    monkeypatch.setattr(chat_routes, "validate_claude_token", _validate)
+
+    resp = auth_client.post(
+        "/api/chat/token/validate", json={"token": "sk-ant-api03-explicit-token"}
+    )
+
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert captured["token"] == "sk-ant-api03-explicit-token"
+    assert body["validation"] == "valid"
+    assert body["validation_detail"]["status"] == "valid"
+
+
 @pytest.mark.parametrize("token", [SETUP_TOKEN_JWT, SETUP_TOKEN_OAT])
 def test_save_token_rejects_setup_token_with_unsupported_validation(
     auth_client, app, monkeypatch, token
