@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import inspect
 import json
+import threading
 
 import pytest
 
@@ -92,3 +93,37 @@ def test_gateway_runner_stream_emits_sse_payload() -> None:
     assert chunk.startswith("data: ")
     payload = json.loads(chunk[len("data: ") :].strip())
     assert payload["type"] == "done"
+
+
+def test_gateway_runner_blocks_concurrent_send_for_same_session(monkeypatch) -> None:
+    runner = _runner()
+    session_id = runner.create_session()["id"]
+
+    run_started = threading.Event()
+    allow_finish = threading.Event()
+    run_finished = threading.Event()
+    call_count = {"value": 0}
+
+    def fake_run_agent(self, sid: str, _message: str) -> None:
+        call_count["value"] += 1
+        if call_count["value"] == 1:
+            # Simulate stale status drift while first send is still active.
+            with self._lock:
+                self._sessions[sid]["status"] = "idle"
+            run_started.set()
+            allow_finish.wait(timeout=2)
+        run_finished.set()
+
+    monkeypatch.setattr(AgentRunner, "_run_agent", fake_run_agent)
+
+    runner.send_message(session_id, "first")
+    assert run_started.wait(timeout=2)
+
+    with pytest.raises(RunnerError, match="already running"):
+        runner.send_message(session_id, "second")
+
+    allow_finish.set()
+    assert run_finished.wait(timeout=2)
+
+    runner.send_message(session_id, "third")
+    assert call_count["value"] == 2
