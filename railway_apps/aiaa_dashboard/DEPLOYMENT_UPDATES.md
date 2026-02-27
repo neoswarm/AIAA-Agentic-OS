@@ -219,6 +219,24 @@ WEBHOOK_TIMEOUT_SECONDS = 30
 - ✅ Migration plan: roll out Redis per environment by setting `REDIS_URL`; rollback is immediate by unsetting it
 - ✅ No code migration required for rollout/rollback; behavior is controlled by environment configuration only
 
+### Gateway Rollout Staged Canary Checklist
+- [ ] Stage 0 (preflight): deploy gateway service and verify both `/health` and `/api/v2/health/readiness` are healthy before changing traffic.
+- [ ] Stage 1 (internal canary): enable `CHAT_BACKEND=gateway` for staging and internal operator testing only; verify setup-token profile validation and one end-to-end chat run.
+- [ ] Stage 2 (limited production canary): roll out gateway to a small cohort first, monitor auth failures (401/403), 5xx rates, and latency regressions for at least 30 minutes.
+- [ ] Stage 3 (full rollout): move all production traffic to gateway only after Stage 2 passes with no sustained errors and keep rollback variables ready.
+- [ ] Exit criteria for each stage: health checks passing, runtime canary succeeding, and no user-facing error spike vs baseline.
+
+### Gateway Rollout Failure Triage
+1. Contain impact immediately: if gateway errors rise or readiness fails, switch `CHAT_BACKEND` back to `sdk` and redeploy.
+2. Classify failure mode:
+   - 401/403: likely token or auth configuration issue.
+   - 5xx/timeouts: likely gateway service or upstream provider instability.
+   - malformed/empty responses: likely gateway contract or parsing drift.
+3. Gather evidence: correlation ID, affected profile id, gateway service logs, and readiness payload at failure time.
+4. Verify env + token configuration: `GATEWAY_BASE_URL`, `GATEWAY_API_KEY`, and setup-token profile state.
+5. Re-run runtime canary validation for the affected profile before restoring traffic.
+6. Recover and re-stage: redeploy last known good gateway commit, confirm canary success, then resume from Stage 1 (not direct full rollout).
+
 ### Database Schema
 All webhook operations use existing `workflows` table:
 - `type = "webhook"`
