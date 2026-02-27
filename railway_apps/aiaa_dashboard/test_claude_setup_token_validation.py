@@ -454,3 +454,85 @@ def test_v1_responses_does_not_hard_block_setup_token_for_gateway(
     body = resp.get_json()
     assert "stream=true" in body["error"]["message"]
     assert "gateway mode is disabled" not in body["error"]["message"].lower()
+
+
+def test_revoke_token_requires_auth(app):
+    client = app.test_client()
+    response = client.post("/api/chat/token/revoke")
+    assert response.status_code == 401
+
+
+def test_revoke_token_calls_gateway_and_syncs_local_metadata(
+    auth_client, app, monkeypatch
+):
+    captured: dict[str, str | dict[str, str]] = {}
+
+    class FakeGatewayClient:
+        def __init__(self, base_url, api_key=None, **_kwargs):
+            captured["base_url"] = base_url
+            captured["api_key"] = api_key
+
+        def post_json(self, path, *, payload=None, **_kwargs):
+            captured["path"] = path
+            captured["payload"] = payload or {}
+            return {"status": "ok", "revoked": True}
+
+    monkeypatch.setattr(chat_routes, "GatewayClient", FakeGatewayClient)
+    monkeypatch.setenv("GATEWAY_BASE_URL", "https://gateway.example.test")
+    monkeypatch.setenv("GATEWAY_API_KEY", "gateway-test-key")
+    monkeypatch.setenv("CLAUDE_SETUP_TOKEN", SETUP_TOKEN_OAT)
+
+    with app.app_context():
+        models.set_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY, SETUP_TOKEN_OAT)
+        assert models.get_setup_token_profile("default")["status"] == "active"
+
+    response = auth_client.post("/api/chat/token/revoke")
+    assert response.status_code == 200
+
+    body = response.get_json()
+    assert body["status"] == "ok"
+    assert body["profile_id"] == "default"
+    assert body["revoked"] is True
+    assert captured["base_url"] == "https://gateway.example.test"
+    assert captured["api_key"] == "gateway-test-key"
+    assert captured["path"] == "/v1/profiles/revoke"
+    assert captured["payload"] == {"profile_id": "default"}
+    assert "CLAUDE_SETUP_TOKEN" not in os.environ
+
+    with app.app_context():
+        assert models.get_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY) in ("", None)
+        profile = models.get_setup_token_profile("default")
+        assert profile is not None
+        assert profile["status"] == "revoked"
+        assert profile["token"] == ""
+
+
+def test_revoke_token_keeps_local_token_when_gateway_call_fails(
+    auth_client, app, monkeypatch
+):
+    class FailingGatewayClient:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def post_json(self, *_args, **_kwargs):
+            raise chat_routes.GatewayClientError("gateway unavailable")
+
+    monkeypatch.setattr(chat_routes, "GatewayClient", FailingGatewayClient)
+    monkeypatch.setenv("GATEWAY_BASE_URL", "https://gateway.example.test")
+    monkeypatch.setenv("GATEWAY_API_KEY", "gateway-test-key")
+    monkeypatch.setenv("CLAUDE_SETUP_TOKEN", SETUP_TOKEN_OAT)
+
+    with app.app_context():
+        models.set_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY, SETUP_TOKEN_OAT)
+        assert models.get_setup_token_profile("default")["status"] == "active"
+
+    response = auth_client.post("/api/chat/token/revoke")
+    assert response.status_code == 502
+    body = response.get_json()
+    assert body["status"] == "error"
+    assert "gateway profile revoke failed" in body["message"].lower()
+    assert os.environ.get("CLAUDE_SETUP_TOKEN") == SETUP_TOKEN_OAT
+
+    with app.app_context():
+        assert models.get_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY) == SETUP_TOKEN_OAT
+        assert models.get_setup_token_profile("default")["status"] == "active"

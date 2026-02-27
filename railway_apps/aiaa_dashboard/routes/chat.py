@@ -1694,17 +1694,6 @@ def validate_token():
 @_login_required_api
 def revoke_token():
     """Revoke the default setup-token profile and clear local token state."""
-    if not _should_use_gateway_profile_api():
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "message": "Gateway profile API is unavailable for revoke.",
-                }
-            ),
-            400,
-        )
-
     try:
         gateway_response = _revoke_gateway_profile(CLAUDE_TOKEN_PROFILE_ID)
     except GatewayHTTPError as exc:
