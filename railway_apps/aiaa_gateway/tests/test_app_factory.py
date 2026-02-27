@@ -1,5 +1,6 @@
 """Tests for the AIAA Gateway app factory scaffold."""
 
+from datetime import datetime
 from pathlib import Path
 import sys
 
@@ -31,9 +32,22 @@ def test_health_endpoint_uses_factory_config():
     client = app.test_client()
 
     response = client.get("/health")
-    data = response.get_json()
+    payload = response.get_json()
 
     assert response.status_code == 200
-    assert data["status"] == "healthy"
-    assert data["service"] == "test_gateway"
-    assert data["timestamp"]
+    assert set(payload) >= {"service", "status", "timestamp"}
+    assert payload["status"] == "healthy"
+    assert payload["service"] == "test_gateway"
+
+
+def test_health_endpoint_emits_iso8601_utc_timestamp():
+    app = create_app({"TESTING": True})
+    client = app.test_client()
+
+    response = client.get("/health")
+    payload = response.get_json()
+
+    assert response.status_code == 200
+    timestamp = payload["timestamp"]
+    parsed = datetime.fromisoformat(timestamp)
+    assert parsed.tzinfo is not None
