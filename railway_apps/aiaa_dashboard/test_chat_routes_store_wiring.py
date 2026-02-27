@@ -359,6 +359,33 @@ def test_stream_uses_store_for_session_lookup(auth_client, monkeypatch):
     assert ("ensure_session", "s-4") in runner.calls
 
 
+def test_stream_exposes_tool_events_in_sse(auth_client, monkeypatch):
+    store = FakeStore()
+    store.create_session("s-tools", title="Tool stream")
+    runner = FakeRunner()
+
+    def fake_stream(session_id: str):
+        runner.calls.append(("get_stream", session_id))
+        yield 'data: {"type":"tool_use","tool":"Read","input":"README.md"}\n\n'
+        yield 'data: {"type":"tool_result","content":"Read complete"}\n\n'
+        yield 'data: {"type":"done"}\n\n'
+
+    monkeypatch.setattr(chat_routes, "_get_chat_store", lambda: store)
+    monkeypatch.setattr(chat_routes, "_get_runner", lambda: runner)
+    monkeypatch.setattr(runner, "get_stream", fake_stream)
+
+    resp = auth_client.get("/api/chat/stream/s-tools")
+    assert resp.status_code == 200
+    assert resp.mimetype == "text/event-stream"
+
+    body = resp.get_data(as_text=True)
+    assert '"type":"tool_use"' in body
+    assert '"tool":"Read"' in body
+    assert '"type":"tool_result"' in body
+    assert '"content":"Read complete"' in body
+    assert '"type":"done"' in body
+
+
 def test_v1_responses_stream_requires_auth(app):
     client = app.test_client()
     resp = client.post("/v1/responses", json={"input": "hi", "stream": True})
@@ -405,7 +432,8 @@ def test_v1_responses_stream_returns_sse_events(auth_client, monkeypatch):
     assert typed_events[0]["type"] == "response.created"
     assert typed_events[-1]["type"] == "response.completed"
     assert any(
-        event.get("type") == "response.output_text.delta" and event.get("delta") == "Hello"
+        event.get("type") == "response.output_text.delta"
+        and event.get("delta") == "Hello"
         for event in typed_events
     )
     assert ("create_session", "session-v1-1") in store.calls
