@@ -36,6 +36,7 @@ from flask import (
 import models
 from services.chat_runner import ChatRunnerBackend, RunnerError, create_chat_runner
 from services.chat_store import ChatStore, InMemoryChatStore, RedisChatStore
+from services.gateway_client import GatewayClient, GatewayClientError
 
 
 chat_bp = Blueprint("chat", __name__)
@@ -49,7 +50,9 @@ _store_lock = threading.RLock()
 _store: ChatStore | None = None
 _message_rate_lock = threading.RLock()
 _message_rate_windows: dict[str, deque[float]] = {}
+_token_rotate_lock = threading.RLock()
 GATEWAY_MODE_FLAG = "CHAT_GATEWAY_MODE_ENABLED"
+_DEFAULT_GATEWAY_PROFILE_ID = "default"
 
 
 def _get_message_rate_limit_per_minute() -> int:
@@ -365,6 +368,60 @@ def _persist_to_railway_async(variables: Dict[str, str]) -> bool:
     )
     thread.start()
     return True
+
+
+def _gateway_client() -> GatewayClient:
+    """Build a configured gateway client for profile lifecycle calls."""
+    base_url = (os.getenv("GATEWAY_BASE_URL") or "").strip()
+    if not base_url:
+        raise RuntimeError("GATEWAY_BASE_URL is not configured")
+
+    api_key = (os.getenv("GATEWAY_API_KEY") or "").strip() or None
+    return GatewayClient(base_url=base_url, api_key=api_key)
+
+
+def _gateway_upsert_setup_token(token: str) -> Dict[str, Any]:
+    """Upsert the default setup-token profile in gateway."""
+    body = _gateway_client().post_json(
+        "/v1/profiles/upsert",
+        payload={
+            "profile_id": _DEFAULT_GATEWAY_PROFILE_ID,
+            "token": token,
+        },
+    )
+    if not isinstance(body, dict):
+        raise RuntimeError("Gateway profile upsert returned an invalid payload")
+    if str(body.get("status") or "").lower() != "ok":
+        raise RuntimeError(str(body.get("message") or "Gateway profile upsert failed"))
+    return body
+
+
+def _gateway_revoke_setup_token() -> Dict[str, Any]:
+    """Revoke the default setup-token profile in gateway."""
+    body = _gateway_client().post_json(
+        "/v1/profiles/revoke",
+        payload={
+            "profile_id": _DEFAULT_GATEWAY_PROFILE_ID,
+            "profile_slug": _DEFAULT_GATEWAY_PROFILE_ID,
+        },
+    )
+    if not isinstance(body, dict):
+        raise RuntimeError("Gateway profile revoke returned an invalid payload")
+    if str(body.get("status") or "").lower() != "ok":
+        raise RuntimeError(str(body.get("message") or "Gateway profile revoke failed"))
+    return body
+
+
+def _rollback_gateway_setup_token(previous_token: str) -> tuple[bool, str]:
+    """Best-effort rollback for failed local token persistence after gateway update."""
+    try:
+        if previous_token:
+            _gateway_upsert_setup_token(previous_token)
+        else:
+            _gateway_revoke_setup_token()
+        return True, ""
+    except Exception as exc:  # pragma: no cover - covered via route tests.
+        return False, str(exc)
 
 
 def _derive_title(message: str) -> str:
@@ -1053,6 +1110,176 @@ def save_token():
             "validation_detail": validation,
             "persisted_to_railway": persisted,
             "redacted": _redact_token(token),
+        }
+    )
+
+
+@chat_bp.route("/api/chat/token/rotate", methods=["POST"])
+@_login_required_api
+def rotate_token():
+    """Rotate Claude setup token with gateway-first, rollback-safe semantics."""
+    payload = request.get_json(silent=True) or {}
+    token = (payload.get("new_token") or payload.get("token") or "").strip()
+    raw_current_token = payload.get("current_token")
+    current_token = None
+
+    if raw_current_token is not None:
+        if not isinstance(raw_current_token, str):
+            return (
+                jsonify(
+                    {
+                        "status": "error",
+                        "message": "Validation failed",
+                        "errors": {"current_token": "current_token must be a string"},
+                    }
+                ),
+                400,
+            )
+        current_token = raw_current_token.strip()
+
+    if not token:
+        _log_token_lifecycle(
+            action="rotate",
+            status="error",
+            reason="missing_token",
+            validation="missing",
+            redacted="",
+        )
+        return jsonify({"status": "error", "message": "token is required"}), 400
+
+    validation = validate_claude_token(token)
+    if validation["status"] in ("invalid", "expired", "unsupported"):
+        _log_token_lifecycle(
+            action="rotate",
+            status="error",
+            reason="validation_failed",
+            validation=validation["status"],
+            redacted=_redact_token(token),
+        )
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": "Claude token validation failed",
+                    "validation": validation,
+                }
+            ),
+            400,
+        )
+
+    with _token_rotate_lock:
+        previous_token = get_claude_token().strip()
+
+        if current_token is not None and current_token != previous_token:
+            _log_token_lifecycle(
+                action="rotate",
+                status="error",
+                reason="current_token_mismatch",
+                redacted=_redact_token(token),
+            )
+            return (
+                jsonify(
+                    {
+                        "status": "error",
+                        "message": "Current token does not match",
+                    }
+                ),
+                409,
+            )
+
+        if previous_token and previous_token == token:
+            _log_token_lifecycle(
+                action="rotate",
+                status="error",
+                reason="token_unchanged",
+                redacted=_redact_token(token),
+            )
+            return (
+                jsonify(
+                    {
+                        "status": "error",
+                        "message": "New token must be different from current token",
+                    }
+                ),
+                400,
+            )
+
+        try:
+            _gateway_upsert_setup_token(token)
+        except (GatewayClientError, RuntimeError) as exc:
+            _log_token_lifecycle(
+                action="rotate",
+                status="error",
+                reason="gateway_upsert_failed",
+                error=str(exc),
+                redacted=_redact_token(token),
+            )
+            return (
+                jsonify(
+                    {
+                        "status": "error",
+                        "message": "Gateway token update failed",
+                        "error": str(exc),
+                    }
+                ),
+                502,
+            )
+
+        previous_env_token = os.environ.get("CLAUDE_SETUP_TOKEN")
+        os.environ["CLAUDE_SETUP_TOKEN"] = token
+
+        try:
+            models.set_setting(CLAUDE_TOKEN_SETTING_KEY, token)
+        except Exception as exc:
+            if previous_env_token is None:
+                os.environ.pop("CLAUDE_SETUP_TOKEN", None)
+            else:
+                os.environ["CLAUDE_SETUP_TOKEN"] = previous_env_token
+
+            rolled_back, rollback_error = _rollback_gateway_setup_token(previous_token)
+            rollback_status = "ok" if rolled_back else "error"
+
+            _log_token_lifecycle(
+                action="rotate",
+                status="error",
+                reason="local_persist_failed",
+                rollback=rollback_status,
+                error=str(exc),
+                rollback_error=rollback_error or None,
+                redacted=_redact_token(token),
+            )
+
+            response_payload: Dict[str, Any] = {
+                "status": "error",
+                "message": "Token rotation failed while saving locally",
+                "error": str(exc),
+                "rollback": {"status": rollback_status},
+            }
+            if rollback_error:
+                response_payload["rollback"]["error"] = rollback_error
+            return jsonify(response_payload), 500
+
+    persisted = _persist_to_railway_async({"CLAUDE_SETUP_TOKEN": token})
+    init_chat_runner()
+
+    _log_token_lifecycle(
+        action="rotate",
+        status="success",
+        validation=validation["status"],
+        persisted_to_railway=persisted,
+        redacted=_redact_token(token),
+        previous_redacted=_redact_token(previous_token),
+    )
+
+    return jsonify(
+        {
+            "status": "ok",
+            "message": "Claude token rotated",
+            "validation": validation["status"],
+            "validation_detail": validation,
+            "persisted_to_railway": persisted,
+            "redacted": _redact_token(token),
+            "previous_redacted": _redact_token(previous_token),
         }
     )
 
