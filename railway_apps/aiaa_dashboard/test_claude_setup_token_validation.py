@@ -255,7 +255,9 @@ def test_create_session_does_not_hard_block_setup_token_for_gateway(
     assert body["session"]["title"] == "Gateway chat"
 
 
-def test_send_message_does_not_hard_block_setup_token_for_gateway(auth_client, app, monkeypatch):
+def test_send_message_does_not_hard_block_setup_token_for_gateway(
+    auth_client, app, monkeypatch
+):
     monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "false")
     monkeypatch.setitem(app.config, "CHAT_BACKEND", "gateway")
     with app.app_context():
@@ -270,3 +272,35 @@ def test_send_message_does_not_hard_block_setup_token_for_gateway(auth_client, a
     body = resp.get_json()
     assert body["status"] == "error"
     assert "gateway mode is disabled" not in body["message"].lower()
+
+
+def test_v1_responses_blocks_setup_token_when_gateway_mode_disabled(
+    auth_client, app, monkeypatch
+):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "false")
+    monkeypatch.delenv("CHAT_BACKEND", raising=False)
+    app.config.pop("CHAT_BACKEND", None)
+    with app.app_context():
+        models.set_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY, SETUP_TOKEN_OAT)
+
+    resp = auth_client.post("/v1/responses", json={"input": "hi", "stream": False})
+
+    assert resp.status_code == 400
+    body = resp.get_json()
+    assert "gateway mode is disabled" in body["error"]["message"].lower()
+
+
+def test_v1_responses_does_not_hard_block_setup_token_for_gateway(
+    auth_client, app, monkeypatch
+):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "false")
+    monkeypatch.setitem(app.config, "CHAT_BACKEND", "gateway")
+    with app.app_context():
+        models.set_setting(chat_routes.CLAUDE_TOKEN_SETTING_KEY, SETUP_TOKEN_OAT)
+
+    resp = auth_client.post("/v1/responses", json={"input": "hi", "stream": False})
+
+    assert resp.status_code == 400
+    body = resp.get_json()
+    assert "stream=true" in body["error"]["message"]
+    assert "gateway mode is disabled" not in body["error"]["message"].lower()

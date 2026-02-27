@@ -783,7 +783,7 @@ def create_response():
     token = get_claude_token()
     if not token:
         return jsonify({"error": {"message": "Claude token not configured"}}), 400
-    if _looks_like_setup_token(token):
+    if _looks_like_setup_token(token) and _is_setup_token_hard_blocked():
         return jsonify({"error": {"message": _unsupported_setup_token_message()}}), 400
 
     payload = request.get_json(silent=True) or {}
