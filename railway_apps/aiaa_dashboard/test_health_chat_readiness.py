@@ -11,6 +11,7 @@ from flask import Flask
 sys.path.insert(0, str(Path(__file__).parent))
 
 import database
+from routes import health_utils
 from routes.api import api_bp
 from routes.views import views_bp
 
@@ -104,13 +105,27 @@ def test_api_health_gateway_backend_requires_gateway_env_vars(client, monkeypatc
         "GATEWAY_BASE_URL",
         "GATEWAY_API_KEY",
     ]
+    assert payload["chat_subsystem"]["gateway_connectivity"]["status"] == "not_checked"
+    assert payload["chat_subsystem"]["gateway_connectivity"]["connected"] is False
 
 
-def test_api_health_gateway_backend_reports_ready_with_gateway_env_vars(client, monkeypatch):
+def test_api_health_gateway_backend_reports_ready_with_gateway_env_vars(
+    client, monkeypatch
+):
     _clear_chat_env(monkeypatch)
     monkeypatch.setenv("CHAT_BACKEND", "gateway")
     monkeypatch.setenv("GATEWAY_BASE_URL", "https://gateway.example.test")
     monkeypatch.setenv("GATEWAY_API_KEY", "gateway-test-key")
+    monkeypatch.setattr(
+        health_utils,
+        "_check_gateway_connectivity",
+        lambda *_: {
+            "connected": True,
+            "status": "connected",
+            "http_status": 200,
+            "error": None,
+        },
+    )
 
     response = client.get("/api/health")
     assert response.status_code == 200
@@ -120,3 +135,44 @@ def test_api_health_gateway_backend_reports_ready_with_gateway_env_vars(client, 
     assert payload["chat_subsystem"]["backend"] == "gateway"
     assert payload["chat_subsystem"]["providers"] == ["gateway"]
     assert payload["chat_subsystem"]["missing_env_vars"] == []
+    assert payload["chat_subsystem"]["gateway_connectivity"] == {
+        "connected": True,
+        "status": "connected",
+        "http_status": 200,
+        "error": None,
+    }
+
+
+def test_api_health_gateway_backend_reports_not_ready_when_connectivity_fails(
+    client, monkeypatch
+):
+    _clear_chat_env(monkeypatch)
+    monkeypatch.setenv("CHAT_BACKEND", "gateway")
+    monkeypatch.setenv("GATEWAY_BASE_URL", "https://gateway.example.test")
+    monkeypatch.setenv("GATEWAY_API_KEY", "gateway-test-key")
+    monkeypatch.setattr(
+        health_utils,
+        "_check_gateway_connectivity",
+        lambda *_: {
+            "connected": False,
+            "status": "unreachable",
+            "http_status": 503,
+            "error": "Gateway health check returned HTTP 503",
+        },
+    )
+
+    response = client.get("/api/health")
+    assert response.status_code == 200
+
+    payload = response.get_json()
+    assert payload["chat_subsystem_ready"] is False
+    assert payload["chat_subsystem"]["ready"] is False
+    assert payload["chat_subsystem"]["backend"] == "gateway"
+    assert payload["chat_subsystem"]["providers"] == []
+    assert payload["chat_subsystem"]["missing_env_vars"] == []
+    assert payload["chat_subsystem"]["gateway_connectivity"] == {
+        "connected": False,
+        "status": "unreachable",
+        "http_status": 503,
+        "error": "Gateway health check returned HTTP 503",
+    }
