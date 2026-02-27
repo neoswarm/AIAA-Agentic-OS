@@ -27,6 +27,11 @@ def _runner() -> GatewayRunner:
     return GatewayRunner(cwd="/tmp", token_provider=lambda: "test-token")
 
 
+def _parse_sse_payload(chunk: str) -> dict[str, object]:
+    assert chunk.startswith("data: ")
+    return json.loads(chunk[len("data: ") :].strip())
+
+
 @pytest.mark.parametrize("method_name", CONTRACT_METHODS)
 def test_gateway_runner_matches_agent_runner_method_signatures(
     method_name: str,
@@ -80,15 +85,58 @@ def test_gateway_runner_send_message_errors_follow_contract() -> None:
         runner.send_message(session_id, "hello")
 
 
-def test_gateway_runner_stream_emits_sse_payload() -> None:
+def test_gateway_runner_stream_emits_success_event_before_terminal_done() -> None:
+    runner = _runner()
+    session_id = runner.create_session()["id"]
+
+    runner._output_queues[session_id].put(
+        {"type": "text", "content": "Hello", "timestamp": "2026-01-01T00:00:00Z"}
+    )
+    runner._output_queues[session_id].put(
+        {"type": "done", "timestamp": "2026-01-01T00:00:01Z"}
+    )
+
+    chunks = list(runner.get_stream(session_id, keepalive_seconds=1))
+    payloads = [_parse_sse_payload(chunk) for chunk in chunks]
+    assert payloads == [
+        {"type": "text", "content": "Hello", "timestamp": "2026-01-01T00:00:00Z"},
+        {"type": "done", "timestamp": "2026-01-01T00:00:01Z"},
+    ]
+
+
+def test_gateway_runner_stream_emits_terminal_error_and_stops() -> None:
+    runner = _runner()
+    session_id = runner.create_session()["id"]
+
+    runner._output_queues[session_id].put(
+        {"type": "error", "content": "stream failed", "timestamp": "2026-01-01T00:00:00Z"}
+    )
+    runner._output_queues[session_id].put(
+        {"type": "done", "timestamp": "2026-01-01T00:00:01Z"}
+    )
+
+    chunks = list(runner.get_stream(session_id, keepalive_seconds=1))
+    payloads = [_parse_sse_payload(chunk) for chunk in chunks]
+    assert payloads == [
+        {
+            "type": "error",
+            "content": "stream failed",
+            "timestamp": "2026-01-01T00:00:00Z",
+        }
+    ]
+
+
+def test_gateway_runner_stream_emits_terminal_done_and_stops() -> None:
     runner = _runner()
     session_id = runner.create_session()["id"]
 
     runner._output_queues[session_id].put(
         {"type": "done", "timestamp": "2026-01-01T00:00:00Z"}
     )
+    runner._output_queues[session_id].put(
+        {"type": "text", "content": "late", "timestamp": "2026-01-01T00:00:01Z"}
+    )
 
-    chunk = next(runner.get_stream(session_id))
-    assert chunk.startswith("data: ")
-    payload = json.loads(chunk[len("data: ") :].strip())
-    assert payload["type"] == "done"
+    chunks = list(runner.get_stream(session_id, keepalive_seconds=1))
+    payloads = [_parse_sse_payload(chunk) for chunk in chunks]
+    assert payloads == [{"type": "done", "timestamp": "2026-01-01T00:00:00Z"}]
