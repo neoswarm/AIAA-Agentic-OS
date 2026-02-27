@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import os
+import secrets
 import shutil
+from collections.abc import MutableMapping
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -11,6 +13,7 @@ from typing import Any
 import requests as http_requests
 from flask import Blueprint, current_app, jsonify, request
 
+from .services.profile_service import revoke_profile
 from .services.responses_service import (
     build_anthropic_messages_payload,
     map_anthropic_to_response,
@@ -115,6 +118,46 @@ def _get_runtime_readiness() -> dict[str, Any]:
     }
 
 
+def _resolve_internal_gateway_token() -> str:
+    configured = (current_app.config.get("GATEWAY_INTERNAL_TOKEN") or "").strip()
+    if configured:
+        return configured
+    return (os.getenv("GATEWAY_INTERNAL_TOKEN") or "").strip()
+
+
+def _require_internal_bearer_auth():
+    expected_token = _resolve_internal_gateway_token()
+    if not expected_token:
+        return None
+
+    auth_header = (request.headers.get("Authorization") or "").strip()
+    if not auth_header.lower().startswith("bearer "):
+        return _json_error(
+            "Missing gateway bearer token.",
+            401,
+            error_type="authentication_error",
+        )
+
+    provided_token = auth_header[7:].strip()
+    if not provided_token or not secrets.compare_digest(provided_token, expected_token):
+        return _json_error(
+            "Invalid gateway bearer token.",
+            401,
+            error_type="authentication_error",
+        )
+    return None
+
+
+def _resolve_profile_store() -> MutableMapping[str, dict[str, Any]]:
+    store = current_app.config.get("PROFILE_STORE")
+    if isinstance(store, MutableMapping):
+        return store
+
+    initialized_store: dict[str, dict[str, Any]] = {}
+    current_app.config["PROFILE_STORE"] = initialized_store
+    return initialized_store
+
+
 @gateway_bp.get("/")
 def index():
     return jsonify(
@@ -142,6 +185,29 @@ def health():
             "runtime": runtime,
         }
     )
+
+
+@gateway_bp.post("/v1/profiles/revoke")
+def revoke_gateway_profile():
+    """Invalidate a profile and remove any persisted token material."""
+    auth_error = _require_internal_bearer_auth()
+    if auth_error is not None:
+        return auth_error
+
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return _json_error("Request body must be a JSON object.", 400)
+
+    profile_id = str(body.get("profile_id") or "").strip()
+    if not profile_id:
+        return _json_error("profile_id is required.", 400)
+
+    try:
+        revoke_profile(_resolve_profile_store(), profile_id)
+    except ValueError as exc:
+        return _json_error(str(exc), 400)
+
+    return jsonify({"status": "ok", "revoked": True})
 
 
 @gateway_bp.post("/v1/responses")

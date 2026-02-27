@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import base64
+from datetime import UTC, datetime
 import hashlib
 import os
+import re
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator, NamedTuple, Optional
+from typing import Any, Iterator, MutableMapping, NamedTuple, Optional
 
 from cryptography.fernet import Fernet, InvalidToken
 
@@ -18,6 +20,7 @@ PROFILE_STATUSES = {"active", "inactive", "revoked"}
 DEFAULT_PROFILE_DB_PATH = (
     Path(__file__).resolve().parents[2] / "data" / "gateway_profiles.db"
 )
+PROFILE_ID_PATTERN = re.compile(r"[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}")
 
 
 class ProfileRecord(NamedTuple):
@@ -207,3 +210,33 @@ def decrypt_token_from_storage(stored_token: Optional[str]) -> Optional[str]:
         return cipher.decrypt(token_value.encode("utf-8")).decode("utf-8")
     except InvalidToken:
         return None
+
+
+def is_valid_profile_id(profile_id: str) -> bool:
+    """Return True when the supplied profile_id passes gateway validation."""
+    return bool(PROFILE_ID_PATTERN.fullmatch((profile_id or "").strip()))
+
+
+def revoke_profile(
+    profile_store: MutableMapping[str, dict[str, Any]],
+    profile_id: str,
+) -> dict[str, Any]:
+    """Invalidate a profile and remove any persisted token material."""
+    normalized_profile_id = (profile_id or "").strip()
+    if not normalized_profile_id:
+        raise ValueError("profile_id is required.")
+    if not is_valid_profile_id(normalized_profile_id):
+        raise ValueError("profile_id is invalid.")
+
+    existing = profile_store.get(normalized_profile_id)
+    record = dict(existing) if isinstance(existing, dict) else {}
+    record.pop("token", None)
+    record.pop("encrypted_token", None)
+
+    revoked_at = datetime.now(UTC).isoformat()
+    record["profile_id"] = normalized_profile_id
+    record["status"] = "revoked"
+    record["revoked_at"] = revoked_at
+    record["updated_at"] = revoked_at
+    profile_store[normalized_profile_id] = record
+    return record
