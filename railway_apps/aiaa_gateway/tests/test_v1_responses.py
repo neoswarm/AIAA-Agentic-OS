@@ -116,6 +116,57 @@ def test_post_v1_responses_rejects_stream_true(monkeypatch):
     assert "non-stream mode" in body["error"]["message"]
 
 
+def test_post_v1_responses_handles_normalized_upstream_payload(monkeypatch):
+    client = _make_client()
+
+    def fake_post(
+        url: str, *, json: dict[str, Any], headers: dict[str, str], timeout: float
+    ):
+        del url, json, headers, timeout
+        return FakeResponse(
+            200,
+            {
+                "id": "resp_normalized_123",
+                "object": "response",
+                "created_at": 1730000000,
+                "status": "completed",
+                "model": "claude-3-5-sonnet-latest",
+                "output": [
+                    {
+                        "id": "msg_normalized_1",
+                        "type": "message",
+                        "status": "completed",
+                        "role": "assistant",
+                        "content": [
+                            {
+                                "type": "output_text",
+                                "text": "Hello from normalized payload",
+                                "annotations": [],
+                            }
+                        ],
+                    }
+                ],
+                "usage": {"input_tokens": 11, "output_tokens": 6, "total_tokens": 17},
+            },
+        )
+
+    monkeypatch.setattr(routes.http_requests, "post", fake_post)
+
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-3-5-sonnet-latest", "input": "hello"},
+    )
+
+    assert response.status_code == 200
+    body = response.get_json()
+    assert body["id"] == "resp_normalized_123"
+    assert body["created_at"] == 1730000000
+    assert body["status"] == "completed"
+    assert body["output_text"] == "Hello from normalized payload"
+    assert body["output"][0]["id"] == "msg_normalized_1"
+    assert body["usage"] == {"input_tokens": 11, "output_tokens": 6, "total_tokens": 17}
+
+
 def test_post_v1_responses_requires_input():
     client = _make_client()
 
