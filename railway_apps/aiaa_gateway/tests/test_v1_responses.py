@@ -1,7 +1,8 @@
-"""Tests for POST /v1/responses non-stream mode."""
+"""Tests for POST /v1/responses compatibility modes."""
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import sys
 from typing import Any
@@ -19,14 +20,30 @@ class FakeResponse:
     """Small fake HTTP response for route tests."""
 
     def __init__(
-        self, status_code: int, body: dict[str, Any] | list[Any], *, text: str = ""
+        self,
+        status_code: int,
+        body: dict[str, Any] | list[Any],
+        *,
+        text: str = "",
+        stream_lines: list[str] | None = None,
     ):
         self.status_code = status_code
         self._body = body
         self.text = text
+        self._stream_lines = stream_lines or []
 
     def json(self) -> dict[str, Any] | list[Any]:
         return self._body
+
+    def iter_lines(self, decode_unicode: bool = False):
+        for line in self._stream_lines:
+            if decode_unicode:
+                yield line
+            else:
+                yield line.encode("utf-8")
+
+    def close(self) -> None:
+        return None
 
 
 def _make_client():
@@ -47,8 +64,14 @@ def test_post_v1_responses_non_stream_success(monkeypatch):
     captured: dict[str, Any] = {}
 
     def fake_post(
-        url: str, *, json: dict[str, Any], headers: dict[str, str], timeout: float
+        url: str,
+        *,
+        json: dict[str, Any],
+        headers: dict[str, str],
+        timeout: float,
+        stream: bool = False,
     ):
+        assert stream is False
         captured["url"] = url
         captured["json"] = json
         captured["headers"] = headers
@@ -97,23 +120,91 @@ def test_post_v1_responses_non_stream_success(monkeypatch):
     assert captured["headers"]["x-api-key"] == "test-anthropic-key"
 
 
-def test_post_v1_responses_rejects_stream_true(monkeypatch):
+def test_post_v1_responses_stream_emits_sse_chunks_and_done(monkeypatch):
     client = _make_client()
+    captured: dict[str, Any] = {}
 
-    def fail_if_called(*args, **kwargs):  # pragma: no cover - safety guard
-        raise AssertionError("Upstream call should not happen when stream=true")
+    def fake_post(
+        url: str,
+        *,
+        json: dict[str, Any],
+        headers: dict[str, str],
+        timeout: float,
+        stream: bool = False,
+    ):
+        captured["url"] = url
+        captured["json"] = json
+        captured["headers"] = headers
+        captured["timeout"] = timeout
+        captured["stream"] = stream
+        return FakeResponse(
+            200,
+            {},
+            stream_lines=[
+                'event: message_start',
+                'data: {"type":"message_start"}',
+                "",
+                'event: content_block_delta',
+                (
+                    'data: {"type":"content_block_delta","delta":{"type":"text_delta",'
+                    '"text":"Hello "}}'
+                ),
+                "",
+                'event: content_block_delta',
+                (
+                    'data: {"type":"content_block_delta","delta":{"type":"text_delta",'
+                    '"text":"world"}}'
+                ),
+                "",
+                'event: message_stop',
+                'data: {"type":"message_stop"}',
+                "",
+            ],
+        )
 
-    monkeypatch.setattr(routes.http_requests, "post", fail_if_called)
+    monkeypatch.setattr(routes.http_requests, "post", fake_post)
 
     response = client.post(
         "/v1/responses",
         json={"model": "claude-3-5-sonnet-latest", "input": "hello", "stream": True},
     )
 
-    assert response.status_code == 400
-    body = response.get_json()
-    assert body["error"]["type"] == "invalid_request_error"
-    assert "non-stream mode" in body["error"]["message"]
+    assert response.status_code == 200
+    assert response.mimetype == "text/event-stream"
+
+    chunks: list[str] = []
+    typed_events: list[dict[str, Any]] = []
+    for line in response.get_data(as_text=True).splitlines():
+        if not line.startswith("data: "):
+            continue
+        payload = line[6:]
+        chunks.append(payload)
+        if payload == "[DONE]":
+            continue
+        typed_events.append(json.loads(payload))
+
+    assert chunks[-1] == "[DONE]"
+    assert typed_events[0]["type"] == "response.created"
+    assert typed_events[-1]["type"] == "response.completed"
+    assert any(
+        event.get("type") == "response.output_text.delta"
+        and event.get("delta") == "Hello "
+        for event in typed_events
+    )
+    assert any(
+        event.get("type") == "response.output_text.delta"
+        and event.get("delta") == "world"
+        for event in typed_events
+    )
+    assert any(
+        event.get("type") == "response.output_text.done"
+        and event.get("text") == "Hello world"
+        for event in typed_events
+    )
+    assert captured["url"].endswith("/v1/messages")
+    assert captured["json"]["stream"] is True
+    assert captured["headers"]["accept"] == "text/event-stream"
+    assert captured["stream"] is True
 
 
 def test_post_v1_responses_requires_input():
@@ -131,8 +222,14 @@ def test_post_v1_responses_surfaces_upstream_errors(monkeypatch):
     client = _make_client()
 
     def fake_post(
-        url: str, *, json: dict[str, Any], headers: dict[str, str], timeout: float
+        url: str,
+        *,
+        json: dict[str, Any],
+        headers: dict[str, str],
+        timeout: float,
+        stream: bool = False,
     ):
+        assert stream is False
         del url, json, headers, timeout
         return FakeResponse(
             429, {"error": {"message": "rate limit exceeded"}}, text="rate limited"
@@ -149,3 +246,47 @@ def test_post_v1_responses_surfaces_upstream_errors(monkeypatch):
     body = response.get_json()
     assert body["error"]["type"] == "upstream_error"
     assert body["error"]["details"]["upstream_status"] == 429
+
+
+def test_post_v1_responses_stream_emits_failed_and_done_for_error_event(monkeypatch):
+    client = _make_client()
+
+    def fake_post(
+        url: str,
+        *,
+        json: dict[str, Any],
+        headers: dict[str, str],
+        timeout: float,
+        stream: bool = False,
+    ):
+        del url, json, headers, timeout
+        assert stream is True
+        return FakeResponse(
+            200,
+            {},
+            stream_lines=[
+                'event: error',
+                'data: {"type":"error","error":{"message":"upstream exploded"}}',
+                "",
+            ],
+        )
+
+    monkeypatch.setattr(routes.http_requests, "post", fake_post)
+
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-3-5-sonnet-latest", "input": "hello", "stream": True},
+    )
+
+    assert response.status_code == 200
+    chunks = [
+        line[6:]
+        for line in response.get_data(as_text=True).splitlines()
+        if line.startswith("data: ")
+    ]
+    assert chunks[-1] == "[DONE]"
+
+    typed_events = [json.loads(chunk) for chunk in chunks if chunk != "[DONE]"]
+    assert typed_events[0]["type"] == "response.created"
+    assert typed_events[1]["type"] == "response.failed"
+    assert "upstream exploded" in typed_events[1]["response"]["error"]["message"]
