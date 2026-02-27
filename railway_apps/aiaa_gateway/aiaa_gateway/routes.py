@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import json
 import logging
-import hmac
+import hashlib
 import os
+import secrets
 import shutil
+import threading
 import time
 import uuid
+from collections import deque
 from collections.abc import Mapping, MutableMapping
 from datetime import UTC, datetime
 from pathlib import Path
@@ -68,6 +71,8 @@ CORRELATION_HEADER = "X-Correlation-ID"
 REQUEST_ID_HEADER = "X-Request-ID"
 _PUBLIC_ENDPOINTS = frozenset({"/", "/health"})
 _PRIVATE_ENDPOINT_PATH_PREFIX = "/v1/"
+_auth_failure_lock = threading.RLock()
+_auth_failure_windows: dict[str, deque[float]] = {}
 
 
 def _resolve_correlation_id() -> str:
@@ -156,10 +161,78 @@ def _resolve_anthropic_api_key() -> str:
     if header_key:
         return header_key
 
+    gateway_api_key = (current_app.config.get("GATEWAY_API_KEY") or "").strip()
+    internal_token = (current_app.config.get("GATEWAY_INTERNAL_TOKEN") or "").strip()
+    auth_header = (request.headers.get("Authorization") or "").strip()
+    if (
+        not gateway_api_key
+        and not internal_token
+        and auth_header.lower().startswith("bearer ")
+    ):
+        return auth_header[7:].strip()
+
     configured = (current_app.config.get("ANTHROPIC_API_KEY") or "").strip()
     if configured:
         return configured
     return (os.getenv("ANTHROPIC_API_KEY") or "").strip()
+
+
+def _get_auth_failure_limit() -> int:
+    raw_value = current_app.config.get("GATEWAY_AUTH_FAILURE_MAX_ATTEMPTS", 5)
+    try:
+        return max(1, int(raw_value))
+    except (TypeError, ValueError):
+        return 5
+
+
+def _get_auth_failure_window_seconds() -> int:
+    raw_value = current_app.config.get("GATEWAY_AUTH_FAILURE_WINDOW_SECONDS", 60)
+    try:
+        return max(1, int(raw_value))
+    except (TypeError, ValueError):
+        return 60
+
+
+def _auth_failure_bucket_key(token: str) -> str:
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    client = (request.remote_addr or "unknown").strip() or "unknown"
+    return f"{client}:{token_hash}"
+
+
+def _is_auth_failure_throttled(token: str) -> tuple[bool, int, int, int]:
+    limit = _get_auth_failure_limit()
+    window_seconds = _get_auth_failure_window_seconds()
+    now = time.monotonic()
+    cutoff = now - window_seconds
+    bucket_key = _auth_failure_bucket_key(token)
+
+    with _auth_failure_lock:
+        history = _auth_failure_windows.setdefault(bucket_key, deque())
+        while history and history[0] <= cutoff:
+            history.popleft()
+        if len(history) >= limit:
+            retry_after = max(1, int(history[0] + window_seconds - now))
+            return True, retry_after, limit, window_seconds
+    return False, 0, limit, window_seconds
+
+
+def _record_auth_failure(token: str) -> None:
+    window_seconds = _get_auth_failure_window_seconds()
+    now = time.monotonic()
+    cutoff = now - window_seconds
+    bucket_key = _auth_failure_bucket_key(token)
+
+    with _auth_failure_lock:
+        history = _auth_failure_windows.setdefault(bucket_key, deque())
+        while history and history[0] <= cutoff:
+            history.popleft()
+        history.append(now)
+
+
+def _reset_auth_failure_throttle_state() -> None:
+    """Testing helper to clear in-memory auth throttle state."""
+    with _auth_failure_lock:
+        _auth_failure_windows.clear()
 
 
 @gateway_bp.before_request
@@ -179,18 +252,57 @@ def require_internal_bearer_auth():
 
     bearer_token = _resolve_bearer_token()
     if not bearer_token:
-        return _json_error(
+        response, status_code = _json_error(
             "Missing internal bearer token.",
             401,
             error_type="authentication_error",
         )
+        response.headers["WWW-Authenticate"] = "Bearer"
+        return response, status_code
 
-    if not hmac.compare_digest(bearer_token, expected_token):
-        return _json_error(
+    throttled, retry_after, limit, window_seconds = _is_auth_failure_throttled(
+        bearer_token
+    )
+    if throttled:
+        response, status_code = _json_error(
+            "Too many invalid internal bearer token attempts.",
+            429,
+            error_type="rate_limit_error",
+            details={
+                "retry_after_seconds": retry_after,
+                "limit": limit,
+                "window_seconds": window_seconds,
+            },
+        )
+        response.headers["Retry-After"] = str(retry_after)
+        return response, status_code
+
+    if not secrets.compare_digest(bearer_token, expected_token):
+        _record_auth_failure(bearer_token)
+        throttled, retry_after, limit, window_seconds = _is_auth_failure_throttled(
+            bearer_token
+        )
+        if throttled:
+            response, status_code = _json_error(
+                "Too many invalid internal bearer token attempts.",
+                429,
+                error_type="rate_limit_error",
+                details={
+                    "retry_after_seconds": retry_after,
+                    "limit": limit,
+                    "window_seconds": window_seconds,
+                },
+            )
+            response.headers["Retry-After"] = str(retry_after)
+            return response, status_code
+
+        response, status_code = _json_error(
             "Invalid internal bearer token.",
             401,
             error_type="authentication_error",
         )
+        response.headers["WWW-Authenticate"] = "Bearer"
+        return response, status_code
 
     return None
 

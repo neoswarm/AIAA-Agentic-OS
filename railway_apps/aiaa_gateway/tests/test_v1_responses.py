@@ -38,6 +38,13 @@ def _set_required_encryption_key(monkeypatch):
     monkeypatch.setenv("CHAT_TOKEN_ENCRYPTION_KEY", "gateway-startup-test-key")
 
 
+@pytest.fixture(autouse=True)
+def _reset_auth_failure_state():
+    routes._reset_auth_failure_throttle_state()
+    yield
+    routes._reset_auth_failure_throttle_state()
+
+
 class FakeStreamResponse(FakeResponse):
     """Fake streaming response exposing iter_lines and close."""
 
@@ -673,6 +680,36 @@ def test_post_v1_responses_requires_internal_bearer_token(monkeypatch):
     assert body["error"]["message"] == "Missing internal bearer token."
 
 
+def test_post_v1_responses_requires_gateway_bearer_when_only_gateway_key_configured(
+    monkeypatch,
+):
+    app = create_app(
+        {
+            "TESTING": True,
+            "ANTHROPIC_API_KEY": "test-anthropic-key",
+            "GATEWAY_API_KEY": "gateway-secret",
+            "GATEWAY_INTERNAL_TOKEN": "",
+        }
+    )
+    client = app.test_client()
+
+    def fail_if_called(*args, **kwargs):  # pragma: no cover - safety guard
+        raise AssertionError("Upstream call should not happen for missing auth")
+
+    monkeypatch.setattr(routes.http_requests, "post", fail_if_called)
+
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-3-5-sonnet-latest", "input": "hello"},
+    )
+
+    assert response.status_code == 401
+    assert response.headers["WWW-Authenticate"] == "Bearer"
+    body = response.get_json()
+    assert body["error"]["type"] == "authentication_error"
+    assert body["error"]["message"] == "Missing internal bearer token."
+
+
 def test_post_v1_responses_rejects_invalid_internal_bearer_token(monkeypatch):
     client = _make_client()
 
@@ -691,6 +728,85 @@ def test_post_v1_responses_rejects_invalid_internal_bearer_token(monkeypatch):
     body = response.get_json()
     assert body["error"]["type"] == "authentication_error"
     assert body["error"]["message"] == "Invalid internal bearer token."
+
+
+def test_post_v1_responses_throttles_repeated_invalid_internal_bearer_tokens(monkeypatch):
+    app = create_app(
+        {
+            "TESTING": True,
+            "ANTHROPIC_API_KEY": "test-anthropic-key",
+            "GATEWAY_API_KEY": "gateway-secret",
+            "GATEWAY_INTERNAL_TOKEN": "",
+            "GATEWAY_AUTH_FAILURE_MAX_ATTEMPTS": 2,
+            "GATEWAY_AUTH_FAILURE_WINDOW_SECONDS": 60,
+        }
+    )
+    client = app.test_client()
+
+    def fail_if_called(*args, **kwargs):  # pragma: no cover - safety guard
+        raise AssertionError("Upstream call should not happen for invalid auth")
+
+    monkeypatch.setattr(routes.http_requests, "post", fail_if_called)
+
+    headers = {"Authorization": "Bearer wrong-token"}
+    payload = {"model": "claude-3-5-sonnet-latest", "input": "hello"}
+
+    first = client.post("/v1/responses", headers=headers, json=payload)
+    assert first.status_code == 401
+
+    second = client.post("/v1/responses", headers=headers, json=payload)
+    assert second.status_code == 429
+    assert second.headers["Retry-After"]
+    body = second.get_json()
+    assert body["error"]["type"] == "rate_limit_error"
+    assert body["error"]["details"]["limit"] == 2
+    assert body["error"]["details"]["window_seconds"] == 60
+    assert body["error"]["details"]["retry_after_seconds"] >= 1
+
+
+def test_post_v1_responses_gateway_bearer_auth_uses_configured_anthropic_key(monkeypatch):
+    app = create_app(
+        {
+            "TESTING": True,
+            "ANTHROPIC_API_KEY": "test-anthropic-key",
+            "GATEWAY_API_KEY": "gateway-secret",
+            "GATEWAY_INTERNAL_TOKEN": "",
+            "DEFAULT_MAX_OUTPUT_TOKENS": 256,
+            "UPSTREAM_REQUEST_TIMEOUT_SECONDS": 5,
+        }
+    )
+    client = app.test_client()
+    captured: dict[str, Any] = {}
+
+    def fake_post(
+        url: str, *, json: dict[str, Any], headers: dict[str, str], timeout: float
+    ):
+        captured["url"] = url
+        captured["json"] = json
+        captured["headers"] = headers
+        captured["timeout"] = timeout
+        return FakeResponse(
+            200,
+            {
+                "id": "msg_upstream_123",
+                "model": "claude-3-5-sonnet-latest",
+                "content": [{"type": "text", "text": "Hello from Anthropic"}],
+                "usage": {"input_tokens": 9, "output_tokens": 4},
+                "stop_reason": "end_turn",
+            },
+        )
+
+    monkeypatch.setattr(routes.http_requests, "post", fake_post)
+
+    response = client.post(
+        "/v1/responses",
+        headers={"Authorization": "Bearer gateway-secret"},
+        json={"model": "claude-3-5-sonnet-latest", "input": "hello"},
+    )
+
+    assert response.status_code == 200
+    assert captured["url"].endswith("/v1/messages")
+    assert captured["headers"]["x-api-key"] == "test-anthropic-key"
 
 
 def test_post_v1_responses_requires_internal_token_configuration(monkeypatch):
