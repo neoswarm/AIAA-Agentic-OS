@@ -53,7 +53,8 @@ _message_rate_lock = threading.RLock()
 _message_rate_windows: dict[str, deque[float]] = {}
 _token_rotate_lock = threading.RLock()
 GATEWAY_MODE_FLAG = "CHAT_GATEWAY_MODE_ENABLED"
-_DEFAULT_GATEWAY_PROFILE_ID = "default"
+DEFAULT_GATEWAY_PROFILE_ID = "default"
+_PROFILE_STATUS_VALUES = {"active", "inactive", "revoked"}
 
 
 def _get_message_rate_limit_per_minute() -> int:
@@ -310,6 +311,69 @@ def _is_setup_token_hard_blocked() -> bool:
     return _chat_backend() != "gateway"
 
 
+def _gateway_base_url() -> str:
+    if has_app_context():
+        configured = (current_app.config.get("GATEWAY_BASE_URL") or "").strip()
+        if configured:
+            return configured
+    return (os.getenv("GATEWAY_BASE_URL", "") or "").strip()
+
+
+def _gateway_api_key() -> str:
+    if has_app_context():
+        configured = (current_app.config.get("GATEWAY_API_KEY") or "").strip()
+        if configured:
+            return configured
+    return (os.getenv("GATEWAY_API_KEY", "") or "").strip()
+
+
+def _normalize_gateway_status(raw_status: Any) -> str | None:
+    normalized = str(raw_status or "").strip().lower()
+    return normalized or None
+
+
+def _extract_gateway_profile_status(payload: Dict[str, Any]) -> str | None:
+    status = _normalize_gateway_status(payload.get("profile_status"))
+    if status:
+        return status
+
+    profile_payload = payload.get("profile")
+    if isinstance(profile_payload, dict):
+        status = _normalize_gateway_status(profile_payload.get("status"))
+        if status:
+            return status
+    return None
+
+
+def _extract_gateway_token_status(payload: Dict[str, Any]) -> str | None:
+    status = _normalize_gateway_status(payload.get("token_status"))
+    if status:
+        return status
+    return _extract_gateway_profile_status(payload)
+
+
+def _upsert_gateway_setup_token_profile(token: str) -> Dict[str, Any] | None:
+    base_url = _gateway_base_url()
+    api_key = _gateway_api_key()
+    if not base_url or not api_key:
+        return None
+
+    client = GatewayClient(base_url, api_key=api_key)
+    payload = {
+        "profile_id": DEFAULT_GATEWAY_PROFILE_ID,
+        "provider": "anthropic",
+        "auth_mode": "setup_token",
+        "token": token,
+        "metadata": {"source": "dashboard", "path": "/api/chat/token"},
+    }
+    response = client.post_json("/v1/profiles/upsert", payload=payload)
+    if not isinstance(response, dict):
+        raise GatewayClientError(
+            "Gateway profiles/upsert response must be a JSON object"
+        )
+    return response
+
+
 def validate_claude_token(token: str) -> Dict[str, Any]:
     """Validate Claude token with compatible checks.
 
@@ -445,7 +509,7 @@ def _gateway_upsert_setup_token(token: str) -> Dict[str, Any]:
     body = _gateway_client().post_json(
         "/v1/profiles/upsert",
         payload={
-            "profile_id": _DEFAULT_GATEWAY_PROFILE_ID,
+            "profile_id": DEFAULT_GATEWAY_PROFILE_ID,
             "token": token,
         },
     )
@@ -461,8 +525,8 @@ def _gateway_revoke_setup_token() -> Dict[str, Any]:
     body = _gateway_client().post_json(
         "/v1/profiles/revoke",
         payload={
-            "profile_id": _DEFAULT_GATEWAY_PROFILE_ID,
-            "profile_slug": _DEFAULT_GATEWAY_PROFILE_ID,
+            "profile_id": DEFAULT_GATEWAY_PROFILE_ID,
+            "profile_slug": DEFAULT_GATEWAY_PROFILE_ID,
         },
     )
     if not isinstance(body, dict):
@@ -1148,53 +1212,62 @@ def save_token():
             400,
         )
 
-    if _should_use_gateway_profile_api():
-        try:
-            gateway_profile = _upsert_gateway_profile(CLAUDE_TOKEN_PROFILE_ID, token)
-        except GatewayHTTPError as exc:
-            _log_token_lifecycle(
-                action="save",
-                status="error",
-                reason="gateway_http_error",
-                profile_id=CLAUDE_TOKEN_PROFILE_ID,
-                gateway_http_status=exc.status_code,
-                redacted=_redact_token(token),
+    gateway_profile_status = None
+    gateway_token_status = None
+    gateway_upserted = False
+    try:
+        gateway_upsert_payload = _upsert_gateway_setup_token_profile(token)
+        if gateway_upsert_payload is not None:
+            gateway_upserted = True
+            gateway_profile_status = _extract_gateway_profile_status(
+                gateway_upsert_payload
             )
-            return (
-                jsonify(
-                    {
-                        "status": "error",
-                        "message": f"Gateway profile upsert failed with HTTP {exc.status_code}",
-                    }
-                ),
-                502,
-            )
-        except (GatewayClientError, RuntimeError) as exc:
-            _log_token_lifecycle(
-                action="save",
-                status="error",
-                reason="gateway_request_failed",
-                profile_id=CLAUDE_TOKEN_PROFILE_ID,
-                error=str(exc),
-                redacted=_redact_token(token),
-            )
-            return (
-                jsonify(
-                    {
-                        "status": "error",
-                        "message": f"Gateway profile upsert failed: {exc}",
-                    }
-                ),
-                502,
-            )
+            gateway_token_status = _extract_gateway_token_status(gateway_upsert_payload)
+    except GatewayHTTPError as exc:
+        _log_token_lifecycle(
+            action="save",
+            status="error",
+            reason="gateway_upsert_http_error",
+            gateway_http_status=exc.status_code,
+            redacted=_redact_token(token),
+        )
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": "Gateway profile upsert failed",
+                    "gateway_http_status": exc.status_code,
+                }
+            ),
+            502,
+        )
+    except GatewayClientError as exc:
+        _log_token_lifecycle(
+            action="save",
+            status="error",
+            reason="gateway_upsert_failed",
+            gateway_error=str(exc),
+            redacted=_redact_token(token),
+        )
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": "Gateway profile upsert failed",
+                    "gateway_error": str(exc),
+                }
+            ),
+            502,
+        )
 
-        gateway_validation = str(gateway_profile.get("validation") or "").strip().lower()
+    if gateway_upsert_payload:
+        gateway_validation = str(gateway_upsert_payload.get("validation") or "").strip().lower()
         if gateway_validation:
             validation = {
                 "status": gateway_validation,
                 "http_status": None,
                 "message": str(
-                    gateway_profile.get("message")
+                    gateway_upsert_payload.get("message")
                     or validation.get("message")
                     or "Gateway profile upsert completed"
                 ),
@@ -1202,6 +1275,29 @@ def save_token():
 
     os.environ["CLAUDE_SETUP_TOKEN"] = token
     models.set_setting(CLAUDE_TOKEN_SETTING_KEY, token)
+
+    if gateway_profile_status in _PROFILE_STATUS_VALUES:
+        try:
+            models.upsert_setup_token_profile(
+                DEFAULT_GATEWAY_PROFILE_ID,
+                token=token,
+                status=gateway_profile_status,
+            )
+        except Exception:
+            pass
+
+    profile_metadata_stored = False
+    if gateway_token_status:
+        try:
+            models.update_setting_metadata(
+                CLAUDE_TOKEN_SETTING_KEY,
+                validation_status=gateway_token_status,
+                last_error=None,
+            )
+            profile_metadata_stored = True
+        except Exception:
+            profile_metadata_stored = False
+
     persisted = _persist_to_railway_async({"CLAUDE_SETUP_TOKEN": token})
 
     init_chat_runner()
@@ -1210,6 +1306,10 @@ def save_token():
         action="save",
         status="success",
         validation=validation["status"],
+        gateway_upserted=gateway_upserted,
+        profile_status=gateway_profile_status,
+        token_status=gateway_token_status,
+        profile_metadata_stored=profile_metadata_stored,
         persisted_to_railway=persisted,
         redacted=_redact_token(token),
     )
@@ -1221,6 +1321,10 @@ def save_token():
             "validation": validation["status"],
             "validation_detail": validation,
             "persisted_to_railway": persisted,
+            "gateway_upserted": gateway_upserted,
+            "profile_status": gateway_profile_status,
+            "token_status": gateway_token_status,
+            "profile_metadata_stored": profile_metadata_stored,
             "redacted": _redact_token(token),
         }
     )
