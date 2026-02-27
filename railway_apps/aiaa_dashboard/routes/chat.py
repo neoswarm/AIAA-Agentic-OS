@@ -36,12 +36,14 @@ from flask import (
 import models
 from services.chat_runner import ChatRunnerBackend, RunnerError, create_chat_runner
 from services.chat_store import ChatStore, InMemoryChatStore, RedisChatStore
+from services.gateway_client import GatewayClient, GatewayClientError, GatewayHTTPError
 
 
 chat_bp = Blueprint("chat", __name__)
 logger = logging.getLogger(__name__)
 
 CLAUDE_TOKEN_SETTING_KEY = "claude_setup_token"
+CLAUDE_TOKEN_PROFILE_ID = "default"
 
 _runner_lock = threading.RLock()
 _runner: ChatRunnerBackend | None = None
@@ -190,6 +192,36 @@ def get_claude_token() -> str:
     if stored:
         os.environ["CLAUDE_SETUP_TOKEN"] = stored
     return stored
+
+
+def _build_gateway_client() -> GatewayClient:
+    base_url = (
+        current_app.config.get("GATEWAY_BASE_URL")
+        or os.getenv("GATEWAY_BASE_URL", "")
+    ).strip()
+    api_key = (
+        current_app.config.get("GATEWAY_API_KEY")
+        or os.getenv("GATEWAY_API_KEY", "")
+    ).strip()
+
+    if not base_url or not api_key:
+        raise RuntimeError(
+            "Gateway profile API is unavailable. Set GATEWAY_BASE_URL and GATEWAY_API_KEY."
+        )
+    return GatewayClient(base_url, api_key=api_key, timeout_seconds=10.0)
+
+
+def _revoke_gateway_profile(profile_id: str) -> dict[str, Any]:
+    body = _build_gateway_client().post_json(
+        "/v1/profiles/revoke",
+        payload={"profile_id": profile_id},
+    )
+    if not isinstance(body, dict):
+        raise RuntimeError("Gateway revoke response must be a JSON object.")
+    status = str(body.get("status") or "").strip().lower()
+    if status != "ok" or body.get("revoked") is False:
+        raise RuntimeError("Gateway did not confirm profile revoke.")
+    return body
 
 
 def _decode_base64url_json(segment: str) -> dict[str, Any] | None:
@@ -1099,5 +1131,64 @@ def validate_token():
             "validation": validation["status"],
             "validation_detail": validation,
             "redacted": _redact_token(token),
+        }
+    )
+
+
+@chat_bp.route("/api/chat/token/revoke", methods=["POST"])
+@_login_required_api
+def revoke_token():
+    """Revoke the default setup-token profile via gateway and clear local metadata."""
+    try:
+        gateway_response = _revoke_gateway_profile(CLAUDE_TOKEN_PROFILE_ID)
+    except GatewayHTTPError as exc:
+        _log_token_lifecycle(
+            action="revoke",
+            status="error",
+            profile_id=CLAUDE_TOKEN_PROFILE_ID,
+            reason="gateway_http_error",
+            gateway_http_status=exc.status_code,
+        )
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": f"Gateway profile revoke failed with HTTP {exc.status_code}",
+                }
+            ),
+            502,
+        )
+    except (GatewayClientError, RuntimeError) as exc:
+        _log_token_lifecycle(
+            action="revoke",
+            status="error",
+            profile_id=CLAUDE_TOKEN_PROFILE_ID,
+            reason="gateway_request_failed",
+            error=str(exc),
+        )
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": f"Gateway profile revoke failed: {exc}",
+                }
+            ),
+            502,
+        )
+
+    models.delete_setting(CLAUDE_TOKEN_SETTING_KEY)
+    os.environ.pop("CLAUDE_SETUP_TOKEN", None)
+
+    _log_token_lifecycle(
+        action="revoke",
+        status="success",
+        profile_id=CLAUDE_TOKEN_PROFILE_ID,
+    )
+    return jsonify(
+        {
+            "status": "ok",
+            "message": "Claude token revoked",
+            "profile_id": CLAUDE_TOKEN_PROFILE_ID,
+            "revoked": bool(gateway_response.get("revoked", True)),
         }
     )
