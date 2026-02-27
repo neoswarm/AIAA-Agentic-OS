@@ -127,6 +127,43 @@ def test_post_v1_responses_requires_input():
     assert body["error"]["message"] == "input is required."
 
 
+def test_post_v1_responses_rejects_unsupported_input_payload(monkeypatch):
+    client = _make_client()
+
+    def fail_if_called(*args, **kwargs):  # pragma: no cover - safety guard
+        raise AssertionError(
+            "Upstream call should not happen for invalid input payloads"
+        )
+
+    monkeypatch.setattr(routes.http_requests, "post", fail_if_called)
+
+    response = client.post(
+        "/v1/responses",
+        json={
+            "model": "claude-3-5-sonnet-latest",
+            "input": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "input_image",
+                            "image_url": "https://example.com/image.png",
+                        }
+                    ],
+                }
+            ],
+        },
+    )
+
+    assert response.status_code == 400
+    body = response.get_json()
+    assert body["error"]["type"] == "invalid_request_error"
+    assert (
+        body["error"]["message"]
+        == "input contains unsupported content. Only text input is supported."
+    )
+
+
 def test_post_v1_responses_surfaces_upstream_errors(monkeypatch):
     client = _make_client()
 

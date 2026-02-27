@@ -50,6 +50,9 @@ _store: ChatStore | None = None
 _message_rate_lock = threading.RLock()
 _message_rate_windows: dict[str, deque[float]] = {}
 GATEWAY_MODE_FLAG = "CHAT_GATEWAY_MODE_ENABLED"
+_UNSUPPORTED_RESPONSES_INPUT_MESSAGE = (
+    "Unsupported /v1/responses input payload. Only text input is supported."
+)
 
 
 def _get_message_rate_limit_per_minute() -> int:
@@ -410,10 +413,12 @@ def _log_chat_session_lifecycle(
     logger.info(json.dumps(payload, sort_keys=True))
 
 
-def _extract_response_input_text(raw_input: Any) -> str:
+def _extract_response_input_text(raw_input: Any) -> tuple[str, bool]:
     chunks: list[str] = []
+    saw_unsupported = False
 
     def _collect(value: Any) -> None:
+        nonlocal saw_unsupported
         if isinstance(value, str):
             text = value.strip()
             if text:
@@ -425,12 +430,19 @@ def _extract_response_input_text(raw_input: Any) -> str:
             return
         if isinstance(value, dict):
             # Responses input may be text blocks or message-like structures.
+            found_supported_key = False
             for key in ("text", "content", "message", "value"):
                 if key in value:
+                    found_supported_key = True
                     _collect(value.get(key))
+            if not found_supported_key:
+                saw_unsupported = True
+            return
+        if value is not None:
+            saw_unsupported = True
 
     _collect(raw_input)
-    return "\n".join(chunks).strip()
+    return "\n".join(chunks).strip(), saw_unsupported
 
 
 def _parse_runner_sse_event(raw_event: str) -> dict[str, Any] | None:
@@ -799,7 +811,14 @@ def create_response():
             400,
         )
 
-    prompt_text = _extract_response_input_text(payload.get("input"))
+    prompt_text, saw_unsupported_input = _extract_response_input_text(
+        payload.get("input")
+    )
+    if saw_unsupported_input:
+        return (
+            jsonify({"error": {"message": _UNSUPPORTED_RESPONSES_INPUT_MESSAGE}}),
+            400,
+        )
     if not prompt_text:
         return jsonify({"error": {"message": "input is required"}}), 400
 
