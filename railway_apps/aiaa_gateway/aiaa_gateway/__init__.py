@@ -7,6 +7,14 @@ import os
 from flask import Flask
 
 from .routes import gateway_bp
+from .services.profile_service import validate_token_encryption_key
+
+
+def _validate_startup_configuration(app: Flask) -> None:
+    """Validate required secrets before serving requests."""
+    if not str(app.config.get("ANTHROPIC_API_KEY", "")).strip():
+        raise RuntimeError("Missing required gateway secret: ANTHROPIC_API_KEY.")
+    validate_token_encryption_key()
 
 
 def create_app(test_config: dict | None = None) -> Flask:
@@ -36,5 +44,6 @@ def create_app(test_config: dict | None = None) -> Flask:
     if test_config:
         app.config.update(test_config)
 
+    _validate_startup_configuration(app)
     app.register_blueprint(gateway_bp)
     return app

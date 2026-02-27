@@ -176,6 +176,11 @@ def _resolve_token_encryption_key() -> str:
     return key
 
 
+def validate_token_encryption_key() -> None:
+    """Fail fast when token encryption configuration is missing."""
+    _resolve_token_encryption_key()
+
+
 def _build_fernet(raw_key: str) -> Fernet:
     """Build a Fernet cipher from a raw key or deterministic hash fallback."""
     try:
