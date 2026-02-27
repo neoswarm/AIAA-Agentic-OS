@@ -66,6 +66,15 @@ def test_upsert_profile_requires_auth(client):
     assert data["message"] == "Authentication required"
 
 
+def test_upsert_profile_requires_json_object_payload(auth_client):
+    resp = auth_client.post("/v1/profiles/upsert", json=["not", "an", "object"])
+    assert resp.status_code == 400
+    data = resp.get_json()
+    assert data["status"] == "error"
+    assert data["message"] == "Validation failed"
+    assert data["errors"]["body"] == "Request body must be a JSON object"
+
+
 def test_upsert_profile_creates_new_profile(auth_client):
     resp = auth_client.post(
         "/v1/profiles/upsert",

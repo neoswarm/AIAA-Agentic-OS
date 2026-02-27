@@ -50,6 +50,19 @@ def auth_client(app):
 def test_revoke_profile_requires_auth(client):
     resp = client.post("/v1/profiles/revoke", json={"profile_slug": "acme"})
     assert resp.status_code == 401
+    data = resp.get_json()
+    assert data["status"] == "error"
+    assert data["message"] == "Authentication required"
+
+
+def test_revoke_profile_requires_json_object_payload(auth_client):
+    resp = auth_client.post("/v1/profiles/revoke", json=["not", "an", "object"])
+    assert resp.status_code == 400
+
+    data = resp.get_json()
+    assert data["status"] == "error"
+    assert data["message"] == "Validation failed"
+    assert data["errors"]["body"] == "Request body must be a JSON object"
 
 
 def test_revoke_profile_secure_deletes_when_available(auth_client, app, monkeypatch):

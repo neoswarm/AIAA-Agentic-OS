@@ -58,7 +58,11 @@ def login_required(f):
 @login_required
 def api_upsert_profile():
     """Create or update a client profile."""
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True)
+    if data is None:
+        data = {}
+    if not isinstance(data, dict):
+        return _validation_error({"body": "Request body must be a JSON object"})
 
     try:
         result = upsert_profile(data)
