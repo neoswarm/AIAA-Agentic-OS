@@ -270,8 +270,14 @@ def login_required(f):
             return f(*args, **kwargs)
         # API key auth
         api_key = request.headers.get('X-API-Key')
-        if api_key and api_key == os.getenv('DASHBOARD_API_KEY'):
-            return f(*args, **kwargs)
+        if api_key:
+            if api_key == os.getenv('DASHBOARD_API_KEY'):
+                return f(*args, **kwargs)
+            return jsonify({
+                "status": "error",
+                "message": "API key is invalid or revoked. Generate a new API key in Settings.",
+                "error_code": "api_key_invalid_or_revoked",
+            }), 401
         return jsonify({"status": "error", "message": "Authentication required"}), 401
     return decorated
 
