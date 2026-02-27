@@ -21,3 +21,18 @@ def test_gateway_railway_deploy_doc_has_initial_sections():
     ]
     for section in required_sections:
         assert section in content, f"Missing required section: {section}"
+
+
+def test_gateway_railway_deploy_doc_covers_dashboard_env_wiring_and_rollback_toggle():
+    content = DOC_PATH.read_text(encoding="utf-8")
+    required_items = [
+        "### Dashboard Service Wiring",
+        "CHAT_BACKEND=gateway",
+        "GATEWAY_BASE_URL=https://<gateway-service-domain>",
+        "GATEWAY_API_KEY=<gateway-bearer-token>",
+        "CHAT_GATEWAY_MODE_ENABLED=true",
+        "CHAT_GATEWAY_MODE_ENABLED=false",
+        "CHAT_BACKEND=provider",
+    ]
+    for item in required_items:
+        assert item in content, f"Missing required wiring/rollback item: {item}"

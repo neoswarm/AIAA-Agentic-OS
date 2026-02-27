@@ -7,6 +7,7 @@ This runbook is the initial deployment path for the new gateway service on Railw
 - Railway CLI installed and authenticated (`railway login`)
 - Service code present in `railway_apps/gateway_service/`
 - Railway project already linked from this repository
+- Dashboard service already deployed on Railway
 
 ## Required Service Files
 
@@ -17,10 +18,21 @@ This runbook is the initial deployment path for the new gateway service on Railw
 
 ## Required Environment Variables
 
-- `OPENROUTER_API_KEY`
-- `PERPLEXITY_API_KEY`
-- `SLACK_WEBHOOK_URL`
-- `GATEWAY_SHARED_SECRET`
+### Gateway Service (`gateway-service`)
+
+- `ANTHROPIC_API_KEY` (required unless every request sends `Authorization: Bearer ...`)
+- `ANTHROPIC_BASE_URL` (optional, defaults to `https://api.anthropic.com`)
+- `ANTHROPIC_API_VERSION` (optional, defaults to `2023-06-01`)
+- `DEFAULT_ANTHROPIC_MODEL` (optional, defaults to `claude-3-5-sonnet-latest`)
+- `DEFAULT_MAX_OUTPUT_TOKENS` (optional, defaults to `1024`)
+- `UPSTREAM_REQUEST_TIMEOUT_SECONDS` (optional, defaults to `30`)
+
+### Dashboard Service Wiring
+
+- `CHAT_BACKEND=gateway`
+- `GATEWAY_BASE_URL=https://<gateway-service-domain>`
+- `GATEWAY_API_KEY=<gateway-bearer-token>`
+- `CHAT_GATEWAY_MODE_ENABLED=true` (feature-flag rollout toggle)
 
 ## Deploy Steps
 
@@ -32,9 +44,20 @@ This runbook is the initial deployment path for the new gateway service on Railw
    ```bash
    railway status
    ```
-3. Deploy the service:
+3. Set gateway service environment variables:
+   ```bash
+   railway variables --service gateway-service --set "ANTHROPIC_API_KEY=<anthropic-api-key>"
+   ```
+4. Deploy the service:
    ```bash
    railway up --service gateway-service
+   ```
+5. Wire dashboard environment variables to route chat traffic through the gateway:
+   ```bash
+   railway variables --service <dashboard-service> --set "CHAT_BACKEND=gateway"
+   railway variables --service <dashboard-service> --set "GATEWAY_BASE_URL=https://<gateway-service-domain>"
+   railway variables --service <dashboard-service> --set "GATEWAY_API_KEY=<gateway-bearer-token>"
+   railway variables --service <dashboard-service> --set "CHAT_GATEWAY_MODE_ENABLED=true"
    ```
 
 ## Verification
@@ -45,9 +68,26 @@ This runbook is the initial deployment path for the new gateway service on Railw
    curl -fsS https://<gateway-service-domain>/health
    ```
 3. Send a test gateway request and verify logs show successful handling.
+4. Verify dashboard health reports gateway readiness with no missing vars:
+   - `backend: gateway`
+   - `missing_env_vars: []`
 
 ## Rollback
 
-1. Re-deploy the last known good commit for `railway_apps/gateway_service/`.
-2. Run `railway up --service gateway-service` again.
-3. Re-run health checks and smoke tests.
+1. Toggle gateway mode off immediately in dashboard (fast rollback path):
+   ```bash
+   railway variables --service <dashboard-service> --set "CHAT_GATEWAY_MODE_ENABLED=false"
+   ```
+2. Revert dashboard backend routing to provider mode:
+   ```bash
+   railway variables --service <dashboard-service> --set "CHAT_BACKEND=provider"
+   ```
+3. Optional cleanup: unset dashboard gateway wiring after rollback is stable:
+   ```bash
+   railway variables --service <dashboard-service> --set "GATEWAY_BASE_URL="
+   railway variables --service <dashboard-service> --set "GATEWAY_API_KEY="
+   ```
+4. If needed, redeploy the last known good commit for `railway_apps/gateway_service/` and run:
+   ```bash
+   railway up --service gateway-service
+   ```
