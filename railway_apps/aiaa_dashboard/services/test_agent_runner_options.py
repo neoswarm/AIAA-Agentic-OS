@@ -422,6 +422,64 @@ def test_persist_event_skips_unknown_types():
     assert store.get_events(session_id) == []
 
 
+def test_persist_event_normalizes_translated_gateway_payload_events():
+    store = InMemoryChatStore()
+    runner = AgentRunner(
+        cwd="/app", token_provider=lambda: "unused", session_store=store
+    )
+    session_id = "persist-translated"
+
+    runner._persist_event(
+        session_id,
+        {
+            "type": "tool",
+            "payload": {"kind": "tool_use", "tool": "Bash", "input": "npm test"},
+        },
+    )
+    runner._persist_event(
+        session_id,
+        {
+            "type": "tool",
+            "payload": {"kind": "tool_result", "content": "ok"},
+        },
+    )
+    runner._persist_event(
+        session_id,
+        {
+            "type": "result",
+            "payload": {"kind": "result", "content": "assistant chunk"},
+        },
+    )
+    runner._persist_event(
+        session_id,
+        {
+            "type": "system",
+            "payload": {"kind": "system", "content": "working"},
+        },
+    )
+    runner._persist_event(
+        session_id,
+        {
+            "type": "error",
+            "payload": {"kind": "error", "content": "boom"},
+        },
+    )
+
+    events = store.get_events(session_id)
+    assert [event["type"] for event in events] == [
+        "tool_use",
+        "tool_result",
+        "result",
+        "text",
+        "error",
+    ]
+    assert events[0]["payload"]["tool"] == "Bash"
+    assert events[1]["payload"]["content"] == "ok"
+    assert events[2]["payload"]["content"] == "assistant chunk"
+    assert events[3]["payload"]["content"] == "working"
+    assert events[4]["payload"]["content"] == "boom"
+
+
 def test_redact_token_like_text_masks_common_gateway_patterns():
     raw_bearer = "Bearer sk-ant-api03-super-secret-token-1234567890"
     raw_prefix = "github_pat_1234567890abcdefghijklmno"
@@ -650,6 +708,70 @@ def test_run_agent_streams_success_sequence_from_mocked_sdk_payloads():
         "text",
         "result",
     ]
+
+
+def test_run_agent_streams_translated_gateway_events_and_persists_message():
+    store = RecordingStore()
+    runner = AgentRunner(
+        cwd="/app",
+        token_provider=lambda: "sk-ant-api03-example-token",
+        session_store=store,
+    )
+    session_id = runner.create_session()["id"]
+
+    class DummyOptions:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+    async def fake_query(*, prompt, options):
+        del prompt, options
+        yield {
+            "type": "tool",
+            "payload": {"kind": "tool_use", "tool": "Read", "input": "README.md"},
+        }
+        yield {
+            "type": "tool",
+            "payload": {"kind": "tool_result", "content": "Read complete"},
+        }
+        yield {
+            "type": "result",
+            "payload": {"kind": "result", "content": "Hello"},
+        }
+        yield {
+            "type": "result",
+            "payload": {"kind": "result", "content": "world"},
+        }
+
+    runner._load_sdk = lambda: {"query": fake_query, "options_cls": DummyOptions}
+    runner._run_agent(session_id, "test")
+
+    events = _drain_queue(runner, session_id)
+    assert [event.get("type") for event in events] == [
+        "tool_use",
+        "tool_result",
+        "result",
+        "result",
+        "done",
+    ]
+
+    session_state = runner.get_session(session_id)
+    assert session_state is not None
+    assert session_state["status"] == "idle"
+    assert session_state["messages"][-1]["content"] == "Hello\nworld"
+
+    assert [event["type"] for _, event in store.events] == [
+        "tool_use",
+        "tool_result",
+        "result",
+        "result",
+    ]
+    assert [event["payload"]["kind"] for _, event in store.events] == [
+        "tool_use",
+        "tool_result",
+        "result",
+        "result",
+    ]
+    assert store.messages[-1][1]["content"] == "Hello\nworld"
 
 
 def test_run_agent_uses_cli_stream_error_payload_once():
