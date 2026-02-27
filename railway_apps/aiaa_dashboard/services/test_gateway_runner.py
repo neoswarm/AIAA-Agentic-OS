@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import inspect
 import json
+from typing import Any
 
 import pytest
 
 from services.agent_runner import AgentRunner
+from services.gateway_client import GatewayClientError
 from services.gateway_runner import GatewayRunner, RunnerError
 
 
@@ -23,8 +25,48 @@ CONTRACT_METHODS = (
 )
 
 
+class FakeGatewayClient:
+    """Minimal scripted gateway client for runner transport tests."""
+
+    def __init__(self, scripted_responses: list[dict[str, Any] | Exception]) -> None:
+        self._scripted = list(scripted_responses)
+        self.calls: list[dict[str, Any]] = []
+
+    def post_json(
+        self,
+        path: str,
+        *,
+        payload: dict[str, Any] | None = None,
+        params: Any = None,
+        headers: dict[str, str] | None = None,
+        timeout_seconds: float | None = None,
+    ) -> dict[str, Any]:
+        del params, timeout_seconds
+        self.calls.append(
+            {
+                "path": path,
+                "payload": dict(payload or {}),
+                "headers": dict(headers or {}),
+            }
+        )
+        if not self._scripted:
+            raise AssertionError("No scripted gateway response available")
+        item = self._scripted.pop(0)
+        if isinstance(item, Exception):
+            raise item
+        return dict(item)
+
+
 def _runner() -> GatewayRunner:
     return GatewayRunner(cwd="/tmp", token_provider=lambda: "test-token")
+
+
+def _drain_events(runner: GatewayRunner, session_id: str) -> list[dict[str, Any]]:
+    events: list[dict[str, Any]] = []
+    q = runner._output_queues[session_id]
+    while not q.empty():
+        events.append(q.get())
+    return events
 
 
 @pytest.mark.parametrize("method_name", CONTRACT_METHODS)
@@ -92,3 +134,53 @@ def test_gateway_runner_stream_emits_sse_payload() -> None:
     assert chunk.startswith("data: ")
     payload = json.loads(chunk[len("data: ") :].strip())
     assert payload["type"] == "done"
+
+
+def test_gateway_runner_transport_calls_gateway_client_and_emits_result() -> None:
+    gateway_client = FakeGatewayClient([{"output_text": "hello from gateway"}])
+    runner = GatewayRunner(
+        cwd="/tmp",
+        token_provider=lambda: "sk-ant-test-token",
+        gateway_client=gateway_client,
+    )
+    session_id = runner.create_session()["id"]
+
+    runner._run_agent(session_id, "hello")
+
+    assert len(gateway_client.calls) == 1
+    call = gateway_client.calls[0]
+    assert call["path"] == "/v1/responses"
+    assert call["payload"] == {"input": "hello", "stream": False}
+    assert call["headers"]["X-Anthropic-Api-Key"] == "sk-ant-test-token"
+
+    events = _drain_events(runner, session_id)
+    assert [event["type"] for event in events] == ["result", "done"]
+    assert events[0]["content"] == "hello from gateway"
+
+    session = runner.get_session(session_id)
+    assert session is not None
+    assert session["status"] == "idle"
+    assert session["last_error"] is None
+    assert session["messages"][-1]["content"] == "hello from gateway"
+
+
+def test_gateway_runner_transport_emits_error_when_gateway_fails() -> None:
+    gateway_client = FakeGatewayClient([GatewayClientError("gateway unavailable")])
+    runner = GatewayRunner(
+        cwd="/tmp",
+        token_provider=lambda: "sk-ant-test-token",
+        gateway_client=gateway_client,
+    )
+    session_id = runner.create_session()["id"]
+
+    runner._run_agent(session_id, "hello")
+
+    events = _drain_events(runner, session_id)
+    assert len(events) == 1
+    assert events[0]["type"] == "error"
+    assert "gateway unavailable" in events[0]["content"]
+
+    session = runner.get_session(session_id)
+    assert session is not None
+    assert session["status"] == "error"
+    assert "gateway unavailable" in str(session["last_error"])
