@@ -1,6 +1,4 @@
-"""
-Backend-agnostic chat runner factory.
-"""
+"""Backend-agnostic chat runner interfaces and factory helpers."""
 
 from __future__ import annotations
 

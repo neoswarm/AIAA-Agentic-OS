@@ -816,24 +816,27 @@ def test_v1_responses_rejects_non_stream_mode(auth_client, monkeypatch):
 def test_init_chat_runner_uses_backend_agnostic_factory(app, monkeypatch):
     store = FakeStore()
     factory_runner = FactoryRunner()
-    factory_calls: list[tuple[str, Any, Any]] = []
+    factory_calls: list[tuple[str, Any, Any, str]] = []
 
     monkeypatch.setattr(chat_routes, "_runner", None)
     monkeypatch.setattr(chat_routes, "_get_chat_store", lambda: store)
     monkeypatch.setattr(chat_routes, "_project_root", lambda: "/tmp/project-root")
+    app.config["CHAT_BACKEND"] = "gateway"
 
-    def fake_create_chat_runner(*, cwd, token_provider, session_store):
-        factory_calls.append((cwd, token_provider, session_store))
+    def fake_build_chat_runner(*, cwd, token_provider, session_store, backend):
+        factory_calls.append((cwd, token_provider, session_store, backend))
         return factory_runner
 
-    monkeypatch.setattr(chat_routes, "create_chat_runner", fake_create_chat_runner)
+    monkeypatch.setattr(chat_routes, "build_chat_runner", fake_build_chat_runner)
 
     with app.app_context():
         runner = chat_routes.init_chat_runner()
 
     assert runner is factory_runner
     assert chat_routes._runner is factory_runner
-    assert factory_calls == [("/tmp/project-root", chat_routes.get_claude_token, store)]
+    assert factory_calls == [
+        ("/tmp/project-root", chat_routes.get_claude_token, store, "gateway")
+    ]
 
 
 def test_init_chat_runner_reuses_existing_runner_instance(app, monkeypatch):
@@ -845,7 +848,7 @@ def test_init_chat_runner_reuses_existing_runner_instance(app, monkeypatch):
     monkeypatch.setattr(chat_routes, "_project_root", lambda: "/tmp/new-root")
     monkeypatch.setattr(
         chat_routes,
-        "create_chat_runner",
+        "build_chat_runner",
         lambda **_: (_ for _ in ()).throw(AssertionError("factory should not run")),
     )
 

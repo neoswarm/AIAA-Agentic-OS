@@ -36,7 +36,7 @@ from flask import (
 
 import models
 from services.chat_backend import build_chat_runner
-from services.chat_runner import ChatRunnerBackend, RunnerError, create_chat_runner
+from services.chat_runner import ChatRunnerBackend, RunnerError
 from services.chat_store import (
     ChatStore,
     InMemoryChatStore,
@@ -1053,10 +1053,11 @@ def init_chat_runner(app=None) -> ChatRunnerBackend:
     store = _get_chat_store()
     with _runner_lock:
         if _runner is None:
-            _runner = create_chat_runner(
+            _runner = build_chat_runner(
                 cwd=_project_root(),
                 token_provider=get_claude_token,
                 session_store=store,
+                backend=_chat_backend(),
             )
         else:
             if hasattr(_runner, "cwd"):
