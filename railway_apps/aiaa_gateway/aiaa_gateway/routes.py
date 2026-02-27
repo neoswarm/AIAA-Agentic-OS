@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hmac
 import os
 from datetime import UTC, datetime
 from typing import Any
@@ -15,6 +16,8 @@ from .services.responses_service import (
 )
 
 gateway_bp = Blueprint("gateway", __name__)
+_PUBLIC_ENDPOINTS = frozenset({"/", "/health"})
+_PRIVATE_ENDPOINT_PATH_PREFIX = "/v1/"
 
 
 def _json_error(
@@ -35,19 +38,69 @@ def _json_error(
     return jsonify(payload), status_code
 
 
+def _resolve_bearer_token() -> str:
+    auth_header = (request.headers.get("Authorization") or "").strip()
+    if not auth_header.lower().startswith("bearer "):
+        return ""
+    return auth_header[7:].strip()
+
+
+def _resolve_internal_bearer_token() -> str:
+    configured = (current_app.config.get("GATEWAY_INTERNAL_TOKEN") or "").strip()
+    if configured:
+        return configured
+
+    fallback = (current_app.config.get("GATEWAY_API_KEY") or "").strip()
+    if fallback:
+        return fallback
+
+    return (
+        os.getenv("GATEWAY_INTERNAL_TOKEN") or os.getenv("GATEWAY_API_KEY") or ""
+    ).strip()
+
+
 def _resolve_anthropic_api_key() -> str:
     header_key = (request.headers.get("X-Anthropic-Api-Key") or "").strip()
     if header_key:
         return header_key
 
-    auth_header = (request.headers.get("Authorization") or "").strip()
-    if auth_header.lower().startswith("bearer "):
-        return auth_header[7:].strip()
-
     configured = (current_app.config.get("ANTHROPIC_API_KEY") or "").strip()
     if configured:
         return configured
     return (os.getenv("ANTHROPIC_API_KEY") or "").strip()
+
+
+@gateway_bp.before_request
+def require_internal_bearer_auth():
+    if request.path in _PUBLIC_ENDPOINTS:
+        return None
+    if not request.path.startswith(_PRIVATE_ENDPOINT_PATH_PREFIX):
+        return None
+
+    expected_token = _resolve_internal_bearer_token()
+    if not expected_token:
+        return _json_error(
+            "Gateway internal bearer token is not configured.",
+            503,
+            error_type="configuration_error",
+        )
+
+    bearer_token = _resolve_bearer_token()
+    if not bearer_token:
+        return _json_error(
+            "Missing internal bearer token.",
+            401,
+            error_type="authentication_error",
+        )
+
+    if not hmac.compare_digest(bearer_token, expected_token):
+        return _json_error(
+            "Invalid internal bearer token.",
+            401,
+            error_type="authentication_error",
+        )
+
+    return None
 
 
 @gateway_bp.get("/")
