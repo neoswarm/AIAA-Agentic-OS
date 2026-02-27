@@ -6,7 +6,8 @@ from __future__ import annotations
 
 from typing import Any, Callable, Dict, Generator, Protocol
 
-from services.agent_runner import AgentRunner, RunnerError
+from services.agent_runner import RunnerError
+from services.chat_backend import build_chat_runner
 
 
 class ChatRunnerBackend(Protocol):
@@ -40,7 +41,7 @@ def create_chat_runner(
     session_store: Any | None = None,
 ) -> ChatRunnerBackend:
     """Create the chat runner using the configured backend implementation."""
-    return AgentRunner(
+    return build_chat_runner(
         cwd=cwd,
         token_provider=token_provider,
         session_store=session_store,
