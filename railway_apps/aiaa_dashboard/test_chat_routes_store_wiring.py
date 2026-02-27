@@ -882,6 +882,27 @@ def test_v1_responses_rejects_non_stream_mode(auth_client, monkeypatch):
     assert "stream=true" in payload["error"]["message"]
 
 
+def test_v1_responses_rejects_unsupported_input_payload(auth_client, monkeypatch):
+    monkeypatch.setattr(chat_routes, "get_claude_token", lambda: "sk-ant-test-token")
+    resp = auth_client.post(
+        "/v1/responses",
+        json={
+            "stream": True,
+            "input": [
+                {
+                    "type": "input_image",
+                    "image_url": "https://example.com/image.png",
+                }
+            ],
+        },
+    )
+    assert resp.status_code == 400
+    payload = resp.get_json()
+    assert (
+        payload["error"]["message"] == chat_routes._UNSUPPORTED_RESPONSES_INPUT_MESSAGE
+    )
+
+
 def test_init_chat_runner_uses_backend_agnostic_factory(app, monkeypatch):
     store = FakeStore()
     factory_runner = FactoryRunner()
