@@ -55,6 +55,13 @@ _token_rotate_lock = threading.RLock()
 GATEWAY_MODE_FLAG = "CHAT_GATEWAY_MODE_ENABLED"
 DEFAULT_GATEWAY_PROFILE_ID = "default"
 _PROFILE_STATUS_VALUES = {"active", "inactive", "revoked"}
+_GATEWAY_VALIDATION_MESSAGES = {
+    "valid": "Gateway runtime canary succeeded",
+    "invalid": "Gateway runtime canary failed",
+    "runtime_unavailable": "Claude runtime is not installed on this host",
+    "runtime_error": "Gateway runtime canary crashed",
+    "timeout": "Gateway runtime canary timed out",
+}
 
 
 def _get_message_rate_limit_per_minute() -> int:
@@ -372,6 +379,57 @@ def _upsert_gateway_setup_token_profile(token: str) -> Dict[str, Any] | None:
             "Gateway profiles/upsert response must be a JSON object"
         )
     return response
+
+
+def _gateway_validation_message(status: str, last_error: str) -> str:
+    if last_error:
+        return last_error
+    return _GATEWAY_VALIDATION_MESSAGES.get(
+        status, "Gateway validation status is available."
+    )
+
+
+def _gateway_validation_detail(
+    setting_key: str = CLAUDE_TOKEN_SETTING_KEY,
+) -> Dict[str, Any] | None:
+    get_setting_metadata = getattr(models, "get_setting_metadata", None)
+    if not callable(get_setting_metadata):
+        return None
+
+    metadata = get_setting_metadata(setting_key) or {}
+    validation_status = str(metadata.get("validation_status") or "").strip()
+    if not validation_status:
+        return None
+
+    last_error = str(metadata.get("last_error") or "").strip()
+    validation: Dict[str, Any] = {
+        "status": validation_status,
+        "http_status": None,
+        "message": _gateway_validation_message(validation_status, last_error),
+        "source": "gateway",
+        "last_validated_at": metadata.get("last_validated_at"),
+    }
+    if last_error:
+        validation["error"] = last_error
+    return validation
+
+
+def _resolve_token_validation(
+    token: str,
+    *,
+    allow_gateway_metadata: bool = False,
+) -> Dict[str, Any]:
+    candidate = (token or "").strip()
+    if (
+        allow_gateway_metadata
+        and candidate
+        and _looks_like_setup_token(candidate)
+        and not _is_setup_token_hard_blocked()
+    ):
+        gateway_validation = _gateway_validation_detail()
+        if gateway_validation is not None:
+            return gateway_validation
+    return validate_claude_token(candidate)
 
 
 def validate_claude_token(token: str) -> Dict[str, Any]:
@@ -1156,7 +1214,7 @@ def token_status():
             }
         )
 
-    validation = validate_claude_token(token)
+    validation = _resolve_token_validation(token, allow_gateway_metadata=True)
     _log_token_lifecycle(
         action="status",
         status="success",
@@ -1522,7 +1580,9 @@ def rotate_token():
 def validate_token():
     """Validate a provided token (or the currently stored token) without saving."""
     payload = request.get_json(silent=True) or {}
-    token = (payload.get("token") or "").strip() or get_claude_token()
+    provided_token = (payload.get("token") or "").strip()
+    stored_token = get_claude_token()
+    token = provided_token or stored_token
 
     if not token:
         _log_token_lifecycle(
@@ -1543,6 +1603,32 @@ def validate_token():
                 },
             }
         )
+
+    # For stored setup tokens, prefer cached gateway metadata when available.
+    if (
+        not provided_token
+        and token == stored_token
+        and _looks_like_setup_token(token)
+        and not _is_setup_token_hard_blocked()
+    ):
+        cached_validation = _gateway_validation_detail()
+        if cached_validation is not None:
+            _log_token_lifecycle(
+                action="validate",
+                status="success",
+                configured=True,
+                validation=str(cached_validation.get("status") or "unknown"),
+                redacted=_redact_token(token),
+            )
+            return jsonify(
+                {
+                    "status": "ok",
+                    "configured": True,
+                    "validation": str(cached_validation.get("status") or "unknown"),
+                    "validation_detail": cached_validation,
+                    "redacted": _redact_token(token),
+                }
+            )
 
     if _should_use_gateway_profile_api():
         try:
@@ -1630,64 +1716,87 @@ def validate_token():
         )
         return jsonify(response_payload), status_code
 
-    from routes.api_v1 import validate_profile_token
+    if _looks_like_setup_token(token):
+        from routes.api_v1 import validate_profile_token
 
-    try:
-        profile_payload, status_code = validate_profile_token(
-            profile_id=CLAUDE_TOKEN_PROFILE_ID,
-            token=token,
+        try:
+            profile_payload, status_code = validate_profile_token(
+                profile_id=CLAUDE_TOKEN_PROFILE_ID,
+                token=token,
+            )
+        except Exception as exc:
+            _log_token_lifecycle(
+                action="validate",
+                status="error",
+                reason="gateway_runtime_exception",
+                configured=True,
+                error=str(exc),
+                redacted=_redact_token(token),
+            )
+            return (
+                jsonify(
+                    {
+                        "status": "error",
+                        "configured": True,
+                        "validation": "runtime_error",
+                        "message": f"Gateway runtime canary failed: {exc}",
+                        "validation_detail": {
+                            "status": "runtime_error",
+                            "message": str(exc),
+                        },
+                        "redacted": _redact_token(token),
+                    }
+                ),
+                502,
+            )
+
+        validation = profile_payload.get("validation_detail") or {}
+        validation_status = str(
+            profile_payload.get("validation")
+            or (validation.get("status") if isinstance(validation, dict) else "")
+            or "invalid"
         )
-    except Exception as exc:
         _log_token_lifecycle(
             action="validate",
-            status="error",
-            reason="gateway_runtime_exception",
+            status="success" if status_code < 500 else "error",
             configured=True,
-            error=str(exc),
+            validation=validation_status,
             redacted=_redact_token(token),
         )
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "configured": True,
-                    "validation": "runtime_error",
-                    "message": f"Gateway runtime canary failed: {exc}",
-                    "validation_detail": {
-                        "status": "runtime_error",
-                        "message": str(exc),
-                    },
-                    "redacted": _redact_token(token),
-                }
-            ),
-            502,
-        )
 
-    validation = profile_payload.get("validation_detail") or {}
-    validation_status = str(
-        profile_payload.get("validation")
-        or (validation.get("status") if isinstance(validation, dict) else "")
-        or "invalid"
-    )
+        response_payload = {
+            "status": profile_payload.get("status", "ok"),
+            "configured": True,
+            "validation": validation_status,
+            "validation_detail": validation,
+            "redacted": _redact_token(token),
+        }
+        if profile_payload.get("message"):
+            response_payload["message"] = profile_payload["message"]
+
+        return jsonify(response_payload), status_code
+
+    validation = validate_claude_token(token)
+    validation_status = str(validation.get("status") or "unknown").strip().lower()
     _log_token_lifecycle(
         action="validate",
-        status="success" if status_code < 500 else "error",
+        status="success",
         configured=True,
         validation=validation_status,
         redacted=_redact_token(token),
     )
 
     response_payload = {
-        "status": profile_payload.get("status", "ok"),
+        "status": "ok",
         "configured": True,
         "validation": validation_status,
         "validation_detail": validation,
         "redacted": _redact_token(token),
     }
-    if profile_payload.get("message"):
-        response_payload["message"] = profile_payload["message"]
+    if validation.get("message"):
+        response_payload["message"] = validation["message"]
 
-    return jsonify(response_payload), status_code
+    return jsonify(response_payload), 200
 
 
 @chat_bp.route("/api/chat/token/revoke", methods=["POST"])
