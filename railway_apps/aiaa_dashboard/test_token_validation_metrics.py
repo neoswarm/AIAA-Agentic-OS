@@ -143,3 +143,51 @@ def test_status_metrics_include_stream_and_runtime_error_counters(auth_client, m
     assert data["runtime_error_count"] == 2
     assert data["metrics"]["stream_failures"] == 1
     assert data["metrics"]["runtime_errors"] == 2
+
+
+def test_status_metrics_include_chat_latency_aggregates(auth_client, monkeypatch):
+    """Status endpoint includes queue/first-event/total-runtime chat latency metrics."""
+    _clear_api_key_env(monkeypatch)
+
+    monkeypatch.setattr(api_v2_module.models, "get_setting", lambda _key: "", raising=False)
+    monkeypatch.setattr(api_v2_module.models, "get_setting_metadata", lambda _key: {}, raising=False)
+    monkeypatch.setattr(
+        api_v2_module,
+        "_list_chat_sessions_for_metrics",
+        lambda: [
+            {
+                "id": "latency-1",
+                "queue_wait_ms": 100,
+                "first_event_latency_ms": 250,
+                "total_runtime_ms": 1000,
+            },
+            {
+                "id": "latency-2",
+                "queue_wait_ms": "300",
+                "first_event_latency_ms": None,
+                "total_runtime_ms": 2000,
+            },
+            {
+                "id": "latency-3",
+                "queue_wait_ms": -5,
+                "first_event_latency_ms": "n/a",
+                "total_runtime_ms": "",
+            },
+            "skip-non-dict-session",
+        ],
+        raising=False,
+    )
+
+    resp = auth_client.get("/api/v2/settings/api-keys/status")
+    assert resp.status_code == 200
+
+    data = resp.get_json()
+    assert data["chat_latency_metrics"] == {
+        "avg_queue_wait_ms": 200,
+        "avg_first_event_latency_ms": 250,
+        "avg_total_runtime_ms": 1500,
+        "queue_wait_samples": 2,
+        "first_event_latency_samples": 1,
+        "total_runtime_samples": 2,
+    }
+    assert data["metrics"]["chat_latency"] == data["chat_latency_metrics"]
