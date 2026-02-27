@@ -1,12 +1,10 @@
-"""
-Backend-agnostic chat runner factory.
-"""
+"""Backend-agnostic chat runner interfaces and shared error type."""
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Generator, Protocol
+from typing import Any, Dict, Generator, Protocol
 
-from services.agent_runner import AgentRunner, RunnerError
+from services.agent_runner import RunnerError
 
 
 class ChatRunnerBackend(Protocol):
@@ -33,18 +31,4 @@ class ChatRunnerBackend(Protocol):
     ) -> Generator[str, None, None]: ...
 
 
-def create_chat_runner(
-    *,
-    cwd: str,
-    token_provider: Callable[[], str],
-    session_store: Any | None = None,
-) -> ChatRunnerBackend:
-    """Create the chat runner using the configured backend implementation."""
-    return AgentRunner(
-        cwd=cwd,
-        token_provider=token_provider,
-        session_store=session_store,
-    )
-
-
-__all__ = ["ChatRunnerBackend", "RunnerError", "create_chat_runner"]
+__all__ = ["ChatRunnerBackend", "RunnerError"]
