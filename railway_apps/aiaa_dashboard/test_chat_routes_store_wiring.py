@@ -674,6 +674,69 @@ def test_v1_responses_stream_proxies_gateway_mode_when_enabled(
     assert captured["kwargs"]["headers"]["X-Correlation-ID"] == "corr-test-123"
 
 
+def test_v1_responses_stream_accepts_setup_token_for_gateway_backend(
+    auth_client, app, monkeypatch
+):
+    monkeypatch.setenv(chat_routes.GATEWAY_MODE_FLAG, "false")
+    monkeypatch.setitem(app.config, "CHAT_BACKEND", "gateway")
+    monkeypatch.setitem(app.config, "GATEWAY_BASE_URL", "https://gateway.example")
+    monkeypatch.setattr(
+        chat_routes, "get_claude_token", lambda: "sk-ant-oat01-example-example"
+    )
+    monkeypatch.setattr(
+        chat_routes,
+        "_get_chat_store",
+        lambda: (_ for _ in ()).throw(AssertionError("store should not be used")),
+    )
+    monkeypatch.setattr(
+        chat_routes,
+        "_get_runner",
+        lambda: (_ for _ in ()).throw(AssertionError("runner should not be used")),
+    )
+
+    captured: dict[str, Any] = {}
+
+    class FakeUpstreamResponse:
+        status_code = 200
+        headers = {"Content-Type": "text/event-stream"}
+        text = ""
+
+        def iter_content(self, chunk_size: int = 1):
+            captured["chunk_size"] = chunk_size
+            yield b'data: {"type":"response.created"}\n\n'
+            yield b"data: [DONE]\n\n"
+
+        def json(self):
+            return {}
+
+        def close(self) -> None:
+            captured["closed"] = True
+
+    def fake_post(url: str, **kwargs):
+        captured["url"] = url
+        captured["kwargs"] = dict(kwargs)
+        return FakeUpstreamResponse()
+
+    monkeypatch.setattr(chat_routes.http_requests, "post", fake_post)
+
+    resp = auth_client.post(
+        "/v1/responses",
+        json={"input": "hi", "stream": True},
+    )
+
+    assert resp.status_code == 200
+    assert resp.mimetype == "text/event-stream"
+    body = resp.get_data(as_text=True)
+    assert 'data: {"type":"response.created"}' in body
+    assert "data: [DONE]" in body
+    assert captured["url"] == "https://gateway.example/v1/responses"
+    assert captured["kwargs"]["json"] == {"input": "hi", "stream": True}
+    assert (
+        captured["kwargs"]["headers"]["X-Anthropic-Api-Key"]
+        == "sk-ant-oat01-example-example"
+    )
+
+
 def test_v1_responses_stream_gateway_proxy_handles_request_failure(
     auth_client, app, monkeypatch
 ):
