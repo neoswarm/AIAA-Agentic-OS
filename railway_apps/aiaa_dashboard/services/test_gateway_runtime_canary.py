@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import asyncio
 
+import pytest
+
 from services.gateway_runtime_canary import run_gateway_runtime_canary
 
 
@@ -46,6 +48,54 @@ def test_gateway_runtime_canary_success_sets_setup_token_env():
     assert env["CLAUDE_SETUP_TOKEN"] == "sk-ant-oat01-example-token"
     assert env["CLAUDE_CODE_OAUTH_TOKEN"] == "sk-ant-oat01-example-token"
     assert env["ANTHROPIC_AUTH_TOKEN"] == "sk-ant-oat01-example-token"
+    assert captured["kwargs"]["cwd"] == "/app"
+
+
+def test_gateway_runtime_canary_accepts_explicit_app_subdir_cwd():
+    captured = {}
+
+    async def _fake_exec(*args, **kwargs):
+        captured["kwargs"] = kwargs
+        return _FakeProcess(returncode=0, stdout=b"OK\n")
+
+    result = run_gateway_runtime_canary(
+        "sk-ant-oat01-example-token",
+        timeout_seconds=0.2,
+        cwd="/app/workspace/../workspace/demo",
+        create_subprocess_exec=_fake_exec,
+    )
+
+    assert result["status"] == "valid"
+    assert captured["kwargs"]["cwd"] == "/app/workspace/demo"
+
+
+@pytest.mark.parametrize(
+    "cwd_value",
+    [
+        "../app",
+        "app",
+        "/tmp",
+        "/app/../../etc",
+    ],
+)
+def test_gateway_runtime_canary_rejects_unsafe_cwd(cwd_value):
+    called = False
+
+    async def _fake_exec(*args, **kwargs):
+        nonlocal called
+        called = True
+        return _FakeProcess(returncode=0, stdout=b"OK\n")
+
+    result = run_gateway_runtime_canary(
+        "sk-ant-oat01-example-token",
+        timeout_seconds=0.2,
+        cwd=cwd_value,
+        create_subprocess_exec=_fake_exec,
+    )
+
+    assert result["status"] == "invalid"
+    assert "cwd" in result["message"]
+    assert called is False
 
 
 def test_gateway_runtime_canary_maps_nonzero_exit_to_invalid():

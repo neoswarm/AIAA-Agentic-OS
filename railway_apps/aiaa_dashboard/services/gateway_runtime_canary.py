@@ -13,6 +13,7 @@ CreateSubprocessExec = Callable[..., Awaitable[asyncio.subprocess.Process]]
 
 _CANARY_PROMPT = "Reply with the single word OK."
 _MAX_ERROR_LEN = 500
+_DEFAULT_WORKSPACE_CWD = "/app"
 
 
 def _build_runtime_auth_env(token: str) -> dict[str, str]:
@@ -40,6 +41,7 @@ async def _run_canary(
     token: str,
     *,
     timeout_seconds: float,
+    cwd: str,
     create_subprocess_exec: CreateSubprocessExec,
 ) -> dict[str, Any]:
     env = dict(os.environ)
@@ -54,6 +56,7 @@ async def _run_canary(
         stdout=PIPE,
         stderr=PIPE,
         env=env,
+        cwd=cwd,
     )
     try:
         stdout_raw, stderr_raw = await asyncio.wait_for(
@@ -92,10 +95,33 @@ async def _run_canary(
     }
 
 
+def _resolve_runtime_cwd(cwd: str | None) -> str:
+    normalized_default = os.path.normpath(_DEFAULT_WORKSPACE_CWD)
+    candidate = (cwd or "").strip()
+    if not candidate:
+        return normalized_default
+    if not os.path.isabs(candidate):
+        raise ValueError("cwd must be an absolute path under /app")
+
+    normalized_candidate = os.path.normpath(candidate)
+    try:
+        is_allowed = (
+            os.path.commonpath([normalized_candidate, normalized_default])
+            == normalized_default
+        )
+    except ValueError:
+        is_allowed = False
+
+    if not is_allowed:
+        raise ValueError("cwd must stay within /app workspace")
+    return normalized_candidate
+
+
 def run_gateway_runtime_canary(
     token: str,
     *,
     timeout_seconds: float | None = None,
+    cwd: str | None = None,
     create_subprocess_exec: CreateSubprocessExec = asyncio.create_subprocess_exec,
 ) -> dict[str, Any]:
     """Run a small runtime canary with token auth to validate profile readiness."""
@@ -112,10 +138,16 @@ def run_gateway_runtime_canary(
             timeout = 12.0
 
     try:
+        runtime_cwd = _resolve_runtime_cwd(cwd)
+    except ValueError as exc:
+        return {"status": "invalid", "message": str(exc)}
+
+    try:
         return asyncio.run(
             _run_canary(
                 candidate,
                 timeout_seconds=timeout,
+                cwd=runtime_cwd,
                 create_subprocess_exec=create_subprocess_exec,
             )
         )
