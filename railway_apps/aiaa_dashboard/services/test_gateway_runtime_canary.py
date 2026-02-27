@@ -113,6 +113,29 @@ def test_gateway_runtime_canary_maps_nonzero_exit_to_invalid():
     assert "auth failed" in result["error"]
 
 
+def test_gateway_runtime_canary_redacts_token_like_error_output():
+    leaked_token = "sk-ant-api03-super-secret-token-1234567890"
+
+    async def _fake_exec(*args, **kwargs):
+        return _FakeProcess(
+            returncode=1,
+            stdout=b"",
+            stderr=f"Gateway rejected Authorization: Bearer {leaked_token}".encode(
+                "utf-8"
+            ),
+        )
+
+    result = run_gateway_runtime_canary(
+        leaked_token,
+        timeout_seconds=0.2,
+        create_subprocess_exec=_fake_exec,
+    )
+
+    assert result["status"] == "invalid"
+    assert leaked_token not in result["error"]
+    assert "Bearer " in result["error"]
+
+
 def test_gateway_runtime_canary_reports_runtime_unavailable():
     async def _missing_runtime(*args, **kwargs):
         raise FileNotFoundError("claude not installed")
@@ -124,6 +147,23 @@ def test_gateway_runtime_canary_reports_runtime_unavailable():
     )
 
     assert result["status"] == "runtime_unavailable"
+
+
+def test_gateway_runtime_canary_redacts_runtime_exception_message():
+    leaked_token = "sk-or-secret-token-1234567890"
+
+    async def _crash(*args, **kwargs):
+        raise RuntimeError(f"runtime crash token={leaked_token}")
+
+    result = run_gateway_runtime_canary(
+        leaked_token,
+        timeout_seconds=0.2,
+        create_subprocess_exec=_crash,
+    )
+
+    assert result["status"] == "runtime_error"
+    assert leaked_token not in result["message"]
+    assert "token=" in result["message"]
 
 
 def test_gateway_runtime_canary_times_out_and_kills_process():

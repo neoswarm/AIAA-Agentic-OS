@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
 from asyncio.subprocess import PIPE
 from collections.abc import Awaitable, Callable
 from typing import Any
@@ -14,6 +15,49 @@ CreateSubprocessExec = Callable[..., Awaitable[asyncio.subprocess.Process]]
 _CANARY_PROMPT = "Reply with the single word OK."
 _MAX_ERROR_LEN = 500
 _DEFAULT_WORKSPACE_CWD = "/app"
+_TOKEN_BEARER_PATTERN = re.compile(r"(?i)\b(bearer)(\s+)([A-Za-z0-9._\-]{8,})\b")
+_TOKEN_PREFIX_PATTERN = re.compile(
+    r"\b(?:sk-or-|pplx-|sk-ant-|sk-|xox[baprs]-|ghp_|github_pat_)[A-Za-z0-9._\-]{8,}\b",
+    re.IGNORECASE,
+)
+_TOKEN_KEY_VALUE_PATTERN = re.compile(
+    r"(?i)\b(api[_-]?key|token|secret|password|authorization)\b(\s*[:=]\s*)([^\s\"',;]{8,})"
+)
+_TOKEN_JWT_PATTERN = re.compile(
+    r"\beyJ[A-Za-z0-9_-]{5,}\.[A-Za-z0-9._\-]{5,}\.[A-Za-z0-9._\-]{5,}\b"
+)
+
+
+def _redact_token(token: str) -> str:
+    clean = (token or "").strip()
+    if not clean:
+        return clean
+    if len(clean) <= 10:
+        return "***"
+    return f"{clean[:6]}...{clean[-4:]}"
+
+
+def _redact_token_like_text(value: str) -> str:
+    if not isinstance(value, str) or not value:
+        return value
+
+    redacted = _TOKEN_BEARER_PATTERN.sub(
+        lambda match: f"{match.group(1)}{match.group(2)}{_redact_token(match.group(3))}",
+        value,
+    )
+    redacted = _TOKEN_KEY_VALUE_PATTERN.sub(
+        lambda match: f"{match.group(1)}{match.group(2)}{_redact_token(match.group(3))}",
+        redacted,
+    )
+    redacted = _TOKEN_PREFIX_PATTERN.sub(
+        lambda match: _redact_token(match.group(0)),
+        redacted,
+    )
+    redacted = _TOKEN_JWT_PATTERN.sub(
+        lambda match: _redact_token(match.group(0)),
+        redacted,
+    )
+    return redacted
 
 
 def _build_runtime_auth_env(token: str) -> dict[str, str]:
@@ -79,7 +123,7 @@ async def _run_canary(
         return {
             "status": "invalid",
             "message": "Gateway runtime canary failed",
-            "error": detail[:_MAX_ERROR_LEN],
+            "error": _redact_token_like_text(detail[:_MAX_ERROR_LEN]),
         }
 
     if not stdout:
@@ -159,5 +203,7 @@ def run_gateway_runtime_canary(
     except Exception as exc:  # pragma: no cover - defensive runtime guard
         return {
             "status": "runtime_error",
-            "message": f"Gateway runtime canary crashed: {exc}",
+            "message": _redact_token_like_text(
+                f"Gateway runtime canary crashed: {exc}"
+            ),
         }

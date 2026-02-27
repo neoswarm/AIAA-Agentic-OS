@@ -513,6 +513,18 @@ def test_parse_message_redacts_token_like_result_content():
     assert "Bearer " in event["content"]
 
 
+def test_parse_message_redacts_token_like_error_message_content():
+    runner = _runner()
+    raw = "Authorization: Bearer sk-ant-api03-super-secret-token-123456"
+
+    event = runner._parse_message({"type": "error", "message": raw})
+
+    assert event is not None
+    assert event["type"] == "error"
+    assert raw not in event["content"]
+    assert "Bearer " in event["content"]
+
+
 def test_run_agent_redacts_token_like_values_from_runtime_errors():
     runner = AgentRunner(
         cwd="/app", token_provider=lambda: "sk-ant-oat01-example-token"
@@ -998,19 +1010,24 @@ def test_frame_sse_helpers_for_ping_error_and_done_events():
 
 def test_get_stream_frames_terminal_error_and_done_events():
     runner = _runner()
+    leaked_token = "sk-ant-api03-super-secret-token-123456"
 
     error_session = runner.create_session()
     error_id = error_session["id"]
     runner._output_queues[error_id].put(
-        {"type": "error", "content": "boom", "timestamp": "2026-02-25T11:00:00Z"}
+        {
+            "type": "error",
+            "content": f"Authorization: Bearer {leaked_token}",
+            "timestamp": "2026-02-25T11:00:00Z",
+        }
     )
     error_frames = list(runner.get_stream(error_id, keepalive_seconds=1))
     assert len(error_frames) == 1
-    assert _parse_sse_payload(error_frames[0]) == {
-        "type": "error",
-        "content": "boom",
-        "timestamp": "2026-02-25T11:00:00Z",
-    }
+    payload = _parse_sse_payload(error_frames[0])
+    assert payload["type"] == "error"
+    assert payload["timestamp"] == "2026-02-25T11:00:00Z"
+    assert leaked_token not in payload["content"]
+    assert "Bearer " in payload["content"]
 
     done_session = runner.create_session()
     done_id = done_session["id"]
