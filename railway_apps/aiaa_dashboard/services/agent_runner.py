@@ -101,6 +101,17 @@ def _redact_token_like_text(value: str) -> str:
     return redacted
 
 
+def _redact_sse_value(value: Any) -> Any:
+    """Recursively redact token-like strings in SSE payloads."""
+    if isinstance(value, dict):
+        return {key: _redact_sse_value(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_redact_sse_value(item) for item in value]
+    if isinstance(value, str):
+        return _redact_token_like_text(value)
+    return value
+
+
 class AgentRunner:
     """Runs Claude Agent SDK queries in a background thread and streams events."""
 
@@ -360,6 +371,7 @@ class AgentRunner:
                 yield _frame_sse_ping_event()
                 continue
 
+            event = _redact_sse_value(event)
             event_type = event.get("type")
             if event_type == "error":
                 yield _frame_sse_error_event(
@@ -737,6 +749,7 @@ class AgentRunner:
                 _redact_token_like_text(self._stringify(payload)),
                 500,
             )
+            content = _redact_token_like_text(content)
             return {"type": "error", "content": content, "timestamp": _utc_now_iso()}
 
         return None
