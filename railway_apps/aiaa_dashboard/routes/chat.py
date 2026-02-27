@@ -34,6 +34,7 @@ from flask import (
 )
 
 import models
+from services.chat_backend import build_chat_runner
 from services.chat_runner import ChatRunnerBackend, RunnerError, create_chat_runner
 from services.chat_store import ChatStore, InMemoryChatStore, RedisChatStore
 
@@ -510,6 +511,30 @@ def _get_runner() -> ChatRunnerBackend:
     return _runner
 
 
+def _runner_is_gateway(runner: ChatRunnerBackend) -> bool:
+    return runner.__class__.__name__ == "GatewayRunner"
+
+
+def _gateway_mode_send_runner(store: ChatStore) -> ChatRunnerBackend:
+    """Ensure gateway-mode message sends use a GatewayRunner-backed instance."""
+    runner = _get_runner()
+    if not (_is_gateway_mode_enabled() or _chat_backend() == "gateway"):
+        return runner
+    if _runner_is_gateway(runner):
+        return runner
+
+    global _runner
+    with _runner_lock:
+        if _runner is None or not _runner_is_gateway(_runner):
+            _runner = build_chat_runner(
+                cwd=_project_root(),
+                token_provider=get_claude_token,
+                session_store=store,
+                backend="gateway",
+            )
+        return _runner
+
+
 @chat_bp.route("/chat")
 @_login_required_page
 def chat_page():
@@ -692,7 +717,7 @@ def send_message():
             },
             session_updates=session_updates,
         )
-        runner = _get_runner()
+        runner = _gateway_mode_send_runner(store)
         runner.ensure_session(
             session_id,
             title=session_updates.get("title") or session_obj.get("title"),

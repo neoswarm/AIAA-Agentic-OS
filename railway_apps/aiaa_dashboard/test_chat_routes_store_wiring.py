@@ -260,6 +260,74 @@ def test_send_message_uses_store_state_then_runner(auth_client, monkeypatch):
     assert ("send_message", "s-3", "hello from user") in runner.calls
 
 
+@pytest.mark.parametrize(
+    ("gateway_mode_enabled", "chat_backend"),
+    [
+        (True, "sdk"),
+        (False, "gateway"),
+    ],
+)
+def test_send_message_gateway_mode_uses_gateway_runner(
+    auth_client,
+    monkeypatch,
+    gateway_mode_enabled,
+    chat_backend,
+):
+    store = FakeStore()
+    store.create_session("s-gateway", title="Gateway chat")
+    sdk_runner = FakeRunner()
+
+    class GatewayRunner(FakeRunner):
+        pass
+
+    gateway_runner = GatewayRunner()
+    factory_calls: list[dict[str, Any]] = []
+
+    def fake_build_chat_runner(*, cwd, token_provider, session_store, backend):
+        factory_calls.append(
+            {
+                "cwd": cwd,
+                "token_provider": token_provider,
+                "session_store": session_store,
+                "backend": backend,
+            }
+        )
+        return gateway_runner
+
+    monkeypatch.setattr(chat_routes, "_runner", sdk_runner)
+    monkeypatch.setattr(chat_routes, "_get_chat_store", lambda: store)
+    monkeypatch.setattr(chat_routes, "get_claude_token", lambda: "eyJ.valid.token")
+    monkeypatch.setattr(
+        chat_routes,
+        "_is_gateway_mode_enabled",
+        lambda: gateway_mode_enabled,
+    )
+    monkeypatch.setattr(chat_routes, "_chat_backend", lambda: chat_backend)
+    monkeypatch.setattr(chat_routes, "build_chat_runner", fake_build_chat_runner)
+
+    resp = auth_client.post(
+        "/api/chat/message",
+        json={"session_id": "s-gateway", "message": "route me through gateway"},
+    )
+
+    assert resp.status_code == 202
+    assert resp.get_json()["status"] == "ok"
+    assert factory_calls
+    assert factory_calls[0]["backend"] == "gateway"
+    assert factory_calls[0]["session_store"] is store
+    assert (
+        "send_message",
+        "s-gateway",
+        "route me through gateway",
+    ) not in sdk_runner.calls
+    assert (
+        "send_message",
+        "s-gateway",
+        "route me through gateway",
+    ) in gateway_runner.calls
+    assert chat_routes._runner is gateway_runner
+
+
 def test_send_message_rate_limited_per_user(auth_client, app, monkeypatch):
     store = FakeStore()
     store.create_session("s-limit", title="Rate limit")
