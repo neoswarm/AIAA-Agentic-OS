@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Tests for webhook correlation id propagation to forwarded gateway requests."""
 
+import json
+import logging
+
 import pytest
 from flask import Flask
 
@@ -48,6 +51,18 @@ def _seed_forwarding_webhook(app, slug: str = "gateway-hook") -> None:
 class _DummyResponse:
     status_code = 202
     text = "accepted"
+
+
+def _webhook_lifecycle_payloads(caplog):
+    payloads = []
+    for record in caplog.records:
+        try:
+            payload = json.loads(record.getMessage())
+        except (TypeError, json.JSONDecodeError):
+            continue
+        if payload.get("event") == "webhook_lifecycle":
+            payloads.append(payload)
+    return payloads
 
 
 def test_webhook_forward_propagates_incoming_correlation_id(app, client, monkeypatch):
@@ -105,3 +120,40 @@ def test_webhook_forward_generates_correlation_id_when_missing(
     assert response.headers.get(views_routes.CORRELATION_HEADER) == correlation_id
     assert captured["headers"][views_routes.CORRELATION_HEADER] == correlation_id
     assert captured["headers"][views_routes.REQUEST_ID_HEADER] == correlation_id
+
+
+def test_webhook_forward_logs_correlation_id(app, client, monkeypatch, caplog):
+    """Webhook lifecycle logs include the propagated correlation id."""
+    _seed_forwarding_webhook(app)
+
+    def _fake_post(url, json=None, headers=None, timeout=None):
+        del url, json, headers, timeout
+        return _DummyResponse()
+
+    monkeypatch.setattr(views_routes.http_requests, "post", _fake_post)
+    caplog.set_level(logging.INFO, logger="routes.views")
+    caplog.clear()
+
+    response = client.post(
+        "/webhook/gateway-hook",
+        json={"hello": "world"},
+        headers={views_routes.CORRELATION_HEADER: "corr-log-1"},
+    )
+
+    assert response.status_code == 200
+    payloads = _webhook_lifecycle_payloads(caplog)
+    assert any(
+        payload.get("action") == "received"
+        and payload.get("status") == "accepted"
+        and payload.get("correlation_id") == "corr-log-1"
+        and payload.get("slug") == "gateway-hook"
+        for payload in payloads
+    )
+    assert any(
+        payload.get("action") == "forward"
+        and payload.get("status") == "success"
+        and payload.get("correlation_id") == "corr-log-1"
+        and payload.get("slug") == "gateway-hook"
+        and payload.get("forward_status") == 202
+        for payload in payloads
+    )
