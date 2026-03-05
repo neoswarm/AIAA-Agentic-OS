@@ -1,0 +1,228 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 150182,
+  "unique_keywords": 5564,
+  "estimated_traffic": 12061,
+  "traffic_value": 2725,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 4,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 6,
+  "pos2_3_count": 4,
+  "pos4_10_count": 16,
+  "pos11_20_count": 24,
+  "pos1_3_count": 10,
+  "quick_wins_count": 6,
+  "top_quick_wins": [
+    {
+      "keyword": "homeopathy near to me",
+      "position": 7,
+      "volume": 1300,
+      "kd": 18.0
+    },
+    {
+      "keyword": "integrative md near me",
+      "position": 7,
+      "volume": 720,
+      "kd": 46.0
+    },
+    {
+      "keyword": "holistic primary care doctor near me",
+      "position": 5,
+      "volume": 590,
+      "kd": 27.0
+    },
+    {
+      "keyword": "functional medicine san antonio",
+      "position": 9,
+      "volume": 590,
+      "kd": 10.0
+    },
+    {
+      "keyword": "family practice waco tx",
+      "position": 4,
+      "volume": 590,
+      "kd": 38.0
+    },
+    {
+      "keyword": "functional medicine houston",
+      "position": 10,
+      "volume": 480,
+      "kd": 48.0
+    }
+  ],
+  "top3_sample": [
+    {
+      "keyword": "wiseman family practice",
+      "position": 1,
+      "volume": 5400
+    },
+    {
+      "keyword": "wiseman family",
+      "position": 1,
+      "volume": 1000
+    },
+    {
+      "keyword": "functional medicine austin",
+      "position": 2,
+      "volume": 880
+    },
+    {
+      "keyword": "dr wiseman",
+      "position": 1,
+      "volume": 880
+    },
+    {
+      "keyword": "wiseman family practice austin",
+      "position": 1,
+      "volume": 480
+    }
+  ],
+  "top_by_volume": [
+    {
+      "keyword": "holistic doctors near me",
+      "position": 16,
+      "volume": 12100,
+      "kd": 41.0
+    },
+    {
+      "keyword": "holistic pediatrician near me",
+      "position": 11,
+      "volume": 6600,
+      "kd": 42.0
+    },
+    {
+      "keyword": "wiseman family practice",
+      "position": 1,
+      "volume": 5400,
+      "kd": 28.0
+    },
+    {
+      "keyword": "homeopathy near to me",
+      "position": 7,
+      "volume": 1300,
+      "kd": 18.0
+    },
+    {
+      "keyword": "cedar park physicians",
+      "position": 19,
+      "volume": 1300,
+      "kd": 22.0
+    },
+    {
+      "keyword": "homeopathy near me",
+      "position": 16,
+      "volume": 1300,
+      "kd": 37.0
+    },
+    {
+      "keyword": "wiseman family",
+      "position": 1,
+      "volume": 1000,
+      "kd": 40.0
+    },
+    {
+      "keyword": "acupuncture austin",
+      "position": 15,
+      "volume": 1000,
+      "kd": 29.0
+    },
+    {
+      "keyword": "natural medicine near me",
+      "position": 16,
+      "volume": 1000,
+      "kd": 51.0
+    },
+    {
+      "keyword": "cedar park family medicine",
+      "position": 19,
+      "volume": 880,
+      "kd": 35.0
+    },
+    {
+      "keyword": "functional medicine austin",
+      "position": 2,
+      "volume": 880,
+      "kd": 40.0
+    },
+    {
+      "keyword": "dr wiseman",
+      "position": 1,
+      "volume": 880,
+      "kd": 20.0
+    },
+    {
+      "keyword": "herbal md",
+      "position": 20,
+      "volume": 720,
+      "kd": 73.0
+    },
+    {
+      "keyword": "austin family medicine",
+      "position": 18,
+      "volume": 720,
+      "kd": 47.0
+    },
+    {
+      "keyword": "integrative md near me",
+      "position": 7,
+      "volume": 720,
+      "kd": 46.0
+    },
+    {
+      "keyword": "wiseman family practice cedar park",
+      "position": 18,
+      "volume": 720,
+      "kd": 15.0
+    },
+    {
+      "keyword": "wiseman family practice cedar park",
+      "position": 14,
+      "volume": 720,
+      "kd": 15.0
+    },
+    {
+      "keyword": "wiseman family practice cedar park",
+      "position": 12,
+      "volume": 720,
+      "kd": 15.0
+    },
+    {
+      "keyword": "wiseman family practice cedar park",
+      "position": 9,
+      "volume": 720,
+      "kd": 15.0
+    },
+    {
+      "keyword": "wiseman family practice cedar park",
+      "position": 8,
+      "volume": 720,
+      "kd": 15.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "safamilyintegrativehealth.com",
+      "relevance": "0.16",
+      "keywords": 1039,
+      "traffic": 490,
+      "traffic_value": 581
+    },
+    {
+      "domain": "westholisticmedicine.com",
+      "relevance": "0.13",
+      "keywords": 1347,
+      "traffic": 4543,
+      "traffic_value": 8132
+    },
+    {
+      "domain": "restorativefunctionalmedicine.com",
+      "relevance": "0.11",
+      "keywords": 315,
+      "traffic": 411,
+      "traffic_value": 575
+    }
+  ]
+}

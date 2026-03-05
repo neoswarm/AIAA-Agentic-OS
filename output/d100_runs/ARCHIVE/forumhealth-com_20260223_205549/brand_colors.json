@@ -1,0 +1,12 @@
+{
+  "primary": "#243456",
+  "accent": "#DC6626",
+  "secondary": "#456C8F",
+  "light_background": "#DCF0F9",
+  "green": "#006937",
+  "background": "#ffffff",
+  "text": "#243456",
+  "font_primary": "Plus Jakarta Sans",
+  "font_display": "Founders Grotesk",
+  "source": "extracted via Puppeteer from forumhealth.com CSS (Elementor global colors)"
+}

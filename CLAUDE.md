@@ -847,6 +847,60 @@ You are the **brain** of this system. Your responsibilities:
 
 ---
 
+## Dream 100 (D100) Workflow
+
+**Runner:** `scripts/d100_v3_runner.py` — data collection ONLY. Zero LLM calls.
+**Output dir:** `output/d100_runs/{slug}_{YYYYMMDD_HHMMSS}/`
+**Batch CSV format:** `website,context` columns (semrush_csv not required)
+
+### CRITICAL: No Anthropic API Calls in Runner
+User is on **Claude Max**. Any `call_claude()` or Anthropic API call in the runner = **separate billing** on their API account. ALL LLM generation happens natively inside Claude Code (covered by Claude Max, zero cost).
+
+### Two-Step Run Flow
+
+**Step 1 — Data collection (runner):**
+```bash
+python3 -u scripts/d100_v3_runner.py --csv batch.csv
+```
+Runner scrapes, calls SEMrush, crawls, extracts brand colors. Writes `phase1_data.json` per site. Exits with `status: phase2_pending`.
+
+**Step 2 — Claude Code generates natively (zero cost):**
+For each run dir with `phase1_data.json`:
+1. Read `phase1_data.json` + `build_seo_analysis_prompt()` from runner → write `seo_report.md`
+2. Read `phase1_data.json` + `build_phase2_prompt()` + `CLAUDE_JSON_SCHEMA` from runner → write `phase2_output.json`
+3. Read `phase2_output.json` + `APP_BUILDER_PROMPT` from runner → build `health_assessment.html` natively
+
+**Step 3 — Gamma + Slack (runner):**
+```bash
+python3 -u scripts/d100_v3_runner.py --csv batch.csv --phase3-only
+```
+Runner auto-finds run dirs with `phase2_output.json`, submits to Gamma, fires Slack.
+
+### Key Files Per Run Dir
+| File | Written By | Purpose |
+|------|-----------|---------|
+| `phase1_data.json` | Runner | All scraped data — Claude Code input |
+| `seo_report.md` | Claude Code native | SEO analysis |
+| `phase2_output.json` | Claude Code native | Keywords + ads + emails + app_config |
+| `health_assessment.html` | Claude Code native | Patient app (60-85KB) |
+| `app_build_pending.json` | Runner | Marker: app not yet built |
+| `gamma_response.json` | Runner `--phase3-only` | Gamma submission result |
+
+### Prompt Source of Truth (in runner — Claude Code reads directly)
+- `build_phase2_prompt()` — Phase 2 merged prompt template
+- `CLAUDE_JSON_SCHEMA` — Required output schema for `phase2_output.json`
+- `APP_BUILDER_PROMPT` — Health assessment HTML builder prompt
+- `build_seo_analysis_prompt()` — SEO report prompt
+
+### Gotchas
+- **Python < 3.10** on this project — use `Optional[str]` not `str | None`
+- **Health assessment HTML is 60-85KB** — never use `max_tokens < 16000`; build natively to avoid the limit entirely
+- **Only `claude-sonnet-4-6` works** on this API key — `claude-3-7-sonnet-*` and `claude-3-5-sonnet-*` return HTTP 404
+- **`output-128k-2025-02-19` beta** does NOT work with `claude-sonnet-4-6`
+- **Brand colors MUST** be extracted from the practice website and passed into `APP_BUILDER_PROMPT`
+
+---
+
 ## Quick Commands Reference
 
 ```bash
@@ -871,3 +925,16 @@ cd railway_apps/aiaa_dashboard && railway up
 # Check dashboard health
 curl https://your-app.up.railway.app/health
 ```
+
+
+1. Before writing any code, describe your approach and wait for approval.
+
+2. If the requirements I give you are ambiguous, ask clarifying questions before writing any code.
+
+3. After you finish writing any code, list the edge cases and suggest test cases to cover them.
+
+4. If a task requires changes to more than 3 files, stop and break it into smaller tasks first.
+
+5. When there’s a bug, start by writing a test that reproduces it, then fix it until the test passes.
+
+6. Every time I correct you, reflect on what you did wrong and come up with a plan to never make the same mistake again.

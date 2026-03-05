@@ -1,0 +1,272 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 1144712,
+  "unique_keywords": 912,
+  "estimated_traffic": 896,
+  "traffic_value": 244,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 13,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 2,
+  "pos2_3_count": 1,
+  "pos4_10_count": 15,
+  "pos11_20_count": 32,
+  "pos1_3_count": 3,
+  "quick_wins_count": 15,
+  "top_quick_wins": [
+    {
+      "keyword": "fleet feet ballard",
+      "position": 10,
+      "volume": 1600,
+      "kd": 30.0
+    },
+    {
+      "keyword": "biofeedback near me",
+      "position": 10,
+      "volume": 590,
+      "kd": 30.0
+    },
+    {
+      "keyword": "ballard natural medicine",
+      "position": 7,
+      "volume": 480,
+      "kd": 29.0
+    },
+    {
+      "keyword": "medical rebel",
+      "position": 10,
+      "volume": 390,
+      "kd": 12.0
+    },
+    {
+      "keyword": "blendily",
+      "position": 4,
+      "volume": 390,
+      "kd": 0.0
+    },
+    {
+      "keyword": "concierge medicine seattle wa",
+      "position": 10,
+      "volume": 210,
+      "kd": 26.0
+    },
+    {
+      "keyword": "chemical peel seattle",
+      "position": 8,
+      "volume": 210,
+      "kd": 5.0
+    },
+    {
+      "keyword": "emsculpt seattle",
+      "position": 4,
+      "volume": 170,
+      "kd": 2.0
+    },
+    {
+      "keyword": "functional medicine seattle wa",
+      "position": 9,
+      "volume": 170,
+      "kd": 26.0
+    },
+    {
+      "keyword": "dr simon weight loss",
+      "position": 9,
+      "volume": 170,
+      "kd": 24.0
+    },
+    {
+      "keyword": "red light therapy seattle",
+      "position": 6,
+      "volume": 140,
+      "kd": 8.0
+    },
+    {
+      "keyword": "functional medicine seattle washington",
+      "position": 9,
+      "volume": 140,
+      "kd": 24.0
+    },
+    {
+      "keyword": "med rebels",
+      "position": 7,
+      "volume": 140,
+      "kd": 23.0
+    },
+    {
+      "keyword": "organic aesthetics",
+      "position": 9,
+      "volume": 110,
+      "kd": 29.0
+    },
+    {
+      "keyword": "rebel medicine",
+      "position": 10,
+      "volume": 110,
+      "kd": 19.0
+    }
+  ],
+  "top3_sample": [
+    {
+      "keyword": "rebel med nw",
+      "position": 1,
+      "volume": 480
+    },
+    {
+      "keyword": "rebel med northwest",
+      "position": 1,
+      "volume": 260
+    },
+    {
+      "keyword": "ballard acupuncture",
+      "position": 3,
+      "volume": 170
+    }
+  ],
+  "top_by_volume": [
+    {
+      "keyword": "wei qi",
+      "position": 12,
+      "volume": 1600,
+      "kd": 11.0
+    },
+    {
+      "keyword": "lens neurofeedback",
+      "position": 15,
+      "volume": 1600,
+      "kd": 9.0
+    },
+    {
+      "keyword": "fleet feet ballard",
+      "position": 10,
+      "volume": 1600,
+      "kd": 30.0
+    },
+    {
+      "keyword": "potenza rf micro needling",
+      "position": 14,
+      "volume": 880,
+      "kd": 7.0
+    },
+    {
+      "keyword": "seattle natural medicine",
+      "position": 20,
+      "volume": 590,
+      "kd": 44.0
+    },
+    {
+      "keyword": "red light therapy beds near me",
+      "position": 16,
+      "volume": 590,
+      "kd": 8.0
+    },
+    {
+      "keyword": "biofeedback near me",
+      "position": 10,
+      "volume": 590,
+      "kd": 30.0
+    },
+    {
+      "keyword": "rebel med nw",
+      "position": 1,
+      "volume": 480,
+      "kd": 35.0
+    },
+    {
+      "keyword": "ballard natural medicine",
+      "position": 7,
+      "volume": 480,
+      "kd": 29.0
+    },
+    {
+      "keyword": "advatx laser",
+      "position": 16,
+      "volume": 390,
+      "kd": 0.0
+    },
+    {
+      "keyword": "medical rebel",
+      "position": 10,
+      "volume": 390,
+      "kd": 12.0
+    },
+    {
+      "keyword": "blendily",
+      "position": 4,
+      "volume": 390,
+      "kd": 0.0
+    },
+    {
+      "keyword": "what is nano needling",
+      "position": 15,
+      "volume": 320,
+      "kd": 0.0
+    },
+    {
+      "keyword": "functional medicine seattle",
+      "position": 13,
+      "volume": 320,
+      "kd": 27.0
+    },
+    {
+      "keyword": "concierge medicine seattle",
+      "position": 15,
+      "volume": 320,
+      "kd": 27.0
+    },
+    {
+      "keyword": "concierge doctor seattle",
+      "position": 16,
+      "volume": 260,
+      "kd": 34.0
+    },
+    {
+      "keyword": "body sculpting seattle",
+      "position": 18,
+      "volume": 260,
+      "kd": 9.0
+    },
+    {
+      "keyword": "chinese medicine soup",
+      "position": 12,
+      "volume": 260,
+      "kd": 0.0
+    },
+    {
+      "keyword": "natural path doctors seattle",
+      "position": 18,
+      "volume": 260,
+      "kd": 44.0
+    },
+    {
+      "keyword": "advatx",
+      "position": 18,
+      "volume": 260,
+      "kd": 0.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "naturalmedicineofseattle.com",
+      "relevance": "0.16",
+      "keywords": 1573,
+      "traffic": 1934,
+      "traffic_value": 2458
+    },
+    {
+      "domain": "seattleintegrativemedicine.com",
+      "relevance": "0.16",
+      "keywords": 476,
+      "traffic": 669,
+      "traffic_value": 518
+    },
+    {
+      "domain": "ballardmedicine.com",
+      "relevance": "0.12",
+      "keywords": 265,
+      "traffic": 485,
+      "traffic_value": 1604
+    }
+  ]
+}

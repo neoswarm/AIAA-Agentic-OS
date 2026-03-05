@@ -1,0 +1,208 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 1128506,
+  "unique_keywords": 259,
+  "estimated_traffic": 916,
+  "traffic_value": 391,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 2,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 6,
+  "pos2_3_count": 6,
+  "pos4_10_count": 6,
+  "pos11_20_count": 13,
+  "pos1_3_count": 12,
+  "quick_wins_count": 1,
+  "top_quick_wins": [
+    {
+      "keyword": "holistic doctor columbia sc",
+      "position": 4,
+      "volume": 140,
+      "kd": 27.0
+    }
+  ],
+  "top3_sample": [
+    {
+      "keyword": "south carolina center for integrative medicine",
+      "position": 1,
+      "volume": 390
+    },
+    {
+      "keyword": "sccim",
+      "position": 1,
+      "volume": 320
+    },
+    {
+      "keyword": "integrated health sc",
+      "position": 3,
+      "volume": 260
+    },
+    {
+      "keyword": "south carolina integrative medicine",
+      "position": 1,
+      "volume": 170
+    },
+    {
+      "keyword": "functional medicine columbia sc",
+      "position": 3,
+      "volume": 170
+    },
+    {
+      "keyword": "sc integrative medicine",
+      "position": 1,
+      "volume": 110
+    },
+    {
+      "keyword": "integrative medicine south carolina",
+      "position": 1,
+      "volume": 110
+    }
+  ],
+  "top_by_volume": [
+    {
+      "keyword": "carolina integrative medicine",
+      "position": 15,
+      "volume": 480,
+      "kd": 37.0
+    },
+    {
+      "keyword": "south carolina center for integrative medicine",
+      "position": 1,
+      "volume": 390,
+      "kd": 19.0
+    },
+    {
+      "keyword": "sccim",
+      "position": 1,
+      "volume": 320,
+      "kd": 28.0
+    },
+    {
+      "keyword": "carolina holistic medicine",
+      "position": 19,
+      "volume": 320,
+      "kd": 37.0
+    },
+    {
+      "keyword": "carolina holistic medicine",
+      "position": 13,
+      "volume": 320,
+      "kd": 37.0
+    },
+    {
+      "keyword": "integrated health sc",
+      "position": 3,
+      "volume": 260,
+      "kd": 27.0
+    },
+    {
+      "keyword": "south carolina integrative medicine",
+      "position": 1,
+      "volume": 170,
+      "kd": 24.0
+    },
+    {
+      "keyword": "functional medicine columbia sc",
+      "position": 3,
+      "volume": 170,
+      "kd": 0.0
+    },
+    {
+      "keyword": "holistic doctor columbia sc",
+      "position": 4,
+      "volume": 140,
+      "kd": 27.0
+    },
+    {
+      "keyword": "sc integrative medicine",
+      "position": 1,
+      "volume": 110,
+      "kd": 32.0
+    },
+    {
+      "keyword": "carolina integrated medicine",
+      "position": 12,
+      "volume": 110,
+      "kd": 27.0
+    },
+    {
+      "keyword": "integrative medicine south carolina",
+      "position": 1,
+      "volume": 110,
+      "kd": 27.0
+    },
+    {
+      "keyword": "integrative medicine columbia sc",
+      "position": 10,
+      "volume": 90,
+      "kd": 6.0
+    },
+    {
+      "keyword": "integrative medicine columbia sc",
+      "position": 1,
+      "volume": 90,
+      "kd": 6.0
+    },
+    {
+      "keyword": "upstate functional medicine",
+      "position": 14,
+      "volume": 90,
+      "kd": 30.0
+    },
+    {
+      "keyword": "integrative medicine lexington",
+      "position": 19,
+      "volume": 70,
+      "kd": 19.0
+    },
+    {
+      "keyword": "naturopath columbia sc",
+      "position": 4,
+      "volume": 70,
+      "kd": 26.0
+    },
+    {
+      "keyword": "herbalist columbia sc",
+      "position": 18,
+      "volume": 50,
+      "kd": 21.0
+    },
+    {
+      "keyword": "carolina center for integrative medicine",
+      "position": 4,
+      "volume": 50,
+      "kd": 31.0
+    },
+    {
+      "keyword": "612 st andrews rd",
+      "position": 2,
+      "volume": 40,
+      "kd": 18.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "inspiredhealthsc.com",
+      "relevance": "0.61",
+      "keywords": 163,
+      "traffic": 136,
+      "traffic_value": 209
+    },
+    {
+      "domain": "rootsim.org",
+      "relevance": "0.44",
+      "keywords": 283,
+      "traffic": 610,
+      "traffic_value": 958
+    },
+    {
+      "domain": "carolinaintegrativemedicine.com",
+      "relevance": "0.40",
+      "keywords": 303,
+      "traffic": 1252,
+      "traffic_value": 1712
+    }
+  ]
+}

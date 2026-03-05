@@ -1,0 +1,267 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 433126,
+  "unique_keywords": 6556,
+  "estimated_traffic": 3415,
+  "traffic_value": 3148,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 45,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 0,
+  "pos2_3_count": 3,
+  "pos4_10_count": 18,
+  "pos11_20_count": 29,
+  "pos1_3_count": 3,
+  "quick_wins_count": 15,
+  "top_quick_wins": [
+    {
+      "keyword": "how to remove microplastics from body",
+      "position": 6,
+      "volume": 1300,
+      "kd": 0.0
+    },
+    {
+      "keyword": "how to remove microplastics from your body naturally",
+      "position": 6,
+      "volume": 880,
+      "kd": 31.0
+    },
+    {
+      "keyword": "is functional medicine covered by insurance",
+      "position": 10,
+      "volume": 880,
+      "kd": 13.0
+    },
+    {
+      "keyword": "how to get microplastics out of your body",
+      "position": 9,
+      "volume": 880,
+      "kd": 40.0
+    },
+    {
+      "keyword": "prodome",
+      "position": 5,
+      "volume": 880,
+      "kd": 21.0
+    },
+    {
+      "keyword": "detox diet schedule",
+      "position": 7,
+      "volume": 880,
+      "kd": 31.0
+    },
+    {
+      "keyword": "cynthia thurlow",
+      "position": 8,
+      "volume": 720,
+      "kd": 28.0
+    },
+    {
+      "keyword": "coconut oil in keto diet",
+      "position": 8,
+      "volume": 720,
+      "kd": 17.0
+    },
+    {
+      "keyword": "cirs treatment",
+      "position": 4,
+      "volume": 720,
+      "kd": 7.0
+    },
+    {
+      "keyword": "fasting mimicking diet meal plan",
+      "position": 6,
+      "volume": 590,
+      "kd": 19.0
+    },
+    {
+      "keyword": "coconut oil keto",
+      "position": 7,
+      "volume": 590,
+      "kd": 21.0
+    },
+    {
+      "keyword": "richmond natural medicine",
+      "position": 4,
+      "volume": 590,
+      "kd": 12.0
+    },
+    {
+      "keyword": "how to get rid of microplastics in body",
+      "position": 9,
+      "volume": 590,
+      "kd": 38.0
+    },
+    {
+      "keyword": "can microplastics be removed from the body",
+      "position": 10,
+      "volume": 480,
+      "kd": 39.0
+    },
+    {
+      "keyword": "uncurable",
+      "position": 4,
+      "volume": 480,
+      "kd": 22.0
+    }
+  ],
+  "top3_sample": [
+    {
+      "keyword": "functional medicine books",
+      "position": 3,
+      "volume": 1000
+    },
+    {
+      "keyword": "ketosis coconut oil",
+      "position": 3,
+      "volume": 480
+    }
+  ],
+  "top_by_volume": [
+    {
+      "keyword": "dnrs",
+      "position": 16,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "signs of high testosterone",
+      "position": 17,
+      "volume": 3600,
+      "kd": 62.0
+    },
+    {
+      "keyword": "signs of high testosterone in a woman",
+      "position": 18,
+      "volume": 3600,
+      "kd": 62.0
+    },
+    {
+      "keyword": "ginger turmeric tea benefits",
+      "position": 13,
+      "volume": 2400,
+      "kd": 46.0
+    },
+    {
+      "keyword": "how to treat high testosterone in a woman naturally",
+      "position": 14,
+      "volume": 1900,
+      "kd": 51.0
+    },
+    {
+      "keyword": "quercetin for allergies",
+      "position": 11,
+      "volume": 1900,
+      "kd": 51.0
+    },
+    {
+      "keyword": "quercetin for allergies",
+      "position": 9,
+      "volume": 1900,
+      "kd": 51.0
+    },
+    {
+      "keyword": "signs of high testosterone in women",
+      "position": 19,
+      "volume": 1900,
+      "kd": 66.0
+    },
+    {
+      "keyword": "signs of high testosterone in women",
+      "position": 11,
+      "volume": 1900,
+      "kd": 66.0
+    },
+    {
+      "keyword": "turmeric and ginger tea benefits",
+      "position": 20,
+      "volume": 1600,
+      "kd": 46.0
+    },
+    {
+      "keyword": "symptoms of high testosterone in women",
+      "position": 17,
+      "volume": 1600,
+      "kd": 66.0
+    },
+    {
+      "keyword": "how to remove microplastics from body",
+      "position": 6,
+      "volume": 1300,
+      "kd": 0.0
+    },
+    {
+      "keyword": "brain hijacks technology",
+      "position": 17,
+      "volume": 1300,
+      "kd": 49.0
+    },
+    {
+      "keyword": "brain hijacks technology",
+      "position": 9,
+      "volume": 1300,
+      "kd": 49.0
+    },
+    {
+      "keyword": "functional medicine books",
+      "position": 3,
+      "volume": 1000,
+      "kd": 15.0
+    },
+    {
+      "keyword": "high testosterone signs",
+      "position": 20,
+      "volume": 880,
+      "kd": 68.0
+    },
+    {
+      "keyword": "how to remove microplastics from your body naturally",
+      "position": 6,
+      "volume": 880,
+      "kd": 31.0
+    },
+    {
+      "keyword": "is functional medicine covered by insurance",
+      "position": 10,
+      "volume": 880,
+      "kd": 13.0
+    },
+    {
+      "keyword": "how to get microplastics out of your body",
+      "position": 9,
+      "volume": 880,
+      "kd": 40.0
+    },
+    {
+      "keyword": "how to get microplastics out of your body",
+      "position": 8,
+      "volume": 880,
+      "kd": 40.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "drdanlukaczer.com",
+      "relevance": "0.17",
+      "keywords": 641,
+      "traffic": 52,
+      "traffic_value": 102
+    },
+    {
+      "domain": "safamilyintegrativehealth.com",
+      "relevance": "0.15",
+      "keywords": 1039,
+      "traffic": 490,
+      "traffic_value": 581
+    },
+    {
+      "domain": "dango.co",
+      "relevance": "0.14",
+      "keywords": 1805,
+      "traffic": 1457,
+      "traffic_value": 5880
+    }
+  ]
+}

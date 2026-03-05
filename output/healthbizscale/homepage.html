@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Functional Medicine Marketing & AI Growth Systems | Health Biz Scale</title>
+  <meta name="description" content="Free tools, proven frameworks, and AI-powered growth systems for functional medicine and naturopathic practices. The SCALE SEO Framework + SMART Practice System.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================= */
+    /* DESIGN TOKENS                 */
+    /* ============================= */
+    :root {
+      --g-deep:     #08170e;
+      --g-forest:   #12261B;
+      --g-mid:      #1c3d28;
+      --g-rich:     #214B33;
+      --g-light:    #2d6644;
+      --mint:       #9AE6B4;
+      --mint-dim:   rgba(154,230,180,0.12);
+      --cyan:       #B7FFE4;
+      --blue:       #0285FF;
+      --blue-glow:  rgba(2,133,255,0.25);
+      --cream:      #FBF9F3;
+      --cream-warm: #F4EFE4;
+      --white:      #FFFFFF;
+      --navy:       #000D32;
+      --muted:      rgba(255,255,255,0.6);
+      --muted-dark: rgba(0,13,50,0.6);
+
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+      --font-label:   'Oswald', sans-serif;
+
+      --r-sm: 8px; --r-md: 16px; --r-lg: 24px; --r-xl: 40px;
+      --shadow-card: 0 4px 24px rgba(0,0,0,0.1);
+    }
+
+    /* ============================= */
+    /* RESET                         */
+    /* ============================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-body); background: var(--g-forest); color: var(--white); overflow-x: hidden; line-height: 1.6; }
+    img { max-width: 100%; display: block; }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+
+    /* ============================= */
+    /* TYPOGRAPHY                    */
+    /* ============================= */
+    .t-display { font-family: var(--font-display); font-size: clamp(2.8rem,6vw,5rem); font-weight: 700; line-height: 1.02; letter-spacing: -0.02em; }
+    .t-h2 { font-family: var(--font-display); font-size: clamp(2rem,4.5vw,3.4rem); font-weight: 600; line-height: 1.08; }
+    .t-h3 { font-family: var(--font-display); font-size: clamp(1.3rem,2.5vw,1.8rem); font-weight: 600; line-height: 1.15; }
+    .t-label { font-family: var(--font-label); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; }
+    .t-stat { font-family: var(--font-label); font-size: clamp(2rem,4vw,2.8rem); font-weight: 700; line-height: 1; }
+    em { font-style: italic; }
+
+    .grad-mint { background: linear-gradient(130deg,var(--mint) 0%,var(--cyan) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .grad-warm { background: linear-gradient(130deg,#fff 0%,var(--mint) 55%,var(--cyan) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* ============================= */
+    /* BUTTONS                       */
+    /* ============================= */
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.85rem 1.75rem; border-radius: 100px; font-family: var(--font-body); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.25s ease; border: none; white-space: nowrap; }
+    .btn svg { width: 17px; height: 17px; flex-shrink: 0; }
+    .btn-lg { padding: 1.1rem 2.25rem; font-size: 1.05rem; }
+    .btn-lg svg { width: 19px; height: 19px; }
+
+    .btn-mint { background: linear-gradient(135deg,var(--mint) 0%,var(--cyan) 100%); color: var(--g-forest); box-shadow: 0 8px 32px rgba(154,230,180,0.3); }
+    .btn-mint:hover { transform: translateY(-2px); box-shadow: 0 14px 44px rgba(154,230,180,0.42); }
+    .btn-blue { background: var(--blue); color: white; box-shadow: 0 8px 28px var(--blue-glow); }
+    .btn-blue:hover { background: #0272dc; transform: translateY(-2px); }
+    .btn-ghost { background: transparent; color: var(--mint); border: 1.5px solid rgba(154,230,180,0.4); }
+    .btn-ghost:hover { background: var(--mint-dim); border-color: var(--mint); transform: translateY(-2px); }
+    .btn-ghost-dark { background: transparent; color: var(--g-rich); border: 1.5px solid rgba(33,75,51,0.35); }
+    .btn-ghost-dark:hover { background: rgba(33,75,51,0.06); transform: translateY(-2px); }
+
+    /* ============================= */
+    /* LAYOUT                        */
+    /* ============================= */
+    .container { max-width: 1180px; margin: 0 auto; padding: 0 1.5rem; }
+    .section { padding: 6rem 0; }
+
+    /* ============================= */
+    /* DECORATIVE                    */
+    /* ============================= */
+    .dot-grid { position: absolute; inset: 0; background-image: radial-gradient(circle,rgba(154,230,180,0.1) 1px,transparent 1px); background-size: 30px 30px; pointer-events: none; }
+    .noise { position: absolute; inset: 0; opacity: 0.025; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); pointer-events: none; }
+    .glow-circle { position: absolute; border-radius: 50%; pointer-events: none; }
+
+    .section-eyebrow { display: inline-flex; align-items: center; gap: 0.6rem; margin-bottom: 1.25rem; }
+    .eyebrow-line { width: 22px; height: 2px; background: var(--mint); border-radius: 2px; flex-shrink: 0; }
+    .eyebrow-line-dark { background: var(--g-rich); }
+
+    /* ============================= */
+    /* SCROLL ANIMATIONS             */
+    /* ============================= */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.65s ease, transform 0.65s ease; }
+    .reveal.on { opacity: 1; transform: translateY(0); }
+    .reveal-d1 { transition-delay: 0.1s; } .reveal-d2 { transition-delay: 0.2s; }
+    .reveal-d3 { transition-delay: 0.3s; } .reveal-d4 { transition-delay: 0.4s; }
+
+    /* ============================= */
+    /* NAV                           */
+    /* ============================= */
+    #nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 1.1rem 0; transition: all 0.3s ease; border-bottom: 1px solid transparent; }
+    #nav.stuck { padding: 0.75rem 0; background: rgba(8,23,14,0.95); backdrop-filter: blur(20px); border-bottom-color: rgba(154,230,180,0.1); }
+    .nav-row { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+    .logo { display: flex; align-items: center; gap: 0.8rem; flex-shrink: 0; }
+    .logo-mark { width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg,var(--mint),var(--cyan)); display: flex; align-items: center; justify-content: center; font-family: var(--font-label); font-size: 0.9rem; font-weight: 700; color: var(--g-forest); flex-shrink: 0; }
+    .logo-text { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; color: white; line-height: 1.1; }
+    .logo-text small { display: block; font-family: var(--font-label); font-size: 0.65rem; font-weight: 400; letter-spacing: 0.12em; color: var(--mint); text-transform: uppercase; margin-top: 1px; }
+    .nav-links { display: flex; align-items: center; gap: 1.75rem; }
+    .nav-links a { font-size: 0.88rem; font-weight: 500; color: rgba(255,255,255,0.75); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--mint); }
+    .nav-burger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+    .nav-burger span { display: block; width: 22px; height: 2px; background: white; border-radius: 2px; }
+
+    /* ============================= */
+    /* HERO                          */
+    /* ============================= */
+    #hero { min-height: 100vh; display: flex; align-items: center; padding: 9rem 0 5rem; position: relative; overflow: hidden; background: linear-gradient(155deg, var(--g-deep) 0%, #0d1f14 25%, var(--g-forest) 55%, var(--g-mid) 100%); }
+    #hero .glow-1 { top: -8%; right: -8%; width: 700px; height: 700px; background: radial-gradient(circle,rgba(154,230,180,0.09) 0%,transparent 65%); }
+    #hero .glow-2 { bottom: -5%; left: -8%; width: 560px; height: 560px; background: radial-gradient(circle,rgba(2,133,255,0.07) 0%,transparent 65%); }
+
+    .hero-inner { position: relative; z-index: 2; text-align: center; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem 0.4rem 0.65rem; border-radius: 100px; background: rgba(154,230,180,0.09); border: 1px solid rgba(154,230,180,0.22); margin-bottom: 1.75rem; }
+    .badge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); animation: bdot 2.2s ease infinite; }
+    @keyframes bdot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.75)} }
+
+    .hero-headline { margin-bottom: 1.5rem; }
+    .hero-sub { font-size: clamp(1rem,2vw,1.2rem); color: rgba(255,255,255,0.7); max-width: 620px; margin: 0 auto 2.75rem; line-height: 1.72; }
+    .hero-sub strong { color: var(--mint); font-weight: 600; }
+
+    /* VSL */
+    .vsl-wrap { max-width: 840px; margin: 0 auto 2.75rem; border-radius: var(--r-lg); overflow: hidden; box-shadow: 0 32px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(154,230,180,0.13); }
+    .vsl-ratio { position: relative; padding-bottom: 56.25%; background: var(--g-deep); }
+    .vsl-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; background: linear-gradient(135deg,#0b1c11 0%,#183024 100%); cursor: pointer; }
+    .vsl-play { width: 88px; height: 88px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; transition: all 0.3s; backdrop-filter: blur(8px); }
+    .vsl-play svg { width: 34px; height: 34px; margin-left: 5px; }
+    .vsl-placeholder:hover .vsl-play { background: var(--blue); border-color: var(--blue); transform: scale(1.07); box-shadow: 0 0 40px var(--blue-glow); }
+    .vsl-label { font-family: var(--font-label); font-size: 0.75rem; letter-spacing: 0.12em; color: rgba(255,255,255,0.45); text-transform: uppercase; }
+    .vsl-duration { position: absolute; bottom: 1rem; right: 1rem; padding: 0.3rem 0.7rem; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); border-radius: 6px; font-family: var(--font-label); font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    .hero-ctas { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+    .hero-note { margin-top: 1rem; font-size: 0.78rem; color: rgba(255,255,255,0.38); }
+
+    /* ============================= */
+    /* TRUST BAR                     */
+    /* ============================= */
+    #trust { padding: 0; background: rgba(255,255,255,0.028); border-top: 1px solid rgba(154,230,180,0.09); border-bottom: 1px solid rgba(154,230,180,0.09); }
+    .trust-grid { display: grid; grid-template-columns: repeat(3,1fr); }
+    .trust-cell { padding: 2.25rem 1.5rem; text-align: center; }
+    .trust-cell + .trust-cell { border-left: 1px solid rgba(154,230,180,0.1); }
+    .trust-num { color: var(--mint); margin-bottom: 0.35rem; }
+    .trust-lbl { font-size: 0.88rem; color: var(--muted); }
+
+    /* ============================= */
+    /* PROBLEM                       */
+    /* ============================= */
+    #problem { padding: 6rem 0; position: relative; overflow: hidden; background: linear-gradient(180deg,var(--g-forest) 0%,var(--g-mid) 100%); }
+    .prob-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-top: 3.5rem; }
+    .prob-card { padding: 2rem; border-radius: var(--r-md); background: rgba(8,23,14,0.55); border: 1px solid rgba(154,230,180,0.11); position: relative; overflow: hidden; transition: transform 0.3s, border-color 0.3s; }
+    .prob-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg,var(--mint),var(--cyan)); opacity: 0; transition: opacity 0.3s; }
+    .prob-card:hover { transform: translateY(-4px); border-color: rgba(154,230,180,0.24); }
+    .prob-card:hover::before { opacity: 1; }
+    .prob-icon { width: 46px; height: 46px; border-radius: 12px; background: var(--mint-dim); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
+    .prob-icon svg { width: 22px; height: 22px; color: var(--mint); }
+    .prob-num { font-family: var(--font-label); font-size: 0.7rem; color: var(--mint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 0.6rem; }
+    .prob-card h3 { font-family: var(--font-display); font-size: 1.35rem; font-weight: 600; margin-bottom: 0.75rem; }
+    .prob-card p { font-size: 0.92rem; color: var(--muted); line-height: 1.68; }
+
+    /* ============================= */
+    /* SCALE FRAMEWORK               */
+    /* ============================= */
+    #scale { padding: 6rem 0; background: var(--cream); color: var(--navy); position: relative; overflow: hidden; }
+    .scale-intro { display: grid; grid-template-columns: 1fr 1.2fr; gap: 4rem; align-items: start; margin-bottom: 3rem; }
+    .scale-subtitle { font-size: 1.05rem; color: var(--muted-dark); line-height: 1.75; margin-top: 1rem; }
+
+    /* Tab nav */
+    .scale-tabs { display: flex; gap: 0.5rem; margin-bottom: 0; flex-wrap: wrap; }
+    .scale-tab { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.25rem; border-radius: var(--r-sm); font-weight: 600; font-size: 0.88rem; cursor: pointer; border: 1.5px solid rgba(33,75,51,0.15); background: white; color: rgba(0,13,50,0.5); transition: all 0.25s; }
+    .scale-tab .tab-letter { font-family: var(--font-label); font-size: 1.1rem; font-weight: 700; color: var(--g-rich); }
+    .scale-tab:hover { border-color: var(--g-rich); color: var(--navy); }
+    .scale-tab.active { background: var(--g-rich); color: white; border-color: var(--g-rich); }
+    .scale-tab.active .tab-letter { color: var(--mint); }
+
+    /* Tab panels */
+    .scale-panels { margin-top: 0; }
+    .scale-panel { display: none; }
+    .scale-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2.5rem; background: white; border-radius: var(--r-lg); border: 1px solid rgba(33,75,51,0.1); box-shadow: var(--shadow-card); }
+    .panel-copy h3 { font-family: var(--font-display); font-size: 1.9rem; font-weight: 600; color: var(--navy); margin-bottom: 0.75rem; line-height: 1.1; }
+    .panel-copy p { font-size: 0.95rem; color: var(--muted-dark); line-height: 1.75; margin-bottom: 1.25rem; }
+    .panel-deliverables { display: flex; flex-direction: column; gap: 0.6rem; }
+    .deliverable { display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; color: rgba(0,13,50,0.75); padding: 0.6rem 0.75rem; border-radius: var(--r-sm); background: rgba(33,75,51,0.04); border: 1px solid rgba(33,75,51,0.08); }
+    .del-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); flex-shrink: 0; }
+    .scale-bottom { text-align: center; margin-top: 2.5rem; }
+    .scale-tagline { font-size: 1rem; color: var(--muted-dark); margin-bottom: 1.5rem; font-style: italic; }
+
+    /* ============================= */
+    /* SMART SYSTEM                  */
+    /* ============================= */
+    #smart { padding: 6rem 0; position: relative; overflow: hidden; background: linear-gradient(150deg,var(--g-mid) 0%,var(--g-rich) 55%,var(--g-light) 100%); }
+    .smart-header { text-align: center; margin-bottom: 4rem; }
+    .smart-steps { display: grid; grid-template-columns: repeat(5,1fr); gap: 0; position: relative; }
+    .smart-steps::before { content: ''; position: absolute; top: 2.75rem; left: 10%; right: 10%; height: 1px; background: linear-gradient(90deg,transparent,var(--mint),var(--cyan),var(--mint),transparent); opacity: 0.3; }
+
+    .smart-step { text-align: center; padding: 0 0.75rem; position: relative; cursor: pointer; }
+    .step-marker { width: 54px; height: 54px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1.25rem; border: 1.5px solid rgba(154,230,180,0.35); background: rgba(154,230,180,0.08); transition: all 0.3s; position: relative; z-index: 1; }
+    .step-letter { font-family: var(--font-label); font-size: 1.1rem; font-weight: 700; color: var(--mint); line-height: 1; }
+    .step-word { font-family: var(--font-label); font-size: 0.5rem; letter-spacing: 0.06em; color: rgba(154,230,180,0.6); margin-top: 1px; text-transform: uppercase; }
+    .smart-step.active .step-marker, .smart-step:hover .step-marker { background: var(--mint); border-color: var(--mint); box-shadow: 0 0 24px rgba(154,230,180,0.3); }
+    .smart-step.active .step-letter, .smart-step:hover .step-letter { color: var(--g-forest); }
+    .smart-step.active .step-word, .smart-step:hover .step-word { color: var(--g-forest); }
+
+    .smart-step h4 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .smart-step p { font-size: 0.8rem; color: rgba(255,255,255,0.6); line-height: 1.5; }
+
+    .smart-detail { margin-top: 3rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(154,230,180,0.15); border-radius: var(--r-lg); padding: 2.5rem; display: none; }
+    .smart-detail.active { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .smart-detail-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .smart-detail-sub { font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 1.5rem; }
+    .smart-items { display: flex; flex-direction: column; gap: 0.6rem; }
+    .smart-item { display: flex; align-items: center; gap: 0.65rem; font-size: 0.88rem; color: rgba(255,255,255,0.8); }
+    .smart-item-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); flex-shrink: 0; }
+    .smart-detail-note { background: rgba(154,230,180,0.08); border: 1px solid rgba(154,230,180,0.15); border-radius: var(--r-md); padding: 1.5rem; display: flex; flex-direction: column; justify-content: center; }
+    .smart-detail-note h5 { font-family: var(--font-display); font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--mint); }
+    .smart-detail-note p { font-size: 0.88rem; color: rgba(255,255,255,0.65); line-height: 1.65; }
+
+    /* ============================= */
+    /* ABOUT                         */
+    /* ============================= */
+    #about { padding: 6rem 0; background: var(--cream-warm); color: var(--navy); }
+    .about-grid { display: grid; grid-template-columns: 360px 1fr; gap: 5rem; align-items: center; }
+    .about-photo { position: relative; }
+    .photo-box { width: 100%; aspect-ratio: 3/4; max-height: 480px; border-radius: var(--r-lg); background: linear-gradient(155deg,var(--g-forest),var(--g-rich)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; border: 2px dashed rgba(154,230,180,0.25); overflow: hidden; }
+    .photo-box svg { width: 60px; height: 60px; color: rgba(154,230,180,0.35); }
+    .photo-box span { font-family: var(--font-label); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(154,230,180,0.4); }
+    .photo-badge { position: absolute; bottom: 1.5rem; right: -1.25rem; background: white; border-radius: var(--r-md); padding: 1rem 1.25rem; box-shadow: 0 8px 32px rgba(0,0,0,0.1); text-align: center; }
+    .photo-badge .num { font-family: var(--font-label); font-size: 1.7rem; font-weight: 700; color: var(--g-rich); line-height: 1; }
+    .photo-badge .lbl { font-size: 0.72rem; color: var(--muted-dark); margin-top: 2px; }
+    .about-copy h2 { font-family: var(--font-display); font-size: clamp(1.9rem,3.5vw,2.9rem); font-weight: 600; color: var(--navy); margin: 0.5rem 0 1.25rem; line-height: 1.1; }
+    .about-copy p { font-size: 0.97rem; color: var(--muted-dark); line-height: 1.8; margin-bottom: 1rem; }
+    .creds { display: flex; flex-direction: column; gap: 0.7rem; margin-top: 2rem; }
+    .cred { display: flex; align-items: center; gap: 0.75rem; font-size: 0.93rem; color: rgba(0,13,50,0.75); }
+    .cred-check { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg,var(--g-rich),var(--mint)); display: flex; align-items: center; justify-content: center; }
+    .cred-check svg { width: 10px; height: 10px; color: white; }
+
+    /* ============================= */
+    /* TESTIMONIALS                  */
+    /* ============================= */
+    #testimonials { padding: 6rem 0; background: linear-gradient(180deg,var(--g-forest) 0%,var(--g-mid) 100%); }
+    .testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-top: 3.5rem; }
+    .testi-card { padding: 2rem; border-radius: var(--r-md); background: rgba(255,255,255,0.05); border: 1px solid rgba(154,230,180,0.13); position: relative; overflow: hidden; transition: all 0.3s; }
+    .testi-card::before { content: '"'; position: absolute; top: 0.5rem; right: 1.25rem; font-family: var(--font-display); font-size: 5.5rem; color: rgba(154,230,180,0.08); line-height: 1; }
+    .testi-card:hover { border-color: rgba(154,230,180,0.28); transform: translateY(-4px); }
+    .stars { display: flex; gap: 0.2rem; margin-bottom: 1rem; color: #FFD55C; font-size: 0.95rem; }
+    .testi-card blockquote { font-size: 0.93rem; color: rgba(255,255,255,0.78); line-height: 1.72; font-style: italic; margin-bottom: 1.5rem; position: relative; z-index: 1; }
+    .testi-author { display: flex; align-items: center; gap: 0.75rem; }
+    .author-av { width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg,var(--g-rich),var(--mint)); display: flex; align-items: center; justify-content: center; font-family: var(--font-label); font-size: 0.75rem; font-weight: 600; }
+    .author-name { font-weight: 600; font-size: 0.88rem; }
+    .author-title { font-size: 0.78rem; color: var(--mint); margin-top: 1px; }
+
+    /* ============================= */
+    /* RESOURCES                     */
+    /* ============================= */
+    #resources { padding: 6rem 0; background: var(--cream); color: var(--navy); }
+    .res-header { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: end; margin-bottom: 3rem; }
+    .res-subtitle { font-size: 1.05rem; color: var(--muted-dark); line-height: 1.75; }
+    .res-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+    .res-card { border-radius: var(--r-md); overflow: hidden; background: white; border: 1px solid rgba(33,75,51,0.09); box-shadow: 0 4px 18px rgba(0,0,0,0.05); transition: all 0.3s; }
+    .res-card:hover { transform: translateY(-4px); box-shadow: 0 14px 42px rgba(33,75,51,0.1); }
+    .res-thumb { height: 140px; display: flex; align-items: flex-end; padding: 1rem; position: relative; }
+    .res-thumb-1 { background: linear-gradient(135deg,var(--g-forest),var(--g-rich)); }
+    .res-thumb-2 { background: linear-gradient(135deg,#060d1f,#000D32); }
+    .res-thumb-3 { background: linear-gradient(135deg,#1a1106,#2a1c08); }
+    .res-thumb-4 { background: linear-gradient(135deg,#0d1a2e,#1a2d4a); }
+    .res-thumb-5 { background: linear-gradient(135deg,#1a0d1f,#2e1a3d); }
+    .res-thumb-6 { background: linear-gradient(135deg,var(--g-deep),var(--g-mid)); }
+    .res-cat { padding: 0.28rem 0.7rem; background: var(--mint); color: var(--g-forest); font-family: var(--font-label); font-size: 0.67rem; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 100px; font-weight: 600; align-self: flex-start; }
+    .res-body { padding: 1.4rem; }
+    .res-body h4 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; color: var(--navy); margin-bottom: 0.45rem; line-height: 1.3; }
+    .res-body p { font-size: 0.84rem; color: var(--muted-dark); line-height: 1.62; margin-bottom: 1rem; }
+    .res-link { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.84rem; font-weight: 600; color: var(--g-rich); transition: gap 0.2s; }
+    .res-link:hover { gap: 0.6rem; }
+    .res-link svg { width: 13px; height: 13px; }
+    .res-cta { text-align: center; margin-top: 2.5rem; }
+
+    /* ============================= */
+    /* FAQ                           */
+    /* ============================= */
+    #faq { padding: 6rem 0; background: linear-gradient(155deg,var(--g-mid) 0%,var(--g-forest) 100%); }
+    .faq-list { max-width: 760px; margin: 3rem auto 0; display: flex; flex-direction: column; gap: 0.7rem; }
+    .faq-item { background: rgba(255,255,255,0.045); border: 1px solid rgba(154,230,180,0.13); border-radius: var(--r-md); overflow: hidden; }
+    .faq-q { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.4rem 1.5rem; cursor: pointer; transition: background 0.2s; }
+    .faq-q:hover { background: rgba(154,230,180,0.04); }
+    .faq-q h4 { font-size: 0.97rem; font-weight: 500; color: rgba(255,255,255,0.88); }
+    .faq-icon { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; background: rgba(154,230,180,0.09); border: 1px solid rgba(154,230,180,0.2); display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+    .faq-icon svg { width: 13px; height: 13px; color: var(--mint); transition: transform 0.3s; }
+    .faq-item.open .faq-icon { background: var(--mint); border-color: var(--mint); }
+    .faq-item.open .faq-icon svg { color: var(--g-forest); transform: rotate(45deg); }
+    .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.36s ease; }
+    .faq-a-inner { padding: 0 1.5rem 1.5rem; font-size: 0.92rem; color: var(--muted); line-height: 1.72; }
+    .faq-item.open .faq-a { max-height: 220px; }
+
+    /* ============================= */
+    /* PLAYBOOK CTA                  */
+    /* ============================= */
+    #playbook { padding: 7rem 0; position: relative; overflow: hidden; text-align: center; background: linear-gradient(145deg,var(--g-deep) 0%,#0d2018 35%,var(--g-forest) 100%); }
+    #playbook .cta-glow { top: 50%; left: 50%; transform: translate(-50%,-50%); width: 700px; height: 350px; background: radial-gradient(ellipse,rgba(154,230,180,0.07) 0%,transparent 70%); }
+    #playbook .cta-ring { top: 50%; left: 50%; transform: translate(-50%,-50%); width: 900px; height: 900px; border: 1px solid rgba(154,230,180,0.05); }
+    .cta-inner { position: relative; z-index: 2; }
+    .cta-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.38rem 1rem; background: rgba(154,230,180,0.09); border: 1px solid rgba(154,230,180,0.2); border-radius: 100px; margin-bottom: 1.75rem; }
+    #playbook h2 { font-family: var(--font-display); font-size: clamp(2.2rem,5vw,3.8rem); font-weight: 700; line-height: 1.05; margin-bottom: 1.25rem; }
+    #playbook p { font-size: 1.05rem; color: rgba(255,255,255,0.68); max-width: 500px; margin: 0 auto 2.75rem; line-height: 1.68; }
+
+    /* ============================= */
+    /* FOOTER                        */
+    /* ============================= */
+    footer { padding: 4rem 0 2rem; background: var(--g-deep); border-top: 1px solid rgba(154,230,180,0.09); }
+    .footer-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+    .footer-brand p { font-size: 0.87rem; color: rgba(255,255,255,0.45); line-height: 1.7; margin-top: 1rem; max-width: 250px; }
+    .socials { display: flex; gap: 0.65rem; margin-top: 1.5rem; }
+    .social-btn { width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(154,230,180,0.1); display: flex; align-items: center; justify-content: center; font-family: var(--font-label); font-size: 0.62rem; color: rgba(255,255,255,0.55); transition: all 0.2s; }
+    .social-btn:hover { background: var(--mint-dim); border-color: rgba(154,230,180,0.25); color: var(--mint); }
+    .foot-col-title { font-family: var(--font-label); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mint); margin-bottom: 1.25rem; }
+    .foot-links { display: flex; flex-direction: column; gap: 0.6rem; }
+    .foot-links a { font-size: 0.88rem; color: rgba(255,255,255,0.5); transition: color 0.2s; }
+    .foot-links a:hover { color: var(--mint); }
+    .foot-cta-block { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(154,230,180,0.1); }
+    .foot-cta-block p { font-size: 0.78rem; color: rgba(255,255,255,0.38); margin-bottom: 0.75rem; }
+    .footer-bar { padding-top: 2rem; border-top: 1px solid rgba(154,230,180,0.07); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .footer-bar p { font-size: 0.78rem; color: rgba(255,255,255,0.3); }
+    .footer-legal { display: flex; gap: 1.5rem; }
+    .footer-legal a { font-size: 0.78rem; color: rgba(255,255,255,0.3); transition: color 0.2s; }
+    .footer-legal a:hover { color: rgba(255,255,255,0.55); }
+
+    /* ============================= */
+    /* RESPONSIVE                    */
+    /* ============================= */
+    @media (max-width: 1024px) {
+      .scale-intro { grid-template-columns: 1fr; gap: 1.5rem; }
+      .scale-panel.active { grid-template-columns: 1fr; }
+      .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .about-photo { max-width: 380px; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+      .res-header { grid-template-columns: 1fr; gap: 1.5rem; }
+      .smart-steps { grid-template-columns: 1fr 1fr 1fr; }
+      .smart-detail.active { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-burger { display: flex; }
+      .prob-grid, .testi-grid, .res-grid { grid-template-columns: 1fr; }
+      .res-grid { grid-template-columns: 1fr 1fr; }
+      .trust-grid { grid-template-columns: 1fr; }
+      .trust-cell + .trust-cell { border-left: none; border-top: 1px solid rgba(154,230,180,0.09); }
+      .footer-grid { grid-template-columns: 1fr; }
+      .photo-badge { right: 0; }
+      .footer-bar { flex-direction: column; text-align: center; }
+      .smart-steps { grid-template-columns: 1fr 1fr; }
+      .scale-tab { padding: 0.6rem 0.9rem; font-size: 0.82rem; }
+    }
+    @media (max-width: 480px) {
+      .hero-ctas { flex-direction: column; align-items: stretch; }
+      .btn { justify-content: center; }
+      .res-grid { grid-template-columns: 1fr; }
+      .smart-steps { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="container">
+    <div class="nav-row">
+      <a href="#" class="logo">
+        <div class="logo-mark">HBS</div><!-- SWAP: <img src="/logo.svg" alt="Health Biz Scale" style="width:42px;height:42px;border-radius:10px"> -->
+        <div class="logo-text">Health Biz Scale<small>AI Growth Systems for Health Practices</small></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#scale">SCALE Framework</a></li>
+        <li><a href="#smart">SMART System</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="/case-studies">Case Studies</a></li>
+        <li><a href="#resources">Resources</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+      <a href="https://healthbizplaybook.com" class="btn btn-mint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Get the Playbook
+      </a>
+      <div class="nav-burger" id="burger"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</nav>
+
+
+<!-- HERO -->
+<section id="hero">
+  <div class="glow-circle glow-1"></div>
+  <div class="glow-circle glow-2"></div>
+  <div class="dot-grid"></div>
+  <div class="noise"></div>
+  <div class="container">
+    <div class="hero-inner">
+
+      <div class="hero-badge reveal">
+        <div class="badge-dot"></div>
+        <span class="t-label" style="color:var(--mint);">AI-Powered Growth for Functional Medicine &amp; Naturopathic Practices</span>
+      </div>
+
+      <h1 class="t-display hero-headline reveal reveal-d1">
+        Grow Your Practice<br>
+        <em class="grad-mint">With AI Systems That Work</em>
+      </h1>
+
+      <p class="hero-sub reveal reveal-d2">
+        Free frameworks, tools, and resources helping functional medicine and naturopathic practices
+        <strong>attract more patients, automate their marketing, and build sustainable growth</strong>
+        — without hiring a big team or burning out.
+      </p>
+
+      <div class="vsl-wrap reveal reveal-d2">
+        <div class="vsl-ratio">
+          <div class="vsl-placeholder" id="vslHolder">
+            <div class="vsl-play">
+              <svg viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
+            </div>
+            <div class="vsl-label">Watch: The AI Practice Growth System Explained</div>
+          </div>
+          <div class="vsl-duration">7:15</div>
+          <!--
+            EMBED: <iframe src="YOUR_VIDEO_URL" style="position:absolute;inset:0;width:100%;height:100%;" frameborder="0" allowfullscreen></iframe>
+          -->
+        </div>
+      </div>
+
+      <div class="hero-ctas reveal reveal-d3">
+        <a href="https://healthbizplaybook.com" class="btn btn-mint btn-lg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          Get the Free Health Biz Playbook
+        </a>
+        <a href="#scale" class="btn btn-ghost btn-lg">
+          Explore the Framework
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </a>
+      </div>
+      <p class="hero-note reveal reveal-d4">Free resource. No credit card. Built for functional medicine and naturopathic practitioners.</p>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- TRUST BAR -->
+<div id="trust">
+  <div class="container">
+    <div class="trust-grid">
+      <div class="trust-cell reveal">
+        <div class="t-stat trust-num">87%</div>
+        <div class="trust-lbl">Average Traffic Increase</div>
+      </div>
+      <div class="trust-cell reveal reveal-d1">
+        <div class="t-stat trust-num">5–10x</div>
+        <div class="trust-lbl">Qualified Monthly Patient Calls</div>
+      </div>
+      <div class="trust-cell reveal reveal-d2">
+        <div class="t-stat trust-num">$15K</div>
+        <div class="trust-lbl">First-Launch Program Sales</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="dot-grid" style="opacity:.35;"></div>
+  <div class="container" style="position:relative;z-index:1;">
+    <div class="section-eyebrow reveal">
+      <div class="eyebrow-line"></div>
+      <span class="t-label" style="color:var(--mint);">The Real Challenges</span>
+    </div>
+    <h2 class="t-h2 reveal reveal-d1" style="max-width:580px;margin-bottom:.75rem;">
+      What Most Functional Medicine<br><em class="grad-mint">Practices Are Up Against</em>
+    </h2>
+    <p class="reveal reveal-d2" style="color:var(--muted);max-width:500px;font-size:1rem;line-height:1.72;">
+      These aren't marketing problems. They're systems problems — and each one has a proven fix.
+    </p>
+    <div class="prob-grid">
+      <div class="prob-card reveal">
+        <div class="prob-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
+        <div class="prob-num">Challenge 01</div>
+        <h3>Poor Online Visibility</h3>
+        <p>Your site sits on page 2 or 3 of Google while competitors with less expertise dominate search. Patients can't find you — even when they're actively searching for what you offer.</p>
+      </div>
+      <div class="prob-card reveal reveal-d1">
+        <div class="prob-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="prob-num">Challenge 02</div>
+        <h3>Unpredictable Patient Flow</h3>
+        <p>Referrals are unreliable. One week you're slammed, the next you're wondering how to make payroll. Without a system, lead flow stays inconsistent and stressful.</p>
+      </div>
+      <div class="prob-card reveal reveal-d2">
+        <div class="prob-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+        <div class="prob-num">Challenge 03</div>
+        <h3>No Time for Marketing</h3>
+        <p>You became a practitioner to heal people. Running ads, managing social media, and figuring out SEO wasn't the plan. You need systems that work without requiring your constant attention.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- SCALE SEO FRAMEWORK -->
+<section id="scale">
+  <div class="container">
+
+    <div class="scale-intro">
+      <div>
+        <div class="section-eyebrow reveal">
+          <div class="eyebrow-line eyebrow-line-dark"></div>
+          <span class="t-label" style="color:var(--g-rich);">The SCALE SEO Framework</span>
+        </div>
+        <h2 class="t-h2 reveal reveal-d1" style="color:var(--navy);">
+          The Proven System for<br>Functional Medicine SEO
+        </h2>
+        <p class="scale-subtitle reveal reveal-d2">
+          Five interconnected pillars that take a functional medicine or naturopathic practice from invisible to in-demand. Each layer builds on the last — infrastructure first, then content, authority, lift, and evaluation.
+        </p>
+      </div>
+      <div class="reveal reveal-d2" style="display:flex;flex-direction:column;justify-content:flex-end;">
+        <div style="background:rgba(33,75,51,0.06);border:1px solid rgba(33,75,51,0.12);border-radius:var(--r-md);padding:1.5rem;">
+          <p style="font-family:var(--font-display);font-size:1.1rem;font-style:italic;color:var(--navy);line-height:1.5;margin-bottom:.75rem;">"The SCALE SEO Framework: The proven system that helps functional medicine practices dominate their local market and consistently attract high-value patients."</p>
+          <p style="font-size:.82rem;color:var(--muted-dark);">— Mike Kohl, Health Biz Scale</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="scale-tabs reveal" id="scaleTabs">
+      <button class="scale-tab active" data-panel="s">
+        <span class="tab-letter">S</span> Site Infrastructure
+      </button>
+      <button class="scale-tab" data-panel="c">
+        <span class="tab-letter">C</span> Content Engine
+      </button>
+      <button class="scale-tab" data-panel="a">
+        <span class="tab-letter">A</span> Authority Links
+      </button>
+      <button class="scale-tab" data-panel="l">
+        <span class="tab-letter">L</span> Lift Rankings
+      </button>
+      <button class="scale-tab" data-panel="e">
+        <span class="tab-letter">E</span> Evaluate Results
+      </button>
+    </div>
+
+    <div class="scale-panels reveal reveal-d1" id="scalePanels" style="margin-top:1rem;">
+
+      <div class="scale-panel active" id="panel-s">
+        <div class="panel-copy">
+          <h3><em class="grad-mint" style="-webkit-text-fill-color:unset;color:var(--g-rich);">S</em> — Site Infrastructure</h3>
+          <p>The technical foundation every functional medicine practice website needs before any content or links will move the needle. A well-structured site signals authority to Google from day one.</p>
+          <a href="/services/functional-medicine-seo" class="btn btn-ghost-dark" style="margin-top:.5rem;">Learn About Our SEO Services →</a>
+        </div>
+        <div class="panel-deliverables">
+          <div class="deliverable"><div class="del-dot"></div>XML Sitemaps &amp; crawl optimization</div>
+          <div class="deliverable"><div class="del-dot"></div>Strategic internal linking architecture</div>
+          <div class="deliverable"><div class="del-dot"></div>Core Web Vitals &amp; site speed</div>
+          <div class="deliverable"><div class="del-dot"></div>Technical SEO audit &amp; fixes</div>
+          <div class="deliverable"><div class="del-dot"></div>Mobile responsiveness (60%+ of health searches)</div>
+          <div class="deliverable"><div class="del-dot"></div>Schema markup (LocalBusiness, Medical, FAQ)</div>
+        </div>
+      </div>
+
+      <div class="scale-panel" id="panel-c">
+        <div class="panel-copy">
+          <h3><em style="color:var(--g-rich);">C</em> — Content Engine</h3>
+          <p>AI-assisted content at scale — blog posts, service pages, programmatic location content, and interactive tools — all optimized for functional medicine and naturopathic search terms.</p>
+          <a href="/blog" class="btn btn-ghost-dark" style="margin-top:.5rem;">Browse Free Resources →</a>
+        </div>
+        <div class="panel-deliverables">
+          <div class="deliverable"><div class="del-dot"></div>AI SEO landing pages</div>
+          <div class="deliverable"><div class="del-dot"></div>Programmatic content at scale</div>
+          <div class="deliverable"><div class="del-dot"></div>Interactive tools &amp; symptom trackers</div>
+          <div class="deliverable"><div class="del-dot"></div>Blog articles &amp; topical clusters</div>
+          <div class="deliverable"><div class="del-dot"></div>Service &amp; specialty pages</div>
+          <div class="deliverable"><div class="del-dot"></div>Location pages (city/region targeting)</div>
+        </div>
+      </div>
+
+      <div class="scale-panel" id="panel-a">
+        <div class="panel-copy">
+          <h3><em style="color:var(--g-rich);">A</em> — Authority Links</h3>
+          <p>Build the off-page signals that tell Google your practice is trusted and credible — through medical directories, PR mentions, guest posts, and genuine social authority.</p>
+          <a href="/services" class="btn btn-ghost-dark" style="margin-top:.5rem;">See Our Link Strategy →</a>
+        </div>
+        <div class="panel-deliverables">
+          <div class="deliverable"><div class="del-dot"></div>High-authority backlink acquisition</div>
+          <div class="deliverable"><div class="del-dot"></div>Social link signals &amp; brand mentions</div>
+          <div class="deliverable"><div class="del-dot"></div>Medical journals &amp; authority citations</div>
+          <div class="deliverable"><div class="del-dot"></div>Industry directory submissions</div>
+          <div class="deliverable"><div class="del-dot"></div>Strategic guest posts on health sites</div>
+          <div class="deliverable"><div class="del-dot"></div>PR placements &amp; media mentions</div>
+        </div>
+      </div>
+
+      <div class="scale-panel" id="panel-l">
+        <div class="panel-copy">
+          <h3><em style="color:var(--g-rich);">L</em> — Lift Rankings</h3>
+          <p>Ongoing optimization to climb and hold top positions — improving click-through rates, refreshing content, targeting featured snippets and Google AI Overviews for maximum visibility.</p>
+          <a href="/services/functional-medicine-seo" class="btn btn-ghost-dark" style="margin-top:.5rem;">How We Lift Your Rankings →</a>
+        </div>
+        <div class="panel-deliverables">
+          <div class="deliverable"><div class="del-dot"></div>Strategic internal link improvements</div>
+          <div class="deliverable"><div class="del-dot"></div>CTR optimization (meta titles &amp; descriptions)</div>
+          <div class="deliverable"><div class="del-dot"></div>Content rewrites &amp; refreshes</div>
+          <div class="deliverable"><div class="del-dot"></div>Content depth expansion</div>
+          <div class="deliverable"><div class="del-dot"></div>Keyword clustering &amp; optimization</div>
+          <div class="deliverable"><div class="del-dot"></div>SERP feature &amp; AI Overview targeting</div>
+        </div>
+      </div>
+
+      <div class="scale-panel" id="panel-e">
+        <div class="panel-copy">
+          <h3><em style="color:var(--g-rich);">E</em> — Evaluate Results</h3>
+          <p>Data-driven reporting on what's working, what to optimize, and exactly what each patient is costing you to acquire — so every decision is grounded in real ROI, not guesswork.</p>
+          <a href="/contact" class="btn btn-ghost-dark" style="margin-top:.5rem;">Get a Free Practice Audit →</a>
+        </div>
+        <div class="panel-deliverables">
+          <div class="deliverable"><div class="del-dot"></div>Conversion rate optimization (CRO)</div>
+          <div class="deliverable"><div class="del-dot"></div>Traffic source analysis</div>
+          <div class="deliverable"><div class="del-dot"></div>Keyword rank tracking</div>
+          <div class="deliverable"><div class="del-dot"></div>ROI &amp; revenue attribution</div>
+          <div class="deliverable"><div class="del-dot"></div>Patient acquisition cost analysis</div>
+          <div class="deliverable"><div class="del-dot"></div>A/B testing &amp; landing page experiments</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="scale-bottom reveal">
+      <p class="scale-tagline">Each pillar is available as a standalone service or as part of the complete SCALE system.</p>
+      <a href="https://healthbizplaybook.com" class="btn btn-mint btn-lg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Get the Free SCALE Playbook
+      </a>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- SMART PRACTICE SYSTEM -->
+<section id="smart">
+  <div class="dot-grid" style="opacity:.2;"></div>
+  <div class="container" style="position:relative;z-index:1;">
+
+    <div class="smart-header reveal">
+      <div class="section-eyebrow" style="justify-content:center;margin-bottom:1rem;">
+        <div class="eyebrow-line"></div>
+        <span class="t-label" style="color:var(--mint);">The SMART Practice System</span>
+        <div class="eyebrow-line"></div>
+      </div>
+      <h2 class="t-h2" style="margin-bottom:.75rem;">
+        From First Click to <em class="grad-mint">Loyal Patient</em>
+      </h2>
+      <p style="color:var(--muted);max-width:540px;margin:0 auto;font-size:.97rem;line-height:1.72;">
+        Five modular phases that build a complete patient acquisition and retention engine — use one, use all, or let us implement the full system for you.
+      </p>
+    </div>
+
+    <div class="smart-steps" id="smartSteps">
+
+      <div class="smart-step active" data-step="setup">
+        <div class="step-marker">
+          <div class="step-letter">S</div>
+          <div class="step-word">SETUP</div>
+        </div>
+        <h4>Setup</h4>
+        <p>Build the perfect offer &amp; funnel foundation</p>
+      </div>
+
+      <div class="smart-step" data-step="scale">
+        <div class="step-marker">
+          <div class="step-letter">C</div>
+          <div class="step-word">SCALE</div>
+        </div>
+        <h4>Scale</h4>
+        <p>Mass content authority with AI &amp; SEO</p>
+      </div>
+
+      <div class="smart-step" data-step="flow">
+        <div class="step-marker">
+          <div class="step-letter">A</div>
+          <div class="step-word">FLOW</div>
+        </div>
+        <h4>Automate</h4>
+        <p>Appointments on autopilot via AI &amp; CRM</p>
+      </div>
+
+      <div class="smart-step" data-step="close">
+        <div class="step-marker">
+          <div class="step-letter">R</div>
+          <div class="step-word">CLOSE</div>
+        </div>
+        <h4>Rapport</h4>
+        <p>Pre-sell with automated warm-up sequences</p>
+      </div>
+
+      <div class="smart-step" data-step="grow">
+        <div class="step-marker">
+          <div class="step-letter">T</div>
+          <div class="step-word">GROW</div>
+        </div>
+        <h4>Transform</h4>
+        <p>Deliver results &amp; build patient loyalty</p>
+      </div>
+
+    </div>
+
+    <!-- Detail panels -->
+    <div id="smartDetail">
+
+      <div class="smart-detail active" id="detail-setup">
+        <div>
+          <div class="smart-detail-title">S — <em class="grad-mint">Setup</em> Your Foundation</div>
+          <div class="smart-detail-sub">Perfect Health Offer Phase</div>
+          <div class="smart-items">
+            <div class="smart-item"><div class="smart-item-dot"></div>Front-end offer creation (ads, lead magnets, funnels)</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>ICP &amp; RAG strategy (ideal patient profiling)</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Dream outcome definition</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Funnel type selection &amp; architecture</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Offer positioning &amp; messaging</div>
+          </div>
+        </div>
+        <div class="smart-detail-note">
+          <h5>Why it matters</h5>
+          <p>Most practices fail at marketing because they skip the foundation — undefined offers, unclear audiences, and funnels built on guesswork. SETUP fixes this first.</p>
+        </div>
+      </div>
+
+      <div class="smart-detail" id="detail-scale">
+        <div>
+          <div class="smart-detail-title">C — <em class="grad-mint">Scale</em> with Content Authority</div>
+          <div class="smart-detail-sub">Authority with AI + Human Content Phase</div>
+          <div class="smart-items">
+            <div class="smart-item"><div class="smart-item-dot"></div>Content trust machine (blog, video, social)</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>AI SEO maximizer (topical authority clusters)</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Topical maps &amp; entity stacks</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Social media publishing engine</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>AI Overview &amp; Google Maps dominance</div>
+          </div>
+        </div>
+        <div class="smart-detail-note">
+          <h5>The SCALE SEO layer</h5>
+          <p>This phase is powered by the full SCALE SEO Framework — site infrastructure, content engine, authority links, rank lifting, and results evaluation working in concert.</p>
+        </div>
+      </div>
+
+      <div class="smart-detail" id="detail-flow">
+        <div>
+          <div class="smart-detail-title">A — <em class="grad-mint">Automate</em> Appointments</div>
+          <div class="smart-detail-sub">Appointments on Autopilot Phase</div>
+          <div class="smart-items">
+            <div class="smart-item"><div class="smart-item-dot"></div>Smart CRM setup (GoHighLevel)</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Text &amp; SMS nurture sequences</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>AI voice dialer + chatbot</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Lead reactivation system</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Calendar booking automation</div>
+          </div>
+        </div>
+        <div class="smart-detail-note">
+          <h5>Your practice runs while you sleep</h5>
+          <p>GoHighLevel-native automation ensures no lead falls through the cracks — every inquiry gets an instant, personalized response 24/7 without you lifting a finger.</p>
+        </div>
+      </div>
+
+      <div class="smart-detail" id="detail-close">
+        <div>
+          <div class="smart-detail-title">R — <em class="grad-mint">Rapport</em> Pre-Selling</div>
+          <div class="smart-detail-sub">Pre-Sell with Automated Warm-Up Phase</div>
+          <div class="smart-items">
+            <div class="smart-item"><div class="smart-item-dot"></div>Pre-consult nurture (SMS + email sequences)</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Sales assets (quiz, PDF, video)</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Testimonial capture machine</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Set-and-forget automation workflows</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Objection handling sequences</div>
+          </div>
+        </div>
+        <div class="smart-detail-note">
+          <h5>Patients arrive pre-sold</h5>
+          <p>By the time a patient gets on a call, they've already seen your story, read your testimonials, and understood your process. Conversion rates skyrocket.</p>
+        </div>
+      </div>
+
+      <div class="smart-detail" id="detail-grow">
+        <div>
+          <div class="smart-detail-title">T — <em class="grad-mint">Transform</em> &amp; Retain</div>
+          <div class="smart-detail-sub">Deliver Results &amp; Build Loyalty Phase</div>
+          <div class="smart-items">
+            <div class="smart-item"><div class="smart-item-dot"></div>AI-powered patient app support</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Active treatment sequences</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Post-treatment follow-up automation</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Seamless upsell &amp; referral system</div>
+            <div class="smart-item"><div class="smart-item-dot"></div>Loyalty &amp; re-engagement flows</div>
+          </div>
+        </div>
+        <div class="smart-detail-note">
+          <h5>Retention = your highest ROI</h5>
+          <p>Acquiring a new patient costs 5–7x more than keeping one. TRANSFORM builds the automated systems that keep patients engaged, compliant, and referring others.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="text-align:center;margin-top:3rem;" class="reveal">
+      <p style="color:rgba(255,255,255,0.55);font-size:.9rem;margin-bottom:1.25rem;">Available as modular packages — Essential (SETUP + SCALE), Growth (+ FLOW), or the Complete System</p>
+      <a href="https://healthbizplaybook.com" class="btn btn-mint btn-lg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Get the SMART Practice Playbook
+      </a>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ABOUT MIKE KOHL -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-photo reveal">
+        <div class="photo-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Mike Kohl Photo</span>
+        </div>
+        <div class="photo-badge">
+          <div class="num">20+</div>
+          <div class="lbl">Yrs. Systems Experience</div>
+        </div>
+      </div>
+      <div class="about-copy reveal reveal-d1">
+        <div class="section-eyebrow" style="margin-bottom:.75rem;">
+          <div class="eyebrow-line eyebrow-line-dark"></div>
+          <span class="t-label" style="color:var(--g-rich);">About Mike Kohl</span>
+        </div>
+        <h2>20 Years Building Systems<br><em style="color:var(--g-rich);">That Scale to $500M</em></h2>
+        <p>Before working with functional medicine practitioners, Mike spent 20 years building sales and marketing systems for large companies — scaling one from zero to half a billion dollars per year.</p>
+        <p>His shift came when conventional medicine failed his own family. That journey into functional health became a mission: combining deep technology and systems expertise with a genuine passion for functional medicine — to help clinics like yours grow without the chaos.</p>
+        <div class="creds">
+          <div class="cred"><div class="cred-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg></div>20+ years enterprise sales &amp; marketing systems</div>
+          <div class="cred"><div class="cred-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg></div>Scaled a company from $0 to $500M/year</div>
+          <div class="cred"><div class="cred-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg></div>Functional medicine patient &amp; advocate since 2006</div>
+          <div class="cred"><div class="cred-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg></div>Built GoHighLevel systems for health practices nationwide</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="container">
+    <div style="text-align:center;" class="reveal">
+      <div class="section-eyebrow" style="justify-content:center;margin-bottom:1rem;">
+        <div class="eyebrow-line"></div>
+        <span class="t-label" style="color:var(--mint);">Practitioner Results</span>
+        <div class="eyebrow-line"></div>
+      </div>
+      <h2 class="t-h2">Real Practices. <em class="grad-mint">Real Growth.</em></h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card reveal">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Within a few months, my new patient calls increased about 10x. I stopped using other marketing, hired new doctors, and now have a waiting list."</blockquote>
+        <div class="testi-author">
+          <div class="author-av">DM</div>
+          <div><div class="author-name">Dr. Diane Mueller</div><div class="author-title">Functional Medicine Practitioner</div></div>
+        </div>
+      </div>
+      <div class="testi-card reveal reveal-d1">
+        <div class="stars">★★★★★</div>
+        <blockquote>"We are so much more visible… a lot of people previously told us we were hard to find. That's completely changed."</blockquote>
+        <div class="testi-author">
+          <div class="author-av">PG</div>
+          <div><div class="author-name">Dr. Piper Gibson</div><div class="author-title">Naturopathic Physician</div></div>
+        </div>
+      </div>
+      <div class="testi-card reveal reveal-d2">
+        <div class="stars">★★★★★</div>
+        <blockquote>"I used to have ups and downs with new patient inquiries. Now it's steady and predictable. The system just works."</blockquote>
+        <div class="testi-author">
+          <div class="author-av">AE</div>
+          <div><div class="author-name">Dr. Alison Egeland</div><div class="author-title">Functional Medicine Specialist</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- RESOURCES -->
+<section id="resources">
+  <div class="container">
+    <div class="res-header">
+      <div>
+        <div class="section-eyebrow reveal">
+          <div class="eyebrow-line eyebrow-line-dark"></div>
+          <span class="t-label" style="color:var(--g-rich);">Free Resources &amp; Tools</span>
+        </div>
+        <h2 class="t-h2 reveal reveal-d1" style="color:var(--navy);">
+          Grow Your Practice<br>with These Free Guides
+        </h2>
+      </div>
+      <p class="res-subtitle reveal reveal-d2">
+        Actionable strategies on functional medicine SEO, AI search, patient systems, and digital ads — no fluff, no gatekeeping. Built for practitioners who want to understand what's actually working in 2026.
+      </p>
+    </div>
+    <div class="res-grid">
+      <div class="res-card reveal">
+        <div class="res-thumb res-thumb-1"><div class="res-cat">Functional Medicine SEO</div></div>
+        <div class="res-body">
+          <h4>Functional Medicine SEO: The Complete 2026 Guide</h4>
+          <p>The exact strategies to rank your functional medicine practice on Google — including Google Maps, AI Overviews, and organic search.</p>
+          <a href="/blog/functional-medicine-seo-guide" class="res-link">Read the Guide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+      <div class="res-card reveal reveal-d1">
+        <div class="res-thumb res-thumb-2"><div class="res-cat">AI SEO</div></div>
+        <div class="res-body">
+          <h4>AI Overview SEO: How to Get Your Practice Cited by Google AI</h4>
+          <p>Google's AI Overviews are changing how patients find practitioners. Here's how to get cited — before your competitors figure it out.</p>
+          <a href="/blog/ai-overview-seo-functional-medicine" class="res-link">Read the Guide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+      <div class="res-card reveal reveal-d2">
+        <div class="res-thumb res-thumb-3"><div class="res-cat">Patient Systems</div></div>
+        <div class="res-body">
+          <h4>How to Build a Patient Acquisition System That Runs on Autopilot</h4>
+          <p>A step-by-step breakdown of the SMART Practice System — from offer creation to automated follow-up and patient retention.</p>
+          <a href="/blog/patient-acquisition-system-functional-medicine" class="res-link">Read the Guide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+      <div class="res-card reveal">
+        <div class="res-thumb res-thumb-4"><div class="res-cat">Naturopathic</div></div>
+        <div class="res-body">
+          <h4>Naturopathic Practice Marketing: What Actually Works in 2026</h4>
+          <p>Marketing a naturopathic practice is fundamentally different from conventional medicine. Here's the playbook built specifically for ND practitioners.</p>
+          <a href="/blog/naturopathic-practice-marketing" class="res-link">Read the Guide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+      <div class="res-card reveal reveal-d1">
+        <div class="res-thumb res-thumb-5"><div class="res-cat">Google Maps</div></div>
+        <div class="res-body">
+          <h4>How to Rank on Google Maps for Functional Medicine in 30 Days</h4>
+          <p>Google Maps is the fastest path to qualified patient calls. This guide covers the exact steps to dominate local search in your city.</p>
+          <a href="/blog/google-maps-functional-medicine" class="res-link">Read the Guide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+      <div class="res-card reveal reveal-d2">
+        <div class="res-thumb res-thumb-6"><div class="res-cat">Ads</div></div>
+        <div class="res-body">
+          <h4>Google Ads for Functional Medicine: Budget, Targeting &amp; What to Avoid</h4>
+          <p>Most practitioners waste money on ads because they're targeting wrong. This guide shows exactly how to structure campaigns that convert to booked appointments.</p>
+          <a href="/blog/google-ads-functional-medicine" class="res-link">Read the Guide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </div>
+    </div>
+    <div class="res-cta reveal">
+      <a href="/blog" class="btn btn-ghost-dark btn-lg">
+        View All Resources &amp; Guides
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div style="text-align:center;" class="reveal">
+      <div class="section-eyebrow" style="justify-content:center;margin-bottom:1rem;">
+        <div class="eyebrow-line"></div>
+        <span class="t-label" style="color:var(--mint);">Common Questions</span>
+        <div class="eyebrow-line"></div>
+      </div>
+      <h2 class="t-h2">Questions About <em class="grad-mint">Growing Your Practice</em></h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item reveal">
+        <div class="faq-q">
+          <h4>What makes the SCALE SEO Framework different from standard SEO?</h4>
+          <div class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        </div>
+        <div class="faq-a"><p class="faq-a-inner">Standard SEO is generic. The SCALE Framework is built specifically for functional medicine and naturopathic practices — covering the trust signals, schema types, content topics, and local strategies that move the needle in healthcare. It also incorporates AI Overview optimization, which most agencies haven't touched yet.</p></div>
+      </div>
+      <div class="faq-item reveal reveal-d1">
+        <div class="faq-q">
+          <h4>I've tried other marketing companies and got nothing. Why would this be different?</h4>
+          <div class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        </div>
+        <div class="faq-a"><p class="faq-a-inner">Most agencies apply generic healthcare marketing to functional medicine practices — it doesn't work because the patient journey, trust dynamics, and search intent are completely different. We exclusively serve functional medicine and naturopathic practitioners, and every system we build is designed around how your patients actually search, decide, and book.</p></div>
+      </div>
+      <div class="faq-item reveal reveal-d2">
+        <div class="faq-q">
+          <h4>Can I implement these systems myself or do I need to hire you?</h4>
+          <div class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        </div>
+        <div class="faq-a"><p class="faq-a-inner">Both. The free resources and playbook are designed for practitioners who want to implement themselves. For those who want it done-for-you, we handle everything from setup to optimization. Most clients choose the done-for-you path because their time is better spent on patient care.</p></div>
+      </div>
+      <div class="faq-item reveal reveal-d3">
+        <div class="faq-q">
+          <h4>How long before I start seeing results from SEO?</h4>
+          <div class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        </div>
+        <div class="faq-a"><p class="faq-a-inner">Google Maps ranking typically moves within 30 days. Organic SEO results compound — most clients see meaningful traffic increases within 60–90 days, with consistent growth through month 6. The niche terms we target (functional medicine SEO keywords) have very low competition, which means faster movement than typical healthcare SEO timelines.</p></div>
+      </div>
+      <div class="faq-item reveal reveal-d4">
+        <div class="faq-q">
+          <h4>Do you work with naturopathic and integrative medicine practices too?</h4>
+          <div class="faq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        </div>
+        <div class="faq-a"><p class="faq-a-inner">Absolutely. The SMART and SCALE systems were designed to work across functional medicine, naturopathic medicine, and integrative health practices. The patient acquisition principles are the same — the keyword targeting and content strategy adapt to your specific specialty and local market.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- PLAYBOOK CTA -->
+<section id="playbook">
+  <div class="glow-circle cta-glow"></div>
+  <div class="glow-circle cta-ring"></div>
+  <div class="dot-grid"></div>
+  <div class="container cta-inner">
+    <div class="cta-badge reveal">
+      <span style="font-size:1.1rem;">📋</span>
+      <span class="t-label" style="color:var(--mint);">Free for Practitioners</span>
+    </div>
+    <h2 class="reveal reveal-d1">
+      Get the <em class="grad-mint">Health Biz Playbook</em><br>— Completely Free
+    </h2>
+    <p class="reveal reveal-d2">
+      The SMART + SCALE frameworks, keyword strategy, and patient acquisition roadmap used by our top-performing functional medicine and naturopathic clients. No cost. No strings.
+    </p>
+    <div class="reveal reveal-d3">
+      <a href="https://healthbizplaybook.com" class="btn btn-mint btn-lg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Download the Free Playbook
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <div class="logo-mark">HBS</div>
+          <div class="logo-text">Health Biz Scale<small>AI Growth Systems for Health Practices</small></div>
+        </a>
+        <p>AI-powered growth systems for functional medicine, naturopathic, and integrative health practices. SCALE SEO + SMART Practice System.</p>
+        <div class="socials">
+          <a href="#" class="social-btn" aria-label="Instagram">IG</a>
+          <a href="#" class="social-btn" aria-label="YouTube">YT</a>
+          <a href="#" class="social-btn" aria-label="Facebook">FB</a>
+          <a href="#" class="social-btn" aria-label="LinkedIn">IN</a>
+          <a href="#" class="social-btn" aria-label="TikTok">TK</a>
+        </div>
+      </div>
+      <div>
+        <div class="foot-col-title">Frameworks</div>
+        <div class="foot-links">
+          <a href="#scale">SCALE SEO Framework</a>
+          <a href="#smart">SMART Practice System</a>
+          <a href="/services/functional-medicine-seo">Functional Medicine SEO</a>
+          <a href="/services/local-seo-doctors">Google Maps SEO</a>
+        </div>
+      </div>
+      <div>
+        <div class="foot-col-title">Company</div>
+        <div class="foot-links">
+          <a href="#about">About Mike Kohl</a>
+          <a href="/case-studies">Case Studies</a>
+          <a href="/blog">Blog &amp; Resources</a>
+          <a href="/contact">Contact</a>
+        </div>
+      </div>
+      <div>
+        <div class="foot-col-title">Free Resources</div>
+        <div class="foot-links">
+          <a href="https://healthbizplaybook.com">Health Biz Playbook</a>
+          <a href="/blog/functional-medicine-seo-guide">FM SEO Guide</a>
+          <a href="/blog/naturopathic-practice-marketing">Naturopathic Marketing</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <div class="foot-cta-block">
+          <p>Ready to talk strategy?</p>
+          <a href="/contact" class="btn btn-ghost" style="font-size:.82rem;padding:.6rem 1.2rem;">Book a Strategy Call</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar">
+      <p>© 2026 Health Biz Scale. All Rights Reserved.</p>
+      <div class="footer-legal">
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<script>
+  // Sticky nav
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('stuck', window.scrollY > 60), { passive: true });
+
+  // Scroll reveal
+  const ro = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); ro.unobserve(e.target); } });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+  // SCALE tabs
+  document.querySelectorAll('.scale-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const key = tab.dataset.panel;
+      document.querySelectorAll('.scale-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.scale-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + key).classList.add('active');
+    });
+  });
+
+  // SMART steps
+  document.querySelectorAll('.smart-step').forEach(step => {
+    step.addEventListener('click', () => {
+      const key = step.dataset.step;
+      document.querySelectorAll('.smart-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.smart-detail').forEach(d => d.classList.remove('active'));
+      step.classList.add('active');
+      document.getElementById('detail-' + key).classList.add('active');
+    });
+  });
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+
+  // Smooth anchor scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const t = document.querySelector(a.getAttribute('href'));
+      if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+  });
+</script>
+
+</body>
+</html>
