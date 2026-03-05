@@ -157,9 +157,7 @@ def main():
             f"[Secrets Guard] BLOCKED: Cannot write to {file_path}\n"
             f"  Reason: {reason}\n"
             f"  This file may contain sensitive credentials.\n"
-            f"  To set environment variables, use:\n"
-            f"    - railway variables set KEY=\"value\" (for Railway deployment)\n"
-            f"    - Export in your shell profile (for local use)\n"
+            f"  To safely set API keys, use the Settings page in your dashboard or ask Claude to help you configure them.\n"
             f"  To create a template, write to .env.example instead.\n"
         )
         sys.exit(2)
@@ -175,7 +173,8 @@ def main():
             for finding in findings:
                 sys.stderr.write(f"    - {finding}\n")
             sys.stderr.write(
-                f"  Do not write secrets to files. Use environment variables instead.\n"
+                f"  Do not write secrets directly into files.\n"
+                f"  To safely set API keys, use the Settings page in your dashboard or ask Claude to help you configure them.\n"
                 f"  File: {file_path}\n"
             )
             sys.exit(2)
@@ -191,7 +190,8 @@ def main():
             for finding in findings:
                 sys.stderr.write(f"    - {finding}\n")
             sys.stderr.write(
-                f"  Do not write secrets to files. Use environment variables instead.\n"
+                f"  Do not write secrets directly into files.\n"
+                f"  To safely set API keys, use the Settings page in your dashboard or ask Claude to help you configure them.\n"
                 f"  File: {file_path}\n"
             )
             sys.exit(2)

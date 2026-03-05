@@ -32,7 +32,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-STATE_DIR = Path("/Users/lucasnolan/Agentic OS/.tmp/hooks")
+BASE_DIR = Path(__file__).resolve().parents[2]
+STATE_DIR = BASE_DIR / ".tmp" / "hooks"
 STATE_FILE = STATE_DIR / "modal_endpoint_tracker.json"
 MAX_ENTRIES = 50
 FREE_TIER_LIMIT = 8
@@ -206,7 +207,7 @@ def main():
     new_endpoints = 0
     py_file = extract_py_file(command)
     if py_file:
-        base_dir = Path("/Users/lucasnolan/Agentic OS")
+        base_dir = BASE_DIR
         file_path = base_dir / py_file
         if not file_path.exists():
             file_path = Path(py_file)

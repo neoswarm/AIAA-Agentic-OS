@@ -1,7 +1,7 @@
-# AIAA Agentic OS - Complete Agent Instructions
+# AIAA Agentic OS — Complete Agent Reference
 
-> **Version:** 3.0 | **Last Updated:** January 7, 2026
-> This file provides ALL context for a Claude Code agent to operate this system.
+> **Version:** 5.0 | **Last Updated:** February 18, 2026
+> Skills-first architecture. Plan before you build. Directives are reference, not starting points.
 
 ---
 
@@ -9,831 +9,717 @@
 
 | Resource | Count | Location |
 |----------|-------|----------|
-| Directives (SOPs) | 150+ | `directives/*.md` |
-| Execution Scripts | 152+ | `execution/*.py` |
-| Skill Bibles | 280+ | `skills/SKILL_BIBLE_*.md` |
-| Agency Context | - | `context/` |
-| Client Profiles | - | `clients/{client_name}/` |
-| Dashboard | Railway | `railway_apps/aiaa_dashboard/` |
-
-**Environment Variables Required:**
-```
-OPENROUTER_API_KEY     # Primary LLM access (Claude, GPT via OpenRouter)
-OPENAI_API_KEY         # OpenAI direct (optional)
-PERPLEXITY_API_KEY     # Market research
-GOOGLE_APPLICATION_CREDENTIALS  # Google Docs/Sheets
-SLACK_WEBHOOK_URL      # Notifications
-```
+| **Native Skills** | 133 | `.claude/skills/` |
+| **Shared Utilities** | 4 | `.claude/skills/_shared/` |
+| **Subagents** | 5 | `.claude/agents/` |
+| **Rules** | 9 | `.claude/rules/` |
+| **Active Hooks** | 35 | `.claude/hooks/` |
+| Archived Hooks | 93 | `.claude/hooks/_archived/` |
+| Directives (legacy SOPs) | 150+ | `directives/` |
+| Execution Scripts | Bundled in skills | `.claude/skills/*/` (originals in `execution/`) |
+| Skill Bibles | 286 | `skills/SKILL_BIBLE_*.md` |
+| Agency Context | 4 files | `context/` |
+| Client Profiles | per-client | `clients/{name}/` |
+| Dashboard | Railway | `railway_apps/aiaa_dashboard/` (modular Flask)
 
 ---
 
-## System Architecture (DOE Pattern)
+## Architecture: Skills-First DOE
 
-This system uses a **Directive-Orchestration-Execution (DOE)** architecture that separates concerns:
+This system uses **Directive-Orchestration-Execution (DOE)** with a **skills-first** approach:
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    USER REQUEST                                  │
-│              "Create a VSL funnel for Acme Corp"                │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  LAYER 1: DIRECTIVE (What to do)                                │
-│  ─────────────────────────────────                              │
-│  • Location: directives/*.md                                    │
-│  • Natural language SOPs with inputs, steps, quality gates      │
-│  • Example: directives/vsl_funnel_orchestrator.md               │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  LAYER 2: ORCHESTRATION (Decision making)                       │
-│  ─────────────────────────────────────────                      │
-│  • THIS IS YOU - The Claude Code Agent                          │
-│  • Read directives, load skill bibles, call scripts in order    │
-│  • Handle errors, make routing decisions, self-anneal           │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  LAYER 3: EXECUTION (Doing the work)                            │
-│  ───────────────────────────────────                            │
-│  • Location: execution/*.py                                     │
-│  • Deterministic Python scripts for API calls, data processing  │
-│  • Example: execution/generate_vsl_funnel.py                    │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      OUTPUT                                      │
-│  • Local files: .tmp/*.md                                       │
-│  • Google Docs: Formatted, shareable                            │
-│  • Slack: Notification with links                               │
-└─────────────────────────────────────────────────────────────────┘
+User Request
+    │
+    ▼
+┌─────────────────────────────────────────────────────────┐
+│  1. SKILLS (Primary)                                     │
+│     .claude/skills/ — 133 native skills                  │
+│     Self-contained workflows with context loading,       │
+│     script execution, and quality gates built in.        │
+│     → Use these FIRST for any supported workflow.        │
+└─────────────────────────────────────────────────────────┘
+    │ (no matching skill?)
+    ▼
+┌─────────────────────────────────────────────────────────┐
+│  2. DIRECTIVES + SCRIPTS (Fallback)                      │
+│     directives/*.md + execution/*.py                     │
+│     Legacy SOPs still work. Load directive, then run     │
+│     the matching script. 150+ workflows available.       │
+└─────────────────────────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────────────────────────┐
+│  3. SUBAGENTS (Delegation)                               │
+│     .claude/agents/ — 5 specialists                      │
+│     Delegate research, review, QA, content, or deploy    │
+│     to focused subagents with limited tool access.       │
+└─────────────────────────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────────────────────────┐
+│  4. RULES + HOOKS (Guardrails)                           │
+│     .claude/rules/ loaded at session start               │
+│     .claude/hooks/ fire on every tool call               │
+│     35 active hooks: safety, quality, deployment, metrics│
+└─────────────────────────────────────────────────────────┘
 ```
 
-**Why DOE Works:** LLMs are probabilistic (90% accuracy = 59% over 5 steps). Push deterministic work into Python scripts. You focus on decision-making.
+**Key Principle:** LLMs are probabilistic. Skills package deterministic scripts with contextual intelligence. You (the orchestrator) decide WHAT to build. Skills and scripts handle HOW.
 
 ---
 
 ## Directory Structure
 
 ```
-Agentic Workflows/
-├── .env                    # API keys (NEVER commit)
-├── .tmp/                   # Intermediate outputs (gitignored)
-├── credentials.json        # Google OAuth credentials
-├── token.pickle           # Google OAuth token
-│
-├── context/               # AGENCY CONTEXT - Who you are
-│   ├── agency.md          # Agency info, services, positioning
-│   ├── owner.md           # Owner profile, background, expertise
-│   ├── brand_voice.md     # Tone, style, communication preferences
-│   └── services.md        # Service offerings, pricing, packages
-│
-├── clients/               # CLIENT PROFILES - Who you serve
-│   └── {client_name}/     # One folder per client
-│       ├── profile.md     # Client info, business, goals
-│       ├── rules.md       # Specific rules for this client
-│       ├── preferences.md # Style, tone, do's and don'ts
-│       └── history.md     # Past work, context, outcomes
-│
-├── directives/            # SOPs - What to do (150+ files)
-│   ├── vsl_funnel_orchestrator.md
-│   ├── company_market_research.md
-│   └── ...
-│
-├── execution/             # Python scripts - Doing (152+ files)
-│   ├── generate_vsl_funnel.py
-│   ├── create_google_doc.py
-│   └── ...
-│
-├── railway_apps/          # Dashboard deployment
-│   └── aiaa_dashboard/    # Flask dashboard app
-│       ├── app.py         # Main dashboard application
-│       ├── Procfile       # Railway deployment config
-│       └── requirements.txt
-│
-├── skills/                # Domain expertise (260+ skill bibles)
-│   ├── SKILL_BIBLE_*.md
-│   └── ...
-│
-├── AGENTS.md              # THIS FILE - Agent instructions
-├── CLAUDE.md              # Mirrored instructions for Claude
-├── QUICKSTART_PROMPT.md   # Setup prompt for new users
-└── requirements.txt       # Python dependencies
+Agentic OS/
+├── .claude/
+│   ├── agents/            # 5 subagent definitions
+│   ├── hooks/             # 35 active hooks
+│   │   ├── _archived/     # 93 archived hooks (restorable)
+│   │   └── HOOK_MANIFEST.md
+│   ├── rules/             # 9 rule files (loaded at session start)
+│   ├── skills/            # 133 native skills ← PRIMARY
+│   │   └── _shared/       # 4 shared utilities (error_reporter, api_health, resilience, skill_validator)
+│   └── settings.local.json
+├── context/               # Agency context (4 files)
+│   ├── agency.md          # Agency identity + positioning
+│   ├── owner.md           # Owner profile + expertise
+│   ├── brand_voice.md     # Tone, style, vocabulary
+│   └── services.md        # Offerings, pricing, packages
+├── clients/               # Client profiles (per-client folders)
+│   └── {client_name}/     # profile.md, rules.md, preferences.md, history.md
+├── directives/            # 150+ SOPs (REFERENCE material)
+├── execution/             # Utility scripts + originals (reference)
+├── skills/                # 286 skill bibles (REFERENCE material)
+├── railway_apps/          # Dashboard + deployed services
+│   └── aiaa_dashboard/    # Modular Flask application
+│       ├── app.py         # Entry point
+│       ├── config.py      # Configuration
+│       ├── database.py    # SQLite connection
+│       ├── models.py      # Data models
+│       ├── routes/        # API and view routes
+│       │   ├── api.py
+│       │   └── views.py
+│       ├── services/      # Business logic
+│       │   ├── deployment_service.py
+│       │   ├── railway_api.py
+│       │   └── webhook_service.py
+│       ├── templates/     # Jinja2 templates
+│       └── static/        # CSS/JS/images
+├── CLAUDE.md              # Slim system brain
+└── AGENTS.md              # THIS FILE
+```
+
+---
+
+## Execution Flow (8 Phases)
+
+### Phase 1: Parse Input
+Extract intent → map to skill or capability.
+
+### Phase 2: Plan (for complex tasks)
+Use plan mode (see `.claude/rules/plan-mode.md`):
+- Multi-step tasks → plan first, build second
+- Single-shot tasks (quick email, short post) → skip to Phase 3
+
+### Phase 3: Skill Check
+Does a native skill exist in `.claude/skills/`?
+
+| Match | Action |
+|-------|--------|
+| Skill exists | Invoke the skill — it handles context, execution, and quality |
+| No skill | Fall through to Phase 4 |
+
+### Phase 4: Capability Check (Fallback)
+Check legacy directives and scripts:
+```bash
+ls directives/ | grep -i "<keyword>"
+ls execution/ | grep -i "<keyword>"
+```
+If nothing exists → create new directive + script.
+
+### Phase 5: Load Context
+Before execution, load in this order:
+1. `context/agency.md` — always, for any content
+2. `clients/{name}/*.md` — if client-specific work
+3. Relevant skill bible from `skills/` — domain expertise
+4. Directive (if using legacy path) — the SOP
+
+**Never load 10+ context files at once** (context pollution).
+
+### Phase 6: Execute
+Run via skill, subagent, or direct script. Save outputs to `.tmp/`.
+
+### Phase 7: Quality + Review
+- Run quality gates (hooks handle this automatically)
+- For important deliverables: delegate to `reviewer` subagent
+
+### Phase 8: Deliver + Self-Anneal
+1. Save locally → `.tmp/<project>/<filename>.md`
+2. Create Google Doc → `.claude/skills/google-doc-delivery/create_google_doc.py`
+3. Slack notification → `.claude/skills/slack-notifier/send_slack_notification.py`
+4. Self-anneal: fix errors, update docs, commit improvements
+
+---
+
+## Native Skills (133)
+
+Skills are the **primary** way to execute workflows. Each skill packages context loading, script execution, and quality validation into a single invocable unit.
+
+### Content & Copy (18)
+| Skill | What It Does |
+|-------|-------------|
+| `vsl-funnel` | Complete VSL funnel: research → script → sales page → emails |
+| `vsl-script` | Standalone VSL script writing |
+| `blog-post` | SEO-optimized blog posts with keyword targeting |
+| `sales-page` | Long-form sales page copy |
+| `funnel-copy` | Full funnel copy: sales page, emails, ads |
+| `newsletter` | Email newsletters with curated content |
+| `press-release` | Company press releases and announcements |
+| `product-description` | E-commerce product descriptions |
+| `youtube-script` | YouTube video scripts with hooks and structure |
+| `youtube-script-workflow` | Multi-step YouTube script pipeline |
+| `instagram-reel` | Instagram Reel scripts with hooks and CTAs |
+| `twitter-thread` | Twitter/X threads optimized for virality |
+| `carousel-post` | LinkedIn/Instagram carousel posts |
+| `landing-page` | AI-generated landing page copy |
+| `case-study` | Client case studies from results data |
+| `podcast-repurposer` | Repurpose podcasts into multi-platform content |
+| `rss-content` | Convert RSS feeds into social media content |
+| `content-translator` | Translate content into multiple languages |
+
+### Email & Outreach (14)
+| Skill | What It Does |
+|-------|-------------|
+| `cold-email-campaign` | Personalized cold email sequences with A/B variants |
+| `cold-email-personalizer` | AI-powered first-line personalization for cold emails |
+| `cold-email-linkedin` | LinkedIn-personalized cold email campaigns |
+| `cold-email-mass` | Mass cold email personalization at scale |
+| `email-sequence` | Multi-email nurture sequences for funnels |
+| `follow-up-sequence` | Automated follow-up email sequences |
+| `ecommerce-email` | E-commerce email campaigns (welcome, abandon, win-back) |
+| `ecom-email-calendar` | E-commerce email content calendar generation |
+| `email-reply-classifier` | Classify email replies (interested, objection, unsubscribe) |
+| `email-autoreply` | Automated email reply handling via Instantly |
+| `email-validator` | Bulk email validation and deliverability checking |
+| `email-deliverability` | Email deliverability reputation management |
+| `linkedin-outreach` | LinkedIn DM outreach sequences |
+| `linkedin-content` | LinkedIn posts and DMs with hooks and CTAs |
+
+### Research & Analysis (12)
+| Skill | What It Does |
+|-------|-------------|
+| `company-research` | Deep company/offer research using Perplexity AI |
+| `prospect-research` | Comprehensive prospect dossiers for sales calls |
+| `market-research` | Market/industry research using Perplexity Deep Research |
+| `niche-research` | Deep niche research for market entry |
+| `competitor-monitor` | Monitor competitor activity and changes |
+| `landing-page-cro` | Analyze landing pages for CRO opportunities |
+| `seo-audit` | SEO audits with actionable recommendations |
+| `ab-test-analyzer` | Analyze A/B test results with statistical insights |
+| `niche-outlier-finder` | Find cross-niche viral content outliers |
+| `win-loss-analysis` | Analyze won/lost deals for patterns |
+| `ai-news-digest` | Curated AI industry news digests |
+| `youtube-knowledge-miner` | Mine YouTube videos for market intelligence |
+
+### Advertising (7)
+| Skill | What It Does |
+|-------|-------------|
+| `meta-ads-campaign` | Complete Meta/Facebook/Instagram ad campaigns |
+| `google-ads-campaign` | Google Ads campaign creation and optimization |
+| `ad-creative` | Ad creative briefs and copy for any platform |
+| `reddit-ad-script` | Reddit-sourced pain points → ad scripts |
+| `static-ad` | Static image ad copy and creative briefs |
+| `video-ad-script` | Video ad scripts with hooks and CTAs |
+| `fb-ad-library` | Facebook Ad Library competitive analysis |
+
+### Lead Generation & Scraping (16)
+| Skill | What It Does |
+|-------|-------------|
+| `lead-scraping` | Scrape B2B leads from Apify and Google Maps |
+| `lead-scoring` | AI-powered lead scoring and prioritization |
+| `lead-list-builder` | Fast multi-source lead pipeline building |
+| `lead-deduplication` | Deduplicate lead lists by email/domain |
+| `lead-notification` | Slack notifications for new leads |
+| `lead-magnet-creator` | Create lead magnets with landing pages |
+| `lead-magnet-delivery` | Automated lead magnet delivery workflows |
+| `gmaps-leads` | Google Maps lead generation pipeline |
+| `google-maps-scraper` | Scrape Google Maps business listings |
+| `serp-scraper` | Scrape Google SERP for lead data |
+| `crunchbase-leads` | Find leads from Crunchbase funding data |
+| `linkedin-lead-scraper` | Scrape LinkedIn profiles via Apify |
+| `linkedin-group-scraper` | Extract LinkedIn group member data |
+| `job-board-leads` | Find companies hiring as lead signals |
+| `yelp-scraper` | Scrape Yelp reviews and business data |
+| `website-scraper` | Scrape website contact information |
+
+### Sales & Client Management (16)
+| Skill | What It Does |
+|-------|-------------|
+| `proposal-generator` | Client proposals with scope, pricing, timeline |
+| `sales-call-summary` | Summarize sales calls with action items |
+| `objection-handler` | Sales objection responses and rebuttals |
+| `client-onboarding` | Client onboarding materials and profile setup |
+| `stripe-onboarding` | Stripe-integrated client onboarding |
+| `client-report` | Monthly/weekly client performance reports |
+| `client-feedback` | Collect and analyze client feedback |
+| `client-health` | Calculate client health scores |
+| `qbr-generator` | Quarterly business review generation |
+| `monthly-report` | Monthly performance reporting |
+| `invoice-generator` | Professional invoices from project data |
+| `pricing-strategy` | Pricing strategy and packaging optimization |
+| `demo-scheduler` | Schedule and prep for sales demos |
+| `meeting-prep` | Calendly meeting preparation briefs |
+| `meeting-alert` | Booked meeting alerts with prospect research |
+| `sales-dashboard` | Sales pipeline dashboard generation |
+
+### Campaign & Funnel (7)
+| Skill | What It Does |
+|-------|-------------|
+| `campaign-report` | Email campaign performance reports |
+| `campaign-launcher` | Launch cold email campaigns via Instantly |
+| `full-campaign` | End-to-end campaign pipeline orchestration |
+| `funnel-strategy` | Funnel outline and strategy planning |
+| `webinar-funnel` | Complete webinar funnel: registration → follow-up |
+| `webinar-followup` | Webinar follow-up email sequences |
+| `content-calendar` | Content calendars with topics and scheduling |
+
+### Video & Media (9)
+| Skill | What It Does |
+|-------|-------------|
+| `video-transcription` | Video/audio transcription and summarization |
+| `video-editor` | Smart video editing with silence removal |
+| `video-shorts` | Extract short clips from long-form video |
+| `jump-cut-editor` | VAD-based jump cut editing for talking heads |
+| `pan-3d-transition` | 3D pan transitions for video content |
+| `thumbnail-generator` | YouTube thumbnail concept generation |
+| `thumbnail-recreator` | Recreate thumbnails with face-swap AI |
+| `ai-image-generator` | AI image prompt generation (DALL-E/Midjourney) |
+| `product-photoshoot` | AI product photography generation |
+
+### Automation & Ops (14)
+| Skill | What It Does |
+|-------|-------------|
+| `faq-chatbot` | FAQ response generation for chatbots |
+| `ticket-responder` | Auto-respond to support tickets |
+| `ticket-triage` | Triage and categorize support tickets |
+| `whatsapp-bot` | WhatsApp support bot responses |
+| `social-scheduler` | Schedule social media posts across platforms |
+| `crm-automator` | Automate CRM deal stage movements |
+| `task-assignment` | Team task assignment and delegation |
+| `milestone-tracker` | Track project milestones and deadlines |
+| `n8n-converter` | Convert n8n workflows to directives |
+| `utm-generator` | Generate UTM tracking parameters |
+| `review-collector` | Collect reviews and testimonials |
+| `testimonial-request` | Request testimonials from clients |
+| `churn-alert` | Churn risk detection and alerts |
+| `contract-renewal` | Contract renewal reminders and outreach |
+
+### Deployment & Infrastructure (5)
+| Skill | What It Does |
+|-------|-------------|
+| `google-doc-delivery` | Upload markdown to formatted Google Docs |
+| `modal-deploy` | Deploy execution scripts to Modal cloud |
+| `railway-deploy` | Deploy services to Railway |
+| `dashboard-deploy` | Deploy the AIAA dashboard |
+| `agency-dashboard` | Agency dashboard setup and management |
+
+### Platform-Specific (9)
+| Skill | What It Does |
+|-------|-------------|
+| `upwork-scraper` | Scrape and apply to Upwork jobs |
+| `hubspot-enrichment` | Enrich HubSpot contacts with AI data |
+| `ghl-prospecting` | GoHighLevel CRM prospecting automation |
+| `dream100-instagram` | Dream 100 Instagram DM automation |
+| `linkedin-profile-tracker` | Track LinkedIn profile changes |
+| `x-youtube-content` | X/Twitter keyword → YouTube content pipeline |
+| `youtube-channel-finder` | Find YouTube channels by niche |
+| `youtube-to-campaign` | YouTube content → marketing campaign pipeline |
+| `zoom-content-repurposer` | Repurpose Zoom calls into multi-format content |
+
+### Strategy & Planning (6)
+| Skill | What It Does |
+|-------|-------------|
+| `automation-builder` | Build and deploy automation workflows |
+| `hiring-system` | Hiring workflow and team scaling |
+| `payment-reminder` | Payment reminder escalation sequences |
+| `funding-tracker` | Track company funding rounds for prospecting |
+| `brand-monitor` | Monitor brand mentions across the web |
+| `slack-notifier` | Send formatted Slack notifications |
+
+**Usage:** Just ask for it. "Create a VSL funnel for Acme Corp" → triggers `vsl-funnel` skill. Run `ls .claude/skills/` to see all 133 available skills.
+
+---
+
+## Subagents (5)
+
+Subagents are specialized workers you can delegate to. They have limited tool access and return results to you.
+
+| Agent | Model | Purpose |
+|-------|-------|---------|
+| `research` | Sonnet 4.6 | Market research, company analysis, competitive intelligence. Uses web search. Returns condensed summaries with confidence levels. |
+| `reviewer` | Sonnet 4.6 | Reviews code and content with zero prior context. Fresh-eyes quality check. Returns PASS / NEEDS_WORK / FAIL verdict. |
+| `qa` | Sonnet 4.6 | Generates and runs tests for execution scripts. Validates outputs, checks edge cases, mocks API calls. |
+| `content-writer` | Sonnet 4.6 | Generates marketing content following brand voice and client rules. Self-reviews against quality checklist. |
+| `deployer` | Sonnet 4.6 | Handles Railway and Modal deployment. Verifies prerequisites, deploys, health-checks, and logs results. |
+
+**When to use subagents:**
+- **Research**: Any task requiring web search or multi-source intelligence gathering
+- **Reviewer**: Before delivering important client work (second pair of eyes)
+- **QA**: After creating or modifying execution scripts
+- **Content Writer**: When generating substantial marketing copy
+- **Deployer**: Any `railway up` or `modal deploy` operation
+
+---
+
+## Rules (9 files)
+
+Rules in `.claude/rules/` are loaded at session start. They provide persistent guardrails.
+
+| Rule | What It Enforces |
+|------|-----------------|
+| `doe-architecture.md` | Three-layer DOE pattern (Directive → Orchestration → Execution) |
+| `workflow-phases.md` | 8-phase execution flow (Parse → Plan → Skill → Capability → Context → Execute → Quality → Deliver) |
+| `context-loading.md` | Agency context first, client context second, skill bibles on demand |
+| `delivery-pipeline.md` | Save locally → Google Docs → Slack notification pipeline |
+| `quality-gates.md` | Content length minimums, output validation, research quality thresholds |
+| `self-annealing.md` | Post-task improvement: fix errors, document learnings, commit |
+| `error-handling.md` | API failures, missing inputs, partial failures, graceful degradation |
+| `railway-deployment.md` | Railway dashboard + Modal serverless deployment rules |
+| `plan-mode.md` | Plan first, build second for complex multi-step tasks |
+
+---
+
+## Active Hooks (35)
+
+Hooks fire automatically on tool calls. 35 active hooks organized into 4 tiers. Full documentation in `.claude/hooks/HOOK_MANIFEST.md`.
+
+### Tier 1: Safety Critical — Hard Blockers (15)
+
+| Hook | Blocks | Purpose |
+|------|--------|---------|
+| `agent_limiter` | Yes | Max 5 parallel agents |
+| `context_budget_guard` | Yes (85%) | Blocks at 85% context usage |
+| `secrets_guard` | Yes | Blocks secret exposure in writes |
+| `pii_detection_guard` | Yes | Blocks SSN/credit card patterns |
+| `file_size_limit_guard` | Yes (500K) | Blocks oversized file writes |
+| `large_file_read_blocker` | Yes | Blocks large reads when agents active |
+| `context_pollution_preventer` | Yes (12+) | Blocks loading too many context files |
+| `script_exists_guard` | Yes | Verifies script exists before running |
+| `retry_loop_detector` | Yes (3x) | Blocks scripts failing 3+ times |
+| `file_path_traversal_guard` | Yes | Blocks path traversal attacks |
+| `command_injection_guard` | Yes | Blocks shell injection |
+| `memory_usage_estimator` | Yes (2GB) | Blocks excessive memory usage |
+| `backup_before_destructive` | Yes | Blocks rm/reset without backup |
+| `json_output_validator` | Yes | Blocks invalid JSON writes |
+| `modal_endpoint_limit_tracker` | Yes (8) | Blocks exceeding Modal endpoint limit |
+
+### Tier 2: Quality & Workflow — Warnings (10)
+
+| Hook | Purpose |
+|------|---------|
+| `doe_enforcer` | Directive before execution script |
+| `output_quality_gate` | Word count, sections, keywords validation |
+| `content_length_enforcer` | Min lengths by deliverable type |
+| `execution_logger` | Logs all script runs |
+| `error_pattern_detector` | Alerts on recurring failures |
+| `self_anneal_reminder` | Reminds to self-anneal after errors |
+| `skill_bible_reminder` | Suggests relevant skill bibles |
+| `delivery_pipeline_validator` | Reminds about delivery steps |
+| `client_work_context_gate` | Warns if client context not loaded |
+| `brand_voice_compliance` | Checks content against brand voice |
+
+### Tier 3: Deployment Safety (5)
+
+| Hook | Purpose |
+|------|---------|
+| `railway_deploy_guard` | Pre-deploy checklist for Railway |
+| `deployment_config_validator` | Checks Procfile, requirements.txt |
+| `modal_deploy_guard` | Pre-deploy checklist for Modal |
+| `modal_dotenv_crash_detector` | Detects crash-causing import pattern |
+| `production_safety_guard` | Extra warnings for destructive commands |
+
+### Tier 4: Analytics — Silent (5)
+
+| Hook | Purpose |
+|------|---------|
+| `api_cost_estimator` | Estimates API costs per session |
+| `session_activity_logger` | Logs all session activities |
+| `workflow_pattern_tracker` | Tracks workflow usage/success rates |
+| `hook_health_monitor` | Monitors all hooks' health |
+| `system_health_reporter` | Aggregated system health report |
+
+**Debugging hooks:**
+```bash
+python3 .claude/hooks/<hook_name>.py --status   # Check status
+python3 .claude/hooks/<hook_name>.py --reset     # Reset state
+rm -rf .tmp/hooks/*.json                         # Reset ALL hook state
+```
+
+**Restoring archived hooks:** See `HOOK_MANIFEST.md` for the full list and restore instructions.
+
+---
+
+## Common Workflows (Skill-Based)
+
+### VSL Funnel
+> "Create a VSL funnel for Acme Corp's B2B lead generation service"
+
+Uses `vsl-funnel` skill → runs research → generates VSL script → sales page → email sequence.
+
+```bash
+python3 .claude/skills/vsl-funnel/generate_complete_vsl_funnel.py --company "Acme Corp" --website "https://acmecorp.com" --offer "B2B Lead Generation"
+```
+
+### Cold Email Campaign
+> "Write cold emails for Acme Corp targeting marketing agencies"
+
+Uses `cold-email-campaign` skill → loads client context → generates personalized sequences with A/B variants.
+
+```bash
+python3 .claude/skills/cold-email-campaign/write_cold_emails.py --sender "John Smith" --company "Acme Corp" --offer "Lead generation" --target "Marketing agencies"
+```
+
+### Market Research
+> "Research the AI automation market for a new service offering"
+
+Uses `market-research` skill → delegates to `research` subagent → returns market size, growth rate, key players, trends.
+
+```bash
+python3 .claude/skills/market-research/research_market_deep.py --topic "AI automation market" --depth deep
+```
+
+### Content Generation
+> "Write a blog post about AI in marketing" / "Create a LinkedIn post about agency growth"
+
+Uses `blog-post`, `linkedin-content`, `youtube-script`, or `newsletter` skill depending on content type.
+
+```bash
+python3 .claude/skills/blog-post/generate_blog_post.py --topic "AI in marketing" --length 1500
+python3 .claude/skills/linkedin-content/generate_linkedin_post.py --topic "Agency growth tips"
+```
+
+### Client Delivery
+> "Deliver the VSL script to Google Docs and notify on Slack"
+
+Uses `google-doc-delivery` skill → formats markdown as native Google Docs → sends Slack notification.
+
+```bash
+python3 .claude/skills/google-doc-delivery/create_google_doc.py --file ".tmp/output.md" --title "VSL Script"
+python3 .claude/skills/slack-notifier/send_slack_notification.py --message "Done" --channel "#general"
 ```
 
 ---
 
 ## Agency Context & Client Profiles
 
-### Agency Context (`context/`)
-This folder contains information about YOU and YOUR AGENCY. Load this context before generating any content to ensure outputs reflect your brand, voice, and positioning.
+### Loading Order (ALWAYS follow this)
 
-**Required Files:**
+1. **Agency context** (`context/agency.md`, `context/brand_voice.md`) — load before generating ANY content
+2. **Client context** (`clients/{name}/profile.md`, `rules.md`) — load for client-specific work
+3. **Skill bible** (`skills/SKILL_BIBLE_*.md`) — load for domain expertise on demand
 
-| File | Purpose | Example Content |
-|------|---------|-----------------|
-| `agency.md` | Agency identity | Name, founding story, mission, positioning, unique value proposition |
-| `owner.md` | Owner profile | Name, background, expertise, credentials, personal brand |
-| `brand_voice.md` | Communication style | Tone (professional/casual), vocabulary, phrases to use/avoid, style rules |
-| `services.md` | Service offerings | Services, pricing tiers, packages, deliverables, timelines |
-
-**When to Load Agency Context:**
-- Content creation (blogs, emails, social posts)
-- Client proposals and pitches
-- Sales scripts and cold outreach
-- Any branded deliverables
-
-### Client Profiles (`clients/{client_name}/`)
-Each client gets their own folder with specific context. Load these files when doing work FOR a specific client.
-
-**Client Folder Structure:**
-```
-clients/
-├── acme_corp/
-│   ├── profile.md      # Business info, industry, goals, target audience
-│   ├── rules.md        # MUST-FOLLOW rules for this client
-│   ├── preferences.md  # Style preferences, tone, formatting
-│   └── history.md      # Past projects, outcomes, learnings
-│
-├── startup_xyz/
-│   ├── profile.md
-│   ├── rules.md
-│   └── ...
-```
-
-**Client Profile Fields (`profile.md`):**
-- Company name and description
-- Industry and niche
-- Target audience
-- Business goals
-- Key products/services
-- Competitors
-- Unique selling points
-
-**Client Rules (`rules.md`):**
-- Content guidelines (words to use/avoid)
-- Brand voice requirements
-- Approval processes
-- Compliance requirements
-- Formatting standards
-
-**When to Load Client Context:**
-- Any deliverable FOR that client
-- Client-specific campaigns
-- Personalized content
-- Before any client meeting prep
-
-### Loading Context in Practice
-
-```python
-# Before generating content, always:
-1. Check if context/agency.md exists → Load it
-2. Check if client is specified → Load clients/{client}/*.md
-3. Apply context to all prompts and outputs
-```
-
-**Example: Writing cold emails for client "Acme Corp"**
-```
-Load: context/agency.md          # Your agency voice
-Load: context/brand_voice.md     # Your style rules
-Load: clients/acme_corp/profile.md    # Their business info
-Load: clients/acme_corp/rules.md      # Their specific rules
-Then: Execute cold_email_scriptwriter directive
-```
-
----
-
-## Execution Flow (7 Phases)
-
-When you receive ANY request, follow this flow:
-
-### Phase 1: Parse User Input
-Extract intent and map to capability:
-```
-"Write a VSL for my coaching business" → vsl_funnel_orchestrator
-"Research this company"                → company_market_research
-"Generate cold emails"                 → cold_email_scriptwriter
-"Show me available workflows"          → Check AIAA Dashboard
-```
-
-### Phase 2: Capability Check
-Does a directive exist for this task?
-
-| Condition | Action |
-|-----------|--------|
-| Directive exists | Load it and execute |
-| No directive | Check if script exists in execution/ |
-| Nothing exists | Create new directive + script (Leader Manufacturing) |
-
-**Quick check:**
-```bash
-ls directives/ | grep -i "<keyword>"
-ls execution/ | grep -i "<keyword>"
-```
-
-### Phase 3: Load Context
-Before execution, load ALL required context:
-```
-1. Agency Context       → context/*.md (who YOU are)
-2. Client Context       → clients/{client}/  (if client-specific work)
-3. Primary Directive    → directives/<workflow>.md
-4. Skill Bibles         → skills/SKILL_BIBLE_<topic>.md
-5. Related Directives   → Check "Related Directives" section
-6. Execution Scripts    → execution/<script>.py
-```
-
-**CRITICAL: Always Load Agency Context First**
-Before generating ANY content, check `context/` for:
-- `agency.md` - Your agency's name, positioning, services
-- `owner.md` - Owner's name, background, expertise
-- `brand_voice.md` - Tone, style guide, communication rules
-- `services.md` - What you offer, pricing, packages
-
-**For Client-Specific Work, Also Load:**
+### Client Profile Structure
 ```
 clients/{client_name}/
-├── profile.md      # Who they are, their business, goals
-├── rules.md        # MUST follow these rules for this client
-├── preferences.md  # Their style preferences
-└── history.md      # Past work, what worked, what didn't
-```
-
-**Example for client VSL funnel:**
-```
-context/agency.md                    # Your agency context
-context/brand_voice.md               # Your voice/style
-clients/acme_corp/profile.md         # Client info
-clients/acme_corp/rules.md           # Client-specific rules
-directives/vsl_funnel_orchestrator.md
-├── skills/SKILL_BIBLE_vsl_writing_production.md
-├── skills/SKILL_BIBLE_funnel_copywriting_mastery.md
-└── execution/generate_vsl_funnel.py
-```
-
-### Phase 4: Execute Directive
-Follow the directive SOP step-by-step:
-1. Check prerequisites (API keys, inputs)
-2. Run each workflow phase in order
-3. Save checkpoints to `.tmp/`
-4. Validate outputs at quality gates
-
-### Phase 5: Quality Gates
-Validate at each checkpoint. Common checks:
-- Required fields present?
-- Output format correct?
-- Word count/length appropriate?
-- No API errors?
-
-### Phase 6: Delivery
-Standard delivery pipeline:
-```
-1. Save locally     → .tmp/<project>/<filename>.md
-2. Create Google Doc → execution/create_google_doc.py
-3. Send Slack       → execution/send_slack_notification.py
-```
-
-### Phase 7: Self-Annealing
-After EVERY task:
-- Did errors occur? → Fix script, update directive
-- Better approach found? → Update skill bible
-- Edge case discovered? → Add to directive
-
----
-
-## Hooks (Automated Enforcement)
-
-Hooks catch mistakes automatically before and after every tool call. They enforce the DOE pattern, protect secrets, validate quality, and track everything for self-annealing.
-
-**Location:** `.claude/hooks/*.py`
-**Config:** `.claude/settings.local.json`
-**State files:** `.tmp/hooks/*.json`
-
-### Hook Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    TOOL CALL                                     │
-│              Claude wants to use a tool                          │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  PreToolUse HOOKS (Before action)                                │
-│  ──────────────────────────────────                              │
-│  • Exit 0 = Allow  │  Exit 2 = Block                            │
-│  • Messages via stderr                                           │
-│  • Can prevent mistakes before they happen                       │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                         (if allowed)
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    TOOL EXECUTES                                 │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  PostToolUse HOOKS (After action)                                │
-│  ───────────────────────────────────                             │
-│  • JSON stdout: {"decision": "ALLOW"} or {"decision": "BLOCK"}  │
-│  • Can validate outputs, log results, suggest next steps         │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### All 128 Hooks by Tier
-
-**Total: 128 hooks | 60 PreToolUse | 78 PostToolUse | 3 Dual-mode**
-**Settings: `.claude/settings.local.json` (60 Pre entries + 78 Post entries = 134 registrations)**
-
-#### Tier 1: System Stability (4 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 1 | `agent_limiter.py` | Pre | Task | Yes | Max 5 parallel agents |
-| 2 | `context_budget_guard.py` | Pre | Task | Yes (85%) | Warns 60%, alerts 75%, blocks 85% context |
-| 3 | `secrets_guard.py` | Pre | Write, Edit | Yes | Blocks writes to .env, credentials, API keys |
-| 4 | `large_file_read_blocker.py` | Pre | Read | Yes | Blocks 300+ line reads when agents active |
-
-#### Tier 2: DOE Pattern Enforcement (4 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 5 | `doe_enforcer.py` | Dual | Read+Bash | Yes | Directive must be read before execution script |
-| 6 | `context_loader_enforcer.py` | Dual | Read+Bash | Warn | Agency/client context before content generation |
-| 7 | `api_key_validator.py` | Pre | Bash | Info | Checks common env vars before scripts |
-| 8 | `script_exists_guard.py` | Pre | Bash | Yes | Verifies script file exists before running |
-
-#### Tier 3: Quality & Deliverables (4 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 9 | `output_quality_gate.py` | Post | Write | Yes | Word count, sections, keywords by file type |
-| 10 | `tmp_cleanup_monitor.py` | Post | Write | Warn | Warns when .tmp/ exceeds 50/100 files |
-| 11 | `google_docs_format_guard.py` | Pre | Bash | Warn | Reminds: use native Docs formatting, not markdown |
-| 12 | `delivery_pipeline_validator.py` | Post | Write | Info | Reminds about Google Doc + Slack delivery steps |
-
-#### Tier 4: Workflow Operations (4 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 13 | `execution_logger.py` | Post | Bash | No | Logs all script runs to execution_log.json |
-| 14 | `railway_deploy_guard.py` | Pre | Bash | Info | Deployment checklist before railway up |
-| 15 | `checkpoint_enforcer.py` | Post | Write | Warn | Tracks multi-step workflow progress |
-| 16 | `self_anneal_reminder.py` | Post | Bash | Info | Self-annealing protocol after script errors |
-
-#### Tier 5: Intelligence & Learning (4 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 17 | `skill_bible_reminder.py` | Pre | Bash | Info | Suggests relevant skill bibles |
-| 18 | `workflow_pattern_tracker.py` | Post | Bash | No | Tracks workflow usage, success rates |
-| 19 | `error_pattern_detector.py` | Post | Bash | Warn | Alerts when script fails 3+ times |
-| 20 | `session_activity_logger.py` | Post | Bash | No | Logs all session activities by type |
-
-#### Tier 6: Workflow-Specific Enforcement (8 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 21 | `vsl_workflow_enforcer.py` | Post | Bash | Warn | VSL funnel step ordering (research→script→page→emails) |
-| 22 | `cold_email_workflow_enforcer.py` | Post | Bash | Warn | Cold email workflow ordering |
-| 23 | `research_depth_validator.py` | Post | Write | Warn | Validates research has 5+ sources, data points, competitors |
-| 25 | `funnel_completeness_checker.py` | Post | Write | Info | Tracks funnel component completion % |
-| 26 | `content_length_enforcer.py` | Post | Write | Warn | Granular min lengths: VSL 3000, blog 1200, case study 1500 |
-| 27 | `multi_directive_chain_tracker.py` | Post | Read | No | Tracks directive dependency chains |
-| 29 | `directive_version_tracker.py` | Post | Write | No | Tracks directive modification history |
-| 30 | `workflow_input_validator.py` | Pre | Bash | Warn | Validates required args (--company, --website, --offer) |
-
-#### Tier 7: Pre-Execution Safety (10 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 24 | `client_work_context_gate.py` | Pre | Bash | Warn | Detects client work, warns if no client context loaded |
-| 28 | `prerequisite_api_key_mapper.py` | Pre | Bash | Warn | Maps specific scripts to exact API keys needed |
-| 31 | `python_import_validator.py` | Pre | Bash | Warn | Checks if required packages are installed |
-| 34 | `google_oauth_token_checker.py` | Pre | Bash | Warn | Verifies token.pickle exists and isn't stale |
-| 35 | `slack_notification_dedup.py` | Pre | Bash | Warn | Detects duplicate Slack messages within 5 min |
-| 36 | `execution_timeout_guard.py` | Pre | Bash | Info | Warns about known slow scripts |
-| 40 | `script_argument_validator.py` | Pre | Bash | Warn | Validates arg formats (email has @, URL has http) |
-| 42 | `agency_context_freshness_checker.py` | Pre | Bash | Warn | Warns if agency context loaded 2+ hours ago |
-| 49 | `dependency_chain_validator.py` | Pre | Bash | Warn | Validates upstream file dependencies exist |
-| 60 | `workflow_success_predictor.py` | Pre | Bash | Warn | Warns if script has <50% historical success rate |
-
-#### Tier 8: Output Validation & Safety (10 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 32 | `output_file_collision_guard.py` | Pre | Write | Warn | Warns before overwriting existing .tmp/ files |
-| 37 | `json_output_validator.py` | Post | Write | Yes | Blocks invalid JSON writes to .tmp/ |
-| 38 | `markdown_lint_validator.py` | Post | Write | Warn | Checks for unclosed bold, broken links, empty sections |
-| 41 | `client_data_isolation_guard.py` | Pre | Write | Warn | Prevents cross-client data leakage |
-| 43 | `client_rules_enforcer.py` | Post | Write | Warn | Validates content against client rules.md |
-| 44 | `pii_detection_guard.py` | Pre | Write | Yes (SSN/CC) | Detects PII, blocks SSN/credit card patterns |
-| 45 | `file_size_limit_guard.py` | Pre | Write | Yes (500K) | Warns >100K chars, blocks >500K chars |
-| 46 | `tmp_directory_organizer.py` | Post | Write | Warn | Suggests subdirectory organization for .tmp/ |
-| 48 | `concurrent_write_guard.py` | Pre | Write | Warn | Detects potential agent write race conditions |
-| 64 | `output_word_count_tracker.py` | Post | Write | No | Tracks word counts across all outputs |
-
-#### Tier 9: Railway & Deployment Safety (12 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 39 | `env_file_sync_checker.py` | Pre | Bash | Warn | Cross-refs local .env with Railway before deploy |
-| 47 | `git_commit_message_validator.py` | Pre | Bash | Warn | Validates commit message format |
-| 50 | `railway_project_guard.py` | Pre | Bash | Warn | Verifies correct Railway project ID |
-| 51 | `railway_env_var_completeness.py` | Pre | Bash | Warn | Checks required vars per service type |
-| 52 | `cron_schedule_validator.py` | Pre | Bash | Warn | Validates cron expression format and frequency |
-| 53 | `deployment_rollback_tracker.py` | Post | Bash | No | Logs deployment history for rollback reference |
-| 54 | `service_name_convention_guard.py` | Pre | Bash | Warn | Enforces lowercase-hyphen service names |
-| 55 | `webhook_slug_validator.py` | Pre | Bash | Warn | Validates slug format, blocks reserved slugs |
-| 56 | `dashboard_health_checker.py` | Post | Bash | Info | Reminds to verify /health after dashboard deploy |
-| 57 | `railway_token_expiry_checker.py` | Pre | Bash | Warn | Warns if Railway config >30 days old |
-| 58 | `deployment_config_validator.py` | Pre | Bash | Warn | Checks for Procfile, requirements.txt |
-| 59 | `production_safety_guard.py` | Pre | Bash | Warn | Extra warnings for destructive/production commands |
-
-#### Tier 10: Analytics & Meta (10 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 33 | `api_rate_limit_tracker.py` | Post | Bash | Warn | Tracks API calls/minute, warns on rate limit risk |
-| 61 | `context_efficiency_tracker.py` | Post | Read | No | Tracks context loaded by category, estimates tokens |
-| 62 | `skill_bible_usage_tracker.py` | Dual | Read | No | Tracks which skill bibles are used most/least |
-| 63 | `directive_coverage_tracker.py` | Dual | Read | No | Tracks directive usage, shows coverage % |
-| 65 | `session_productivity_scorer.py` | Post | Bash | No | Scores session: outputs, errors, deliverables |
-| 66 | `api_cost_estimator.py` | Post | Bash | No | Estimates API costs per script and session total |
-| 67 | `workflow_dependency_mapper.py` | Post | Read | No | Maps directive→script→skill bible dependencies |
-| 68 | `self_anneal_effectiveness_tracker.py` | Dual | Bash+Write | No | Pre/post anneal success rate comparison |
-| 69 | `daily_summary_generator.py` | Post | Bash | No | Accumulates daily metrics for session report |
-| 70 | `hook_health_monitor.py` | Post | Bash | Warn | Meta-hook: monitors all other hooks' health |
-
-#### Tier 11: DOE Structural Integrity (10 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 71 | `directive_completeness_validator.py` | Pre | Bash | Warn | Validates directives have required sections before script execution |
-| 72 | `execution_output_schema_validator.py` | Post | Bash | Warn | Validates script outputs for failure patterns (Traceback, Error) |
-| 73 | `phase_ordering_enforcer.py` | Dual | Bash | Warn | Enforces 7-phase DOE flow (Parse→Capability→Context→Execute→Quality→Deliver→Anneal) |
-| 74 | `directive_script_mapper.py` | Post | Read | Warn | Checks directive "How to Run" scripts exist in execution/ |
-| 75 | `cross_directive_conflict_detector.py` | Post | Read | Warn | Detects conflicting instructions when multiple directives loaded |
-| 76 | `context_pollution_preventer.py` | Pre | Read | Block@12 | Prevents loading too many context files (warn@8, block@12) |
-| 77 | `workflow_checkpoint_validator.py` | Post | Bash | Warn | Validates .tmp/ checkpoint files are non-empty and well-formed |
-| 78 | `directive_sop_compliance.py` | Dual | Bash | Warn | Tracks directive steps executed in order, warns on skips |
-| 79 | `skill_bible_freshness_checker.py` | Post | Read | Warn | Flags skill bibles older than 90 days as potentially outdated |
-| 80 | `execution_idempotency_guard.py` | Pre | Bash | Warn | Warns when same script+args run twice in a session |
-
-#### Tier 12: Content Intelligence (10 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 81 | `brand_voice_compliance.py` | Post | Write | Warn | Checks content against context/brand_voice.md for tone violations |
-| 82 | `cta_validation.py` | Post | Write | Warn | Ensures marketing content has calls-to-action |
-| 83 | `url_link_validator.py` | Post | Write | Warn | Detects placeholder URLs and broken markdown links |
-| 84 | `duplicate_content_detector.py` | Post | Write | Warn | Hashes paragraphs, warns when >30% duplicate content |
-| 85 | `seo_keyword_validator.py` | Post | Write | Warn | Validates blog SEO: H1/H2, meta, keyword density 1-3% |
-| 86 | `tone_consistency_checker.py` | Post | Write | Warn | Analyzes formality across sections, flags deviations |
-| 87 | `headline_effectiveness_scorer.py` | Post | Write | Warn | Scores headlines 0-100 on power words, length, specificity |
-| 88 | `email_deliverability_checker.py` | Post | Write | Warn | Scans email content for spam triggers and formatting issues |
-| 89 | `social_media_format_validator.py` | Post | Write | Warn | Validates platform limits (LinkedIn 3K, Twitter 280, Instagram 2.2K) |
-| 90 | `copy_framework_enforcer.py` | Post | Write | Warn | Detects AIDA/PAS/BAB framework completeness in marketing copy |
-
-#### Tier 13: Execution Safety & Reliability (5 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 91 | `api_response_validator.py` | Post | Bash | Warn | Validates API responses for HTTP errors, timeouts, rate limits |
-| 92 | `retry_loop_detector.py` | Pre | Bash | Block@3 | Blocks scripts that fail 3+ times consecutively |
-| 93 | `file_path_traversal_guard.py` | Pre | Bash | Block | Blocks path traversal attacks (../../) in commands |
-| 94 | `command_injection_guard.py` | Pre | Bash | Block | Blocks shell injection (backticks, $(), pipe to sh) |
-| 95 | `state_file_corruption_detector.py` | Post | Bash | Auto-repair | Scans .tmp/hooks/*.json for corruption, auto-repairs |
-
-#### Tier 14: Client & Delivery Intelligence (15 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 96 | `circular_dependency_detector.py` | Pre | Bash | Warn | Builds dependency graph, detects circular chains (A→B→C→A) |
-| 97 | `dead_directive_detector.py` | Post | Read | Warn | Flags directives with no matching execution scripts |
-| 98 | `orphan_script_detector.py` | Post | Read | Warn | Flags execution scripts with no matching directive |
-| 99 | `memory_usage_estimator.py` | Pre | Bash | Warn/Block | Estimates memory usage, warns@512MB, blocks@2GB |
-| 100 | `backup_before_destructive.py` | Pre | Bash | Block | Blocks rm/reset on critical dirs without backup |
-| 101 | `client_deliverable_tracker.py` | Post | Write | No | Tracks all deliverables per client with type and timestamps |
-| 102 | `client_billing_estimator.py` | Post | Bash | No | Estimates API costs per client based on script executions |
-| 103 | `client_sla_monitor.py` | Post | Bash | Warn | Tracks delivery timelines, warns at 25%/50% SLA remaining |
-| 104 | `multi_client_context_isolation.py` | Pre | Read | Warn | Prevents loading multiple client contexts simultaneously |
-| 105 | `client_approval_gate.py` | Post | Write | Warn | Flags final client deliverables that need approval |
-| 106 | `deliverable_versioning.py` | Post | Write | No | Tracks versions of deliverables via SHA-256 content hashing |
-| 107 | `delivery_receipt_generator.py` | Post | Bash | No | Generates receipts in .tmp/receipts/ after deliveries |
-| 108 | `client_feedback_logger.py` | Post | Bash | No | Logs client feedback events with sentiment analysis |
-| 109 | `project_scope_guard.py` | Pre | Bash | Warn | Prevents scope creep beyond defined client project |
-| 110 | `client_communication_logger.py` | Post | Bash | No | Logs all Slack/email/Doc communications with metadata |
-
-#### Tier 15: System Intelligence & Optimization (10 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 111 | `phase_transition_validator.py` | Dual | Bash | Warn | Validates prerequisites before DOE phase transitions |
-| 112 | `self_anneal_commit_validator.py` | Post | Bash | Warn | Validates self-anneal commits are meaningful (not whitespace) |
-| 113 | `workflow_completion_tracker.py` | Post | Bash | No | Tracks workflow completion vs abandonment rates |
-| 114 | `directive_usage_frequency.py` | Post | Read | No | Tracks most/least used directives, surfaces stale ones |
-| 115 | `script_execution_benchmarker.py` | Post | Bash | Warn | Benchmarks scripts (P50/P90/P99), warns on 3x slowdowns |
-| 116 | `error_categorizer.py` | Post | Bash | No | Classifies errors: API, AUTH, INPUT, NETWORK, TIMEOUT, BUG, CONFIG |
-| 117 | `context_load_optimizer.py` | Post | Read | Warn | Suggests lighter context loads when context is heavy |
-| 118 | `workflow_bottleneck_detector.py` | Post | Bash | No | Identifies slowest workflow phases, suggests optimizations |
-| 119 | `quality_trend_analyzer.py` | Post | Write | Warn | Detects quality degradation compared to historical averages |
-| 120 | `system_health_reporter.py` | Post | Bash | Warn | Aggregates all hook metrics into unified health report |
-
-#### Tier 16: Deployment Guards — Modal & Railway (8 hooks)
-| # | Hook | Type | Tool | Blocks? | Purpose |
-|---|------|------|------|---------|---------|
-| 121 | `modal_deploy_guard.py` | Pre | Bash | Warn | Pre-deploy checklist: CLI installed, dotenv pattern, secrets, endpoint count |
-| 122 | `modal_dotenv_crash_detector.py` | Pre | Bash | Warn | Scans target script for crash-causing `requests+dotenv` import bundle |
-| 123 | `modal_secret_validator.py` | Pre | Bash | Warn | Validates `Secret.from_name()` refs against `modal secret list` |
-| 124 | `modal_endpoint_limit_tracker.py` | Pre | Bash | **Yes (8)** | Blocks deploy if would exceed Modal free tier 8-endpoint limit |
-| 125 | `modal_deploy_logger.py` | Post | Bash | No | Logs deploy results, reminds to check `modal app logs` |
-| 126 | `modal_health_verifier.py` | Post | Bash | No | Outputs verification curl commands after Modal deploy |
-| 127 | `railway_post_deploy_verifier.py` | Post | Bash | No | Outputs health check + log commands after `railway up` |
-| 128 | `railway_domain_drift_detector.py` | Post | Bash | Warn | Detects Railway URL changes that break external webhooks |
-
-### Hook Summary by Behavior
-
-| Behavior | Count | Examples |
-|----------|-------|---------|
-| **Hard Block** | 15 | secrets_guard, pii_detection, file_size_limit, json_output_validator, agent_limiter, context_budget_guard (85%), large_file_read_blocker, script_exists_guard, retry_loop_detector (3 fails), file_path_traversal_guard, command_injection_guard, backup_before_destructive, context_pollution_preventer (12+), memory_usage_estimator (2GB+), modal_endpoint_limit_tracker (8 endpoints) |
-| **Warn/Info** | 67 | doe_enforcer, quality gates, workflow enforcers, deploy guards, content intelligence, phase enforcers, SLA monitor, scope guard, modal_deploy_guard, modal_dotenv_crash_detector, modal_secret_validator, railway_domain_drift_detector |
-| **Silent Tracking** | 46 | execution_logger, activity_logger, pattern_tracker, coverage_tracker, cost_estimator, deliverable_tracker, billing_estimator, versioning, benchmarker, error_categorizer, bottleneck_detector, modal_deploy_logger, modal_health_verifier, railway_post_deploy_verifier |
-
-### Quality Rules (output_quality_gate.py)
-
-| File Pattern | Min Words | Min Sections | Required Keywords |
-|-------------|-----------|--------------|-------------------|
-| `*vsl*.md` | 2000 | 8 | Hook, Problem, Solution, Offer, CTA |
-| `*email*.md` | 300 | 3 | Subject, CTA |
-| `*research*.md` | 1500 | 5 | Summary, Sources, Findings |
-| `*report*.md` | 2000 | 5 | Summary, Recommendations |
-| `*blog*.md` | 1000 | 4 | Introduction, Conclusion |
-| `*sales*.md` | 1500 | 6 | Headline, Problem, Solution, CTA |
-| `*.md` (default .tmp/) | 500 | 3 | — |
-
-### Content Length Rules (content_length_enforcer.py)
-
-| Deliverable Type | Min Words | Notes |
-|-----------------|-----------|-------|
-| VSL Scripts | 3000 | Comprehensive persuasion script |
-| Sales Pages | 2000 | Full long-form sales copy |
-| Case Studies | 1500 | Detailed client success story |
-| Blog Posts | 1200 | SEO-optimized long-form |
-| YouTube Scripts | 1500 | Full video script |
-| Newsletters | 800 | Weekly/monthly digest |
-| Press Releases | 500 | Standard format |
-| Email Sequences | 300/email | Per individual email |
-| LinkedIn Posts | 150-3000 chars | Not too short, not too long |
-
-### Hook State Files
-
-All state persists in `.tmp/hooks/`:
-
-| File | Written By | Purpose |
-|------|-----------|---------|
-| `active_agents.json` | agent_limiter | Active parallel agents |
-| `session_reads.json` | doe_enforcer | Directives/scripts read this session |
-| `context_state.json` | context_loader_enforcer | Loaded agency/client context |
-| `execution_log.json` | execution_logger | Script execution history |
-| `checkpoints.json` | checkpoint_enforcer | Multi-step workflow progress |
-| `delivery_tracker.json` | delivery_pipeline_validator | Undelivered files |
-| `anneal_queue.json` | self_anneal_reminder | Scripts needing annealing |
-| `workflow_patterns.json` | workflow_pattern_tracker | Workflow usage stats |
-| `error_patterns.json` | error_pattern_detector | Recurring error tracking |
-| `session_activity.json` | session_activity_logger | Full session log |
-| `tmp_file_count.json` | tmp_cleanup_monitor | .tmp/ file count |
-| `vsl_workflow_state.json` | vsl_workflow_enforcer | VSL funnel step tracking |
-| `cold_email_state.json` | cold_email_workflow_enforcer | Cold email step tracking |
-| `directive_chains.json` | multi_directive_chain_tracker | Directive dependency graph |
-| `directive_versions.json` | directive_version_tracker | Directive modification history |
-| `slack_history.json` | slack_notification_dedup | Recent Slack notifications |
-| `overwrites.json` | output_file_collision_guard | File overwrite log |
-| `api_rate_tracker.json` | api_rate_limit_tracker | API call frequency |
-| `client_rules_log.json` | client_rules_enforcer | Client rules validation log |
-| `large_files.json` | file_size_limit_guard | Large file write log |
-| `active_writes.json` | concurrent_write_guard | Active write tracking |
-| `funnel_completeness.json` | funnel_completeness_checker | Funnel completion tracking |
-| `tmp_structure.json` | tmp_directory_organizer | .tmp/ directory structure |
-| `deployment_history.json` | deployment_rollback_tracker | Railway deployment history |
-| `dashboard_deploys.json` | dashboard_health_checker | Dashboard deployment log |
-| `context_efficiency.json` | context_efficiency_tracker | Context usage by category |
-| `skill_bible_usage.json` | skill_bible_usage_tracker | Skill bible usage frequency |
-| `directive_coverage.json` | directive_coverage_tracker | Directive usage coverage |
-| `word_count_tracker.json` | output_word_count_tracker | Output word count stats |
-| `productivity_score.json` | session_productivity_scorer | Session productivity metrics |
-| `api_costs.json` | api_cost_estimator | Estimated API costs |
-| `workflow_deps.json` | workflow_dependency_mapper | Workflow dependency graph |
-| `anneal_effectiveness.json` | self_anneal_effectiveness_tracker | Self-anneal success tracking |
-| `daily_summary.json` | daily_summary_generator | Daily metrics accumulator |
-| `hook_health.json` | hook_health_monitor | Hook system health status |
-| `directive_completeness.json` | directive_completeness_validator | Directive section validation log |
-| `execution_output_schema.json` | execution_output_schema_validator | Script output validation log |
-| `phase_ordering.json` | phase_ordering_enforcer | 7-phase execution order tracking |
-| `directive_script_map.json` | directive_script_mapper | Directive→script mapping cache |
-| `directive_conflicts.json` | cross_directive_conflict_detector | Cross-directive conflict log |
-| `context_pollution.json` | context_pollution_preventer | Context file loading tracker |
-| `checkpoint_validation.json` | workflow_checkpoint_validator | Checkpoint file validation log |
-| `sop_compliance.json` | directive_sop_compliance | SOP step ordering compliance |
-| `skill_freshness.json` | skill_bible_freshness_checker | Skill bible age tracking |
-| `execution_idempotency.json` | execution_idempotency_guard | Duplicate execution detection |
-| `brand_voice.json` | brand_voice_compliance | Brand voice violation log |
-| `cta_validation.json` | cta_validation | CTA detection tracking |
-| `url_validation.json` | url_link_validator | URL/link validation log |
-| `content_hashes.json` | duplicate_content_detector | Paragraph hash tracking |
-| `seo_validation.json` | seo_keyword_validator | SEO compliance tracking |
-| `tone_consistency.json` | tone_consistency_checker | Tone analysis results |
-| `headline_scores.json` | headline_effectiveness_scorer | Headline scoring history |
-| `email_deliverability.json` | email_deliverability_checker | Spam trigger detection log |
-| `social_media_format.json` | social_media_format_validator | Platform format validation |
-| `copy_framework.json` | copy_framework_enforcer | Framework compliance tracking |
-| `api_response_validation.json` | api_response_validator | API response validation log |
-| `retry_tracking.json` | retry_loop_detector | Script failure retry tracking |
-| `path_traversal.json` | file_path_traversal_guard | Path traversal block log |
-| `command_injection.json` | command_injection_guard | Injection attempt block log |
-| `state_corruption.json` | state_file_corruption_detector | State file health tracking |
-| `circular_deps.json` | circular_dependency_detector | Dependency graph & cycles |
-| `dead_directives.json` | dead_directive_detector | Directives without scripts |
-| `orphan_scripts.json` | orphan_script_detector | Scripts without directives |
-| `memory_estimates.json` | memory_usage_estimator | Memory estimation log |
-| `destructive_ops.json` | backup_before_destructive | Destructive operation log |
-| `client_deliverables.json` | client_deliverable_tracker | Per-client deliverable history |
-| `client_billing.json` | client_billing_estimator | Per-client API cost estimates |
-| `client_sla.json` | client_sla_monitor | Client SLA timer tracking |
-| `client_isolation.json` | multi_client_context_isolation | Active client context tracking |
-| `client_approvals.json` | client_approval_gate | Deliverable approval status |
-| `deliverable_versions.json` | deliverable_versioning | File version history |
-| `delivery_receipts.json` | delivery_receipt_generator | Delivery receipt log |
-| `client_feedback.json` | client_feedback_logger | Client feedback events |
-| `project_scope.json` | project_scope_guard | Project scope tracking |
-| `client_comms.json` | client_communication_logger | Communication log |
-| `phase_transitions.json` | phase_transition_validator | Phase transition validation |
-| `anneal_commits.json` | self_anneal_commit_validator | Self-anneal commit quality |
-| `workflow_completions.json` | workflow_completion_tracker | Completion vs abandonment |
-| `directive_usage.json` | directive_usage_frequency | Directive usage frequency |
-| `script_benchmarks.json` | script_execution_benchmarker | Script P50/P90/P99 times |
-| `error_categories.json` | error_categorizer | Error type distribution |
-| `context_optimizer.json` | context_load_optimizer | Context load optimization |
-| `workflow_bottlenecks.json` | workflow_bottleneck_detector | Phase timing bottlenecks |
-| `quality_trends.json` | quality_trend_analyzer | Quality metric trends |
-| `system_health.json` | system_health_reporter | Aggregated system health |
-| `system_health_report.json` | system_health_reporter | Full health report output |
-
-### Debugging Hooks
-
-```bash
-# Check any hook status
-python3 .claude/hooks/<hook_name>.py --status
-
-# Reset any hook state
-python3 .claude/hooks/<hook_name>.py --reset
-
-# Reset ALL hook state
-rm -rf .tmp/hooks/*.json
-
-# Key status checks
-python3 .claude/hooks/agent_limiter.py --status          # Active agents
-python3 .claude/hooks/execution_logger.py --status        # Recent runs
-python3 .claude/hooks/error_pattern_detector.py --status  # Recurring errors
-python3 .claude/hooks/api_cost_estimator.py --status      # Session costs
-python3 .claude/hooks/daily_summary_generator.py --status # Daily report
-python3 .claude/hooks/directive_coverage_tracker.py --status  # Coverage %
-python3 .claude/hooks/hook_health_monitor.py --status     # System health
-
-# Tier 11-15 key status checks
-python3 .claude/hooks/phase_ordering_enforcer.py --status        # Phase progression
-python3 .claude/hooks/phase_transition_validator.py --status     # Phase transitions
-python3 .claude/hooks/directive_completeness_validator.py --status # Directive validation
-python3 .claude/hooks/brand_voice_compliance.py --status          # Voice compliance
-python3 .claude/hooks/retry_loop_detector.py --status             # Retry blocks
-python3 .claude/hooks/workflow_completion_tracker.py --status     # Completion rates
-python3 .claude/hooks/system_health_reporter.py --status          # Full health report
-python3 .claude/hooks/script_execution_benchmarker.py --status   # Performance
-python3 .claude/hooks/client_sla_monitor.py --status              # SLA tracking
-python3 .claude/hooks/error_categorizer.py --status               # Error types
-```
-
-### Customizing Hooks
-
-**Adjust agent limit:**
-```python
-# In agent_limiter.py
-MAX_AGENTS = 3  # Default is 5
-```
-
-**Adjust context thresholds:**
-```python
-# In context_budget_guard.py
-WARN_THRESHOLD = 0.50   # Default 0.60
-BLOCK_THRESHOLD = 0.80  # Default 0.85
-```
-
-**Add custom quality rules:**
-```python
-# In output_quality_gate.py, add to QUALITY_RULES dict
-"*proposal*.md": {
-    "min_words": 2500,
-    "min_sections": 7,
-    "required_keywords": ["Executive Summary", "Pricing", "Timeline", "Next Steps"]
-}
-```
-
-**Add skill bible mappings:**
-```python
-# In skill_bible_reminder.py, add to SKILL_MAPPING dict
-"proposal": ["SKILL_BIBLE_agency_sales_system.md", "SKILL_BIBLE_offer_positioning.md"]
-```
-
-**Add API key mappings:**
-```python
-# In prerequisite_api_key_mapper.py, add to SCRIPT_KEY_MAP
-"my_new_script.py": ["MY_API_KEY", "MY_SECRET"]
-```
-
-**Add API cost estimates:**
-```python
-# In api_cost_estimator.py, add to COST_MAP
-"my_expensive_script.py": {"api": "custom", "cost": 0.50}
+├── profile.md       # Business info, goals, audience, competitors
+├── rules.md         # MUST-FOLLOW rules for this client
+├── preferences.md   # Style, tone, formatting preferences
+└── history.md       # Past work, outcomes, learnings
 ```
 
 ---
 
-## Common Workflows
+## Environment Setup
 
-### 1. VSL Funnel Creation (Complete Pipeline)
+### Required API Keys
+
+| Key | Purpose | Required |
+|-----|---------|----------|
+| `OPENROUTER_API_KEY` | LLM access (Claude/GPT) | Yes |
+| `PERPLEXITY_API_KEY` | Market research | Yes |
+| `SLACK_WEBHOOK_URL` | Notifications | Yes |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Google Docs delivery | For delivery |
+| `OPENAI_API_KEY` | OpenAI direct | Optional |
+| `ANTHROPIC_API_KEY` | Direct Claude | Optional |
+| `FAL_KEY` | Image generation | Optional |
+| `APIFY_API_TOKEN` | Lead scraping | Optional |
+
+### First-Time Setup
 ```bash
-# Option A: Run the complete orchestrator
-python3 execution/generate_complete_vsl_funnel.py \
-  --company "Acme Corp" \
-  --website "https://acmecorp.com" \
-  --offer "B2B Lead Generation"
-
-# Option B: Run individual steps
-python3 execution/research_company_offer.py --company "Acme Corp" --website "https://acmecorp.com"
-python3 execution/generate_vsl_script.py --research-file ".tmp/research.json"
-python3 execution/generate_sales_page.py --vsl-file ".tmp/vsl_script.md"
-python3 execution/generate_email_sequence.py --research-file ".tmp/research.json"
+pip install -r requirements.txt
+cp .env.example .env               # Configure API keys
+# Place credentials.json in project root for Google Docs
+npm install -g @railway/cli        # Railway CLI
+railway login                      # Authenticate
 ```
 
-**Outputs:**
-- `.tmp/vsl_funnel_<company>/01_research.md`
-- `.tmp/vsl_funnel_<company>/02_vsl_script.md`
-- `.tmp/vsl_funnel_<company>/03_sales_page.md`
-- `.tmp/vsl_funnel_<company>/04_email_sequence.md`
+---
 
-### 2. Cold Email Campaign
+## Railway Dashboard
+
+**v5.0 Modular Architecture** — The dashboard has been refactored from a 5,362-line monolith into a clean, maintainable Flask application with SQLite persistence.
+
+### Architecture
+
+**Entry Point:**
+- `app.py` — Flask app initialization, registers routes
+
+**Data Layer:**
+- `database.py` — SQLite connection and initialization
+- `models.py` — Event, Execution, Deployment, and WebhookLog models
+- SQLite replaces in-memory deque for persistent storage
+
+**Business Logic:**
+- `services/deployment_service.py` — One-click deploy from UI
+- `services/railway_api.py` — Railway API integration
+- `services/webhook_service.py` — Webhook management with retry logic
+
+**Routes:**
+- `routes/views.py` — Dashboard UI endpoints
+- `routes/api.py` — RESTful API with authentication
+
+**Frontend:**
+- `templates/` — Jinja2 templates with component structure
+- `static/` — Design system, dark/light theme, visual cron builder
+
+### Key Features
+
+- **SQLite Persistence** — Events, executions, deployments, webhook logs persist across restarts
+- **One-Click Deploy** — Deploy any skill to Railway from the dashboard UI
+- **Visual Cron Builder** — Build cron schedules with interactive UI
+- **API Authentication** — API keys for programmatic access
+- **Webhook Management** — Register, test, retry, and monitor webhooks
+- **Execution Timeline** — Visual execution history with filtering
+- **Dark/Light Theme** — Design system with theme toggle
+- **Mobile Responsive** — Works on all devices
+
+### Endpoints
+
+| Endpoint | Purpose |
+|----------|---------|
+| `/` | Dashboard home with skill catalog |
+| `/workflows` | Active workflows (cron + webhook) |
+| `/executions` | Execution history with timeline view |
+| `/deployments` | Deployment history and one-click deploy wizard |
+| `/webhooks` | Webhook management UI |
+| `/env` | Environment variable management |
+| `/api/skills` | API: List all skills |
+| `/api/execute` | API: Execute a skill |
+| `/webhook/<slug>` | Public webhook endpoints |
+| `/health` | Health check (no auth) |
+
+### Deployment
+
 ```bash
-python3 execution/write_cold_emails.py \
-  --sender "John Smith" \
-  --company "Acme Corp" \
-  --offer "Lead generation service" \
-  --target "Marketing agencies"
+cd railway_apps/aiaa_dashboard
+railway up  # Deploy to Railway
+# OR
+python3 app.py  # Run locally on port 5000
 ```
 
-### 3. Market Research
-```bash
-python3 execution/research_company_offer.py \
-  --company "Target Company" \
-  --website "https://targetcompany.com" \
-  --offer "Their main product"
+**Full Railway deployment rules** are in `.claude/rules/railway-deployment.md` and `directives/deploy_to_railway.md`.
+
+---
+
+## Shared Utilities (4)
+
+All skills have access to 4 shared utilities in `.claude/skills/_shared/`:
+
+### 1. Error Reporter (`error_reporter.py`)
+**Purpose:** Centralized error reporting with Slack integration
+
+**Features:**
+- Captures full stack traces
+- Sends formatted error notifications to Slack
+- Includes context (skill name, args, timestamp)
+- Graceful degradation if Slack webhook fails
+
+**Usage:**
+```python
+from _shared.error_reporter import report_error
+
+try:
+    # Skill logic
+    pass
+except Exception as e:
+    report_error(e, skill_name="cold-email-campaign", context={"company": "Acme"})
 ```
 
-### 4. Content Generation
-```bash
-# Blog post
-python3 execution/generate_blog_post.py --topic "AI in marketing" --length 1500
+### 2. API Health Checker (`api_health.py`)
+**Purpose:** Pre-flight validation of API keys and connectivity
 
-# LinkedIn post
-python3 execution/generate_linkedin_post.py --topic "Agency growth tips"
+**Features:**
+- Tests API key validity before execution
+- Verifies network connectivity
+- Returns detailed health status
+- Prevents wasted execution on bad credentials
 
-# Newsletter
-python3 execution/generate_newsletter.py --theme "Weekly AI updates"
+**Usage:**
+```python
+from _shared.api_health import check_api_health
+
+health = check_api_health("OPENROUTER_API_KEY")
+if not health["healthy"]:
+    print(f"API health check failed: {health['error']}")
+    sys.exit(1)
 ```
+
+### 3. Resilience Decorators (`resilience.py`)
+**Purpose:** Automatic retry and fallback logic for API calls
+
+**Features:**
+- `@retry` — Automatic retry with exponential backoff
+- `@timeout` — Enforce maximum execution time
+- `@fallback` — Graceful degradation with fallback values
+- Configurable retry attempts and delay
+
+**Usage:**
+```python
+from _shared.resilience import retry, timeout
+
+@retry(max_attempts=3, delay=2)
+@timeout(seconds=30)
+def call_api():
+    # API call logic
+    pass
+```
+
+### 4. Skill Validator (`skill_validator.py`)
+**Purpose:** Validate skill structure and integrity
+
+**Features:**
+- Verifies SKILL.md exists and is valid
+- Checks Python script exists and is executable
+- Validates required arguments are documented
+- Ensures quality gates are defined
+
+**Usage:**
+```python
+from _shared.skill_validator import validate_skill
+
+is_valid, errors = validate_skill("cold-email-campaign")
+if not is_valid:
+    print(f"Skill validation failed: {errors}")
+```
+
+**When to use shared utilities:**
+- Error Reporter: In every skill's exception handler
+- API Health: Before expensive API operations
+- Resilience: Around all external API calls
+- Skill Validator: When creating or modifying skills
 
 ---
 
 ## Modal Serverless Deployment
 
-Execution scripts can be deployed to Modal as serverless webhooks. This gives workflows a public URL that can be triggered by external services (Calendly, Stripe, cron, etc.) without running a server.
+Deploy execution scripts as serverless webhooks on Modal.
 
-### Deploy Command
-```bash
-modal deploy execution/<script>.py
-```
+**Deploy:** `modal deploy .claude/skills/<skill-name>/<script>.py`
 
-### Currently Deployed Apps
-
-| App | Endpoints | Purpose |
-|-----|-----------|---------|
-| `calendly-meeting-prep` | webhook, health | Auto-research when meetings booked |
-| `slack-test` | webhook, health | Test Modal → Slack pipeline |
-
-### Modal Secrets (configured at modal.com)
-
-| Secret Name | Environment Variable |
-|-------------|---------------------|
-| `openrouter-secret` | OPENROUTER_API_KEY |
-| `perplexity-secret` | PERPLEXITY_API_KEY |
-| `slack-webhook` | SLACK_WEBHOOK_URL |
-| `google-service-account` | GOOGLE_SERVICE_ACCOUNT_JSON |
-| `calendly-secret` | CALENDLY_API_KEY |
-
-### Critical: dotenv Import Pattern
-
-Scripts deployed to Modal MUST separate `requests` and `dotenv` imports. Modal containers don't have `python-dotenv` installed, and bundling both in a single `try/except sys.exit(1)` block crashes the container silently (requests hang forever, no error returned).
-
+**Critical rule:** Separate `requests` and `dotenv` imports (Modal has no `python-dotenv`):
 ```python
-# CORRECT - works on Modal and locally
 try:
     import requests
 except ImportError:
@@ -846,1060 +732,40 @@ except ImportError:
     pass  # Not needed on Modal
 ```
 
-**37 scripts in `execution/` still have the crash-causing pattern.** Fix each one before deploying to Modal.
+**Free tier limits:** 8 web endpoints max, 30 compute hours/month.
 
-### Free Tier Limits
-- **8 web endpoints max** (across all apps, ~4 apps with webhook+health each)
-- 30 compute hours/month
-- Cold starts: 2-10 seconds after idle
-
-### Managing Apps
-```bash
-modal app list                    # See all apps and status
-modal app stop <app-id>           # Free up endpoints
-modal app logs <app-name>         # Debug failures
-modal secret list                 # Check configured secrets
-```
-
-### Debugging Hangs
-If `curl` connects but never returns:
-1. Run `modal app logs <app-name>` — usually reveals an import crash
-2. Check that all declared `modal.Secret.from_name()` secrets exist
-3. Verify the script runs locally with `python3 execution/<script>.py --test`
+Use the `modal-deploy` skill or `deployer` subagent for deployment operations.
 
 ---
 
-## AIAA Dashboard & Webhook Deployment
+## Quality Rules
 
-All workflows are managed through the AIAA Dashboard deployed on Railway. The dashboard provides a central hub for monitoring, executing, and configuring workflows.
-
-### Dashboard Features
-
-| Feature | Description |
-|---------|-------------|
-| **150+ Workflows** | Full documentation with prerequisites, how-to-run, and process steps |
-| **Active Workflows** | Dynamic discovery of cron + webhook workflows from Railway API |
-| **Webhook Workflows** | Register, test, toggle, and delete webhook endpoints — no rebuild needed |
-| **HTTP Forwarding** | Route webhook payloads to standalone processing services via `forward_url` |
-| **Cron Management** | Schedule editor, toggle, Run Now, and delete for cron workflows |
-| **Light/Dark Mode** | Toggle with localStorage persistence |
-| **Environment Variables** | View and set API keys from the UI |
-| **Real-time Logs** | See all workflow executions and webhook events |
-| **Mobile Responsive** | Works on phones and tablets |
-| **Password Protected** | Secure SHA-256 hashed login |
-
-### Deploy Dashboard to Railway
-
-**Prerequisites:**
-```bash
-npm install -g @railway/cli
-railway login
-```
-
-**Deploy:**
-```bash
-cd railway_apps/aiaa_dashboard
-railway init          # Select "Empty Project"
-railway up            # Deploy the app
-```
-
-**Configure Environment Variables:**
-
-**Dashboard-specific variables (set per-service):**
-```bash
-# Generate password hash
-python3 << 'PYHASH'
-import hashlib
-password = "your-password"
-print(hashlib.sha256(password.encode()).hexdigest())
-PYHASH
-
-# Set dashboard auth variables
-railway variables set DASHBOARD_USERNAME="admin"
-railway variables set DASHBOARD_PASSWORD_HASH="<hash-from-above>"
-railway variables set FLASK_SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
-railway variables set RAILWAY_API_TOKEN="<your-railway-api-token>"
-
-# Generate public domain
-railway domain
-```
-
-**API Keys as Project-Wide Shared Variables:**
-
-API keys are set as **project-level shared variables** so ALL services inherit them automatically. Set them once via the dashboard's Environment page or the shared variables API:
-
-```bash
-# Via the dashboard UI: go to Environment page, set each key
-# Via the API (from any script that can reach the dashboard):
-curl -X POST "https://your-dashboard.up.railway.app/api/shared-variables/sync" \
-  -H "Content-Type: application/json" -H "Cookie: session=$SESSION" \
-  -d '{"variables": {"OPENROUTER_API_KEY": "...", "PERPLEXITY_API_KEY": "..."}}'
-```
-
-The deploy script (`execution/deploy_to_railway.py`) automatically syncs API keys as shared variables during deployment.
-
-**Required Variables:**
-| Variable | Scope | Required For |
-|----------|-------|-------------|
-| `DASHBOARD_USERNAME` | Dashboard service | Dashboard login |
-| `DASHBOARD_PASSWORD_HASH` | Dashboard service | Dashboard login |
-| `FLASK_SECRET_KEY` | Dashboard service | Session security |
-| `RAILWAY_API_TOKEN` | Dashboard service | Cron management, shared variable sync |
-| `OPENROUTER_API_KEY` | **Shared (project)** | All AI generation workflows |
-| `PERPLEXITY_API_KEY` | **Shared (project)** | Research workflows |
-| `ANTHROPIC_API_KEY` | **Shared (project)** | Direct Claude access |
-| `SLACK_WEBHOOK_URL` | **Shared (project)** | Notifications |
-| `FAL_KEY` | **Shared (project)** | Image generation |
-| `APIFY_API_TOKEN` | **Shared (project)** | Lead scraping |
-| `CALENDLY_API_KEY` | **Shared (project)** | Calendly integration |
-| `INSTANTLY_API_KEY` | **Shared (project)** | Email outreach |
-
-### Dashboard Endpoints
-
-Once deployed, your dashboard provides these endpoints:
-
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
-| `/` | GET | Yes | Dashboard home |
-| `/health` | GET | No | Health check |
-| `/login` | GET/POST | No | Authentication |
-| `/workflows` | GET | Yes | Active Workflows page (cron + webhook) |
-| `/workflow/<id>` | GET | Yes | Workflow details & documentation |
-| `/env` | GET | Yes | Environment variable management |
-| `/logs` | GET | Yes | Execution logs |
-| **Cron Workflow API** | | | |
-| `/api/active-workflows` | GET | Yes | List active cron workflows (JSON) |
-| `/api/active-workflows/refresh` | POST | Yes | Invalidate cache, re-fetch from Railway |
-| `/api/workflow/toggle` | POST | Yes | Enable/disable cron schedule |
-| `/api/workflow/schedule` | POST | Yes | Update cron schedule |
-| `/api/workflow/run-now` | POST | Yes | Trigger immediate cron execution |
-| `/api/workflow/delete` | POST | Yes | Delete a cron workflow service |
-| **Webhook Workflow API** | | | |
-| `/api/webhook-workflows` | GET | Yes | List all registered webhooks |
-| `/api/webhook-workflows/register` | POST | Yes | Register new webhook (no rebuild) |
-| `/api/webhook-workflows/unregister` | POST | Yes | Delete a webhook workflow |
-| `/api/webhook-workflows/toggle` | POST | Yes | Enable/disable a webhook |
-| `/api/webhook-workflows/test` | POST | Yes | Send test payload to a webhook |
-| `/webhook/<slug>` | POST | No | Public webhook endpoint (receives external payloads) |
-| **Shared Variables API** | | | |
-| `/api/shared-variables` | GET | Yes | List all project-level shared variables (redacted) |
-| `/api/shared-variables/set` | POST | Yes | Set a single shared variable |
-| `/api/shared-variables/sync` | POST | Yes | Bulk-set multiple shared variables |
-
-### Webhook Workflow System
-
-The dashboard hosts a complete webhook workflow system. Webhooks are **registered via live API calls** — no rebuild or redeploy required. They appear on the Active Workflows page alongside cron workflows.
-
-**Two Types of Active Workflows:**
-| Type | Trigger | Managed By | Deploy Method |
-|------|---------|------------|---------------|
-| **Cron Workflows** | Railway cron schedule | Railway API (`serviceInstanceUpdate`) | `railway up --service <name>` |
-| **Webhook Workflows** | External HTTP POST | Dashboard in-memory registry | `POST /api/webhook-workflows/register` (no rebuild) |
-
-**Webhook Architecture:**
-```
-Registration (no rebuild):
-  POST /api/webhook-workflows/register
-    → Updates in-memory _webhook_registry (instant)
-    → Persists to WEBHOOK_CONFIG env var via Railway API (background, best-effort)
-    → Writes webhook_config.json to disk (backup)
-
-On startup, dashboard loads config from:
-  1. WEBHOOK_CONFIG env var (primary — survives restarts)
-  2. webhook_config.json file (seed fallback — first deploy only)
-
-Incoming webhook (no forward_url):
-  POST /webhook/<slug>
-    → Checks in-memory registry
-    → Returns 404 if not registered, 503 if disabled
-    → Sends Slack notification (if slack_notify: true)
-    → Returns 200 with JSON response
-
-Incoming webhook (with forward_url):
-  POST /webhook/<slug>
-    → Checks in-memory registry
-    → Forwards payload to forward_url as POST:
-        {webhook_slug, webhook_name, source, payload, timestamp}
-    → Returns processing service response to caller
-    → Returns 502 if forward fails
-```
-
-**Register a Webhook (no rebuild):**
-```bash
-# Via execution script
-python3 execution/deploy_webhook_workflow.py \
-  --slug ai-news \
-  --name "AI News Digest" \
-  --description "Fetches AI news via Perplexity" \
-  --source "Automation" \
-  --forward-url "https://ai-news-processor.up.railway.app/process" \
-  --slack-notify
-
-# Via curl
-curl -X POST "https://your-dashboard.up.railway.app/api/webhook-workflows/register" \
-  -H "Content-Type: application/json" \
-  -H "Cookie: session=$SESSION" \
-  -d '{"slug": "ai-news", "name": "AI News", "description": "...", "source": "Automation", "slack_notify": true}'
-```
-
-**Register Payload Fields:**
-| Field | Required | Description |
-|-------|----------|-------------|
-| `slug` | Yes | URL slug — maps to `/webhook/<slug>`. Lowercase, hyphens only. |
-| `name` | Yes | Display name in dashboard UI |
-| `description` | No | What happens when webhook fires |
-| `source` | No | External service name (badge in UI). Default: "Unknown" |
-| `slack_notify` | No | Send Slack notification on receive. Default: false |
-| `enabled` | No | Active on registration. Default: true |
-| `forward_url` | No | URL to forward payloads to for custom processing |
-
-**Dashboard UI Actions (all work without rebuild):**
-- **Copy URL** — copies the public webhook endpoint URL
-- **Test** — sends a test payload to the webhook
-- **Toggle** — enable/disable the webhook
-- **Delete** — unregisters the webhook, refreshes the page
-
-**HTTP Forwarding for Custom Processing:**
-Set `forward_url` to route payloads to a standalone processing service. The dashboard acts as a router — receives the webhook, wraps the payload with metadata, and forwards it. No dashboard rebuild needed for custom processing logic.
-
-**Key Files:**
-- `railway_apps/aiaa_dashboard/app.py` — webhook handler, registry, shared variables API, all endpoints
-- `railway_apps/aiaa_dashboard/workflow_config.json` — workflow metadata (friendly names, descriptions)
-- `execution/deploy_to_railway.py` — unified deploy script (cron, webhook, web) with shared variable sync
-- `directives/deploy_to_railway.md` — full deployment SOP
-
-### Workflow Execution via Dashboard
-
-**Option 1: Manual Execution (Dashboard UI)**
-1. Login to dashboard
-2. Navigate to Workflows
-3. Find workflow (search or browse)
-4. Click workflow for full documentation
-5. Copy the execution command
-6. Run in Claude Code
-
-**Option 2: Direct Script Execution**
-```bash
-# All workflows run via execution scripts
-python3 execution/<workflow_script>.py --arg1 "value" --arg2 "value"
-```
-
-**Option 3: Webhook Trigger**
-External services trigger workflows automatically via webhooks configured in the dashboard.
-
-### Viewing Workflow Documentation
-
-Each workflow in the dashboard includes:
-- **Description**: What the workflow does
-- **Prerequisites**: Required API keys and setup
-- **How to Run**: Exact command with arguments
-- **Process Steps**: Step-by-step breakdown
-- **Inputs/Outputs**: Expected data format
-- **Related Workflows**: Connected workflows
+| Deliverable | Min Words | Notes |
+|-------------|-----------|-------|
+| VSL Scripts | 3000 | Full persuasion script |
+| Sales Pages | 2000 | Long-form copy |
+| Case Studies | 1500 | Detailed success story |
+| Blog Posts | 1200 | SEO long-form |
+| YouTube Scripts | 1500 | Full video script |
+| Newsletters | 800 | Digest format |
+| Email Sequences | 300/email | Per email |
+| LinkedIn Posts | 150-3000 chars | Platform limits |
 
 ---
 
-## Publishing Workflows to Railway (CRITICAL)
+## Creating New Capabilities
 
-**MANDATORY DIRECTIVE:** Whenever you are asked to deploy, publish, or schedule ANY workflow, you MUST read and follow this entire section. Do not skip any rules. This applies to ALL workflow deployments without exception.
+When no skill, directive, or script exists:
 
-**IMPORTANT:** When instructed to publish, deploy, or schedule a workflow, you MUST read your `/directives/deploy_to_railway.md` directive AND use the unified deploy script:
-
-```bash
-# Deploy any workflow (auto-detects type, sets shared vars, registers with dashboard)
-python3 execution/deploy_to_railway.py --directive <name> --auto
-
-# Or specify type explicitly
-python3 execution/deploy_to_railway.py --directive <name> --type cron --schedule "0 */3 * * *" --auto
-python3 execution/deploy_to_railway.py --directive <name> --type webhook --slug <slug> --slack-notify --auto
-python3 execution/deploy_to_railway.py --directive <name> --type web --auto
-```
-
-The deploy script handles ALL of the following automatically: scaffolding, deployment, shared variable sync, cron configuration, webhook registration, and `workflow_config.json` updates.
-
-### Rule 1: Same Railway Project as Dashboard
-ALL workflows MUST be deployed to the **SAME Railway project** where the AIAA Dashboard was installed during initial setup. Never create separate Railway projects for individual workflows.
-
-**To find the dashboard project:**
-```bash
-cd railway_apps/aiaa_dashboard
-railway status
-# Note the Project name/ID
-```
-
-**To deploy a new workflow service to the same project:**
-```bash
-cd railway_apps/<new_workflow>
-railway link -p <DASHBOARD_PROJECT_ID>
-railway up
-```
-
-### Rule 2: Register Workflow in Dashboard Config
-
-After deploying ANY scheduled workflow (cron job), update the workflow metadata config:
-
-**Location:** `railway_apps/aiaa_dashboard/workflow_config.json`
-
-```json
-{
-  "project_id": "3b96c81f-9518-4131-b2bc-bcd7a524a5ef",
-  "cache_ttl_seconds": 300,
-  "workflows": {
-    "<SERVICE_ID>": {
-      "name": "Friendly Workflow Name",
-      "description": "What this workflow does",
-      "enabled": true
-    }
-  }
-}
-```
-
-**How it works:**
-- The dashboard dynamically queries Railway API for all services with cron schedules in the project
-- Any service with a `cronSchedule` set automatically appears in Active Workflows
-- The `workflow_config.json` provides friendly names and descriptions (without it, the raw Railway service name is used)
-- Results are cached for 5 minutes (configurable via `cache_ttl_seconds`)
-- **Requires `RAILWAY_API_TOKEN`** to be set on the dashboard service (see Rule 7)
-
-**When you need to redeploy the dashboard vs. not:**
-- **NO redeploy needed:** Changing a cron schedule, disabling/enabling cron, triggering a run — the API query picks up live state
-- **Redeploy needed:** Adding a new entry to `workflow_config.json` for friendly name/description (the file is baked into the dashboard deployment)
-- **No action needed:** A new cron service deployed to the project auto-appears with its raw Railway service name even without a config entry
-
-**To get the SERVICE_ID after deploying:**
-```bash
-# Use --json to get the actual service ID (plain text output shows deployment IDs, NOT service IDs)
-cd railway_apps/<new_workflow>
-railway service status --all --json
-# Look for the "id" field — that is the service ID
-# The UUID shown in plain-text output (middle column) is the DEPLOYMENT ID, not the service ID
-```
-
-**To force refresh the workflow list (optional):**
-Call POST `/api/active-workflows/refresh` while logged into the dashboard.
-
-### Rule 3: Environment Variables via Shared Variables
-API keys are now **project-level shared variables** -- set once, inherited by all services automatically. The deploy script (`deploy_to_railway.py`) syncs them via the dashboard's `/api/shared-variables/sync` endpoint during deployment.
-
-**Shared API keys** (set once, all services get them):
-- OPENROUTER_API_KEY, PERPLEXITY_API_KEY, SLACK_WEBHOOK_URL, ANTHROPIC_API_KEY, FAL_KEY, APIFY_API_TOKEN, INSTANTLY_API_KEY, CALENDLY_API_KEY
-
-**Service-specific variables** (set per-service, e.g. GOOGLE_OAUTH_TOKEN_PICKLE) are still set via Railway CLI by the deploy script.
-
-**To manually sync shared variables:**
-```bash
-# Via dashboard Environment page (sets project-wide shared variables)
-# Or via API:
-curl -X POST "https://your-dashboard.up.railway.app/api/shared-variables/sync" \
-  -H "Content-Type: application/json" -H "Cookie: session=$SESSION" \
-  -d '{"variables": {"OPENROUTER_API_KEY": "...", "PERPLEXITY_API_KEY": "..."}}'
-```
-
-**Check the workflow's directive** (`directives/<workflow>.md`) for the "Prerequisites" section listing required API keys.
-
-### Rule 4: Google OAuth Token for Google Services
-If a workflow creates Google Docs, Sheets, or uses ANY Google API, you MUST upload the `token.pickle` OAuth token:
-
-```bash
-# 1. Check if workflow uses Google services
-grep -l "google" railway_apps/<workflow>/*.py
-
-# 2. If yes, find token.pickle (should be in project root)
-ls -la token.pickle
-
-# 3. Base64 encode and upload to Railway
-python3 -c "
-import base64
-with open('token.pickle', 'rb') as f:
-    print(base64.b64encode(f.read()).decode())
-" | railway variables set GOOGLE_OAUTH_TOKEN_PICKLE="$(cat)"
-
-# Or manually:
-TOKEN=$(python3 -c "import base64; print(base64.b64encode(open('token.pickle','rb').read()).decode())")
-railway variables set GOOGLE_OAUTH_TOKEN_PICKLE="$TOKEN"
-```
-
-**Why:** Service accounts have 0 GB storage quota and cannot create files. OAuth user tokens use YOUR Google account's storage.
-
-### Publishing Checklist
-When publishing a workflow, complete ALL steps:
-
-- [ ] Deploy to SAME Railway project as dashboard (`railway link -p <PROJECT_ID> && railway up`)
-- [ ] Set ALL required environment variables (Railway CLI or embed as fallback — see Rule 3 and gotchas)
-- [ ] **If workflow uses Google APIs:** Upload `GOOGLE_OAUTH_TOKEN_PICKLE` (base64 encoded token.pickle)
-- [ ] Set cron schedule via `serviceInstanceUpdate` GraphQL mutation (railway.json alone is not enough)
-- [ ] Add entry to `railway_apps/aiaa_dashboard/workflow_config.json` with service ID, friendly name, and description
-- [ ] Redeploy dashboard to pick up the new config entry (`railway up --service aiaa-dashboard`)
-- [ ] Verify workflow appears in dashboard Active Workflows page
-- [ ] Test that workflow runs successfully (use "Run Now" button or `deploymentInstanceExecutionCreate` mutation)
-
-### Rule 5: Google Docs Formatting (NOT Markdown)
-When creating Google Docs, content MUST be formatted using native Google Docs formatting (headings, bold, dividers), NOT raw markdown text. Markdown syntax like `# Heading` or `**bold**` will appear as literal text in Google Docs.
-
-**Required Formatting Approach:**
-```python
-def format_content_for_google_docs(markdown_content: str) -> list:
-    """Convert markdown to Google Docs API formatting requests."""
-    import re
-
-    requests = []
-    current_index = 1
-
-    lines = markdown_content.split('\n')
-
-    for line in lines:
-        if not line.strip():
-            # Empty line - add newline
-            requests.append({
-                'insertText': {'location': {'index': current_index}, 'text': '\n'}
-            })
-            current_index += 1
-            continue
-
-        # Check for horizontal rule
-        if line.strip() == '---':
-            requests.append({
-                'insertText': {'location': {'index': current_index}, 'text': '\n'}
-            })
-            current_index += 1
-            requests.append({
-                'insertSectionBreak': {
-                    'location': {'index': current_index},
-                    'sectionType': 'CONTINUOUS'
-                }
-            })
-            continue
-
-        # Process headings (# ## ###)
-        heading_match = re.match(r'^(#{1,6})\s+(.+)$', line)
-        if heading_match:
-            level = len(heading_match.group(1))
-            text = heading_match.group(2) + '\n'
-            heading_type = {1: 'HEADING_1', 2: 'HEADING_2', 3: 'HEADING_3'}.get(level, 'HEADING_4')
-
-            requests.append({
-                'insertText': {'location': {'index': current_index}, 'text': text}
-            })
-            requests.append({
-                'updateParagraphStyle': {
-                    'range': {'startIndex': current_index, 'endIndex': current_index + len(text)},
-                    'paragraphStyle': {'namedStyleType': heading_type},
-                    'fields': 'namedStyleType'
-                }
-            })
-            current_index += len(text)
-            continue
-
-        # Process bold text **text**
-        text = line + '\n'
-        requests.append({
-            'insertText': {'location': {'index': current_index}, 'text': text}
-        })
-
-        # Find and format bold sections
-        for match in re.finditer(r'\*\*(.+?)\*\*', line):
-            start = current_index + match.start()
-            end = current_index + match.end()
-            requests.append({
-                'updateTextStyle': {
-                    'range': {'startIndex': start, 'endIndex': end},
-                    'textStyle': {'bold': True},
-                    'fields': 'bold'
-                }
-            })
-
-        current_index += len(text)
-
-    return requests
-```
-
-**Key Formatting Elements:**
-| Markdown | Google Docs API |
-|----------|-----------------|
-| `# Heading` | `updateParagraphStyle` with `HEADING_1` |
-| `## Subhead` | `updateParagraphStyle` with `HEADING_2` |
-| `**bold**` | `updateTextStyle` with `bold: True` |
-| `---` | `insertSectionBreak` (horizontal rule) |
-| `- item` | `createParagraphBullets` |
-
-**NEVER** insert raw markdown into Google Docs. Always convert to native formatting.
-
-### Rule 6: Railway GraphQL API for Cron Management
-The dashboard uses Railway's GraphQL API to manage cron schedules. Critical learnings:
-
-**API Endpoint:** `https://backboard.railway.app/graphql/v2`
-
-**To disable a cron schedule:**
-```graphql
-mutation {
-  serviceInstanceUpdate(
-    serviceId: "SERVICE_ID",
-    environmentId: "ENV_ID",
-    input: { cronSchedule: null }  # MUST be null, NOT empty string ""
-  )
-}
-```
-
-**To enable/restore a cron schedule:**
-```graphql
-mutation {
-  serviceInstanceUpdate(
-    serviceId: "SERVICE_ID",
-    environmentId: "ENV_ID",
-    input: { cronSchedule: "0 */3 * * *" }
-  )
-}
-```
-
-**To check cron status:**
-```graphql
-query {
-  service(id: "SERVICE_ID") {
-    serviceInstances {
-      edges { node { cronSchedule environmentId } }
-    }
-  }
-}
-```
-
-**To trigger immediate cron execution (Run Now):**
-```graphql
-# First get the service instance ID (NOT service_id)
-query {
-  service(id: "SERVICE_ID") {
-    serviceInstances { edges { node { id } } }
-  }
-}
-
-# Then trigger execution
-mutation {
-  deploymentInstanceExecutionCreate(input: {
-    serviceInstanceId: "SERVICE_INSTANCE_ID"
-  })
-}
-```
-
-**Critical Gotchas:**
-- `cronSchedule: ""` (empty string) causes "Problem processing request" error
-- `cronSchedule: null` properly disables the cron
-- `ServiceUpdateInput` only has `icon` and `name` - use `ServiceInstanceUpdateInput` for cron
-- `serviceInstanceRedeploy` fails if no existing deployment - use `railway up` CLI instead
-- After removing a deployment, the service shows "offline" even with cron set - must redeploy
-- `deploymentInstanceExecutionCreate` triggers immediate cron run, bypassing schedule
-- `serviceInstanceId` is different from `serviceId` - get it from `service.serviceInstances.edges[].node.id`
-- `variableUpsert` mutation may timeout with 504 Gateway errors - workaround: embed credentials in code with env var fallback (e.g., `os.getenv("VAR") or "fallback_value"`)
-- `serviceInstanceUpdate` works reliably even when `variableUpsert` times out
-- `railway link <PROJECT_ID>` (positional arg) fails — must use `railway link -p <PROJECT_ID>` with the `-p` flag
-- `railway service status --all` plain text output shows **deployment IDs** in the middle column, NOT service IDs. Use `--json` flag to get actual service IDs (the `"id"` field)
-- `railway up` with multiple services requires `--service <name>` flag to specify which service to deploy
-- macOS does not have the `timeout` command — use Python `subprocess` with timeout or background process with `sleep` + kill instead
-- `railway.json` `cronSchedule` field is only applied on initial deploy — subsequent schedule changes must use `serviceInstanceUpdate` GraphQL mutation
-- Dynamic workflow loading on the dashboard requires `RAILWAY_API_TOKEN` to be set as an env var on the dashboard service
-
-### Rule 7: Dashboard RAILWAY_API_TOKEN
-The dashboard needs a Railway API token to manage cron schedules AND to dynamically load active workflows. Set it in Railway:
-
-```bash
-# Get token from Railway CLI config (stored at ~/.railway/config.json)
-TOKEN=$(python3 -c "import json; d=json.load(open('$HOME/.railway/config.json')); print(d.get('user', {}).get('token', ''))")
-
-# Set in Railway for dashboard service (preferred method — CLI)
-cd railway_apps/aiaa_dashboard
-railway variables set RAILWAY_API_TOKEN="$TOKEN" --service aiaa-dashboard
-```
-
-**Fallback if `railway variables set` times out:** Embed the token directly in app.py as a fallback:
-```python
-RAILWAY_API_TOKEN = os.getenv("RAILWAY_API_TOKEN", "<PASTE_TOKEN_HERE>")
-```
-
-**Do NOT use** `variableUpsert` GraphQL mutation for this — it is known to timeout with 504 errors (see gotchas above).
-
-### Rule 8: Dashboard Schedule Editor
-The dashboard has a granular schedule editor for cron jobs with these components:
-
-**UI Elements:**
-- Interval input (1-24) - how often to run
-- Unit selector ("hours" or "days")
-- Minute input (0-59) - when within the hour
-- Save button - applies changes to Railway
-- Current cron display - shows actual expression
-
-**Cron Expression Builder:**
-```javascript
-// Every N hours at minute X
-if (unit === 'hours') {
-    if (interval === 1) return `${minute} * * * *`;
-    return `${minute} */${interval} * * *`;
-}
-// Every N days at 00:XX
-if (unit === 'days') {
-    if (interval === 1) return `${minute} 0 * * *`;
-    return `${minute} 0 */${interval} * *`;
-}
-```
-
-**Human-Readable Conversion (cronToText):**
-| Cron Pattern | Display Text |
-|--------------|--------------|
-| `0 */3 * * *` | "Every 3 hours" |
-| `30 * * * *` | "Every hour at :30" |
-| `0 0 * * *` | "Daily at 00:00" |
-| `0 9 * * *` | "Daily at 09:00" |
-| `0 0 */2 * *` | "Every 2 days" |
-
-**Key Implementation Notes:**
-- Schedule text updates dynamically on save AND on page load
-- Editor parses current cron to pre-populate inputs
-- Uses `data-service-id` attributes to link displays to workflows
-- RAILWAY_API_TOKEN must be set for API calls to work
-
-### Rule 9: Dynamic Workflow Discovery Architecture
-
-The dashboard's Active Workflows page loads workflows dynamically from Railway's API rather than a hardcoded list. Here is how the system works:
-
-**Data Flow:**
-1. User visits `/workflows` (Active Workflows page)
-2. `fetch_active_workflows_from_railway()` checks in-memory cache (TTL: 5 min)
-3. If cache expired, queries Railway GraphQL API: `project.services.edges[].node.serviceInstances.edges[].node.cronSchedule`
-4. Filters to only services with a non-null `cronSchedule`
-5. Merges with `workflow_config.json` for friendly names/descriptions
-6. Caches result and returns to template
-
-**Key Files:**
-- `railway_apps/aiaa_dashboard/app.py` — `fetch_active_workflows_from_railway()`, `parse_cron_to_readable()`, `invalidate_workflow_cache()`
-- `railway_apps/aiaa_dashboard/workflow_config.json` — service ID → friendly name/description mapping
-
-**API Endpoints:**
-- `GET /api/active-workflows` — returns current workflow list as JSON
-- `POST /api/active-workflows/refresh` — invalidates cache and re-fetches from Railway API
-
-**Cache Invalidation Triggers:**
-- Automatic: cache expires after `cache_ttl_seconds` (default 300s)
-- Manual: `POST /api/active-workflows/refresh`
-- On delete: `api_workflow_delete()` calls `invalidate_workflow_cache()` after successful deletion
-
-### Rule 10: Webhook Workflow Deployment
-
-**IMPORTANT:** Webhook workflows now deploy as **standalone Railway services** (just like cron workflows) with a Flask app. The dashboard registers a webhook slug with a `forward_url` pointing to the standalone service. Use the unified deploy script:
-
-```bash
-# Deploy webhook workflow (deploys standalone service + registers webhook on dashboard)
-python3 execution/deploy_to_railway.py --directive calendly_meeting_prep --type webhook --slug calendly --slack-notify --auto
-```
-
-**Key Differences from Cron Deployment:**
-| Aspect | Cron Workflows | Webhook Workflows |
-|--------|---------------|-------------------|
-| Deploy method | `deploy_to_railway.py --type cron` | `deploy_to_railway.py --type webhook` |
-| Service type | Standalone with `run.py` + `railway.json` | Standalone Flask app with `/webhook` endpoint |
-| Dashboard integration | Auto-appears via Railway API | Webhook registered with `forward_url` to service |
-| Trigger | Railway cron schedule | External HTTP POST → dashboard → forward to service |
-| Processing | In standalone service | In standalone service (heavy processing supported) |
-
-**Architecture:**
-```
-External Service (Calendly, Stripe, etc.)
-    → POST /webhook/<slug> on dashboard
-    → Dashboard forwards payload to standalone service's /webhook endpoint
-    → Standalone service does the heavy processing (API calls, doc creation, etc.)
-```
-
-**Webhook Persistence:**
-- **In-memory registry** is the source of truth (instant updates)
-- **WEBHOOK_CONFIG env var** provides durability across restarts (set via Railway API, best-effort)
-- **webhook_config.json** is seed data for first deploy only (file is baked into image)
-
-**Webhook Deployment Checklist:**
-- [ ] Standalone service deployed and healthy
-- [ ] Webhook registered on dashboard with `forward_url` pointing to service
-- [ ] Webhook visible in dashboard Active Workflows page
-- [ ] Test button works from dashboard UI
-- [ ] External service configured to POST to dashboard webhook URL
+1. **Check existing:** `ls .claude/skills/ | grep -i "<keyword>"`
+2. **Create skill** (preferred): New folder `.claude/skills/<name>/` with `SKILL.md` + `.py` script
+3. **Create directive** (optional reference): `directives/<name>.md` with inputs, steps, quality gates
+4. **Create skill bible** (if new domain): `skills/SKILL_BIBLE_<topic>.md`
 
 ---
 
-## Key Execution Scripts
+## Your Role
 
-### Content & Copy
-| Script | Purpose |
-|--------|---------|
-| `generate_vsl_funnel.py` | Complete VSL + landing page + emails |
-| `generate_vsl_script.py` | VSL script only |
-| `generate_sales_page.py` | Sales page copy |
-| `generate_email_sequence.py` | Email nurture sequence |
-| `generate_blog_post.py` | Long-form blog content |
-| `generate_linkedin_post.py` | LinkedIn content |
-| `write_cold_emails.py` | Cold email sequences |
+You are the **orchestrator**. Parse intent → Plan (if complex) → Find the right skill → Load context → Execute → Review → Deliver → Self-anneal.
 
-### Research & Data
-| Script | Purpose |
-|--------|---------|
-| `research_company_offer.py` | Deep company research via Perplexity |
-| `research_market_deep.py` | Market/industry research |
-| `research_prospect_deep.py` | Individual prospect research |
-| `scrape_linkedin_apify.py` | LinkedIn profile scraping |
-
-### Delivery & Integration
-| Script | Purpose |
-|--------|---------|
-| `create_google_doc.py` | Upload to Google Docs |
-| `send_slack_notification.py` | Send Slack messages |
-
-### Dashboard & Deployment
-| Script | Purpose |
-|--------|---------|
-| `deploy_aiaa_dashboard.py` | Deploy/update AIAA dashboard to Railway |
-| `deploy_to_railway.py` | Unified deploy for any workflow (cron, webhook, web) with shared variable sync |
-
-### Utilities
-| Script | Purpose |
-|--------|---------|
-| `convert_n8n_to_directive.py` | Convert N8N JSON to directive |
-| `parse_vtt_transcript.py` | Extract text from VTT files |
-| `validate_emails.py` | Email validation |
-
----
-
-## Skill Bibles
-
-Skill bibles provide deep domain expertise. Load relevant ones before execution.
-
-### Finding Skill Bibles
-```bash
-# List all skill bibles
-ls skills/SKILL_BIBLE_*.md
-
-# Search by topic
-ls skills/ | grep -i "vsl\|funnel\|email\|sales"
-```
-
-### Key Skill Bibles by Category
-
-**VSL & Funnels:**
-- `SKILL_BIBLE_vsl_writing_production.md`
-- `SKILL_BIBLE_vsl_script_mastery_fazio.md`
-- `SKILL_BIBLE_funnel_copywriting_mastery.md`
-- `SKILL_BIBLE_agency_funnel_building.md`
-
-**Cold Email & Outreach:**
-- `SKILL_BIBLE_cold_email_mastery.md`
-- `SKILL_BIBLE_cold_dm_email_conversion.md`
-- `SKILL_BIBLE_email_deliverability.md`
-
-**Agency & Sales:**
-- `SKILL_BIBLE_agency_sales_system.md`
-- `SKILL_BIBLE_agency_scaling_roadmap.md`
-- `SKILL_BIBLE_offer_positioning.md`
-
-**AI & Automation:**
-- `SKILL_BIBLE_ai_automation_agency.md`
-- `SKILL_BIBLE_monetizable_agentic_workflows.md`
-- `SKILL_BIBLE_ai_prompting_workflows.md`
-
----
-
-## Creating New Capabilities (Leader Manufacturing)
-
-When a capability doesn't exist:
-
-### Step 1: Check If It Really Doesn't Exist
-```bash
-ls directives/ | grep -i "<keyword>"
-ls execution/ | grep -i "<keyword>"
-ls skills/ | grep -i "<keyword>"
-```
-
-### Step 2: Create New Directive
-```markdown
-# directives/new_workflow.md
-
-## What This Workflow Is
-[One paragraph description]
-
-## What It Does
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
-
-## Prerequisites
-- Required API keys
-- Required skill bibles
-- Installation commands
-
-## How to Run
-```bash
-python3 execution/new_workflow.py --arg1 "value"
-```
-
-## Inputs
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| arg1 | string | Yes | Description |
-
-## Process
-### Step 1: [Name]
-[Details]
-
-### Step 2: [Name]
-[Details]
-
-## Quality Gates
-- [ ] Check 1
-- [ ] Check 2
-
-## Edge Cases
-- Edge case 1 → Solution
-- Edge case 2 → Solution
-```
-
-### Step 3: Create Execution Script
-```python
-#!/usr/bin/env python3
-"""
-New Workflow - [Description]
-
-Usage:
-    python3 execution/new_workflow.py --arg1 "value"
-"""
-
-import argparse
-import os
-from pathlib import Path
-from dotenv import load_dotenv
-
-load_dotenv()
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--arg1", required=True)
-    args = parser.parse_args()
-    
-    # Implementation
-    print(f"Running with {args.arg1}")
-    
-if __name__ == "__main__":
-    main()
-```
-
-### Step 4: Create Skill Bible (If Needed)
-If this is a new domain, create `skills/SKILL_BIBLE_<topic>.md` with:
-- Executive Summary
-- Core Principles
-- Techniques & Tactics
-- Common Mistakes
-- Quality Checklist
-
----
-
-## Self-Annealing Protocol
-
-After EVERY task completion:
-
-### 1. Check for Errors
-Did anything fail? Fix it:
-```
-Error occurred → Read stack trace → Fix script → Test → Update directive
-```
-
-### 2. Update Directive
-Add learnings:
-- New edge cases discovered
-- Better approaches found
-- Quality gate refinements
-
-### 3. Update Skill Bible
-Add domain knowledge:
-- New techniques that worked
-- Mistakes to avoid
-- Industry-specific insights
-
-### 4. Commit Changes
-Keep the system improving:
-```bash
-git add directives/ execution/ skills/
-git commit -m "Self-anneal: [what was learned]"
-```
-
----
-
-## Error Handling Patterns
-
-### API Failures
-```python
-for attempt in range(3):
-    try:
-        result = api_call()
-        break
-    except Exception as e:
-        if attempt == 2:
-            raise
-        time.sleep(10 * (attempt + 1))  # Exponential backoff
-```
-
-### Missing Inputs
-Fail fast with clear message:
-```python
-if not args.required_field:
-    print("Error: --required_field is required")
-    sys.exit(1)
-```
-
-### Partial Failures
-Degrade gracefully:
-```
-Critical workflow fails → Stop and report
-Non-critical fails → Continue with warning
-Delivery fails → Save locally, continue
-```
-
----
-
-## Environment Setup
-
-### First-Time Setup
-```bash
-# 1. Install Python dependencies
-pip install -r requirements.txt
-
-# 2. Configure environment
-cp .env.example .env
-# Edit .env with your API keys
-
-# 3. Setup Google OAuth (for Docs integration)
-# Place credentials.json in project root
-python3 execution/create_google_doc.py --test
-
-# 4. Deploy AIAA Dashboard to Railway
-npm install -g @railway/cli
-railway login
-cd railway_apps/aiaa_dashboard
-railway init
-railway up
-railway domain
-```
-
-### Required API Keys
-| Key | Purpose | Get From |
-|-----|---------|----------|
-| `OPENROUTER_API_KEY` | LLM access | openrouter.ai |
-| `PERPLEXITY_API_KEY` | Research | perplexity.ai |
-| `SLACK_WEBHOOK_URL` | Notifications | Slack app settings |
-| `GOOGLE_APPLICATION_CREDENTIALS` | Docs/Sheets | Google Cloud Console |
-
----
-
-## Debugging Tips
-
-### Check Script Arguments
-```bash
-python3 execution/<script>.py --help
-```
-
-### Test with Minimal Input
-```bash
-python3 execution/generate_vsl_funnel.py \
-  --product "Test Product" \
-  --price "$99" \
-  --audience "Test audience"
-```
-
-### Check API Connectivity
-```bash
-# Test OpenRouter
-curl https://openrouter.ai/api/v1/models -H "Authorization: Bearer $OPENROUTER_API_KEY"
-
-# Test Perplexity
-curl https://api.perplexity.ai/chat/completions \
-  -H "Authorization: Bearer $PERPLEXITY_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"model":"llama-3.1-sonar-small-128k-online","messages":[{"role":"user","content":"test"}]}'
-```
-
-### View Execution Logs
-```bash
-# Dashboard logs (via Railway)
-railway logs
-
-# Local execution
-python3 execution/<script>.py 2>&1 | tee output.log
-
-# Check dashboard health
-curl https://your-app.up.railway.app/health
-```
-
----
-
-## Summary: Your Role as Orchestrator
-
-You are the **brain** of this system. Your responsibilities:
-
-1. **Parse Intent** → Understand what the user wants
-2. **Load Agency Context** → Read `context/` to understand who you're representing
-3. **Load Client Context** → If client-specific, read `clients/{client}/` for their rules
-4. **Find Capability** → Locate directive + script + skill bible
-5. **Execute** → Run scripts, follow SOPs, check quality gates
-6. **Deliver** → Save locally, upload to Google Docs, notify via Slack
-7. **Self-Anneal** → Learn from every execution, update the system
-
-**Core Principles:**
-- **ALWAYS load agency context before generating content**
-- **ALWAYS load client context when doing client-specific work**
-- Check for existing tools before creating new ones
-- Load skill bibles for domain expertise
-- Push deterministic work into Python scripts
-- Self-anneal when things break
-- Update directives as you learn
-
-**Context Loading Priority:**
-```
-1. context/agency.md      → Always load first
-2. context/brand_voice.md → For any content creation
-3. clients/{name}/*.md    → For client-specific work
-4. skills/SKILL_BIBLE_*   → For domain expertise
-5. directives/*.md        → For workflow SOPs
-```
-
-**The bottleneck isn't ideas or execution. It's deciding what to build next.**
-
----
-
-## Quick Commands Reference
-
-```bash
-# View all workflows
-# Open your AIAA Dashboard at https://your-app.up.railway.app
-
-# Run VSL funnel
-python3 execution/generate_complete_vsl_funnel.py --company "X" --website "Y" --offer "Z"
-
-# Research a company
-python3 execution/research_company_offer.py --company "X" --website "Y"
-
-# Create Google Doc from markdown
-python3 execution/create_google_doc.py --file ".tmp/output.md" --title "Doc Title"
-
-# Send Slack notification
-python3 execution/send_slack_notification.py --message "Task complete" --channel "#general"
-
-# Deploy/update dashboard
-cd railway_apps/aiaa_dashboard && railway up
-
-# Deploy any workflow to Railway (unified script)
-python3 execution/deploy_to_railway.py --directive <name> --auto
-
-# Deploy cron workflow
-python3 execution/deploy_to_railway.py --directive <name> --type cron --schedule "0 */3 * * *" --auto
-
-# Deploy webhook workflow
-python3 execution/deploy_to_railway.py --directive <name> --type webhook --slug <slug> --slack-notify --auto
-
-# List deployable directives
-python3 execution/deploy_to_railway.py --list
-
-# Check deployment info for a directive
-python3 execution/deploy_to_railway.py --directive <name> --info
-
-# Check dashboard health
-curl https://your-app.up.railway.app/health
-```
+Skills are your primary tools. Directives and skill bibles are reference. Subagents are your team. Hooks are your safety net. The bottleneck isn't capability — it's deciding what to build next.

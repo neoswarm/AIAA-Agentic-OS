@@ -148,11 +148,11 @@ def main():
         state["blocks_issued"] = state.get("blocks_issued", 0) + 1
         save_state(state)
         sys.stderr.write(
-            f"[Context Pollution] BLOCKED: Already loaded {count} context files "
+            f"[Context Pollution] BLOCKED: Already loaded {count} reference files "
             f"(limit: {BLOCK_THRESHOLD})\n"
             f"  Attempted to load: {file_name} ({category})\n"
-            f"  Too many context files causes context window flooding.\n"
-            f"  Use --reset to clear or be more selective about context loading.\n"
+            f"  Loading too many reference files at once can reduce output quality.\n"
+            f"  Try loading only the most relevant ones for your current task.\n"
         )
         sys.exit(2)
 
@@ -169,11 +169,11 @@ def main():
         state["warnings_issued"] = state.get("warnings_issued", 0) + 1
         save_state(state)
         sys.stderr.write(
-            f"[Context Pollution] WARNING: Now loading context file #{count + 1} "
+            f"[Context Pollution] WARNING: Now loading reference file #{count + 1} "
             f"({file_name})\n"
-            f"  {count + 1}/{BLOCK_THRESHOLD} context files loaded. "
+            f"  {count + 1}/{BLOCK_THRESHOLD} reference files loaded. "
             f"Approaching limit.\n"
-            f"  Consider whether all loaded context is necessary.\n"
+            f"  Loading too many reference files at once can reduce output quality. Try loading only the most relevant ones for your current task.\n"
         )
         sys.exit(0)
 

@@ -17,6 +17,7 @@ Before writing ANY file:
 import json
 import sys
 import re
+import fcntl
 from pathlib import Path
 from datetime import datetime
 
@@ -28,7 +29,12 @@ STATE_FILE = STATE_DIR / "pii_detection_log.json"
 def load_state():
     try:
         if STATE_FILE.exists():
-            return json.loads(STATE_FILE.read_text())
+            with open(STATE_FILE, "r") as f:
+                fcntl.flock(f, fcntl.LOCK_SH)
+                try:
+                    return json.loads(f.read())
+                finally:
+                    fcntl.flock(f, fcntl.LOCK_UN)
     except (json.JSONDecodeError, OSError):
         pass
     return {"detections": [], "stats": {"total_scans": 0, "warnings": 0, "blocks": 0}}
@@ -36,7 +42,12 @@ def load_state():
 
 def save_state(state):
     STATE_DIR.mkdir(parents=True, exist_ok=True)
-    STATE_FILE.write_text(json.dumps(state, indent=2))
+    with open(STATE_FILE, "w") as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        try:
+            f.write(json.dumps(state, indent=2))
+        finally:
+            fcntl.flock(f, fcntl.LOCK_UN)
 
 
 def detect_emails(content):

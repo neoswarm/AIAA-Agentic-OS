@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}Workflows — AIAA Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+.search-filter-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 300px;
+    padding: 0.75rem 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9375rem;
+}
+
+.search-input:focus {
+    border-color: var(--accent);
+}
+
+.filter-toggle {
+    padding: 0.75rem 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.filter-toggle:hover {
+    background: var(--bg-elevated);
+}
+
+.filter-toggle.active {
+    background: var(--accent-muted);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.category-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+.category-tab {
+    padding: 0.5rem 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.category-tab:hover {
+    background: var(--bg-elevated);
+}
+
+.category-tab.active {
+    background: var(--accent-muted);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem 0 1rem;
+}
+
+.section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.section-count {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.workflows-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .workflows-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-filter-bar {
+        flex-direction: column;
+    }
+    
+    .search-input {
+        min-width: 100%;
+    }
+    
+    .category-tabs {
+        flex-wrap: wrap;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Workflow Catalog</h1>
+        <p class="page-subtitle">{{ total_workflows }} available workflows</p>
+    </div>
+</div>
+
+<div class="search-filter-bar">
+    <input type="text" 
+           class="search-input" 
+           id="workflow-search" 
+           placeholder="Search workflows by name, description, or category..."
+           oninput="filterWorkflows()">
+    
+    <label class="filter-toggle" id="deployed-filter">
+        <input type="checkbox" id="deployed-only" onchange="filterWorkflows()" style="display: none;">
+        <span>Show Deployed Only</span>
+    </label>
+</div>
+
+<div class="category-tabs">
+    <button class="category-tab active" data-category="all" onclick="filterByCategory('all')">
+        All
+    </button>
+    {% for category in categories %}
+    <button class="category-tab" data-category="{{ category }}" onclick="filterByCategory('{{ category }}')">
+        {{ category }}
+    </button>
+    {% endfor %}
+</div>
+
+{# Favorites Section #}
+{% if favorites and favorites|length > 0 %}
+<div class="section-header">
+    <h2 class="section-title">⭐ Favorites</h2>
+    <span class="section-count">{{ favorites|length }} workflow{{ 's' if favorites|length != 1 }}</span>
+</div>
+<div class="workflows-grid" id="favorites-section">
+    {% for workflow in favorites %}
+    {% from "components/workflow_card.html" import workflow_card %}
+    {{ workflow_card(workflow) }}
+    {% endfor %}
+</div>
+{% endif %}
+
+{# Recently Used Section #}
+{% if recent_workflows and recent_workflows|length > 0 %}
+<div class="section-header">
+    <h2 class="section-title">🕐 Recently Used</h2>
+    <span class="section-count">{{ recent_workflows|length }} workflow{{ 's' if recent_workflows|length != 1 }}</span>
+</div>
+<div class="workflows-grid" id="recent-section">
+    {% for workflow in recent_workflows %}
+    {% from "components/workflow_card.html" import workflow_card %}
+    {{ workflow_card(workflow) }}
+    {% endfor %}
+</div>
+{% endif %}
+
+{# All Workflows Section #}
+<div class="section-header">
+    <h2 class="section-title">All Workflows</h2>
+    <span class="section-count" id="workflow-count">{{ workflows|length }} workflow{{ 's' if workflows|length != 1 }}</span>
+</div>
+<!-- Skeleton: Workflow Grid (visible during initial page paint) -->
+<div class="skeleton-workflows-grid" id="catalog-skeleton">
+    <div class="skeleton-workflow-card skeleton-pulse"><div class="skeleton-line skeleton-line--long" style="margin-bottom:0.75rem"></div><div class="skeleton-line skeleton-line--short"></div></div>
+    <div class="skeleton-workflow-card skeleton-pulse"><div class="skeleton-line skeleton-line--long" style="margin-bottom:0.75rem"></div><div class="skeleton-line skeleton-line--short"></div></div>
+    <div class="skeleton-workflow-card skeleton-pulse"><div class="skeleton-line skeleton-line--long" style="margin-bottom:0.75rem"></div><div class="skeleton-line skeleton-line--short"></div></div>
+    <div class="skeleton-workflow-card skeleton-pulse"><div class="skeleton-line skeleton-line--long" style="margin-bottom:0.75rem"></div><div class="skeleton-line skeleton-line--short"></div></div>
+    <div class="skeleton-workflow-card skeleton-pulse"><div class="skeleton-line skeleton-line--long" style="margin-bottom:0.75rem"></div><div class="skeleton-line skeleton-line--short"></div></div>
+    <div class="skeleton-workflow-card skeleton-pulse"><div class="skeleton-line skeleton-line--long" style="margin-bottom:0.75rem"></div><div class="skeleton-line skeleton-line--short"></div></div>
+</div>
+
+<div class="workflows-grid" id="workflows-grid">
+    {% for workflow in workflows %}
+    {% from "components/workflow_card.html" import workflow_card %}
+    {{ workflow_card(workflow) }}
+    {% endfor %}
+</div>
+
+<div id="no-results" class="hidden">
+    {% from "components/empty_state.html" import empty_state %}
+    {{ empty_state('search', 'No workflows found', 'Try adjusting your search or filters.') }}
+</div>
+
+{# Include Deploy Wizard #}
+{% include "deploy_wizard.html" %}
+
+<script src="{{ url_for('static', filename='js/cron_builder.js') }}"></script>
+<script src="{{ url_for('static', filename='js/favorites.js') }}"></script>
+
+<script>
+let currentCategory = 'all';
+
+function filterByCategory(category) {
+    currentCategory = category;
+    
+    // Update active tab
+    document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector(`[data-category="${category}"]`).classList.add('active');
+    
+    filterWorkflows();
+}
+
+function filterWorkflows() {
+    const searchTerm = document.getElementById('workflow-search').value.toLowerCase();
+    const deployedOnly = document.getElementById('deployed-only').checked;
+    const workflowCards = document.querySelectorAll('#workflows-grid .workflow-card');
+    let visibleCount = 0;
+    
+    workflowCards.forEach(card => {
+        const workflowName = card.getAttribute('data-workflow').toLowerCase();
+        const description = card.querySelector('.workflow-description')?.textContent.toLowerCase() || '';
+        const categoryBadge = card.querySelector('.badge-category')?.textContent.toLowerCase() || '';
+        const isDeployed = card.querySelector('.badge-success') !== null;
+        
+        // Check search match
+        const matchesSearch = !searchTerm || 
+            workflowName.includes(searchTerm) || 
+            description.includes(searchTerm) ||
+            categoryBadge.includes(searchTerm);
+        
+        // Check category match
+        const matchesCategory = currentCategory === 'all' || 
+            categoryBadge.includes(currentCategory.toLowerCase());
+        
+        // Check deployed filter
+        const matchesDeployed = !deployedOnly || isDeployed;
+        
+        if (matchesSearch && matchesCategory && matchesDeployed) {
+            card.style.display = 'block';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Update count
+    document.getElementById('workflow-count').textContent = 
+        `${visibleCount} workflow${visibleCount !== 1 ? 's' : ''}`;
+    
+    // Show/hide no results message
+    const noResults = document.getElementById('no-results');
+    const grid = document.getElementById('workflows-grid');
+    if (visibleCount === 0) {
+        grid.style.display = 'none';
+        noResults.classList.remove('hidden');
+    } else {
+        grid.style.display = 'grid';
+        noResults.classList.add('hidden');
+    }
+}
+
+// Toggle deployed filter styling
+document.getElementById('deployed-only').addEventListener('change', function() {
+    const filterToggle = document.getElementById('deployed-filter');
+    if (this.checked) {
+        filterToggle.classList.add('active');
+    } else {
+        filterToggle.classList.remove('active');
+    }
+});
+
+// Hide catalog skeleton after server-rendered content paints
+document.addEventListener('DOMContentLoaded', function() {
+    var skel = document.getElementById('catalog-skeleton');
+    if (skel) skel.style.display = 'none';
+});
+</script>
+{% endblock %}

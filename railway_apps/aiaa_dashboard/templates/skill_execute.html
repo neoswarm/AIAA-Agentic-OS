@@ -1,0 +1,1534 @@
+{% extends "base.html" %}
+
+{% block title %}Run Skill - AIAA{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Skill Header */
+.skill-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.skill-header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.skill-header-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: white;
+    fill: none;
+}
+
+.skill-header-info {
+    flex: 1;
+}
+
+.skill-header-info h1 {
+    font-size: 1.375rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.skill-header-info p {
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+}
+
+.skill-category-badge {
+    display: inline-block;
+    margin-top: 0.375rem;
+    padding: 0.2rem 0.5rem;
+    background: var(--bg-elevated);
+    border-radius: 4px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-secondary);
+}
+
+/* Mode Tabs */
+.mode-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 0.25rem;
+    width: fit-content;
+}
+
+.mode-tab {
+    padding: 0.5rem 1.25rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.mode-tab:hover {
+    color: var(--text-primary);
+}
+
+.mode-tab.active {
+    background: var(--accent);
+    color: white;
+}
+
+/* Form Container */
+.skill-form-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.skill-form-body {
+    padding: 1.5rem;
+}
+
+/* Dynamic Form Styles */
+.field-group {
+    margin-bottom: 1.25rem;
+}
+
+.field-label {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.field-label .required-mark {
+    color: var(--error);
+    font-weight: 600;
+}
+
+.field-tooltip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    font-size: 0.625rem;
+    font-weight: 700;
+    cursor: help;
+    position: relative;
+}
+
+.field-tooltip:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 400;
+    white-space: nowrap;
+    max-width: 280px;
+    white-space: pre-line;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.field-input,
+.field-select,
+.field-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    transition: border-color 0.15s;
+}
+
+.field-input:focus,
+.field-select:focus,
+.field-textarea:focus {
+    border-color: var(--accent);
+}
+
+.field-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.field-hint {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.field-error {
+    display: none;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--error);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.field-group.has-error .field-error {
+    opacity: 1;
+}
+
+.field-group.has-error .field-input,
+.field-group.has-error .field-select,
+.field-group.has-error .field-textarea {
+    border-color: var(--error);
+}
+
+.field-group.has-error .field-error {
+    display: block;
+}
+
+/* Advanced Options */
+.advanced-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 0;
+    margin: 0.5rem 0 1rem;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.advanced-toggle:hover {
+    color: var(--text-primary);
+}
+
+.advanced-toggle svg {
+    transition: transform 0.2s;
+}
+
+.advanced-toggle.open svg {
+    transform: rotate(90deg);
+}
+
+.advanced-fields {
+    display: none;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.advanced-fields.visible {
+    display: block;
+}
+
+/* NL Mode */
+.nl-mode-container {
+    display: none;
+}
+
+.nl-mode-container.visible {
+    display: block;
+}
+
+.nl-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.nl-textarea:focus {
+    border-color: var(--accent);
+}
+
+.nl-suggestion {
+    display: none;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--accent-muted);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    font-size: 0.875rem;
+}
+
+.nl-suggestion.visible {
+    display: block;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-elevated);
+}
+
+.btn-run {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-run:hover {
+    background: var(--accent-hover);
+}
+
+.btn-run:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-run svg {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-estimate {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-estimate:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* File Upload */
+.file-upload-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.file-upload-area:hover {
+    border-color: var(--accent);
+    background: var(--accent-muted);
+}
+
+/* Loading state */
+.form-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--text-muted);
+    gap: 1rem;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Execution Error Panel */
+.execution-error-panel {
+    display: none;
+    margin-top: 1rem;
+    background: var(--error-muted, #2d1b1b);
+    border: 1px solid var(--error, #ef4444);
+    border-radius: 12px;
+    padding: 1.25rem;
+    color: var(--text-primary);
+}
+
+.execution-error-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.9375rem;
+    color: var(--error, #ef4444);
+}
+
+.execution-error-message {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+.execution-error-recovery {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.execution-error-recovery a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.execution-error-recovery a:hover {
+    text-decoration: underline;
+}
+
+.error-action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 1rem;
+    background: var(--accent);
+    color: white !important;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none !important;
+    margin-top: 0.25rem;
+}
+
+.error-action-link:hover {
+    opacity: 0.9;
+    text-decoration: none !important;
+}
+
+.error-field-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0;
+}
+
+.error-field-list li {
+    padding: 0.25rem 0;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.error-field-list li:last-child {
+    border-bottom: none;
+}
+
+/* Output Preview */
+.output-preview {
+    margin-top: 1.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.output-preview-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.output-preview-header svg {
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+}
+
+.output-preview-body {
+    padding: 1rem 1.25rem;
+}
+
+.output-preview-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.output-preview-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.375rem 0;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.output-preview-list li::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 0.4375rem;
+    flex-shrink: 0;
+}
+
+/* Active runner recovery */
+.runner-recovery-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.875rem;
+    margin-bottom: 1rem;
+    padding: 0.875rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--warning, #f59e0b);
+    background: var(--warning-muted, rgba(245, 158, 11, 0.12));
+}
+
+.runner-recovery-banner.visible {
+    display: flex;
+}
+
+.runner-recovery-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.runner-recovery-copy strong {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.runner-recovery-copy span {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.runner-recovery-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.runner-recovery-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.875rem;
+    border-radius: 7px;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.runner-recovery-link:hover {
+    background: var(--accent-hover);
+}
+
+.runner-recovery-dismiss {
+    border: 1px solid var(--border-subtle);
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: 7px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.runner-recovery-dismiss:hover {
+    color: var(--text-primary);
+    border-color: var(--border);
+}
+
+/* Skill Meta Bar */
+.skill-meta-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.skill-meta-bar .complexity-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+}
+.complexity-simple {
+    background: var(--success-muted, #dcfce7);
+    color: var(--success, #16a34a);
+}
+.complexity-moderate {
+    background: var(--warning-muted, #fef3c7);
+    color: var(--warning, #d97706);
+}
+.complexity-advanced {
+    background: var(--error-muted, #fef2f2);
+    color: var(--error, #dc2626);
+}
+.skill-time-estimate {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .skill-header {
+        flex-direction: column;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-run,
+    .btn-estimate {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Skill Header -->
+<div class="skill-header">
+    <div class="skill-header-icon">
+        <svg viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+    </div>
+    <div class="skill-header-info">
+        <h1 id="skill-title">Loading skill...</h1>
+        <p id="skill-description"></p>
+        <span class="skill-category-badge" id="skill-category" style="display: none;"></span>
+    </div>
+</div>
+
+<!-- Active Runner Recovery -->
+<div class="runner-recovery-banner" id="runner-recovery-banner" role="status" aria-live="polite">
+    <div class="runner-recovery-copy">
+        <strong>Runner still active</strong>
+        <span id="runner-recovery-text">A previous run is still in progress.</span>
+    </div>
+    <div class="runner-recovery-actions">
+        <a class="runner-recovery-link" id="runner-recovery-link" href="#">Resume Run</a>
+        <button class="runner-recovery-dismiss" type="button" onclick="dismissActiveRunner()">Dismiss</button>
+    </div>
+</div>
+
+<!-- Client Selector -->
+<div class="field-group" id="client-selector-group" style="display: none; margin-bottom: 1.5rem;">
+    <label class="field-label">
+        Client
+        <span class="field-tooltip" data-tip="Select a client to apply their profile settings to this skill run">?</span>
+    </label>
+    <select class="field-select" id="client-selector" name="client">
+        <option value="">No client (general)</option>
+    </select>
+    <span class="field-hint">Optional: select a client to customize the output for their brand.</span>
+</div>
+
+<!-- Mode Tabs -->
+<div class="mode-tabs" role="tablist" aria-label="Skill input mode">
+    <button class="mode-tab active" id="tab-form" role="tab" aria-selected="true" aria-controls="form-mode-container" onclick="switchMode('form')">Form</button>
+    <button class="mode-tab" id="tab-nl" role="tab" aria-selected="false" aria-controls="nl-mode-container" onclick="switchMode('nl')">Natural Language</button>
+</div>
+
+<!-- Form Mode -->
+<div class="skill-form-card" id="form-mode-container" role="tabpanel" aria-labelledby="tab-form">
+    <div class="skill-form-body">
+        <!-- Loading state -->
+        <div class="form-loading" id="form-loading">
+            <div class="spinner"></div>
+            <span>Loading skill details...</span>
+        </div>
+
+        <!-- Dynamic form rendered here by JS -->
+        <div id="skill-form-container" style="display: none;"></div>
+
+        <!-- Advanced options -->
+        <button class="advanced-toggle" id="advanced-toggle" style="display: none;" onclick="toggleAdvanced()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6"/>
+            </svg>
+            Advanced Options
+        </button>
+        <div class="advanced-fields" id="advanced-fields"></div>
+    </div>
+
+    <div class="form-actions">
+        <button class="btn-run" id="btn-run" onclick="runSkill()" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            Run Skill
+        </button>
+        <button class="btn-estimate" id="btn-estimate" onclick="estimateCost()" style="display: none;">
+            Estimate Cost
+        </button>
+    </div>
+</div>
+
+<!-- Natural Language Mode -->
+<div class="nl-mode-container" id="nl-mode-container" role="tabpanel" aria-labelledby="tab-nl">
+    <div class="skill-form-card">
+        <div class="skill-form-body">
+            <div class="field-group">
+                <label class="field-label">Describe what you need</label>
+                <textarea class="nl-textarea" id="nl-input" placeholder="E.g. Write a 1500-word blog post about AI trends in marketing for small businesses..."></textarea>
+            </div>
+            <div class="nl-suggestion" id="nl-suggestion"></div>
+        </div>
+        <div class="form-actions">
+            <button class="btn-run" id="btn-nl-run" onclick="runNaturalLanguage()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Run
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Output Preview -->
+<div class="output-preview" id="output-preview" style="display: none;">
+    <div class="output-preview-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        Expected Output
+    </div>
+    <div class="output-preview-body">
+        <ul class="output-preview-list" id="output-preview-list"></ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var skillName = getSkillNameFromUrl();
+    var skillMeta = null;
+    var ACTIVE_EXECUTION_STORAGE_KEY = 'aiaa.activeExecution';
+
+    function getSkillNameFromUrl() {
+        var parts = window.location.pathname.split('/');
+        var idx = parts.indexOf('skills');
+        if (idx >= 0 && parts[idx + 1]) return decodeURIComponent(parts[idx + 1]);
+        return null;
+    }
+
+    function readActiveExecution() {
+        var raw = localStorage.getItem(ACTIVE_EXECUTION_STORAGE_KEY);
+        if (!raw) return null;
+        try {
+            var parsed = JSON.parse(raw);
+            if (!parsed || !parsed.executionId) return null;
+            return parsed;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function persistActiveExecution(executionId, activeSkillName) {
+        localStorage.setItem(ACTIVE_EXECUTION_STORAGE_KEY, JSON.stringify({
+            executionId: executionId,
+            skillName: activeSkillName || '',
+            startedAt: Date.now()
+        }));
+    }
+
+    function clearActiveExecution() {
+        localStorage.removeItem(ACTIVE_EXECUTION_STORAGE_KEY);
+    }
+
+    function extractExecutionFromStatusResponse(payload) {
+        if (payload && payload.execution && typeof payload.execution === 'object') {
+            return payload.execution;
+        }
+        return payload || {};
+    }
+
+    function isActiveExecutionStatus(status) {
+        return status === 'running' || status === 'queued' || status === 'pending' || status === 'starting';
+    }
+
+    function showActiveRunnerBanner(activeExecution, executionData) {
+        var banner = document.getElementById('runner-recovery-banner');
+        var text = document.getElementById('runner-recovery-text');
+        var link = document.getElementById('runner-recovery-link');
+
+        var detectedSkillName = executionData.skill_name || activeExecution.skillName || skillName;
+        if (detectedSkillName) {
+            text.textContent = formatSkillName(detectedSkillName) + ' is still running. Resume live progress.';
+        } else {
+            text.textContent = 'A previous run is still in progress. Resume live progress.';
+        }
+
+        link.href = '/executions/' + encodeURIComponent(activeExecution.executionId) + '/progress';
+        banner.classList.add('visible');
+    }
+
+    window.dismissActiveRunner = function() {
+        clearActiveExecution();
+        var banner = document.getElementById('runner-recovery-banner');
+        banner.classList.remove('visible');
+    };
+
+    async function restoreActiveExecutionIfRunning() {
+        var activeExecution = readActiveExecution();
+        if (!activeExecution || !activeExecution.executionId) return;
+
+        try {
+            var res = await fetch('/api/v2/executions/' + encodeURIComponent(activeExecution.executionId) + '/status');
+            if (!res.ok) {
+                if (res.status === 404) clearActiveExecution();
+                return;
+            }
+
+            var payload = await res.json();
+            var executionData = extractExecutionFromStatusResponse(payload);
+            var status = executionData.status;
+
+            if (isActiveExecutionStatus(status)) {
+                showActiveRunnerBanner(activeExecution, executionData);
+            } else if (status) {
+                clearActiveExecution();
+            }
+        } catch (e) {
+            // Keep the runner marker on transient failures.
+        }
+    }
+
+    // Load skill metadata and build form
+    async function loadSkill() {
+        if (!skillName) {
+            document.getElementById('skill-title').textContent = 'Skill not found';
+            document.getElementById('form-loading').innerHTML = '<span style="color:var(--error);">No skill specified in URL.</span>';
+            return;
+        }
+
+        try {
+            var res = await fetch('/api/v2/skills/' + encodeURIComponent(skillName));
+            if (!res.ok) throw new Error('Skill not found');
+            var responseData = await res.json();
+            skillMeta = responseData.skill || responseData;
+
+            document.getElementById('skill-title').textContent = formatSkillName(skillMeta.name || skillName);
+            document.getElementById('skill-description').textContent = skillMeta.description || '';
+
+            if (skillMeta.category) {
+                var badge = document.getElementById('skill-category');
+                badge.textContent = skillMeta.category;
+                badge.style.display = 'inline-block';
+            }
+
+            // Show skill meta (time + complexity)
+            var metaBar = document.createElement('div');
+            metaBar.className = 'skill-meta-bar';
+            if (skillMeta.process_steps && skillMeta.process_steps.length > 0) {
+                var steps = skillMeta.process_steps.length;
+                var mins = Math.max(Math.floor(steps / 2), 1);
+                metaBar.innerHTML += '<span class="skill-time-estimate">' + mins + ' min estimated</span>';
+            }
+            // Compute complexity client-side from full skill detail
+            var stepsCount = (skillMeta.process_steps || []).length;
+            var prereqCount = (skillMeta.prerequisites || []).length;
+            var reqInputs = (skillMeta.inputs || []).filter(function(i) { return i.required; }).length;
+            var cScore = stepsCount + prereqCount + reqInputs;
+            var complexity = cScore <= 5 ? 'simple' : (cScore <= 10 ? 'moderate' : 'advanced');
+            metaBar.innerHTML += '<span class="complexity-badge complexity-' + complexity + '">' + complexity + '</span>';
+            document.getElementById('skill-category').parentNode.appendChild(metaBar);
+
+            // Render output preview
+            var outputExamples = skillMeta.output_examples || [];
+            if (outputExamples.length > 0) {
+                var previewList = document.getElementById('output-preview-list');
+                previewList.innerHTML = '';
+                outputExamples.forEach(function(line) {
+                    var li = document.createElement('li');
+                    li.textContent = line;
+                    previewList.appendChild(li);
+                });
+                document.getElementById('output-preview').style.display = 'block';
+            } else if (skillMeta.goal) {
+                // Fallback: use the goal as a description of what gets generated
+                var previewList = document.getElementById('output-preview-list');
+                previewList.innerHTML = '';
+                var li = document.createElement('li');
+                li.textContent = skillMeta.goal;
+                previewList.appendChild(li);
+                document.getElementById('output-preview').style.display = 'block';
+            }
+
+            buildForm(skillMeta.inputs || []);
+            prefillFromQueryParams();
+        } catch (e) {
+            document.getElementById('skill-title').textContent = formatSkillName(skillName);
+            document.getElementById('form-loading').innerHTML = '<span style="color:var(--text-muted);">Could not load skill details. You can still run it with default settings.</span>';
+            document.getElementById('btn-run').disabled = false;
+        }
+    }
+
+    async function loadClientSelector() {
+        try {
+            var data = await fetchAPI('/api/v2/clients');
+            var clients = data.clients || [];
+            if (clients.length === 0) return; // Hide selector if no clients
+
+            var select = document.getElementById('client-selector');
+            clients.forEach(function(client) {
+                var opt = document.createElement('option');
+                opt.value = client.slug;
+                opt.textContent = client.name;
+                select.appendChild(opt);
+            });
+            document.getElementById('client-selector-group').style.display = 'block';
+
+            // Pre-fill from query params if present (for re-run with client)
+            var params = getQueryParams();
+            if (params.client) {
+                select.value = params.client;
+            }
+        } catch (e) {
+            // Silently fail -- client selector is optional enhancement
+            console.warn('Could not load clients:', e);
+        }
+    }
+
+    function prefillFromQueryParams() {
+        var params = getQueryParams();
+        Object.keys(params).forEach(function(key) {
+            var field = document.getElementById('field-' + key);
+            if (field) {
+                field.value = params[key];
+                // Trigger change event so any validation listeners update
+                field.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    }
+
+    function buildForm(inputs) {
+        var container = document.getElementById('skill-form-container');
+        var advancedContainer = document.getElementById('advanced-fields');
+        var requiredFields = [];
+        var optionalFields = [];
+
+        inputs.forEach(function(input) {
+            if (input.required) {
+                requiredFields.push(input);
+            } else {
+                optionalFields.push(input);
+            }
+        });
+
+        // Build required fields
+        requiredFields.forEach(function(input) {
+            container.appendChild(createFieldElement(input));
+        });
+
+        // Build optional fields behind toggle
+        if (optionalFields.length > 0) {
+            document.getElementById('advanced-toggle').style.display = 'flex';
+            optionalFields.forEach(function(input) {
+                advancedContainer.appendChild(createFieldElement(input));
+            });
+        }
+
+        document.getElementById('form-loading').style.display = 'none';
+        container.style.display = 'block';
+        document.getElementById('btn-run').disabled = false;
+        document.getElementById('btn-estimate').style.display = 'inline-flex';
+
+        // Attach real-time validation after form is built
+        attachFieldValidationListeners();
+    }
+
+    function createFieldElement(input) {
+        var group = document.createElement('div');
+        group.className = 'field-group';
+        group.setAttribute('data-field', input.name);
+
+        var label = document.createElement('label');
+        label.className = 'field-label';
+        label.innerHTML = escapeHtml(input.label || input.name);
+        if (input.required) {
+            label.innerHTML += ' <span class="required-mark">*</span>';
+        }
+        var tipText = input.description || '';
+        if (input.example) {
+            tipText += (tipText ? '\n\nExample: ' : 'Example: ') + input.example;
+        } else if (input.placeholder && input.placeholder.length < 60) {
+            tipText += (tipText ? '\n\nExample: ' : 'Example: ') + input.placeholder;
+        }
+        if (tipText) {
+            label.innerHTML += ' <span class="field-tooltip" data-tip="' + escapeAttr(tipText) + '">?</span>';
+        }
+        group.appendChild(label);
+
+        var el;
+        if (input.type === 'select' && input.options) {
+            el = document.createElement('select');
+            el.className = 'field-select';
+            var defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            defaultOpt.textContent = 'Select...';
+            el.appendChild(defaultOpt);
+            input.options.forEach(function(opt) {
+                var o = document.createElement('option');
+                o.value = opt;
+                o.textContent = opt;
+                if (opt === input.default) o.selected = true;
+                el.appendChild(o);
+            });
+        } else if (input.type === 'textarea') {
+            el = document.createElement('textarea');
+            el.className = 'field-textarea';
+            el.placeholder = input.placeholder || '';
+            if (input.default) el.value = input.default;
+        } else if (input.type === 'number') {
+            el = document.createElement('input');
+            el.className = 'field-input';
+            el.type = 'number';
+            el.placeholder = input.placeholder || '';
+            if (input.default !== undefined) el.value = input.default;
+        } else if (input.type === 'file') {
+            var fileArea = document.createElement('div');
+            fileArea.className = 'file-upload-area';
+            fileArea.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>'
+                + '<span>Click to upload or drag and drop</span>';
+            el = document.createElement('input');
+            el.type = 'file';
+            el.style.display = 'none';
+            el.id = 'file-' + input.name;
+            fileArea.onclick = function() { el.click(); };
+            el.onchange = function() {
+                if (el.files.length > 0) {
+                    fileArea.querySelector('span').textContent = el.files[0].name;
+                }
+            };
+            group.appendChild(fileArea);
+            group.appendChild(el);
+            return group;
+        } else {
+            el = document.createElement('input');
+            el.className = 'field-input';
+            el.type = 'text';
+            el.placeholder = input.placeholder || '';
+            if (input.default) el.value = input.default;
+        }
+
+        el.name = input.name;
+        el.id = 'field-' + input.name;
+        if (input.required) el.required = true;
+        group.appendChild(el);
+
+        if (input.hint) {
+            var hint = document.createElement('span');
+            hint.className = 'field-hint';
+            hint.textContent = input.hint;
+            group.appendChild(hint);
+        }
+
+        var errEl = document.createElement('span');
+        errEl.className = 'field-error';
+        errEl.setAttribute('aria-live', 'polite');
+        errEl.textContent = 'This field is required';
+        group.appendChild(errEl);
+
+        return group;
+    }
+
+    // Switch between form and NL mode
+    window.switchMode = function(mode) {
+        document.getElementById('tab-form').classList.toggle('active', mode === 'form');
+        document.getElementById('tab-nl').classList.toggle('active', mode === 'nl');
+        document.getElementById('tab-form').setAttribute('aria-selected', mode === 'form' ? 'true' : 'false');
+        document.getElementById('tab-nl').setAttribute('aria-selected', mode === 'nl' ? 'true' : 'false');
+        document.getElementById('form-mode-container').style.display = mode === 'form' ? 'block' : 'none';
+        document.getElementById('nl-mode-container').classList.toggle('visible', mode === 'nl');
+    };
+
+    // Arrow key navigation for mode tabs (W3C APG tabs pattern)
+    var tablist = document.querySelector('[role="tablist"]');
+    if (tablist) {
+        tablist.addEventListener('keydown', function(e) {
+            var tabs = Array.from(this.querySelectorAll('[role="tab"]'));
+            var index = tabs.indexOf(document.activeElement);
+            if (index === -1) return;
+            var newIndex;
+            if (e.key === 'ArrowRight') newIndex = (index + 1) % tabs.length;
+            else if (e.key === 'ArrowLeft') newIndex = (index - 1 + tabs.length) % tabs.length;
+            else return;
+            e.preventDefault();
+            tabs[newIndex].focus();
+            tabs[newIndex].click();
+        });
+    }
+
+    window.toggleAdvanced = function() {
+        var toggle = document.getElementById('advanced-toggle');
+        var fields = document.getElementById('advanced-fields');
+        toggle.classList.toggle('open');
+        fields.classList.toggle('visible');
+    };
+
+    // Collect form data
+    function collectFormData() {
+        var data = {};
+        var formContainer = document.getElementById('skill-form-container');
+        var advancedFields = document.getElementById('advanced-fields');
+
+        [formContainer, advancedFields].forEach(function(container) {
+            container.querySelectorAll('input, select, textarea').forEach(function(el) {
+                if (el.name && el.value) {
+                    data[el.name] = el.value;
+                }
+            });
+        });
+
+        // Include client selector value if selected
+        var clientSelect = document.getElementById('client-selector');
+        if (clientSelect && clientSelect.value) {
+            data.client = clientSelect.value;
+        }
+
+        return data;
+    }
+
+    // Get field label text from a field-group
+    function getFieldLabel(group) {
+        var labelEl = group.querySelector('.field-label');
+        if (!labelEl) return 'This field';
+        // Clone to strip out child elements (required mark, tooltip)
+        var clone = labelEl.cloneNode(true);
+        var children = clone.querySelectorAll('.required-mark, .field-tooltip');
+        children.forEach(function(c) { c.remove(); });
+        return clone.textContent.trim() || 'This field';
+    }
+
+    // Show a field-level error
+    function showFieldValidationError(group, message) {
+        var errEl = group.querySelector('.field-error');
+        if (errEl) errEl.textContent = message;
+        group.classList.add('has-error');
+    }
+
+    // Clear a field-level error
+    function clearFieldValidationError(group) {
+        group.classList.remove('has-error');
+    }
+
+    // Validate a single field, return true if valid
+    function validateField(group) {
+        var input = group.querySelector('input, select, textarea');
+        if (!input) return true;
+
+        var value = input.value.trim();
+        var label = getFieldLabel(group);
+
+        // Required check
+        if (input.required && !value) {
+            showFieldValidationError(group, label + ' is required');
+            return false;
+        }
+
+        // URL format check
+        if (value && input.type === 'url') {
+            if (!/^https?:\/\/.+/.test(value)) {
+                showFieldValidationError(group, 'Please enter a valid URL (e.g. https://example.com)');
+                return false;
+            }
+        }
+
+        // Number min/max check
+        if (value && input.type === 'number') {
+            var num = parseFloat(value);
+            var min = input.hasAttribute('min') ? parseFloat(input.getAttribute('min')) : null;
+            var max = input.hasAttribute('max') ? parseFloat(input.getAttribute('max')) : null;
+            if (min !== null && max !== null && (num < min || num > max)) {
+                showFieldValidationError(group, 'Value must be between ' + min + ' and ' + max);
+                return false;
+            } else if (min !== null && num < min) {
+                showFieldValidationError(group, 'Value must be at least ' + min);
+                return false;
+            } else if (max !== null && num > max) {
+                showFieldValidationError(group, 'Value must be at most ' + max);
+                return false;
+            }
+        }
+
+        clearFieldValidationError(group);
+        return true;
+    }
+
+    // Attach real-time validation listeners to all form fields
+    function attachFieldValidationListeners() {
+        document.querySelectorAll('#skill-form-container .field-group, #advanced-fields .field-group').forEach(function(group) {
+            var input = group.querySelector('input, select, textarea');
+            if (!input) return;
+
+            input.addEventListener('blur', function() {
+                validateField(group);
+            });
+
+            input.addEventListener('input', function() {
+                if (input.value.trim()) {
+                    clearFieldValidationError(group);
+                }
+            });
+        });
+    }
+
+    // Validate all required fields
+    function validateForm() {
+        var valid = true;
+        document.querySelectorAll('#skill-form-container .field-group').forEach(function(group) {
+            if (!validateField(group)) {
+                valid = false;
+            }
+        });
+        return valid;
+    }
+
+    // Run skill
+    window.runSkill = async function() {
+        if (!validateForm()) return;
+
+        var btn = document.getElementById('btn-run');
+        setButtonLoading(btn, true, 'Running...');
+
+        // Clear any previous error display
+        hideExecutionError();
+
+        try {
+            var params = collectFormData();
+            var res = await fetch('/api/v2/skills/' + encodeURIComponent(skillName) + '/execute', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(params)
+            });
+
+            var data = await res.json();
+
+            if (!res.ok) {
+                // Show structured error with recovery guidance
+                showExecutionError(res.status, data);
+                setButtonLoading(btn, false);
+                return;
+            }
+
+            if (data.execution_id) {
+                persistActiveExecution(data.execution_id, skillName);
+                window.location.href = '/executions/' + encodeURIComponent(data.execution_id) + '/progress';
+            }
+        } catch (e) {
+            // Network error or timeout
+            setButtonLoading(btn, false);
+
+            if (e.name === 'AbortError' || e.message.includes('timeout') || e.message.includes('network')) {
+                showExecutionError(0, { message: 'Network error. Check your connection and try again.' });
+            } else {
+                showExecutionError(0, { message: e.message || 'Something went wrong. Please try again.' });
+            }
+        }
+    };
+
+    // Natural language run
+    window.runNaturalLanguage = async function() {
+        var input = document.getElementById('nl-input').value.trim();
+        if (!input) return;
+
+        var btn = document.getElementById('btn-nl-run');
+        setButtonLoading(btn, true, 'Processing...');
+
+        // Clear any previous error display
+        hideExecutionError();
+
+        try {
+            var res = await fetch('/api/v2/skills/' + encodeURIComponent(skillName) + '/execute', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ natural_language: input })
+            });
+
+            var data = await res.json();
+
+            if (!res.ok) {
+                // Show structured error with recovery guidance
+                showExecutionError(res.status, data);
+                setButtonLoading(btn, false);
+                return;
+            }
+
+            if (data.execution_id) {
+                persistActiveExecution(data.execution_id, skillName);
+                window.location.href = '/executions/' + encodeURIComponent(data.execution_id) + '/progress';
+            }
+        } catch (e) {
+            // Network error or timeout
+            setButtonLoading(btn, false);
+
+            if (e.name === 'AbortError' || e.message.includes('timeout') || e.message.includes('network')) {
+                showExecutionError(0, { message: 'Network error. Check your connection and try again.' });
+            } else {
+                showExecutionError(0, { message: e.message || 'Something went wrong. Please try again.' });
+            }
+        }
+    };
+
+    // Estimate cost
+    window.estimateCost = async function() {
+        var btn = document.getElementById('btn-estimate');
+        setButtonLoading(btn, true, 'Estimating...');
+        try {
+            var res = await fetch('/api/v2/skills/' + encodeURIComponent(skillName) + '/estimate');
+            if (!res.ok) {
+                setButtonLoading(btn, false);
+                return;
+            }
+            var data = await res.json();
+            var minutes = data.estimated_seconds ? Math.max(1, Math.round(data.estimated_seconds / 60)) + ' min' : 'unknown';
+            var cost = (data.estimated_cost_usd !== undefined && data.estimated_cost_usd !== null)
+                ? ('$' + Number(data.estimated_cost_usd).toFixed(2))
+                : 'N/A';
+            showToast('Estimated time: ~' + minutes + ' | Cost: ' + cost, 'info');
+        } catch (e) {
+            showToast('Could not get estimate', 'warning');
+        } finally {
+            setButtonLoading(btn, false);
+        }
+    };
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    function escapeAttr(str) {
+        return (str || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function formatSkillName(name) {
+        return (name || '').replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    }
+
+    // Error classification and recovery guidance
+    function classifyError(status, data) {
+        var message = data.message || data.error || 'An error occurred';
+        var messageLower = message.toLowerCase();
+        var recovery = [];
+
+        // Missing API key detection
+        if (messageLower.includes('api key') || messageLower.includes('api_key') ||
+            messageLower.includes('not configured') || messageLower.includes('authentication') ||
+            messageLower.includes('unauthorized') || status === 401) {
+
+            // Try to detect which key is missing
+            var keyHints = {
+                'openrouter': 'openrouter',
+                'perplexity': 'perplexity',
+                'anthropic': 'anthropic',
+                'openai': 'openai',
+                'slack': 'slack',
+                'fal': 'fal'
+            };
+
+            var detectedKey = '';
+            for (var hint in keyHints) {
+                if (messageLower.includes(hint)) {
+                    detectedKey = keyHints[hint];
+                    break;
+                }
+            }
+
+            var settingsUrl = '/settings?tab=api-keys' + (detectedKey ? '&highlight=' + detectedKey : '');
+
+            return {
+                title: 'API Key Required',
+                message: message,
+                icon: 'key',
+                recoveryHTML: '<a href="' + settingsUrl + '" class="error-action-link">Go to Settings to configure your API key</a>'
+            };
+        }
+
+        // Validation errors (field-level)
+        if (status === 400 && data.errors) {
+            var fieldList = Object.entries(data.errors).map(function(entry) {
+                return '<li><strong>' + escapeHtml(entry[0]) + ':</strong> ' + escapeHtml(entry[1]) + '</li>';
+            }).join('');
+
+            return {
+                title: 'Validation Error',
+                message: 'Please fix the following fields:',
+                icon: 'alert',
+                recoveryHTML: '<ul class="error-field-list">' + fieldList + '</ul>'
+            };
+        }
+
+        // Rate limiting
+        if (status === 429) {
+            return {
+                title: 'Too Many Requests',
+                message: 'The service is temporarily overloaded. Please wait a moment.',
+                icon: 'clock',
+                recoveryHTML: '<p>Wait 30 seconds and try again. If this persists, check your API provider dashboard for rate limits.</p>'
+            };
+        }
+
+        // Server errors
+        if (status >= 500) {
+            return {
+                title: 'Server Error',
+                message: message,
+                icon: 'server',
+                recoveryHTML: '<p>This is usually temporary. Try again in a moment.</p><p>If the problem persists, check that your API keys are valid in <a href="/settings?tab=api-keys">Settings</a>.</p>'
+            };
+        }
+
+        // Skill not found
+        if (status === 404) {
+            return {
+                title: 'Skill Not Found',
+                message: message,
+                icon: 'search',
+                recoveryHTML: '<a href="/skills" class="error-action-link">Browse available skills</a>'
+            };
+        }
+
+        // Network / timeout (status 0)
+        if (status === 0) {
+            return {
+                title: 'Connection Problem',
+                message: message,
+                icon: 'wifi',
+                recoveryHTML: '<p>Check your internet connection and try again.</p>'
+            };
+        }
+
+        // Generic fallback
+        return {
+            title: 'Execution Failed',
+            message: message,
+            icon: 'alert',
+            recoveryHTML: '<p>Try again. If the problem persists, <a href="/help">visit the Help page</a>.</p>'
+        };
+    }
+
+    function showExecutionError(status, data) {
+        var classified = classifyError(status, data);
+
+        // Also highlight field-level errors in the form
+        if (data.errors) {
+            Object.keys(data.errors).forEach(function(fieldName) {
+                var group = document.querySelector('[data-field="' + fieldName + '"]');
+                if (group) {
+                    showFieldValidationError(group, data.errors[fieldName]);
+                }
+            });
+        }
+
+        // Show error panel below the form
+        var panel = document.getElementById('execution-error-panel');
+        if (!panel) {
+            panel = document.createElement('div');
+            panel.id = 'execution-error-panel';
+            panel.className = 'execution-error-panel';
+            // Insert after the form card
+            var formCard = document.getElementById('form-mode-container');
+            formCard.parentNode.insertBefore(panel, formCard.nextSibling);
+        }
+
+        panel.innerHTML = '<div class="execution-error-header">' +
+            '<strong>' + escapeHtml(classified.title) + '</strong>' +
+            '<button class="toast-close" onclick="hideExecutionError()" style="background:none;border:none;cursor:pointer;color:inherit;">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+            '</button></div>' +
+            '<p class="execution-error-message">' + escapeHtml(classified.message) + '</p>' +
+            '<div class="execution-error-recovery">' + classified.recoveryHTML + '</div>';
+
+        panel.style.display = 'block';
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    window.hideExecutionError = function() {
+        var panel = document.getElementById('execution-error-panel');
+        if (panel) panel.style.display = 'none';
+    };
+
+    restoreActiveExecutionIfRunning();
+    loadSkill();
+    loadClientSelector();
+})();
+</script>
+{% endblock %}

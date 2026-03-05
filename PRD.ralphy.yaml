@@ -1,0 +1,191 @@
+tasks:
+  - title: Define gateway env vars in dashboard config and validation (CHAT_BACKEND,
+      GATEWAY_*).
+    completed: true
+    parallel_group: 1
+  - title: Add backend selector utility (sdk vs gateway) with explicit startup log.
+    completed: true
+    parallel_group: 2
+  - title: Add migration note for default backend rollout strategy.
+    completed: true
+    parallel_group: 3
+  - title: Add feature-flag guard so gateway mode can be toggled off instantly.
+    completed: true
+    parallel_group: 4
+  - title: Scaffold railway_apps/aiaa_gateway Flask app with app factory.
+    completed: true
+    parallel_group: 5
+  - title: Implement profile schema for setup-token profiles (profile_id, encrypted
+      token, timestamps, status).
+    completed: true
+    parallel_group: 5
+  - title: Implement runtime launcher to execute Claude runtime with setup-token env
+      mapping.
+    completed: true
+    parallel_group: 5
+  - title: Create services/gateway_client.py with typed request wrappers and
+      retry/backoff.
+    completed: true
+    parallel_group: 5
+  - title: Update settings token section copy for gateway setup-token flow.
+    completed: true
+    parallel_group: 5
+  - title: Add correlation ID propagation from dashboard to gateway logs.
+    completed: true
+    parallel_group: 5
+  - title: Add GET /health readiness endpoint with JSON contract in gateway.
+    completed: true
+    parallel_group: 6
+  - title: Implement encrypted token storage utility in gateway profile service.
+    completed: true
+    parallel_group: 6
+  - title: Implement workspace/cwd enforcement in gateway runtime (/app default plus
+      allowlist checks).
+    completed: true
+    parallel_group: 6
+  - title: Create services/gateway_runner.py implementing existing runner interface
+      contract.
+    completed: true
+    parallel_group: 6
+  - title: Add token status badge states and UX for validate, save, rotate, revoke.
+    completed: true
+    parallel_group: 6
+  - title: Add structured logs for token lifecycle and chat session lifecycle.
+    completed: true
+    parallel_group: 6
+  - title: Add SSE utility helpers for framing ping error and done events.
+    completed: true
+    parallel_group: 7
+  - title: Implement POST /v1/profiles/upsert handler and service.
+    completed: true
+    parallel_group: 7
+  - title: Implement POST /v1/responses non-stream mode in gateway.
+    completed: true
+    parallel_group: 7
+  - title: Create services/chat_backend.py resolver to return sdk or gateway runner.
+    completed: true
+    parallel_group: 7
+  - title: Update chat UX error messaging for gateway auth and runtime failures.
+    completed: true
+    parallel_group: 7
+  - title: Add metrics counters for token validation statuses, stream failures, and
+      runtime errors.
+    completed: true
+    parallel_group: 7
+  - title: Add internal auth middleware for protected gateway endpoints.
+    completed: true
+    parallel_group: 8
+  - title: Implement POST /v1/profiles/validate using gateway runtime canary.
+    completed: true
+    parallel_group: 8
+  - title: Implement POST /v1/responses stream mode via SSE generator.
+    completed: true
+    parallel_group: 8
+  - title: Wire routes/chat.py to backend-agnostic runner path.
+    completed: true
+    parallel_group: 8
+  - title: Ensure existing chat stream rendering handles translated gateway events.
+    completed: true
+    parallel_group: 8
+  - title: Add timing metrics for queue wait, first-event latency, and total runtime.
+    completed: true
+    parallel_group: 8
+  - title: Add gateway app pytest setup and health endpoint tests.
+    completed: true
+    parallel_group: 9
+  - title: Implement POST /v1/profiles/revoke with secure delete or invalidate.
+    completed: true
+    parallel_group: 9
+  - title: Implement gateway event normalization for tool_use, tool_result, text,
+      result, error, done.
+    completed: true
+    parallel_group: 9
+  - title: Remove setup-token hard-block behavior when CHAT_BACKEND equals gateway.
+    completed: true
+    parallel_group: 9
+  - title: Add frontend checks and tests for token lifecycle flows.
+    completed: true
+    parallel_group: 9
+  - title: Add initial Railway deploy docs for new gateway service.
+    completed: true
+    parallel_group: 9
+  - title: Add token redaction helper and tests for token-like patterns in gateway.
+    completed: false
+    parallel_group: 10
+  - title: Add gateway runtime tests with mocked SDK or CLI stream payloads.
+    completed: false
+    parallel_group: 10
+  - title: Add route and service tests for backend selection and session flow.
+    completed: false
+    parallel_group: 10
+  - title: Enforce mandatory encryption keys on dashboard and gateway startup.
+    completed: false
+    parallel_group: 11
+  - title: Add reconnect-aware stream semantics and duplicate-delta suppression.
+    completed: false
+    parallel_group: 11
+  - title: Add gateway compatibility check endpoint for .claude, context, and
+      execution visibility.
+    completed: false
+    parallel_group: 11
+  - title: Add strict no-token-leak logging filters and regression tests.
+    completed: false
+    parallel_group: 12
+  - title: Add per-session concurrency guard in gateway runner path.
+    completed: false
+    parallel_group: 12
+  - title: Add smoke tests for .tmp write, file read, and minimal tool event.
+    completed: false
+    parallel_group: 12
+  - title: Add rate limiting and throttling on gateway profile mutation endpoints.
+    completed: false
+    parallel_group: 13
+  - title: Add retryable versus terminal error classification for gateway execution
+      failures.
+    completed: false
+    parallel_group: 13
+  - title: Add Railway private networking and secrets wiring runbook for dashboard
+      plus gateway.
+    completed: false
+    parallel_group: 13
+  - title: Add auth failure telemetry and lockout behavior for repeated invalid
+      gateway bearer tokens.
+    completed: false
+    parallel_group: 14
+  - title: Ensure rate-limit responses include retry metadata for client handling.
+    completed: false
+    parallel_group: 14
+  - title: Add rollback guide to flip CHAT_BACKEND to sdk safely.
+    completed: false
+    parallel_group: 14
+  - title: "Add end-to-end integration test: save token, create session, send
+      message, stream done."
+    completed: false
+    parallel_group: 15
+  - title: "Add integration test: rotate token invalidates old runtime path."
+    completed: false
+    parallel_group: 16
+  - title: "Add integration test: revoke token blocks new chat runs with clear UI
+      error."
+    completed: false
+    parallel_group: 17
+  - title: Add soak test script for repeated stream sessions with interruption
+      scenarios.
+    completed: false
+    parallel_group: 18
+  - title: Add production readiness checklist docs for gateway rollout.
+    completed: false
+    parallel_group: 19
+  - title: Run staging canary with real setup-token and representative prompts.
+    completed: false
+    parallel_group: 20
+  - title: Validate key AIAA chat workflows with research content and tool-heavy
+      prompts.
+    completed: false
+    parallel_group: 21
+  - title: Verify no token leakage in logs, traces, errors, and client payloads.
+    completed: false
+    parallel_group: 22
+  - title: Execute phased production rollout and 48-hour monitoring checklist.
+    completed: false
+    parallel_group: 23

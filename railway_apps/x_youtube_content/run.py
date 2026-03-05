@@ -16,6 +16,8 @@ import os
 import sys
 import json
 import time
+import base64
+import pickle
 from datetime import datetime
 from pathlib import Path
 
@@ -294,20 +296,37 @@ def markdown_to_docs_requests(markdown_content: str) -> list:
     return requests
 
 
+def decrypt_token_pickle(token_pickle_b64: str):
+    """Decode and deserialize GOOGLE_OAUTH_TOKEN_PICKLE safely."""
+    if not token_pickle_b64:
+        return None
+
+    try:
+        token_data = base64.b64decode(token_pickle_b64, validate=True)
+    except Exception as e:
+        print(f"Invalid GOOGLE_OAUTH_TOKEN_PICKLE encoding: {e}")
+        return None
+
+    try:
+        return pickle.loads(token_data)
+    except Exception as e:
+        print(f"Invalid GOOGLE_OAUTH_TOKEN_PICKLE payload: {e}")
+        return None
+
+
 def create_google_doc(content: str, title: str) -> dict:
     """Create Google Doc with proper formatting using OAuth2 user credentials."""
     try:
-        import pickle
-        import base64
         from google.auth.transport.requests import Request
         from googleapiclient.discovery import build
 
         # Try OAuth2 token first (user credentials with storage quota)
         token_pickle_b64 = os.getenv("GOOGLE_OAUTH_TOKEN_PICKLE")
         if token_pickle_b64:
-            # Decode and load the pickle
-            token_data = base64.b64decode(token_pickle_b64)
-            creds = pickle.loads(token_data)
+            creds = decrypt_token_pickle(token_pickle_b64)
+            if creds is None:
+                print("Skipping OAuth2 Google Doc creation due to invalid token payload")
+                return {"documentUrl": None, "status": "skipped"}
 
             # Refresh if expired
             if creds.expired and creds.refresh_token:

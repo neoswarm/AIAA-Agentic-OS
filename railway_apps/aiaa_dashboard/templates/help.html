@@ -1,0 +1,627 @@
+{% extends "base.html" %}
+
+{% block title %}Help - AIAA Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Help page layout */
+    .help-sections {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 2rem;
+        align-items: flex-start;
+    }
+
+    /* Sidebar nav */
+    .help-nav {
+        position: sticky;
+        top: 2rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 1rem;
+    }
+
+    .help-nav-title {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        padding: 0 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .help-nav-link {
+        display: block;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        text-decoration: none;
+        border-radius: 6px;
+        transition: all 0.15s;
+    }
+
+    .help-nav-link:hover {
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+    }
+
+    .help-nav-link.active {
+        background: var(--accent-muted);
+        color: var(--accent);
+    }
+
+    /* Content area */
+    .help-content {
+        min-width: 0;
+    }
+
+    .help-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .help-section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* Getting Started */
+    .getting-started-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .gs-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 1.25rem;
+        transition: all 0.15s;
+    }
+
+    .gs-card:hover {
+        border-color: var(--accent);
+    }
+
+    .gs-card-num {
+        width: 28px;
+        height: 28px;
+        background: var(--accent-muted);
+        color: var(--accent);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .gs-card-title {
+        font-size: 0.9375rem;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    .gs-card-desc {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    /* FAQ Search */
+    .faq-search-wrapper {
+        margin-bottom: 1rem;
+    }
+    .faq-search {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.9375rem;
+        transition: border-color 0.15s;
+    }
+    .faq-search:focus {
+        border-color: var(--accent);
+    }
+    .faq-no-results {
+        padding: 1.5rem;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        display: none;
+    }
+
+    /* FAQ Accordion */
+    .faq-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .faq-item {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .faq-question {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        cursor: pointer;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: left;
+        font-family: inherit;
+        transition: background 0.15s;
+    }
+
+    .faq-question:hover {
+        background: var(--bg-elevated);
+    }
+
+    .faq-chevron {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        transition: transform 0.2s;
+    }
+
+    .faq-chevron svg {
+        width: 20px;
+        height: 20px;
+        stroke: var(--text-muted);
+        fill: none;
+        stroke-width: 2;
+    }
+
+    .faq-item.open .faq-chevron {
+        transform: rotate(180deg);
+    }
+
+    .faq-answer {
+        display: none;
+        padding: 0 1.25rem 1.25rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        line-height: 1.7;
+    }
+
+    .faq-item.open .faq-answer {
+        display: block;
+    }
+
+    /* Glossary */
+    .glossary-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .glossary-item {
+        padding: 1rem 1.25rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: 10px;
+    }
+
+    .glossary-term {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--accent);
+        margin-bottom: 0.25rem;
+    }
+
+    .glossary-def {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    /* Troubleshooting */
+    .troubleshoot-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .troubleshoot-item {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: 10px;
+        padding: 1.25rem;
+    }
+
+    .troubleshoot-problem {
+        font-size: 0.9375rem;
+        font-weight: 500;
+        color: var(--error);
+        margin-bottom: 0.5rem;
+    }
+
+    .troubleshoot-solution {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .troubleshoot-solution strong {
+        color: var(--text-primary);
+    }
+
+    @media (max-width: 768px) {
+        .help-sections {
+            grid-template-columns: 1fr;
+        }
+
+        .help-nav {
+            position: static;
+            display: flex;
+            overflow-x: auto;
+            gap: 0.25rem;
+            padding: 0.5rem;
+        }
+
+        .help-nav-title {
+            display: none;
+        }
+
+        .help-nav-link {
+            white-space: nowrap;
+            padding: 0.5rem 0.875rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Help</h1>
+        <p class="page-subtitle">Learn how to use Agentic OS and get answers to common questions</p>
+    </div>
+</div>
+
+<div class="help-sections">
+    <!-- Navigation -->
+    <nav class="help-nav" id="helpNav">
+        <div class="help-nav-title">Sections</div>
+        <a href="#getting-started" class="help-nav-link active" data-section="getting-started">Getting Started</a>
+        <a href="#faq" class="help-nav-link" data-section="faq">FAQ</a>
+        <a href="#glossary" class="help-nav-link" data-section="glossary">Glossary</a>
+        <a href="#troubleshooting" class="help-nav-link" data-section="troubleshooting">Troubleshooting</a>
+    </nav>
+
+    <!-- Content -->
+    <div class="help-content">
+
+        <!-- Getting Started -->
+        <div class="help-section" id="getting-started">
+            <h2 class="help-section-title">Getting Started</h2>
+            <div class="getting-started-grid">
+                <div class="gs-card">
+                    <div class="gs-card-num">1</div>
+                    <div class="gs-card-title">Set up your API key</div>
+                    <div class="gs-card-desc">Go to <a href="/settings" style="color: var(--accent);">Settings</a> and add your OpenRouter API key. This powers all AI content generation.</div>
+                </div>
+                <div class="gs-card">
+                    <div class="gs-card-num">2</div>
+                    <div class="gs-card-title">Add a client</div>
+                    <div class="gs-card-desc">Visit <a href="/clients-manage" style="color: var(--accent);">Clients</a> to set up your first client profile. This personalizes all content created for them.</div>
+                </div>
+                <div class="gs-card">
+                    <div class="gs-card-num">3</div>
+                    <div class="gs-card-title">Run your first skill</div>
+                    <div class="gs-card-desc">Browse available skills from the <a href="/skills" style="color: var(--accent);">Skills</a> page and run one to see how it works.</div>
+                </div>
+                <div class="gs-card">
+                    <div class="gs-card-num">4</div>
+                    <div class="gs-card-title">Review your output</div>
+                    <div class="gs-card-desc">Check <a href="/executions" style="color: var(--accent);">Execution History</a> to see your results. You can copy, download, or send to Google Docs.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="help-section" id="faq">
+            <h2 class="help-section-title">Frequently Asked Questions</h2>
+            <div class="faq-search-wrapper">
+                <input type="text" class="faq-search" id="faqSearch" placeholder="Search FAQ..." autocomplete="off" aria-label="Search frequently asked questions">
+            </div>
+            <div class="faq-list" id="faqList">
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>What is Agentic OS?</span>
+                        <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        Agentic OS is an AI-powered platform that helps you create marketing content, research companies, manage email campaigns, and automate agency work. It comes with 133 ready-to-use skills that handle tasks like writing blog posts, generating emails, creating funnels, and more.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>What is an API key and why do I need one?</span>
+                        <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        An API key is like a password that lets Agentic OS connect to AI services. You need at least an OpenRouter API key to generate content. Think of it as giving Agentic OS permission to use AI on your behalf. You can get one free at openrouter.ai.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>What are skills?</span>
+                        <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        Skills are pre-built tasks that Agentic OS can perform. Each skill handles a specific job, like "Write a Blog Post" or "Research a Company." You fill in a few details, click run, and the skill produces a finished output. There are 133 skills covering content, email, research, social media, ads, and more.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>How do client profiles work?</span>
+                        <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        Client profiles store information about each of your clients, including their industry, target audience, brand voice, and content preferences. When you run a skill for a client, this information is automatically used to personalize the output. Set them up in the Clients section.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>How much does it cost to run skills?</span>
+                        <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        Costs depend on the AI model used and the length of output. Most skills cost between $0.05 and $0.50 per run. You pay for API usage through your OpenRouter account. Agentic OS itself is free to use.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>Where do my outputs go?</span>
+                        <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        All outputs are saved locally first, then optionally delivered to Google Docs and notified via Slack. You can view, copy, and download any output from the Execution History page. Nothing is lost even if delivery to Google Docs fails.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>Can I use Agentic OS for multiple clients?</span>
+                        <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        Yes! You can create separate client profiles for each of your clients in the Clients section. When you run a skill, the output is automatically personalized based on the selected client's industry, audience, and brand voice.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>What happens if a skill fails halfway through?</span>
+                        <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        If a skill encounters an error during execution, you'll see a clear error message explaining what went wrong and suggested steps to fix it. Your inputs are preserved so you can retry without re-entering everything. Any partial output is saved.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>How do I connect Google Docs or Slack?</span>
+                        <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        Go to Settings and look for the Google Docs and Slack sections. For Slack, paste your webhook URL and click Save. For Google Docs, you'll need a credentials file set up on the server. Use the Test button to verify each connection works.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>Is my data and content secure?</span>
+                        <span class="faq-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        Your API keys are stored securely on the server and never exposed in the browser. All content generation happens through encrypted API connections. Your outputs are stored locally on the server and are only accessible to authenticated users.
+                    </div>
+                </div>
+
+                <div class="faq-no-results" id="faqNoResults">No matching questions found. Try different keywords.</div>
+
+            </div>
+        </div>
+
+        <!-- Glossary -->
+        <div class="help-section" id="glossary">
+            <h2 class="help-section-title">Glossary</h2>
+            <div class="glossary-list">
+                <div class="glossary-item">
+                    <div class="glossary-term">Skill</div>
+                    <div class="glossary-def">A pre-built task that generates a specific type of output, like a blog post, email sequence, or research report.</div>
+                </div>
+                <div class="glossary-item">
+                    <div class="glossary-term">API Key</div>
+                    <div class="glossary-def">A unique code that connects Agentic OS to external services like AI models (OpenRouter) or research tools (Perplexity).</div>
+                </div>
+                <div class="glossary-item">
+                    <div class="glossary-term">Client Profile</div>
+                    <div class="glossary-def">A saved set of information about one of your clients, used to personalize content and maintain consistency.</div>
+                </div>
+                <div class="glossary-item">
+                    <div class="glossary-term">Execution</div>
+                    <div class="glossary-def">A single run of a skill. Each execution produces an output and is logged in your history.</div>
+                </div>
+                <div class="glossary-item">
+                    <div class="glossary-term">Webhook</div>
+                    <div class="glossary-def">A way for external services to trigger actions in Agentic OS automatically, like starting a skill when a new lead comes in.</div>
+                </div>
+                <div class="glossary-item">
+                    <div class="glossary-term">Brand Voice</div>
+                    <div class="glossary-def">The tone and style used in content. Can be casual, professional, technical, friendly, or authoritative.</div>
+                </div>
+                <div class="glossary-item">
+                    <div class="glossary-term">Deliverable</div>
+                    <div class="glossary-def">The finished output from a skill, like a completed blog post, email draft, or research report.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Troubleshooting -->
+        <div class="help-section" id="troubleshooting">
+            <h2 class="help-section-title">Troubleshooting</h2>
+            <div class="troubleshoot-list">
+                <div class="troubleshoot-item">
+                    <div class="troubleshoot-problem">"API key not working" or "Unauthorized" errors</div>
+                    <div class="troubleshoot-solution">
+                        <strong>Fix:</strong> Go to <a href="/settings" style="color: var(--accent);">Settings</a> and re-enter your API key. Make sure you copied the full key including the prefix (e.g., <code style="background: var(--bg-elevated); padding: 0.125rem 0.375rem; border-radius: 4px; font-size: 0.8125rem;">sk-or-</code>). If it still fails, generate a new key from your provider.
+                    </div>
+                </div>
+                <div class="troubleshoot-item">
+                    <div class="troubleshoot-problem">Skill is taking too long or seems stuck</div>
+                    <div class="troubleshoot-solution">
+                        <strong>Fix:</strong> Some skills take 2-5 minutes, especially research-heavy ones. If it's been more than 10 minutes, try cancelling and running again. Check that your API key has sufficient credits.
+                    </div>
+                </div>
+                <div class="troubleshoot-item">
+                    <div class="troubleshoot-problem">Output quality is lower than expected</div>
+                    <div class="troubleshoot-solution">
+                        <strong>Fix:</strong> Make sure you've filled in as many input fields as possible. Skills produce better results with detailed inputs. Also check that you have a client profile set up with target audience and brand voice configured.
+                    </div>
+                </div>
+                <div class="troubleshoot-item">
+                    <div class="troubleshoot-problem">Google Docs delivery isn't working</div>
+                    <div class="troubleshoot-solution">
+                        <strong>Fix:</strong> Google Docs integration requires a credentials file on the server. Check <a href="/settings" style="color: var(--accent);">Settings</a> to see if Google Docs shows as connected. Your outputs are always saved locally even if delivery fails.
+                    </div>
+                </div>
+                <div class="troubleshoot-item">
+                    <div class="troubleshoot-problem">Slack notifications aren't coming through</div>
+                    <div class="troubleshoot-solution">
+                        <strong>Fix:</strong> Verify your Slack Webhook URL in <a href="/settings" style="color: var(--accent);">Settings</a>. Use the Test button to send a test message. Make sure the webhook is still active in your Slack workspace settings.
+                    </div>
+                </div>
+                <div class="troubleshoot-item">
+                    <div class="troubleshoot-problem">Page shows an error after logging in</div>
+                    <div class="troubleshoot-solution">
+                        <strong>Fix:</strong> Try clearing your browser cache and logging in again. If the issue persists, check that the dashboard service is running correctly in Railway.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // FAQ accordion
+    // Initialize FAQ ARIA attributes
+    (function() {
+        document.querySelectorAll('.faq-item').forEach(function(item, index) {
+            var btn = item.querySelector('.faq-question');
+            var answer = item.querySelector('.faq-answer');
+            var answerId = 'faq-answer-' + (index + 1);
+            answer.id = answerId;
+            answer.setAttribute('role', 'region');
+            answer.setAttribute('aria-labelledby', 'faq-btn-' + (index + 1));
+            btn.id = 'faq-btn-' + (index + 1);
+            btn.setAttribute('aria-expanded', 'false');
+            btn.setAttribute('aria-controls', answerId);
+            // Hide decorative chevron SVGs from screen readers
+            var chevronSvg = item.querySelector('.faq-chevron svg');
+            if (chevronSvg) chevronSvg.setAttribute('aria-hidden', 'true');
+        });
+    })();
+
+    function toggleFaq(btn) {
+        var item = btn.closest('.faq-item');
+        var wasOpen = item.classList.contains('open');
+        // Close all
+        document.querySelectorAll('.faq-item').forEach(function(i) {
+            i.classList.remove('open');
+            var b = i.querySelector('.faq-question');
+            if (b) b.setAttribute('aria-expanded', 'false');
+        });
+        // Toggle clicked
+        if (!wasOpen) {
+            item.classList.add('open');
+            btn.setAttribute('aria-expanded', 'true');
+        }
+    }
+
+    // FAQ search filtering
+    (function() {
+        var searchInput = document.getElementById('faqSearch');
+        var faqItems = document.querySelectorAll('.faq-item');
+        var noResults = document.getElementById('faqNoResults');
+        var searchTimeout;
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            var query = this.value.trim().toLowerCase();
+
+            searchTimeout = setTimeout(function() {
+                var visibleCount = 0;
+                faqItems.forEach(function(item) {
+                    var question = item.querySelector('.faq-question').textContent.toLowerCase();
+                    var answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+                    var matches = !query || question.includes(query) || answer.includes(query);
+                    item.style.display = matches ? '' : 'none';
+                    if (matches) visibleCount++;
+                });
+                noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+            }, 200);
+        });
+    })();
+
+    // Nav highlighting on scroll
+    (function() {
+        var sections = document.querySelectorAll('.help-section');
+        var navLinks = document.querySelectorAll('.help-nav-link');
+
+        function updateNav() {
+            var scrollPos = window.scrollY + 120;
+            sections.forEach(function(section) {
+                if (section.offsetTop <= scrollPos && section.offsetTop + section.offsetHeight > scrollPos) {
+                    navLinks.forEach(function(link) { link.classList.remove('active'); });
+                    var activeLink = document.querySelector('.help-nav-link[data-section="' + section.id + '"]');
+                    if (activeLink) activeLink.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', updateNav);
+
+        // Smooth scroll for nav links
+        navLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var target = document.getElementById(link.dataset.section);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    })();
+</script>
+{% endblock %}

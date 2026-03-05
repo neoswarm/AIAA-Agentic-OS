@@ -25,6 +25,12 @@ from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 from pathlib import Path
 
+try:
+    from execution.chat_run_limiter import CHAT_RUN_LIMITER, ChatRunLimitError
+except ImportError:
+    # Support running directly from /app/execution on Modal.
+    from chat_run_limiter import CHAT_RUN_LIMITER, ChatRunLimitError
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("claude-orchestrator")
@@ -222,6 +228,53 @@ ALL_TOOLS = {
         }
     }
 }
+
+# Named tool profiles for webhook configs.
+TOOL_PROFILES = {
+    "safe": ["read_sheet", "instantly_get_emails", "web_search", "web_fetch"],
+    "default": ["send_email", "read_sheet", "update_sheet", "web_search", "web_fetch"],
+    "full": list(ALL_TOOLS.keys())
+}
+DEFAULT_TOOL_PROFILE = "default"
+
+
+def resolve_allowed_tools(webhook_config: dict) -> tuple[list[str], str]:
+    """
+    Resolve allowed tools from webhook config.
+
+    Supported config formats:
+    - {"tool_profile": "safe|default|full"}  # preferred
+    - {"tools": "safe|default|full"}         # shorthand alias
+    - {"tools": ["send_email", "web_fetch"]} # legacy explicit list
+    """
+    raw_profile = webhook_config.get("tool_profile")
+    raw_tools = webhook_config.get("tools")
+
+    # Backward-compatible shorthand: "tools": "safe"
+    if raw_profile is None and isinstance(raw_tools, str):
+        raw_profile = raw_tools
+        raw_tools = None
+
+    if raw_profile is not None:
+        profile = str(raw_profile).strip().lower()
+        if profile in TOOL_PROFILES:
+            return list(TOOL_PROFILES[profile]), profile
+
+        logger.warning(
+            "Unknown tool profile '%s'. Falling back to '%s'.",
+            raw_profile,
+            DEFAULT_TOOL_PROFILE
+        )
+        return list(TOOL_PROFILES[DEFAULT_TOOL_PROFILE]), DEFAULT_TOOL_PROFILE
+
+    if isinstance(raw_tools, list):
+        resolved_tools = [name for name in raw_tools if name in ALL_TOOLS]
+        unknown_tools = [name for name in raw_tools if name not in ALL_TOOLS]
+        if unknown_tools:
+            logger.warning("Ignoring unknown tools in webhook config: %s", unknown_tools)
+        return resolved_tools, "custom"
+
+    return list(TOOL_PROFILES[DEFAULT_TOOL_PROFILE]), DEFAULT_TOOL_PROFILE
 
 # ============================================================================
 # TOOL IMPLEMENTATIONS
@@ -891,7 +944,7 @@ def directive(slug: str, payload: dict = None):
     # AGENTIC MODE: Claude orchestrates using directive + tools
     # =========================================================================
     if directive_name:
-        allowed_tools = webhook_config.get("tools", ["send_email"])
+        allowed_tools, tool_profile = resolve_allowed_tools(webhook_config)
 
         try:
             directive_content = load_directive(directive_name)
@@ -899,24 +952,35 @@ def directive(slug: str, payload: dict = None):
             return {"status": "error", "error": str(e)}
 
         try:
-            result = run_directive(
-                slug=slug,
-                directive_content=directive_content,
-                input_data=input_data,
-                allowed_tools=allowed_tools,
-                token_data=token_data,
-                max_turns=max_turns
-            )
+            with CHAT_RUN_LIMITER.run_slot():
+                result = run_directive(
+                    slug=slug,
+                    directive_content=directive_content,
+                    input_data=input_data,
+                    allowed_tools=allowed_tools,
+                    token_data=token_data,
+                    max_turns=max_turns
+                )
             return {
                 "status": "success",
                 "slug": slug,
                 "mode": "agentic",
                 "directive": directive_name,
+                "tool_profile": tool_profile,
+                "allowed_tools": allowed_tools,
                 "response": result["response"],
                 "thinking": result["thinking"],
                 "conversation": result["conversation"],
                 "usage": result["usage"],
                 "timestamp": datetime.utcnow().isoformat()
+            }
+        except ChatRunLimitError as e:
+            logger.warning(f"Directive limit reached for {slug}: {e}")
+            return {
+                "status": "error",
+                "error": str(e),
+                "code": "chat_run_limit_reached",
+                "max_concurrent_chat_runs": CHAT_RUN_LIMITER.max_concurrent_runs,
             }
         except Exception as e:
             logger.error(f"Directive error: {e}")
@@ -933,17 +997,18 @@ def list_webhooks():
     config = load_webhook_config()
     webhooks = config.get("webhooks", {})
 
-    return {
-        "webhooks": {
-            slug: {
-                "directive": cfg.get("directive"),
-                "script": cfg.get("script"),
-                "description": cfg.get("description", ""),
-                "tools": cfg.get("tools", [])
-            }
-            for slug, cfg in webhooks.items()
+    webhook_data = {}
+    for slug, cfg in webhooks.items():
+        tools, tool_profile = resolve_allowed_tools(cfg)
+        webhook_data[slug] = {
+            "directive": cfg.get("directive"),
+            "script": cfg.get("script"),
+            "description": cfg.get("description", ""),
+            "tool_profile": tool_profile,
+            "tools": tools
         }
-    }
+
+    return {"webhooks": webhook_data}
 
 
 # ============================================================================
@@ -1155,45 +1220,8 @@ Be concise. Complete tasks fully."""
     conversation = []
 
     try:
-        # Initial call
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=4096,
-            system=system,
-            tools=tools,
-            messages=messages
-        )
-
-        # Agentic loop
-        turns = 0
-        max_turns = 10
-
-        while response.stop_reason == "tool_use" and turns < max_turns:
-            turns += 1
-            tool_results = []
-
-            for block in response.content:
-                if block.type == "tool_use":
-                    slack_notify(f"🔧 *Tool: {block.name}*")
-
-                    try:
-                        result = run_agent_tool(block.name, block.input, token_data)
-                        result_str = json.dumps(result) if isinstance(result, (dict, list)) else str(result)
-                        slack_notify(f"✅ Success: {result_str[:200]}")
-                    except Exception as e:
-                        result_str = json.dumps({"error": str(e)})
-                        slack_notify(f"❌ Error: {str(e)}")
-
-                    conversation.append({"tool": block.name, "result": result_str[:500]})
-                    tool_results.append({
-                        "type": "tool_result",
-                        "tool_use_id": block.id,
-                        "content": result_str[:10000]
-                    })
-
-            messages.append({"role": "assistant", "content": response.content})
-            messages.append({"role": "user", "content": tool_results})
-
+        with CHAT_RUN_LIMITER.run_slot():
+            # Initial call
             response = client.messages.create(
                 model="claude-sonnet-4-20250514",
                 max_tokens=4096,
@@ -1202,22 +1230,67 @@ Be concise. Complete tasks fully."""
                 messages=messages
             )
 
-        # Extract final text
-        final = ""
-        for block in response.content:
-            if hasattr(block, "text"):
-                final += block.text
+            # Agentic loop
+            turns = 0
+            max_turns = 10
 
-        slack_notify(f"🏁 *Done*\n{final[:500]}")
+            while response.stop_reason == "tool_use" and turns < max_turns:
+                turns += 1
+                tool_results = []
 
+                for block in response.content:
+                    if block.type == "tool_use":
+                        slack_notify(f"🔧 *Tool: {block.name}*")
+
+                        try:
+                            result = run_agent_tool(block.name, block.input, token_data)
+                            result_str = json.dumps(result) if isinstance(result, (dict, list)) else str(result)
+                            slack_notify(f"✅ Success: {result_str[:200]}")
+                        except Exception as e:
+                            result_str = json.dumps({"error": str(e)})
+                            slack_notify(f"❌ Error: {str(e)}")
+
+                        conversation.append({"tool": block.name, "result": result_str[:500]})
+                        tool_results.append({
+                            "type": "tool_result",
+                            "tool_use_id": block.id,
+                            "content": result_str[:10000]
+                        })
+
+                messages.append({"role": "assistant", "content": response.content})
+                messages.append({"role": "user", "content": tool_results})
+
+                response = client.messages.create(
+                    model="claude-sonnet-4-20250514",
+                    max_tokens=4096,
+                    system=system,
+                    tools=tools,
+                    messages=messages
+                )
+
+            # Extract final text
+            final = ""
+            for block in response.content:
+                if hasattr(block, "text"):
+                    final += block.text
+
+            slack_notify(f"🏁 *Done*\n{final[:500]}")
+
+            return JSONResponse({
+                "status": "success",
+                "query": query,
+                "response": final,
+                "turns": turns,
+                "conversation": conversation
+            })
+
+    except ChatRunLimitError as e:
         return JSONResponse({
-            "status": "success",
-            "query": query,
-            "response": final,
-            "turns": turns,
-            "conversation": conversation
-        })
-
+            "status": "error",
+            "error": str(e),
+            "code": "chat_run_limit_reached",
+            "max_concurrent_chat_runs": CHAT_RUN_LIMITER.max_concurrent_runs,
+        }, status_code=429)
     except Exception as e:
         slack_notify(f"💥 *Error*: {str(e)}")
         return JSONResponse({"error": str(e)}, status_code=500)
@@ -1942,21 +2015,15 @@ def read_demo_transcript(name: str = "kickoff"):
     """
     from fastapi.responses import JSONResponse
 
-    transcript_map = {
-        "kickoff": "/app/demo_kickoff_call_transcript.md",
-        "sales": "/app/demo_sales_call_transcript.md"
-    }
-
-    if name not in transcript_map:
+    if name not in DEMO_TRANSCRIPT_MAP:
         return JSONResponse({
             "status": "error",
             "error": f"Unknown transcript: {name}",
-            "available": list(transcript_map.keys())
+            "available": list(DEMO_TRANSCRIPT_MAP.keys())
         }, status_code=400)
 
     try:
-        with open(transcript_map[name], "r") as f:
-            content = f.read()
+        content = _load_demo_transcript(name)
 
         return JSONResponse({
             "status": "success",
@@ -1968,6 +2035,73 @@ def read_demo_transcript(name: str = "kickoff"):
             "status": "error",
             "error": str(e)
         }, status_code=500)
+
+
+@app.function(image=image, secrets=ALL_SECRETS, timeout=60)
+@modal.fastapi_endpoint(method="GET")
+def export_demo_transcript(name: str = "kickoff", format: str = "json"):
+    """
+    Export demo transcripts as JSON or Markdown.
+
+    URL: GET /export-demo-transcript?name=kickoff&format=json
+    URL: GET /export-demo-transcript?name=sales&format=markdown
+    """
+    from fastapi.responses import JSONResponse, PlainTextResponse
+
+    export_format = (format or "json").strip().lower()
+    if export_format not in {"json", "markdown", "md"}:
+        return JSONResponse({
+            "status": "error",
+            "error": f"Unsupported format: {format}",
+            "available_formats": ["json", "markdown"],
+        }, status_code=400)
+
+    if name not in DEMO_TRANSCRIPT_MAP:
+        return JSONResponse({
+            "status": "error",
+            "error": f"Unknown transcript: {name}",
+            "available": list(DEMO_TRANSCRIPT_MAP.keys())
+        }, status_code=400)
+
+    try:
+        content = _load_demo_transcript(name)
+        if export_format in {"markdown", "md"}:
+            return PlainTextResponse(
+                content=content,
+                media_type="text/markdown; charset=utf-8",
+                headers={
+                    "Content-Disposition": f'attachment; filename="{name}_transcript.md"'
+                },
+            )
+
+        return JSONResponse({
+            "status": "success",
+            "name": name,
+            "format": "json",
+            "content": content,
+        }, headers={
+            "Content-Disposition": f'attachment; filename="{name}_transcript.json"'
+        })
+    except Exception as e:
+        return JSONResponse({
+            "status": "error",
+            "error": str(e)
+        }, status_code=500)
+
+
+DEMO_TRANSCRIPT_MAP = {
+    "kickoff": "/app/demo_kickoff_call_transcript.md",
+    "sales": "/app/demo_sales_call_transcript.md",
+}
+
+
+def _load_demo_transcript(name: str) -> str:
+    """Load one of the built-in demo transcripts."""
+    if name not in DEMO_TRANSCRIPT_MAP:
+        raise ValueError(f"Unknown transcript: {name}")
+
+    with open(DEMO_TRANSCRIPT_MAP[name], "r", encoding="utf-8") as f:
+        return f.read()
 
 
 @app.function(image=image, secrets=ALL_SECRETS, timeout=300)
@@ -1991,24 +2125,18 @@ def create_proposal_from_transcript(transcript: str = "sales", demo: bool = True
     import anthropic
     import requests
 
-    transcript_map = {
-        "kickoff": "/app/demo_kickoff_call_transcript.md",
-        "sales": "/app/demo_sales_call_transcript.md"
-    }
-
-    if transcript not in transcript_map:
+    if transcript not in DEMO_TRANSCRIPT_MAP:
         return JSONResponse({
             "status": "error",
             "error": f"Unknown transcript: {transcript}",
-            "available": list(transcript_map.keys())
+            "available": list(DEMO_TRANSCRIPT_MAP.keys())
         }, status_code=400)
 
     slack_notify(f"📄 *Create Proposal from Transcript*\nTranscript: {transcript}\nDemo mode: {demo}")
 
     try:
         # Step 1: Read the transcript
-        with open(transcript_map[transcript], "r") as f:
-            transcript_content = f.read()
+        transcript_content = _load_demo_transcript(transcript)
 
         slack_notify(f"📝 *Step 1/3: Transcript loaded*\n{len(transcript_content)} characters")
 
@@ -2529,6 +2657,7 @@ def main():
     print("  GET  /scrape-leads?query=dentists&location=US&limit=100")
     print("  POST /generate-proposal      - Body: {client, project}")
     print("  GET  /read-demo-transcript?name=kickoff|sales")
+    print("  GET  /export-demo-transcript?name=sales&format=json|markdown")
     print("  GET  /create-proposal-from-transcript?transcript=sales")
     print("  GET  /youtube-outliers?keywords=AI+agents,ChatGPT&days=7&top_n=10")
     print("")

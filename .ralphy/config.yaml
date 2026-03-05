@@ -1,0 +1,11 @@
+project:
+  name: "AIAA Agentic OS"
+
+boundaries:
+  never_touch:
+    - "PRD.md"
+    - "progress.txt"
+    - ".ralphy-worktrees/**"
+
+rules:
+  - "Do not modify PRD.md or progress.txt."

@@ -8,8 +8,9 @@ Beautiful monitoring dashboard + webhook handlers for agentic workflows.
 import os
 import json
 import hashlib
+import uuid
 from datetime import datetime
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template_string, g, has_request_context
 import requests
 from collections import deque
 import threading
@@ -38,6 +39,7 @@ events_lock = threading.Lock()
 
 # File-based deduplication that survives worker restarts
 DEDUP_FILE = "/tmp/processed_webhooks.json"
+CORRELATION_HEADER = "X-Correlation-ID"
 
 def load_processed_webhooks():
     """Load processed webhooks from file."""
@@ -64,16 +66,123 @@ def save_processed_webhook(key: str):
     except Exception as e:
         print(f"[WARN] Could not save dedup: {e}")
 
-def log_event(event_type: str, status: str, data: dict):
+def get_correlation_id() -> str:
+    """Get request correlation ID when in a request context."""
+    if has_request_context():
+        return getattr(g, "correlation_id", "")
+    return ""
+
+
+def log_event(event_type: str, status: str, data: dict, correlation_id: str = None):
     """Log an event to the dashboard."""
+    correlation_id = correlation_id or get_correlation_id()
     with events_lock:
         events_log.appendleft({
             "id": len(events_log) + 1,
             "timestamp": datetime.now().isoformat(),
             "type": event_type,
             "status": status,
-            "data": data
+            "data": data,
+            "correlation_id": correlation_id,
         })
+
+
+def persist_rotated_token_to_railway(token_json: str, max_attempts: int = 3, base_delay_seconds: float = 1.0) -> bool:
+    """Persist GOOGLE_OAUTH_TOKEN_JSON to Railway vars with retry."""
+    api_token = os.getenv("RAILWAY_API_TOKEN", "")
+    project_id = os.getenv("RAILWAY_PROJECT_ID", "")
+    environment_id = os.getenv("RAILWAY_ENVIRONMENT_ID", os.getenv("RAILWAY_ENV_ID", ""))
+    service_id = os.getenv("RAILWAY_SERVICE_ID", "")
+
+    if not api_token or not project_id or not environment_id:
+        print("[WARN] Skipping token persistence: missing Railway API credentials")
+        return False
+
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Content-Type": "application/json",
+    }
+    mutation = """
+    mutation variableUpsert($input: VariableUpsertInput!) {
+      variableUpsert(input: $input)
+    }
+    """
+
+    input_payload = {
+        "projectId": project_id,
+        "environmentId": environment_id,
+        "name": "GOOGLE_OAUTH_TOKEN_JSON",
+        "value": token_json,
+    }
+    if service_id:
+        input_payload["serviceId"] = service_id
+
+    payload = {
+        "query": mutation,
+        "variables": {
+            "input": input_payload,
+        },
+    }
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            resp = requests.post(RAILWAY_GRAPHQL_URL, headers=headers, json=payload, timeout=15)
+            if resp.status_code == 200:
+                body = resp.json()
+                if not body.get("errors"):
+                    print("[INFO] Persisted rotated Google OAuth token to Railway")
+                    return True
+                print(f"[WARN] Railway token persistence error (attempt {attempt}/{max_attempts}): {body['errors']}")
+            else:
+                print(f"[WARN] Railway token persistence failed (attempt {attempt}/{max_attempts}): HTTP {resp.status_code}")
+        except Exception as e:
+            print(f"[WARN] Railway token persistence exception (attempt {attempt}/{max_attempts}): {e}")
+
+        if attempt < max_attempts:
+            time.sleep(base_delay_seconds * (2 ** (attempt - 1)))
+
+    print("[WARN] Failed to persist rotated Google OAuth token to Railway after retries")
+    return False
+
+
+def persist_rotated_token_to_railway_background(token_json: str) -> None:
+    """Persist rotated token in a background daemon thread."""
+    if not token_json:
+        return
+    thread = threading.Thread(
+        target=persist_rotated_token_to_railway,
+        args=(token_json,),
+        daemon=True,
+    )
+    thread.start()
+
+
+def refresh_google_oauth_token_if_needed(creds: Credentials) -> None:
+    """Refresh Google OAuth token and persist rotated value in background."""
+    global GOOGLE_OAUTH_TOKEN_JSON
+
+    if not creds or not creds.expired or not creds.refresh_token:
+        return
+
+    previous_token_json = None
+    try:
+        previous_token_json = creds.to_json()
+    except Exception:
+        pass
+
+    creds.refresh(Request())
+    print("[INFO] Refreshed Google OAuth token")
+
+    try:
+        rotated_token_json = creds.to_json()
+    except Exception as e:
+        print(f"[WARN] Could not serialize refreshed Google OAuth token: {e}")
+        return
+
+    if rotated_token_json and rotated_token_json != previous_token_json:
+        GOOGLE_OAUTH_TOKEN_JSON = rotated_token_json
+        os.environ["GOOGLE_OAUTH_TOKEN_JSON"] = rotated_token_json
+        persist_rotated_token_to_railway_background(rotated_token_json)
 
 # =============================================================================
 # Dashboard HTML Template
@@ -685,10 +794,7 @@ def create_google_doc(research: dict) -> str:
             scopes=token_data.get('scopes')
         )
         
-        # Refresh if expired
-        if creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-            print("[INFO] Refreshed Google OAuth token")
+        refresh_google_oauth_token_if_needed(creds)
         
         drive_service = build('drive', 'v3', credentials=creds)
         docs_service = build('docs', 'v1', credentials=creds)
@@ -826,18 +932,23 @@ Generated by: AIAA Agentic OS
 # Research Functions
 # =============================================================================
 
-def research_with_perplexity(query: str) -> str:
+def research_with_perplexity(query: str, correlation_id: str = None) -> str:
     """Use Perplexity Sonar for research."""
     if not PERPLEXITY_API_KEY:
         return None
     
     try:
+        headers = {
+            "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
+            "Content-Type": "application/json",
+        }
+        request_correlation_id = correlation_id or get_correlation_id()
+        if request_correlation_id:
+            headers[CORRELATION_HEADER] = request_correlation_id
+
         resp = requests.post(
             "https://api.perplexity.ai/chat/completions",
-            headers={
-                "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
-                "Content-Type": "application/json"
-            },
+            headers=headers,
             json={
                 "model": "sonar",
                 "messages": [{"role": "user", "content": query}],
@@ -854,18 +965,23 @@ def research_with_perplexity(query: str) -> str:
     return None
 
 
-def research_with_claude(prompt: str) -> str:
+def research_with_claude(prompt: str, correlation_id: str = None) -> str:
     """Use Claude via OpenRouter."""
     if not OPENROUTER_API_KEY:
         return None
     
     try:
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+        }
+        request_correlation_id = correlation_id or get_correlation_id()
+        if request_correlation_id:
+            headers[CORRELATION_HEADER] = request_correlation_id
+
         resp = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json"
-            },
+            headers=headers,
             json={
                 "model": "anthropic/claude-sonnet-4",
                 "messages": [{"role": "user", "content": prompt}],
@@ -892,7 +1008,7 @@ def extract_company_from_email(email: str) -> str:
     return domain.split(".")[0].title()
 
 
-def research_prospect(name: str, email: str, company: str = None) -> dict:
+def research_prospect(name: str, email: str, company: str = None, correlation_id: str = None) -> dict:
     """Research prospect and company."""
     results = {
         "prospect_name": name,
@@ -910,12 +1026,14 @@ def research_prospect(name: str, email: str, company: str = None) -> dict:
     # Company research
     if company:
         results["company_research"] = research_with_perplexity(
-            f'Research "{company}". Provide: what they do, company size, target market, recent news.'
+            f'Research "{company}". Provide: what they do, company size, target market, recent news.',
+            correlation_id=correlation_id,
         )
     
     # Prospect research
     results["prospect_research"] = research_with_perplexity(
-        f'Research "{name}" at "{company or "their company"}". Find: role, background, expertise.'
+        f'Research "{name}" at "{company or "their company"}". Find: role, background, expertise.',
+        correlation_id=correlation_id,
     )
     
     # Generate talking points
@@ -939,19 +1057,38 @@ PROSPECT RESEARCH:
 3. **Potential Pain Points** - What challenges might they face
 4. **Meeting Goals** - What to learn/achieve
 
-Be specific and actionable.""")
+Be specific and actionable.""", correlation_id=correlation_id)
     
     # Summary
     results["summary"] = research_with_claude(f"""Create a 3-4 sentence executive summary:
 {context}
 
-Include: who they are, what their company does, why they might be booking, one key thing to remember.""")
+Include: who they are, what their company does, why they might be booking, one key thing to remember.""", correlation_id=correlation_id)
     
     return results
 
 # =============================================================================
 # Routes
 # =============================================================================
+
+@app.before_request
+def assign_correlation_id():
+    """Attach a request correlation ID to every inbound request."""
+    incoming = request.headers.get(CORRELATION_HEADER) or request.headers.get("X-Request-ID")
+    if incoming and incoming.strip():
+        g.correlation_id = incoming.strip()
+    else:
+        g.correlation_id = uuid.uuid4().hex
+
+
+@app.after_request
+def add_correlation_id_header(response):
+    """Expose correlation ID on outbound responses."""
+    correlation_id = get_correlation_id()
+    if correlation_id:
+        response.headers[CORRELATION_HEADER] = correlation_id
+    return response
+
 
 @app.route("/")
 def dashboard():
@@ -979,16 +1116,21 @@ def api_events():
 @app.route("/webhook/calendly", methods=["POST"])
 def calendly_webhook():
     """Handle Calendly webhook."""
+    correlation_id = get_correlation_id()
     payload = request.get_json()
     
     if not payload:
-        log_event("webhook", "error", {"message": "No payload received"})
-        return jsonify({"error": "No payload"}), 400
+        log_event("webhook", "error", {"message": "No payload received"}, correlation_id=correlation_id)
+        return jsonify({"error": "No payload", "correlation_id": correlation_id}), 400
     
     event_type = payload.get("event")
     if event_type != "invitee.created":
-        log_event("webhook", "ignored", {"message": f"Event type: {event_type}"})
-        return jsonify({"status": "ignored", "reason": f"Event {event_type} not handled"}), 200
+        log_event("webhook", "ignored", {"message": f"Event type: {event_type}"}, correlation_id=correlation_id)
+        return jsonify({
+            "status": "ignored",
+            "reason": f"Event {event_type} not handled",
+            "correlation_id": correlation_id,
+        }), 200
     
     invitee_data = payload.get("payload", {})
     
@@ -1007,9 +1149,14 @@ def calendly_webhook():
     # Check file-based dedup
     processed = load_processed_webhooks()
     if dedup_key in processed:
-        log_event("meeting_booked", "duplicate", {"name": invitee_data.get("name"), "email": email})
+        log_event(
+            "meeting_booked",
+            "duplicate",
+            {"name": invitee_data.get("name"), "email": email},
+            correlation_id=correlation_id,
+        )
         print(f"[INFO] Duplicate skipped: {email}")
-        return jsonify({"status": "duplicate"}), 200
+        return jsonify({"status": "duplicate", "correlation_id": correlation_id}), 200
     
     # Save immediately before any processing
     save_processed_webhook(dedup_key)
@@ -1046,14 +1193,19 @@ def calendly_webhook():
         company = extract_company_from_email(email)
     
     # Log event
-    log_event("meeting_booked", "processing", {"name": name, "email": email, "company": company})
+    log_event(
+        "meeting_booked",
+        "processing",
+        {"name": name, "email": email, "company": company},
+        correlation_id=correlation_id,
+    )
     
     # Send initial alert
     send_meeting_alert(name, email, event_name, start_time, company)
     
     # Research
     try:
-        research = research_prospect(name, email, company)
+        research = research_prospect(name, email, company, correlation_id=correlation_id)
         
         # Create Google Doc
         doc_url = create_google_doc(research)
@@ -1061,13 +1213,28 @@ def calendly_webhook():
         # Send to Slack with doc link
         send_research_to_slack(research, doc_url)
         
-        log_event("meeting_booked", "success", {"name": name, "company": company, "doc_url": doc_url})
+        log_event(
+            "meeting_booked",
+            "success",
+            {"name": name, "company": company, "doc_url": doc_url},
+            correlation_id=correlation_id,
+        )
         print(f"[INFO] Complete: {name} - Doc: {doc_url}")
-        return jsonify({"status": "success", "prospect": name, "doc_url": doc_url}), 200
+        return jsonify({
+            "status": "success",
+            "prospect": name,
+            "doc_url": doc_url,
+            "correlation_id": correlation_id,
+        }), 200
     except Exception as e:
-        log_event("meeting_booked", "error", {"name": name, "error": str(e)})
+        log_event(
+            "meeting_booked",
+            "error",
+            {"name": name, "error": str(e)},
+            correlation_id=correlation_id,
+        )
         print(f"[ERROR] {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": str(e), "correlation_id": correlation_id}), 500
 
 
 @app.route("/health", methods=["GET"])
@@ -1076,7 +1243,8 @@ def health():
     return jsonify({
         "status": "ok",
         "service": "aiaa-webhooks",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
+        "correlation_id": get_correlation_id(),
     })
 
 

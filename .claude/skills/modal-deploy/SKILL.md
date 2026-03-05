@@ -10,6 +10,15 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 Deploy execution scripts to Modal for serverless cloud execution.
 
 ## Deploy Command
+
+Using the automated deployment script:
+```bash
+python3 .claude/skills/modal-deploy/modal_deploy.py \
+  --script execution/script_name.py \
+  --app-name my-app
+```
+
+Or direct Modal CLI:
 ```bash
 modal deploy execution/<script>.py
 ```

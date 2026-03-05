@@ -187,10 +187,8 @@ def main():
         save_state(state)
 
         sys.stderr.write(
-            f"[Path Traversal Guard] BLOCKED: Potential path traversal detected\n"
-            f"  Issues: {'; '.join(all_issues[:3])}\n"
-            f"  Command: {command[:100]}\n"
-            f"  All file access should stay within the project directory.\n"
+            f"[Path Traversal Guard] BLOCKED: This file path was blocked for safety.\n"
+            f"  The system can only access files within the project directory.\n"
         )
         sys.exit(2)
 

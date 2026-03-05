@@ -1,0 +1,7 @@
+2026-02-24
+- Added `EventSchema` in `railway_apps/aiaa_dashboard/services/chat_store.py` for streamed events with validated fields: `type`, `payload`, and `timestamp`.
+- Enforced streamed event type values to `tool`, `system`, or `result`.
+- Added Redis-backed event persistence methods in `RedisChatStore`: `append_event(...)` and `get_events(...)`, including event TTL support.
+- Added focused event tests in `railway_apps/aiaa_dashboard/services/test_chat_store.py` for schema defaults, invalid input validation, append/get behavior, and transaction failure safety.
+- Ran tests: `python3 -m pytest railway_apps/aiaa_dashboard/services/test_chat_store.py`.
+- Ran lint/style check: `python3 -m black --check railway_apps/aiaa_dashboard/services/chat_store.py railway_apps/aiaa_dashboard/services/test_chat_store.py`.

@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Event Logs - AIAA{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Event Logs</h1>
+    <p class="text-muted">Real-time system events, webhook calls, and activity tracking</p>
+</div>
+
+<!-- Event Stats -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+    {% for status, count in event_stats.items() %}
+    <div class="stat-card-mini">
+        <div class="stat-label">{{ status|capitalize }}</div>
+        <div class="stat-value">{{ count }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Filter Controls -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-body" style="padding: 1rem 1.25rem;">
+        <form method="GET" style="display: flex; gap: 1rem; align-items: center;">
+            <div style="flex: 1;">
+                <label class="form-label" style="margin-bottom: 0.5rem;" for="event-type-filter">Filter by Type</label>
+                <select name="type" id="event-type-filter" class="form-input" onchange="this.form.submit()">
+                    <option value="">All Types</option>
+                    <option value="auth">Authentication</option>
+                    <option value="deploy">Deployment</option>
+                    <option value="webhook">Webhook</option>
+                    <option value="cron">Cron Job</option>
+                    <option value="api">API Call</option>
+                    <option value="env_var">Environment Variable</option>
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label class="form-label" style="margin-bottom: 0.5rem;" for="event-status-filter">Filter by Status</label>
+                <select name="status" id="event-status-filter" class="form-input" onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    <option value="success">Success</option>
+                    <option value="error">Error</option>
+                    <option value="failed">Failed</option>
+                    <option value="warning">Warning</option>
+                    <option value="info">Info</option>
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label class="form-label" style="margin-bottom: 0.5rem;" for="event-limit-filter">Limit</label>
+                <select name="limit" id="event-limit-filter" class="form-input" onchange="this.form.submit()">
+                    <option value="50">50 events</option>
+                    <option value="100" selected>100 events</option>
+                    <option value="200">200 events</option>
+                    <option value="500">500 events</option>
+                </select>
+            </div>
+            <button type="button" class="btn btn-outline" onclick="window.location.href='/events'" style="margin-top: 1.5rem;">
+                Clear Filters
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Events Table -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">Event History</span>
+        <button class="btn btn-sm" onclick="window.location.reload()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            Refresh
+        </button>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        {% if events %}
+        <div style="overflow-x: auto;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">ID</th>
+                        <th style="width: 180px;">Timestamp</th>
+                        <th>Type</th>
+                        <th>Source</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr>
+                        <td class="mono" style="color: var(--text-muted);">
+                            #{{ event.id }}
+                        </td>
+                        <td class="mono" style="white-space: nowrap; font-size: 0.8125rem;">
+                            {{ event.created_at[:19] if event.created_at else 'N/A' }}
+                        </td>
+                        <td>
+                            <span class="badge badge-secondary">{{ event.type }}</span>
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 0.875rem;">
+                            {{ event.source }}
+                        </td>
+                        <td>
+                            {% if event.status == 'success' %}
+                            <span class="badge badge-success">{{ event.status }}</span>
+                            {% elif event.status == 'error' or event.status == 'failed' %}
+                            <span class="badge badge-error">{{ event.status }}</span>
+                            {% elif event.status == 'warning' %}
+                            <span class="badge badge-warning">{{ event.status }}</span>
+                            {% else %}
+                            <span class="badge badge-info">{{ event.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if event.data %}
+                            <details>
+                                <summary style="cursor: pointer; color: var(--text-muted); font-size: 0.875rem;">
+                                    {% if event.data.workflow %}
+                                    {{ event.data.workflow }}
+                                    {% elif event.data.username %}
+                                    {{ event.data.username }} - {{ event.data.action or 'action' }}
+                                    {% elif event.data.message %}
+                                    {{ event.data.message }}
+                                    {% else %}
+                                    View details
+                                    {% endif %}
+                                </summary>
+                                <pre class="mono" style="margin-top: 0.5rem; padding: 0.5rem; background: var(--bg-elevated); border-radius: 4px; font-size: 0.75rem; max-width: 500px; overflow-x: auto;">{{ event.data | tojson(indent=2) }}</pre>
+                            </details>
+                            {% else %}
+                            <span style="color: var(--text-muted); font-size: 0.875rem;">No data</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="padding: 3rem; text-align: center; color: var(--text-muted);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 1rem; opacity: 0.5;" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <p>No events found</p>
+            <p style="font-size: 0.875rem;">Events will appear here as system activities occur</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.stat-card-mini {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+}
+
+.stat-card-mini .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card-mini .stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.form-label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+}
+
+.form-input:focus {
+    border-color: var(--primary);
+}
+
+.mono {
+    font-family: 'DM Mono', monospace;
+}
+
+.badge {
+    padding: 0.25rem 0.625rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.badge-secondary {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.badge-success {
+    background: rgba(34, 197, 94, 0.15);
+    color: rgb(34, 197, 94);
+}
+
+.badge-error {
+    background: rgba(239, 68, 68, 0.15);
+    color: rgb(239, 68, 68);
+}
+
+.badge-warning {
+    background: rgba(251, 146, 60, 0.15);
+    color: rgb(251, 146, 60);
+}
+
+.badge-info {
+    background: rgba(59, 130, 246, 0.15);
+    color: rgb(59, 130, 246);
+}
+
+.btn-sm {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+}
+
+details summary {
+    list-style: none;
+}
+
+details summary::-webkit-details-marker {
+    display: none;
+}
+
+details[open] summary {
+    color: var(--primary);
+}
+</style>
+{% endblock %}

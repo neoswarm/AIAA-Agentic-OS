@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Skills - AIAA{% endblock %}
+
+{% block extra_css %}
+<style>
+.skill-toolbar {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.skill-search {
+    flex: 1;
+    min-width: 240px;
+}
+
+.skill-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.skill-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    background: var(--bg-surface);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s, transform 0.15s;
+}
+
+.skill-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.skill-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.skill-card-desc {
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+.skill-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.skill-input-count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.skill-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Run Skill</h1>
+        <p class="page-subtitle">{{ total_skills }} skills available</p>
+    </div>
+</div>
+
+<div class="skill-toolbar">
+    <input id="skill-search" class="form-input skill-search" type="text" placeholder="Search skills by name or description..." oninput="filterSkillCards()">
+    <select id="skill-category" class="form-select" onchange="filterSkillCards()">
+        <option value="">All categories</option>
+        {% for category in categories.keys()|list|sort %}
+        <option value="{{ category }}" {% if category_filter == category %}selected{% endif %}>{{ category|capitalize }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="skill-grid" id="skill-grid">
+    {% for skill in skills %}
+    <a class="skill-card"
+       href="/skills/{{ skill.name|urlencode }}/run"
+       data-skill-name="{{ (skill.display_name or skill.name)|lower }}"
+       data-skill-description="{{ (skill.description or '')|lower }}"
+       data-skill-category="{{ (skill.category or '')|lower }}">
+        <div class="skill-card-title">{{ skill.display_name or skill.name }}</div>
+        <div class="skill-card-desc">{{ skill.description or 'No description provided.' }}</div>
+        <div class="skill-card-meta">
+            <span class="badge badge-category">{{ skill.category or 'other' }}</span>
+            <span class="skill-input-count">{{ (skill.inputs or [])|length }} input{{ '' if (skill.inputs or [])|length == 1 else 's' }}</span>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+<div class="skill-empty" id="skill-empty" style="display:none;">
+    No skills match your filters.
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterSkillCards() {
+    var q = (document.getElementById('skill-search').value || '').toLowerCase().trim();
+    var category = (document.getElementById('skill-category').value || '').toLowerCase().trim();
+    var cards = document.querySelectorAll('#skill-grid .skill-card');
+    var visible = 0;
+
+    cards.forEach(function(card) {
+        var name = card.getAttribute('data-skill-name') || '';
+        var desc = card.getAttribute('data-skill-description') || '';
+        var cat = card.getAttribute('data-skill-category') || '';
+
+        var matchesQuery = !q || name.indexOf(q) !== -1 || desc.indexOf(q) !== -1;
+        var matchesCategory = !category || cat === category;
+        var show = matchesQuery && matchesCategory;
+
+        card.style.display = show ? '' : 'none';
+        if (show) visible += 1;
+    });
+
+    document.getElementById('skill-empty').style.display = visible === 0 ? 'block' : 'none';
+}
+
+document.addEventListener('DOMContentLoaded', filterSkillCards);
+</script>
+{% endblock %}

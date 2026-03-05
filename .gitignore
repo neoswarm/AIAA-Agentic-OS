@@ -24,3 +24,6 @@ credentials.json
 *.key
 service_account*.json
 aiaa-agentic-os-*.json
+
+# Ralphy local worktrees
+.ralphy-worktrees/

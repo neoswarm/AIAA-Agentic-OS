@@ -1,0 +1,1012 @@
+{% extends "base.html" %}
+
+{% block title %}Home - AIAA{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Search Hero */
+.search-hero {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.search-hero-input {
+    flex: 1;
+    position: relative;
+}
+
+.search-hero-input input {
+    width: 100%;
+    padding: 1rem 1.25rem 1rem 3rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.search-hero-input input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-muted);
+}
+
+.search-hero-input input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-hero-input .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.search-results-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    z-index: 50;
+    max-height: 360px;
+    overflow-y: auto;
+    display: none;
+}
+
+.search-results-dropdown.visible {
+    display: block;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: background 0.1s;
+}
+
+.search-result-item:hover,
+.search-result-item.highlighted {
+    background: var(--bg-elevated);
+}
+
+.search-result-item .result-name {
+    font-weight: 500;
+    font-size: 0.9375rem;
+}
+
+.search-result-item .result-desc {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.icon-btn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+}
+
+.icon-btn:hover {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+}
+
+/* Quick Start Section */
+.section-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+}
+
+.quick-start-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.quick-start-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 1.25rem 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.15s;
+}
+
+.quick-start-card:hover {
+    background: var(--bg-elevated);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.quick-start-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.quick-start-icon svg {
+    width: 22px;
+    height: 22px;
+    stroke: white;
+    fill: none;
+}
+
+.quick-start-card .qs-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.3;
+}
+
+/* Main Layout Grid */
+.home-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.5rem;
+}
+
+/* Category Chips */
+.category-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.category-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 9999px;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+}
+
+.category-chip:hover {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+.category-chip .chip-count {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    background: var(--bg-elevated);
+    padding: 0.125rem 0.375rem;
+    border-radius: 9999px;
+}
+
+/* Recent Activity */
+.activity-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.875rem 0;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 0.375rem;
+    flex-shrink: 0;
+}
+
+.activity-dot.dot-success { background: var(--success); }
+.activity-dot.dot-error { background: var(--error); }
+.activity-dot.dot-running { background: var(--warning); }
+.activity-dot.dot-queued { background: var(--text-muted); }
+
+.activity-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.activity-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.125rem;
+}
+
+.activity-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Favorites */
+.favorites-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.favorite-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    transition: background 0.1s;
+}
+
+.favorite-item:hover {
+    background: var(--bg-elevated);
+}
+
+.favorite-star {
+    color: var(--warning);
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.favorite-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Star Toggle */
+.qs-star {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-muted);
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s;
+    padding: 0.25rem;
+    line-height: 1;
+}
+.quick-start-card { position: relative; }
+.quick-start-card:hover .qs-star { opacity: 1; }
+.qs-star.favorited { color: var(--warning); opacity: 1; }
+.qs-star:hover { color: var(--warning); }
+
+/* Empty State */
+.empty-hint {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+}
+
+/* Welcome Banner */
+.welcome-banner {
+    background: var(--accent-muted);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.welcome-banner-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+.welcome-banner-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+.welcome-banner-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+.welcome-banner-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    flex-shrink: 0;
+}
+.welcome-banner-close:hover {
+    color: var(--text-primary);
+}
+.welcome-banner-steps {
+    display: flex;
+    gap: 0.75rem;
+}
+.welcome-step {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition: border-color 0.15s;
+}
+.welcome-step:hover {
+    border-color: var(--accent);
+}
+.welcome-step-num {
+    width: 24px;
+    height: 24px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+@media (max-width: 600px) {
+    .welcome-banner-steps {
+        flex-direction: column;
+    }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .home-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .search-hero {
+        flex-direction: column;
+    }
+
+    .hero-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .quick-start-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Complexity badges */
+.complexity-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+}
+.complexity-simple {
+    background: var(--success-muted, #dcfce7);
+    color: var(--success, #16a34a);
+}
+.complexity-moderate {
+    background: var(--warning-muted, #fef3c7);
+    color: var(--warning, #d97706);
+}
+.complexity-advanced {
+    background: var(--error-muted, #fef2f2);
+    color: var(--error, #dc2626);
+}
+.time-estimate {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.result-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner (first-time visitors) -->
+<div class="welcome-banner" id="welcomeBanner" style="display: none;">
+    <div class="welcome-banner-content">
+        <div class="welcome-banner-text">
+            <h2 class="welcome-banner-title">Welcome to Agentic OS</h2>
+            <p class="welcome-banner-desc">Your AI-powered agency assistant with 133 ready-to-use skills. Here's how to get started:</p>
+        </div>
+        <button class="welcome-banner-close" id="welcomeBannerClose" title="Dismiss" aria-label="Dismiss welcome banner">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+    </div>
+    <div class="welcome-banner-steps">
+        <a href="/settings?tab=api-keys" class="welcome-step">
+            <span class="welcome-step-num">1</span>
+            <span class="welcome-step-text">Set up your API key</span>
+        </a>
+        <a href="/skills" class="welcome-step">
+            <span class="welcome-step-num">2</span>
+            <span class="welcome-step-text">Browse 133 skills</span>
+        </a>
+        <a href="/help" class="welcome-step">
+            <span class="welcome-step-num">3</span>
+            <span class="welcome-step-text">Read the FAQ</span>
+        </a>
+    </div>
+</div>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Welcome back{{ ', ' + username if username else '' }}</h1>
+        <p class="page-subtitle">What would you like to create today?</p>
+    </div>
+</div>
+
+<!-- Search Hero -->
+<div class="search-hero">
+    <div class="search-hero-input" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="search-results">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text"
+               id="skill-search"
+               role="searchbox"
+               aria-autocomplete="list"
+               aria-controls="search-results"
+               aria-label="Search skills"
+               placeholder="What do you want to do? e.g. Write a blog post, research a company..."
+               autocomplete="off">
+        <div class="search-results-dropdown" id="search-results" role="listbox" aria-label="Search results"></div>
+    </div>
+    <div class="hero-actions">
+        <a href="/settings" class="icon-btn" title="Settings" aria-label="Settings">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+            </svg>
+        </a>
+        <a href="/help" class="icon-btn" title="Help" aria-label="Help">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </a>
+    </div>
+</div>
+
+<!-- Quick Start -->
+<div class="section-label">Quick Start</div>
+
+<!-- Skeleton: Quick Start (visible while skills API loads) -->
+<div class="skeleton-grid" id="quick-start-skeleton" aria-hidden="true">
+    <div class="skeleton-card skeleton-pulse"><div class="skeleton-circle" style="margin: 0 auto 0.625rem;"></div><div class="skeleton-line skeleton-line--short" style="margin: 0 auto;"></div></div>
+    <div class="skeleton-card skeleton-pulse"><div class="skeleton-circle" style="margin: 0 auto 0.625rem;"></div><div class="skeleton-line skeleton-line--short" style="margin: 0 auto;"></div></div>
+    <div class="skeleton-card skeleton-pulse"><div class="skeleton-circle" style="margin: 0 auto 0.625rem;"></div><div class="skeleton-line skeleton-line--short" style="margin: 0 auto;"></div></div>
+    <div class="skeleton-card skeleton-pulse"><div class="skeleton-circle" style="margin: 0 auto 0.625rem;"></div><div class="skeleton-line skeleton-line--short" style="margin: 0 auto;"></div></div>
+    <div class="skeleton-card skeleton-pulse"><div class="skeleton-circle" style="margin: 0 auto 0.625rem;"></div><div class="skeleton-line skeleton-line--short" style="margin: 0 auto;"></div></div>
+    <div class="skeleton-card skeleton-pulse"><div class="skeleton-circle" style="margin: 0 auto 0.625rem;"></div><div class="skeleton-line skeleton-line--short" style="margin: 0 auto;"></div></div>
+</div>
+
+<div class="quick-start-grid" id="quick-start-grid" style="display:none">
+    <a href="/skills/blog-post/run" class="quick-start-card">
+        <div class="quick-start-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+            <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <span class="qs-label">Write Content</span>
+        <button class="qs-star" data-skill="blog-post" onclick="toggleFavorite('blog-post', event)" aria-label="Add to favorites">&#9733;</button>
+    </a>
+    <a href="/skills/company-research/run" class="quick-start-card">
+        <div class="quick-start-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+            <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <span class="qs-label">Research Topic</span>
+        <button class="qs-star" data-skill="company-research" onclick="toggleFavorite('company-research', event)" aria-label="Add to favorites">&#9733;</button>
+    </a>
+    <a href="/skills/cold-email-campaign/run" class="quick-start-card">
+        <div class="quick-start-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+            <svg viewBox="0 0 24 24" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <span class="qs-label">Draft Emails</span>
+        <button class="qs-star" data-skill="cold-email-campaign" onclick="toggleFavorite('cold-email-campaign', event)" aria-label="Add to favorites">&#9733;</button>
+    </a>
+    <a href="/skills/market-research/run" class="quick-start-card">
+        <div class="quick-start-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+            <svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <span class="qs-label">Analyze Data</span>
+        <button class="qs-star" data-skill="market-research" onclick="toggleFavorite('market-research', event)" aria-label="Add to favorites">&#9733;</button>
+    </a>
+    <a href="/skills/lead-list-builder/run" class="quick-start-card">
+        <div class="quick-start-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
+            <svg viewBox="0 0 24 24" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <span class="qs-label">Generate Leads</span>
+        <button class="qs-star" data-skill="lead-list-builder" onclick="toggleFavorite('lead-list-builder', event)" aria-label="Add to favorites">&#9733;</button>
+    </a>
+    <a href="/skills/vsl-funnel/run" class="quick-start-card">
+        <div class="quick-start-icon" style="background: linear-gradient(135deg, #a18cd1, #fbc2eb);">
+            <svg viewBox="0 0 24 24" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <span class="qs-label">Create Funnel</span>
+        <button class="qs-star" data-skill="vsl-funnel" onclick="toggleFavorite('vsl-funnel', event)" aria-label="Add to favorites">&#9733;</button>
+    </a>
+</div>
+
+<!-- Recommended for You -->
+<div id="recommended-section" style="display: none; margin-bottom: 2rem;">
+    <div class="section-label">Recommended for You</div>
+    <div class="quick-start-grid" id="recommended-grid"></div>
+</div>
+
+<!-- Main Grid: Left + Right sidebar -->
+<div class="home-grid">
+    <!-- Left Column -->
+    <div>
+        <!-- Browse by Category -->
+        <div class="section-label">Browse by Category</div>
+
+        <!-- Skeleton: Category Chips (visible while skills API loads) -->
+        <div id="category-skeleton" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem;" aria-hidden="true">
+            <div class="skeleton-chip skeleton-pulse"></div>
+            <div class="skeleton-chip skeleton-pulse"></div>
+            <div class="skeleton-chip skeleton-pulse"></div>
+            <div class="skeleton-chip skeleton-pulse"></div>
+            <div class="skeleton-chip skeleton-pulse"></div>
+        </div>
+
+        <div class="category-chips" id="category-chips" style="display:none">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- All Skills Preview (shown when browsing) -->
+        <div id="category-skills-preview" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title" id="category-preview-title">Skills</span>
+                    <a href="/skills" class="text-link" style="font-size: 0.8125rem; color: var(--accent); text-decoration: none;">View All &rarr;</a>
+                </div>
+                <div class="card-body" id="category-skills-list" style="padding: 0;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div>
+        <!-- Recent Activity -->
+        <div class="card" style="margin-bottom: 1.25rem;">
+            <div class="card-header">
+                <span class="card-title">Recent Activity</span>
+                <a href="/executions" style="font-size: 0.8125rem; color: var(--accent); text-decoration: none;">See All &rarr;</a>
+            </div>
+            <div class="card-body" style="padding: 0.5rem 1rem;">
+                <div class="activity-list" id="recent-activity">
+                    <div class="empty-hint" id="activity-empty-state">
+                        <div style="margin-bottom: 0.5rem;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--text-muted);">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            </svg>
+                        </div>
+                        <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 0.25rem;">No activity yet</div>
+                        <div>Your recent skill executions will appear here.</div>
+                        <a href="/skills" class="btn" style="margin-top: 0.75rem; font-size: 0.75rem; padding: 0.5rem 1rem;">Run a Skill</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Favorites -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Favorites</span>
+            </div>
+            <div class="card-body" style="padding: 0.5rem 0.75rem;">
+                <div class="favorites-list" id="favorites-list">
+                    <div class="empty-hint">Star your most-used skills for quick access.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Welcome banner -- show for first-time visitors
+(function() {
+    var banner = document.getElementById('welcomeBanner');
+    var closeBtn = document.getElementById('welcomeBannerClose');
+    if (!localStorage.getItem('welcome_banner_dismissed')) {
+        banner.style.display = 'block';
+    }
+    closeBtn.addEventListener('click', function() {
+        banner.style.display = 'none';
+        localStorage.setItem('welcome_banner_dismissed', '1');
+    });
+})();
+
+(function() {
+    const searchInput = document.getElementById('skill-search');
+    const searchResults = document.getElementById('search-results');
+    const categoryChips = document.getElementById('category-chips');
+    const activityList = document.getElementById('recent-activity');
+    const favoritesList = document.getElementById('favorites-list');
+    let allSkills = [];
+    let searchTimeout = null;
+    let highlightIndex = -1;
+
+    var FAVORITES_KEY = 'skill_favorites';
+
+    function getFavorites() {
+        try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'); }
+        catch (e) { return []; }
+    }
+
+    window.toggleFavorite = function(skillName, event) {
+        if (event) { event.preventDefault(); event.stopPropagation(); }
+        var favs = getFavorites();
+        var idx = favs.indexOf(skillName);
+        if (idx === -1) {
+            favs.push(skillName);
+        } else {
+            favs.splice(idx, 1);
+        }
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+        updateStarStates();
+        loadFavorites();
+        return idx === -1;
+    };
+
+    function updateStarStates() {
+        var favs = getFavorites();
+        document.querySelectorAll('.qs-star').forEach(function(star) {
+            var name = star.getAttribute('data-skill');
+            star.classList.toggle('favorited', favs.indexOf(name) !== -1);
+            star.setAttribute('aria-label', favs.indexOf(name) !== -1 ? 'Remove from favorites' : 'Add to favorites');
+        });
+    }
+
+    // Load skills on page init
+    async function loadSkills() {
+        try {
+            const res = await fetch('/api/v2/skills');
+            if (!res.ok) return;
+            const data = await res.json();
+            allSkills = data.skills || data || [];
+            renderCategories(allSkills);
+
+            // Hide skeletons, show real content
+            document.getElementById('quick-start-skeleton').style.display = 'none';
+            document.getElementById('quick-start-grid').style.display = 'grid';
+            document.getElementById('category-skeleton').style.display = 'none';
+            document.getElementById('category-chips').style.display = 'flex';
+            updateStarStates();
+        } catch (e) {
+            console.warn('Could not load skills:', e);
+            if (typeof showToast === 'function') showToast('Failed to load skills', 'error');
+
+            // Hide skeletons even on error so user sees error state, not eternal skeleton
+            document.getElementById('quick-start-skeleton').style.display = 'none';
+            document.getElementById('quick-start-grid').style.display = 'grid';
+            document.getElementById('category-skeleton').style.display = 'none';
+            document.getElementById('category-chips').style.display = 'flex';
+        }
+    }
+
+    // Load recent activity
+    async function loadRecentActivity() {
+        try {
+            const res = await fetch('/api/v2/executions?limit=5');
+            if (!res.ok) return;
+            const data = await res.json();
+            const executions = data.executions || data || [];
+            if (executions.length === 0) return;
+
+            activityList.innerHTML = '';
+            executions.forEach(function(exec) {
+                const dotClass = exec.status === 'success' ? 'dot-success'
+                    : exec.status === 'error' ? 'dot-error'
+                    : exec.status === 'running' ? 'dot-running'
+                    : 'dot-queued';
+                const timeAgo = formatTimeAgo(exec.created_at || exec.started_at);
+                const item = document.createElement('a');
+                item.className = 'activity-item';
+                item.href = '/executions/' + encodeURIComponent(exec.id) + '/output';
+                item.style.textDecoration = 'none';
+                item.style.color = 'inherit';
+                item.innerHTML = '<div class="activity-dot ' + dotClass + '"></div>'
+                    + '<div class="activity-info">'
+                    + '<div class="activity-name">' + escapeHtml(exec.skill_name || 'Unknown') + '</div>'
+                    + '<div class="activity-meta">' + escapeHtml(exec.status || '') + '</div>'
+                    + '</div>'
+                    + '<span class="activity-time">' + escapeHtml(timeAgo) + '</span>';
+                activityList.appendChild(item);
+            });
+        } catch (e) {
+            console.warn('Could not load activity:', e);
+            showToast('Failed to load recent activity', 'error');
+        }
+    }
+
+    // Load favorites
+    async function loadFavorites() {
+        var favs = getFavorites();
+
+        if (!Array.isArray(favs) || favs.length === 0) {
+            favoritesList.innerHTML = '<div class="empty-hint">'
+                + '<div style="margin-bottom: 0.5rem;">'
+                + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--text-muted);">'
+                + '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'
+                + '</svg></div>'
+                + '<div style="font-weight: 500; color: var(--text-primary); margin-bottom: 0.25rem;">No favorites yet</div>'
+                + '<div>Star your most-used skills for quick access.</div>'
+                + '<a href="/skills" class="btn" style="margin-top: 0.75rem; font-size: 0.75rem; padding: 0.5rem 1rem;">Browse Skills</a>'
+                + '</div>';
+            return;
+        }
+
+        favoritesList.innerHTML = '';
+        favs.forEach(function(name) {
+            var a = document.createElement('a');
+            a.className = 'favorite-item';
+            a.href = '/skills/' + encodeURIComponent(name) + '/run';
+            a.innerHTML = '<span class="favorite-star">&#9733;</span>'
+                + '<span class="favorite-name">' + escapeHtml(formatSkillName(name)) + '</span>';
+            favoritesList.appendChild(a);
+        });
+    }
+
+    // Load recommended skills
+    async function loadRecommended() {
+        try {
+            var res = await fetch('/api/v2/skills/recommended');
+            if (!res.ok) return;
+            var data = await res.json();
+            var skills = (data.skills || []).slice(0, 8);
+            if (skills.length === 0) return;
+
+            var grid = document.getElementById('recommended-grid');
+            grid.innerHTML = '';
+            skills.forEach(function(s) {
+                var card = document.createElement('a');
+                card.className = 'quick-start-card';
+                card.href = '/skills/' + encodeURIComponent(s.name) + '/run';
+                card.style.position = 'relative';
+
+                var metaLine = '';
+                if (s.estimated_minutes) {
+                    metaLine += '<span class="time-estimate">' + escapeHtml(String(s.estimated_minutes)) + ' min</span> ';
+                }
+                if (s.complexity) {
+                    metaLine += '<span class="complexity-badge complexity-' + escapeHtml(s.complexity) + '">' + escapeHtml(s.complexity) + '</span>';
+                }
+
+                card.innerHTML = '<div class="quick-start-icon" style="background: var(--accent);">'
+                    + '<svg viewBox="0 0 24 24" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
+                    + '</div>'
+                    + '<span class="qs-label">' + escapeHtml(formatSkillName(s.name)) + '</span>'
+                    + (metaLine ? '<div style="margin-top: 0.25rem;">' + metaLine + '</div>' : '')
+                    + '<button class="qs-star" data-skill="' + escapeHtml(s.name) + '" onclick="toggleFavorite(\'' + escapeHtml(s.name).replace(/'/g, "\\'") + '\', event)" aria-label="Add to favorites">&#9733;</button>';
+                grid.appendChild(card);
+            });
+
+            document.getElementById('recommended-section').style.display = 'block';
+            updateStarStates();
+        } catch (e) {
+            // Non-critical, silently fail
+            console.warn('Could not load recommendations:', e);
+        }
+    }
+
+    // Render category chips
+    function renderCategories(skills) {
+        var cats = {};
+        skills.forEach(function(s) {
+            var c = s.category || 'Other';
+            cats[c] = (cats[c] || 0) + 1;
+        });
+
+        categoryChips.innerHTML = '';
+        Object.keys(cats).sort().forEach(function(cat) {
+            var chip = document.createElement('a');
+            chip.className = 'category-chip';
+            chip.href = '/skills?category=' + encodeURIComponent(cat);
+            chip.innerHTML = escapeHtml(cat)
+                + ' <span class="chip-count">' + cats[cat] + '</span>';
+            categoryChips.appendChild(chip);
+        });
+    }
+
+    // Search (API-backed with synonym expansion)
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        highlightIndex = -1;
+        var q = this.value.trim();
+        if (q.length < 2) {
+            searchResults.classList.remove('visible');
+            searchInput.closest('[role="combobox"]').setAttribute('aria-expanded', 'false');
+            return;
+        }
+        searchTimeout = setTimeout(async function() {
+            try {
+                var res = await fetch('/api/v2/skills/search?q=' + encodeURIComponent(q));
+                if (!res.ok) return;
+                var data = await res.json();
+                var matches = (data.skills || []).slice(0, 8);
+
+                if (matches.length === 0) {
+                    searchResults.innerHTML = '<div style="padding: 1.25rem; text-align: center;"><div style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.25rem;">No skills match your search</div><div style="color: var(--text-muted); font-size: 0.75rem;">Try different keywords or <a href="/skills" style="color: var(--accent);">browse all skills</a></div></div>';
+                } else {
+                    searchResults.innerHTML = '';
+                    matches.forEach(function(s, i) {
+                        var item = document.createElement('a');
+                        item.className = 'search-result-item';
+                        item.href = '/skills/' + encodeURIComponent(s.name) + '/run';
+                        item.setAttribute('data-index', i);
+
+                        var metaHtml = '<div class="result-meta">';
+                        if (s.estimated_minutes) {
+                            metaHtml += '<span class="time-estimate">' + escapeHtml(String(s.estimated_minutes)) + ' min</span>';
+                        }
+                        if (s.complexity) {
+                            metaHtml += '<span class="complexity-badge complexity-' + escapeHtml(s.complexity) + '">' + escapeHtml(s.complexity) + '</span>';
+                        }
+                        metaHtml += '</div>';
+
+                        item.innerHTML = '<div style="flex:1; min-width:0;">'
+                            + '<div class="result-name">' + escapeHtml(formatSkillName(s.name)) + '</div>'
+                            + '<div class="result-desc">' + escapeHtml(s.description || '') + '</div>'
+                            + metaHtml
+                            + '</div>';
+                        searchResults.appendChild(item);
+                    });
+                }
+                searchResults.classList.add('visible');
+                searchInput.closest('[role="combobox"]').setAttribute('aria-expanded', 'true');
+            } catch (e) {
+                console.warn('Search error:', e);
+            }
+        }, 300);
+    });
+
+    // Keyboard navigation in search
+    searchInput.addEventListener('keydown', function(e) {
+        var items = searchResults.querySelectorAll('.search-result-item');
+        if (!items.length) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            highlightIndex = Math.min(highlightIndex + 1, items.length - 1);
+            updateHighlight(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            highlightIndex = Math.max(highlightIndex - 1, 0);
+            updateHighlight(items);
+        } else if (e.key === 'Enter' && highlightIndex >= 0) {
+            e.preventDefault();
+            items[highlightIndex].click();
+        } else if (e.key === 'Escape') {
+            searchResults.classList.remove('visible');
+            searchInput.closest('[role="combobox"]').setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    function updateHighlight(items) {
+        items.forEach(function(item, i) {
+            item.classList.toggle('highlighted', i === highlightIndex);
+        });
+    }
+
+    // Close search on outside click
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-hero-input')) {
+            searchResults.classList.remove('visible');
+            var combobox = document.querySelector('[role="combobox"]');
+            if (combobox) combobox.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    // Helpers
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    function formatSkillName(name) {
+        return (name || '').replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    }
+
+    function formatTimeAgo(dateStr) {
+        if (!dateStr) return '';
+        var diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+        if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+        return Math.floor(diff / 86400) + 'd ago';
+    }
+
+    // Init
+    loadSkills();
+    loadRecentActivity();
+    loadFavorites();
+    loadRecommended();
+})();
+</script>
+{% endblock %}

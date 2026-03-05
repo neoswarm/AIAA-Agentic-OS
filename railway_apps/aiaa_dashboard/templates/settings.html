@@ -1,0 +1,1173 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - AIAA Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Settings Tabs */
+    .settings-tabs {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 2rem;
+    }
+
+    .settings-tab {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s;
+    }
+
+    .settings-tab:hover {
+        color: var(--text-primary);
+    }
+
+    .settings-tab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+    }
+
+    .settings-panel {
+        display: none;
+    }
+
+    .settings-panel.active {
+        display: block;
+    }
+
+    /* API Key Row */
+    .api-key-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .api-key-item {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 1.25rem;
+    }
+
+    .api-key-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .api-key-name {
+        font-size: 0.9375rem;
+        font-weight: 500;
+    }
+
+    .api-key-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.25rem 0.625rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .api-key-status.valid {
+        background: var(--success-muted);
+        color: var(--success);
+    }
+
+    .api-key-status.missing {
+        background: var(--bg-elevated);
+        color: var(--text-muted);
+    }
+
+    .api-key-status.invalid {
+        background: var(--error-muted);
+        color: var(--error);
+    }
+
+    .api-key-status.warning {
+        background: var(--warning-muted);
+        color: var(--warning);
+    }
+
+    .api-key-status.validating,
+    .api-key-status.saving,
+    .api-key-status.rotating,
+    .api-key-status.revoking {
+        background: var(--accent-muted);
+        color: var(--accent);
+    }
+
+    .api-key-status.validating .api-key-status-dot,
+    .api-key-status.saving .api-key-status-dot,
+    .api-key-status.rotating .api-key-status-dot,
+    .api-key-status.revoking .api-key-status-dot {
+        animation: tokenStatusPulse 1s ease-in-out infinite;
+    }
+
+    .api-key-status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .api-key-input-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .api-key-input-row .form-input {
+        flex: 1;
+        font-family: 'DM Mono', monospace;
+        font-size: 0.8125rem;
+    }
+
+    .api-key-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.8125rem;
+        border-radius: 6px;
+    }
+
+    .btn-danger-subtle {
+        background: var(--error-muted);
+        color: var(--error);
+        border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .btn-danger-subtle:hover {
+        background: rgba(239, 68, 68, 0.18);
+    }
+
+    .api-key-help {
+        margin-top: 0.75rem;
+    }
+
+    .api-key-help-toggle {
+        font-size: 0.8125rem;
+        color: var(--accent);
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        padding: 0;
+    }
+
+    .api-key-help-toggle:hover {
+        text-decoration: underline;
+    }
+
+    .api-key-help-content {
+        display: none;
+        margin-top: 0.5rem;
+        padding: 0.75rem;
+        background: var(--bg-elevated);
+        border-radius: 8px;
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .api-key-help-content.visible {
+        display: block;
+    }
+
+    .api-key-help-content a {
+        color: var(--accent);
+        text-decoration: none;
+    }
+
+    .api-key-help-content a:hover {
+        text-decoration: underline;
+    }
+
+    /* Preferences */
+    .pref-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+    }
+
+    .pref-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pref-item .form-label {
+        margin-bottom: 0.375rem;
+    }
+
+    /* Toggle Switch */
+    .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .toggle-row:last-child {
+        border-bottom: none;
+    }
+
+    .toggle-label-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .toggle-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .toggle-desc {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.125rem;
+    }
+
+    .toggle-switch {
+        position: relative;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .toggle-slider::before {
+        content: '';
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        left: 2px;
+        bottom: 2px;
+        background: var(--text-muted);
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background: var(--accent-muted);
+        border-color: var(--accent);
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+        background: var(--accent);
+        transform: translateX(20px);
+    }
+
+    /* Profile */
+    .profile-form {
+        max-width: 480px;
+    }
+
+    .settings-save-row {
+        margin-top: 2rem;
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .save-status {
+        font-size: 0.8125rem;
+        color: var(--success);
+        display: none;
+    }
+
+    .save-status.visible {
+        display: inline;
+    }
+
+    /* Inline key format errors */
+    .key-format-error {
+        display: none;
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        color: var(--error);
+    }
+
+    .key-format-error.visible {
+        display: block;
+    }
+
+    /* API key highlight animation (for deep-linking from error pages) */
+    .api-key-highlighted {
+        animation: keyHighlightPulse 2s ease-in-out 2;
+        box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    @keyframes keyHighlightPulse {
+        0%, 100% { box-shadow: 0 0 0 2px var(--accent); }
+        50% { box-shadow: 0 0 0 4px var(--accent), 0 0 12px rgba(99, 102, 241, 0.3); }
+    }
+
+    @keyframes tokenStatusPulse {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+        .pref-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .api-key-input-row {
+            flex-direction: column;
+        }
+
+        .api-key-input-row .form-input {
+            width: 100%;
+        }
+
+        .api-key-actions {
+            width: 100%;
+        }
+
+        .api-key-actions .btn-sm {
+            flex: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Settings</h1>
+        <p class="page-subtitle">Manage your API connections, preferences, and profile</p>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="settings-tabs" id="settingsTabs" role="tablist" aria-label="Settings sections">
+    <button class="settings-tab active" data-tab="api-keys" role="tab" aria-selected="true" aria-controls="panel-api-keys" id="tab-api-keys">API Keys</button>
+    <button class="settings-tab" data-tab="preferences" role="tab" aria-selected="false" aria-controls="panel-preferences" id="tab-preferences">Preferences</button>
+    <button class="settings-tab" data-tab="profile" role="tab" aria-selected="false" aria-controls="panel-profile" id="tab-profile">Profile</button>
+</div>
+
+<!-- API Keys Panel -->
+<div class="settings-panel active" id="panel-api-keys" role="tabpanel" aria-labelledby="tab-api-keys">
+    <div class="api-key-list" id="apiKeyList">
+
+        <div class="api-key-item" data-key="openrouter">
+            <div class="api-key-header">
+                <span class="api-key-name">OpenRouter API Key</span>
+                <span class="api-key-status missing" id="status-openrouter" role="status" aria-live="polite">
+                    <span class="api-key-status-dot"></span>
+                    <span class="api-key-status-text">Not configured</span>
+                </span>
+            </div>
+            <div class="api-key-input-row">
+                <input type="password" class="form-input" id="input-openrouter" placeholder="sk-or-v1-..." autocomplete="off">
+                <div class="api-key-actions">
+                    <button class="btn btn-sm btn-secondary" data-action="test" onclick="testApiKey('openrouter')">Test</button>
+                    <button class="btn btn-sm" data-action="save" onclick="saveApiKey('openrouter')">Save</button>
+                    <button class="btn btn-sm btn-secondary" data-action="rotate" onclick="rotateApiKey('openrouter')">Rotate</button>
+                    <button class="btn btn-sm btn-danger-subtle" data-action="revoke" onclick="revokeApiKey('openrouter')">Revoke</button>
+                </div>
+            </div>
+            <span class="key-format-error" id="error-openrouter"></span>
+            <div class="api-key-help">
+                <button class="api-key-help-toggle" onclick="toggleHelp(this)">What is this?</button>
+                <div class="api-key-help-content">
+                    OpenRouter gives you access to AI models like Claude and GPT. It powers all content generation in Agentic OS.<br><br>
+                    <strong>Where to get it:</strong> Sign up at openrouter.ai, click your profile icon, go to Keys, and create a new key.
+                </div>
+            </div>
+        </div>
+
+        <div class="api-key-item" data-key="claude" id="claude-token-card">
+            <div class="api-key-header">
+                <span class="api-key-name">Claude Setup Token (Gateway)</span>
+                <span class="api-key-status missing" id="status-claude" role="status" aria-live="polite">
+                    <span class="api-key-status-dot"></span>
+                    <span class="api-key-status-text">Not configured</span>
+                </span>
+            </div>
+            <div class="api-key-input-row">
+                <input type="password" class="form-input" id="input-claude" placeholder="sk-ant-oat..." autocomplete="off">
+                <div class="api-key-actions">
+                    <button class="btn btn-sm btn-secondary" data-action="validate" onclick="testClaudeToken()">Verify</button>
+                    <button class="btn btn-sm" data-action="save" onclick="saveClaudeToken()">Save</button>
+                </div>
+            </div>
+            <span class="key-format-error" id="error-claude"></span>
+            <div class="api-key-help">
+                <button class="api-key-help-toggle" onclick="toggleHelp(this)">What is this?</button>
+                <div class="api-key-help-content">
+                    This token is used by the Gateway setup-token flow to run Claude chat and tools server-side.<br><br>
+                    <strong>Use:</strong> Run <code>claude setup-token</code> and paste the generated token (<code>sk-ant-oat...</code>).<br>
+                    <strong>Note:</strong> Anthropic API keys (<code>sk-ant-...</code>) are not part of the gateway setup-token flow.
+                </div>
+            </div>
+        </div>
+
+        <div class="api-key-item" data-key="perplexity">
+            <div class="api-key-header">
+                <span class="api-key-name">Perplexity API Key</span>
+                <span class="api-key-status missing" id="status-perplexity" role="status" aria-live="polite">
+                    <span class="api-key-status-dot"></span>
+                    <span class="api-key-status-text">Not configured</span>
+                </span>
+            </div>
+            <div class="api-key-input-row">
+                <input type="password" class="form-input" id="input-perplexity" placeholder="pplx-..." autocomplete="off">
+                <div class="api-key-actions">
+                    <button class="btn btn-sm btn-secondary" data-action="test" onclick="testApiKey('perplexity')">Test</button>
+                    <button class="btn btn-sm" data-action="save" onclick="saveApiKey('perplexity')">Save</button>
+                    <button class="btn btn-sm btn-secondary" data-action="rotate" onclick="rotateApiKey('perplexity')">Rotate</button>
+                    <button class="btn btn-sm btn-danger-subtle" data-action="revoke" onclick="revokeApiKey('perplexity')">Revoke</button>
+                </div>
+            </div>
+            <span class="key-format-error" id="error-perplexity"></span>
+            <div class="api-key-help">
+                <button class="api-key-help-toggle" onclick="toggleHelp(this)">What is this?</button>
+                <div class="api-key-help-content">
+                    Perplexity is used for market research and company analysis tasks. It searches the web and provides sourced answers.<br><br>
+                    <strong>Where to get it:</strong> Sign up at perplexity.ai, go to Settings, then API, and generate a key.
+                </div>
+            </div>
+        </div>
+
+        <div class="api-key-item" data-key="slack">
+            <div class="api-key-header">
+                <span class="api-key-name">Slack Webhook URL</span>
+                <span class="api-key-status missing" id="status-slack" role="status" aria-live="polite">
+                    <span class="api-key-status-dot"></span>
+                    <span class="api-key-status-text">Not configured</span>
+                </span>
+            </div>
+            <div class="api-key-input-row">
+                <input type="password" class="form-input" id="input-slack" placeholder="https://hooks.slack.com/services/..." autocomplete="off">
+                <div class="api-key-actions">
+                    <button class="btn btn-sm btn-secondary" data-action="test" onclick="testApiKey('slack')">Test</button>
+                    <button class="btn btn-sm" data-action="save" onclick="saveApiKey('slack')">Save</button>
+                    <button class="btn btn-sm btn-secondary" data-action="rotate" onclick="rotateApiKey('slack')">Rotate</button>
+                    <button class="btn btn-sm btn-danger-subtle" data-action="revoke" onclick="revokeApiKey('slack')">Revoke</button>
+                </div>
+            </div>
+            <span class="key-format-error" id="error-slack"></span>
+            <div class="api-key-help">
+                <button class="api-key-help-toggle" onclick="toggleHelp(this)">What is this?</button>
+                <div class="api-key-help-content">
+                    Slack Webhook lets Agentic OS send you notifications when tasks complete, like deliverables or reports.<br><br>
+                    <strong>Where to get it:</strong> In Slack, go to Apps, search for "Incoming Webhooks", add to a channel, and copy the webhook URL.
+                </div>
+            </div>
+        </div>
+
+        <div class="api-key-item" data-key="google">
+            <div class="api-key-header">
+                <span class="api-key-name">Google Docs</span>
+                <span class="api-key-status missing" id="status-google" role="status" aria-live="polite">
+                    <span class="api-key-status-dot"></span>
+                    <span class="api-key-status-text">Not configured</span>
+                </span>
+            </div>
+            <div class="api-key-input-row">
+                <p style="font-size: 0.875rem; color: var(--text-secondary);">Google Docs integration requires a credentials file. This is set up on the server.</p>
+            </div>
+            <div class="api-key-help">
+                <button class="api-key-help-toggle" onclick="toggleHelp(this)">Setup guide</button>
+                <div class="api-key-help-content">
+                    Google Docs integration lets deliverables be automatically formatted and uploaded as Google Docs.<br><br>
+                    <strong>Setup:</strong> Place your <code>credentials.json</code> file from Google Cloud Console in the project root. The first time you run a delivery, you'll be prompted to authorize access.
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Preferences Panel -->
+<div class="settings-panel" id="panel-preferences" role="tabpanel" aria-labelledby="tab-preferences">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Content Defaults</span>
+        </div>
+        <div class="card-body">
+            {% set default_chat_profile = preferences.get('pref.default_chat_profile', 'balanced') %}
+            <div class="pref-grid">
+                <div class="pref-item">
+                    <label class="form-label" for="pref-tone">Default tone</label>
+                    <select class="form-select" id="pref-tone">
+                        <option value="professional">Professional</option>
+                        <option value="casual">Casual</option>
+                        <option value="friendly">Friendly</option>
+                        <option value="authoritative">Authoritative</option>
+                        <option value="conversational">Conversational</option>
+                    </select>
+                    <span class="form-hint">Sets the default writing style for all content</span>
+                </div>
+                <div class="pref-item">
+                    <label class="form-label" for="pref-length">Default length</label>
+                    <select class="form-select" id="pref-length">
+                        <option value="short">Short</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="long">Long</option>
+                    </select>
+                    <span class="form-hint">Controls how detailed outputs are by default</span>
+                </div>
+                <div class="pref-item">
+                    <label class="form-label" for="pref-format">Output format</label>
+                    <select class="form-select" id="pref-format">
+                        <option value="markdown" selected>Markdown</option>
+                        <option value="html">HTML</option>
+                        <option value="plain">Plain Text</option>
+                    </select>
+                    <span class="form-hint">Default file format for generated content</span>
+                </div>
+                <div class="pref-item">
+                    <label class="form-label" for="pref-default-chat-profile">Default chat profile</label>
+                    <select class="form-select" id="pref-default-chat-profile">
+                        <option value="balanced" {% if default_chat_profile == 'balanced' %}selected{% endif %}>Balanced</option>
+                        <option value="research" {% if default_chat_profile == 'research' %}selected{% endif %}>Research</option>
+                        <option value="creative" {% if default_chat_profile == 'creative' %}selected{% endif %}>Creative</option>
+                        <option value="concise" {% if default_chat_profile == 'concise' %}selected{% endif %}>Concise</option>
+                    </select>
+                    <span class="form-hint">Used as the starter profile for new chat sessions</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Integrations</span>
+        </div>
+        <div class="card-body">
+            <div class="toggle-row">
+                <div class="toggle-label-group">
+                    <span class="toggle-label">Auto-deliver to Google Docs</span>
+                    <span class="toggle-desc">Automatically upload finished content to Google Docs</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="pref-auto-gdocs">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-label-group">
+                    <span class="toggle-label">Slack notifications</span>
+                    <span class="toggle-desc">Get notified in Slack when tasks complete</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="pref-slack-notify">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-save-row">
+        <button class="btn" id="savePrefsBtn" onclick="savePreferences()">Save Preferences</button>
+        <span class="save-status" id="prefsSaveStatus">Preferences saved</span>
+    </div>
+</div>
+
+<!-- Profile Panel -->
+<div class="settings-panel" id="panel-profile" role="tabpanel" aria-labelledby="tab-profile">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Your Profile</span>
+        </div>
+        <div class="card-body">
+            <div class="profile-form">
+                <div class="form-group">
+                    <label class="form-label" for="profile-name">Name</label>
+                    <input type="text" class="form-input" id="profile-name" placeholder="Your name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="profile-company">Company</label>
+                    <input type="text" class="form-input" id="profile-company" placeholder="Your company name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="profile-industry">Industry</label>
+                    <select class="form-select" id="profile-industry">
+                        <option value="">Select your industry</option>
+                        <option value="marketing">Marketing Agency</option>
+                        <option value="saas">SaaS / Software</option>
+                        <option value="ecommerce">E-commerce</option>
+                        <option value="consulting">Consulting</option>
+                        <option value="real-estate">Real Estate</option>
+                        <option value="finance">Finance</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="education">Education</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-save-row">
+        <button class="btn" id="saveProfileBtn" onclick="saveProfile()">Save Profile</button>
+        <span class="save-status" id="profileSaveStatus">Profile saved</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/token_lifecycle.js') }}"></script>
+<script>
+    // Tab switching
+    document.querySelectorAll('.settings-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.settings-tab').forEach(function(t) {
+                t.classList.remove('active');
+                t.setAttribute('aria-selected', 'false');
+            });
+            document.querySelectorAll('.settings-panel').forEach(function(p) { p.classList.remove('active'); });
+            tab.classList.add('active');
+            tab.setAttribute('aria-selected', 'true');
+            document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+        });
+    });
+
+    // Arrow key navigation for settings tabs (W3C APG tabs pattern)
+    var settingsTablist = document.getElementById('settingsTabs');
+    if (settingsTablist) {
+        settingsTablist.addEventListener('keydown', function(e) {
+            var tabs = Array.from(this.querySelectorAll('[role="tab"]'));
+            var index = tabs.indexOf(document.activeElement);
+            if (index === -1) return;
+            var newIndex;
+            if (e.key === 'ArrowRight') newIndex = (index + 1) % tabs.length;
+            else if (e.key === 'ArrowLeft') newIndex = (index - 1 + tabs.length) % tabs.length;
+            else return;
+            e.preventDefault();
+            tabs[newIndex].focus();
+            tabs[newIndex].click();
+        });
+    }
+
+    // Toggle help text
+    function toggleHelp(btn) {
+        var content = btn.nextElementSibling;
+        content.classList.toggle('visible');
+        btn.textContent = content.classList.contains('visible') ? 'Hide' : (btn.textContent.includes('guide') ? 'Setup guide' : 'What is this?');
+    }
+
+    // API key prefix definitions (mirrors server-side _KEY_PREFIXES in api_v2.py)
+    var KEY_PREFIXES = {
+        'openrouter': { prefix: 'sk-or-', label: 'OpenRouter API Key', hint: 'OpenRouter key should start with sk-or-' },
+        'perplexity': { prefix: 'pplx-', label: 'Perplexity API Key', hint: 'Perplexity key should start with pplx-' },
+        'anthropic':  { prefix: 'sk-ant-', label: 'Anthropic API Key', hint: 'Anthropic key should start with sk-ant-' },
+        'openai':     { prefix: 'sk-', label: 'OpenAI API Key', hint: 'OpenAI key should start with sk-' },
+        'slack':      { prefix: 'https://hooks.slack.com/', label: 'Slack Webhook URL', hint: 'Slack webhook should start with https://hooks.slack.com/' },
+        'fal':        { prefix: '', label: 'fal.ai Key', hint: '' }
+    };
+
+    var TOKEN_ACTION_STATUS = {
+        validate: { status: 'validating', text: 'Validating...' },
+        save: { status: 'saving', text: 'Saving...' },
+        rotate: { status: 'rotating', text: 'Rotating...' },
+        revoke: { status: 'revoking', text: 'Revoking...' }
+    };
+
+    function setTokenActionStatus(keyName, action) {
+        var actionStatus = TOKEN_ACTION_STATUS[action];
+        if (!actionStatus) return;
+        updateKeyStatus(keyName, actionStatus.status, actionStatus.text);
+    }
+
+    // Show/hide key format error
+    function showKeyError(keyName, message) {
+        var errorEl = document.getElementById('error-' + keyName);
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.classList.add('visible');
+        }
+    }
+
+    function clearKeyError(keyName) {
+        var errorEl = document.getElementById('error-' + keyName);
+        if (errorEl) {
+            errorEl.classList.remove('visible');
+        }
+    }
+
+    // Attach input listeners to clear errors when user types
+    ['openrouter', 'perplexity', 'slack', 'claude'].forEach(function(keyName) {
+        var input = document.getElementById('input-' + keyName);
+        if (input) {
+            input.addEventListener('input', function() {
+                clearKeyError(keyName);
+            });
+        }
+    });
+
+    function validateKeyInput(keyName, value) {
+        if (!value) {
+            showKeyError(keyName, 'Please enter an API key');
+            return false;
+        }
+
+        // Prefix validation (skip for keys with no prefix requirement like fal)
+        var keyConfig = KEY_PREFIXES[keyName];
+        if (keyConfig && keyConfig.prefix && !value.startsWith(keyConfig.prefix)) {
+            showKeyError(keyName, keyConfig.hint);
+            return false;
+        }
+
+        return true;
+    }
+
+    // Save API key with client-side prefix validation
+    function saveApiKey(keyName) {
+        var input = document.getElementById('input-' + keyName);
+        var value = input.value.trim();
+
+        // Clear previous error
+        clearKeyError(keyName);
+
+        if (!validateKeyInput(keyName, value)) {
+            return;
+        }
+
+        var item = input.closest('.api-key-item');
+        var btn = item.querySelector('[data-action="save"]');
+        setButtonLoading(btn, true, 'Saving...');
+        setTokenActionStatus(keyName, 'save');
+
+        fetch('/api/v2/settings/api-keys', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key_name: keyName, key_value: value })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            setButtonLoading(btn, false);
+            if (data.status === 'ok') {
+                clearKeyError(keyName);
+                updateKeyStatus(keyName, 'valid', 'Connected');
+                input.value = '';
+                input.placeholder = 'Key saved — enter new value to update';
+            } else {
+                var msg = (data.errors && data.errors.key_value) || data.message || data.error || 'Save failed';
+                if (data.errors && data.errors.key_value) {
+                    showKeyError(keyName, data.errors.key_value);
+                }
+                updateKeyStatus(keyName, 'invalid', msg);
+            }
+        })
+        .catch(function() {
+            setButtonLoading(btn, false);
+            updateKeyStatus(keyName, 'invalid', 'Save failed');
+            if (typeof showToast === 'function') {
+                showToast('Failed to save API key. Check your connection.', 'error');
+            }
+        });
+    }
+
+    // Rotate API key/token (replace existing value)
+    function rotateApiKey(keyName) {
+        var input = document.getElementById('input-' + keyName);
+        var value = input.value.trim();
+
+        clearKeyError(keyName);
+        if (!validateKeyInput(keyName, value)) {
+            return;
+        }
+
+        if (!confirm('Rotate this token now? The existing value will be replaced.')) {
+            return;
+        }
+
+        var item = input.closest('.api-key-item');
+        var btn = item.querySelector('[data-action="rotate"]');
+        setButtonLoading(btn, true, 'Rotating...');
+        setTokenActionStatus(keyName, 'rotate');
+
+        fetch('/api/v2/settings/api-keys/' + encodeURIComponent(keyName) + '/rotate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key_value: value })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            setButtonLoading(btn, false);
+            if (data.status === 'ok') {
+                clearKeyError(keyName);
+                updateKeyStatus(keyName, 'valid', 'Connected');
+                input.value = '';
+                input.placeholder = 'Token rotated — enter new value to rotate again';
+                if (typeof showToast === 'function') {
+                    showToast('Token rotated successfully.', 'success');
+                }
+            } else {
+                var msg = (data.errors && data.errors.key_value) || data.message || 'Rotate failed';
+                if (data.errors && data.errors.key_value) {
+                    showKeyError(keyName, data.errors.key_value);
+                }
+                updateKeyStatus(keyName, 'invalid', msg);
+            }
+        })
+        .catch(function() {
+            setButtonLoading(btn, false);
+            updateKeyStatus(keyName, 'invalid', 'Rotate failed');
+            if (typeof showToast === 'function') {
+                showToast('Failed to rotate token. Check your connection.', 'error');
+            }
+        });
+    }
+
+    // Revoke API key/token
+    function revokeApiKey(keyName) {
+        if (!confirm('Revoke this token? This removes the saved value from this dashboard.')) {
+            return;
+        }
+
+        var input = document.getElementById('input-' + keyName);
+        var item = input.closest('.api-key-item');
+        var btn = item.querySelector('[data-action="revoke"]');
+        setButtonLoading(btn, true, 'Revoking...');
+        setTokenActionStatus(keyName, 'revoke');
+
+        fetch('/api/v2/settings/api-keys/' + encodeURIComponent(keyName) + '/revoke', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            setButtonLoading(btn, false);
+            if (data.status === 'ok') {
+                clearKeyError(keyName);
+                updateKeyStatus(keyName, 'missing', 'Not configured');
+                input.value = '';
+                input.placeholder = 'Token revoked — enter a value to save';
+                if (typeof showToast === 'function') {
+                    showToast('Token revoked.', 'success');
+                }
+            } else {
+                updateKeyStatus(keyName, 'invalid', data.message || 'Revoke failed');
+            }
+        })
+        .catch(function() {
+            setButtonLoading(btn, false);
+            updateKeyStatus(keyName, 'invalid', 'Revoke failed');
+            if (typeof showToast === 'function') {
+                showToast('Failed to revoke token. Check your connection.', 'error');
+            }
+        });
+    }
+
+    // Test API key
+    function testApiKey(keyName) {
+        var input = document.getElementById('input-' + keyName);
+        var btn = input.closest('.api-key-item').querySelector('[data-action="test"]');
+        setButtonLoading(btn, true, 'Testing...');
+        setTokenActionStatus(keyName, 'validate');
+
+        fetch('/api/v2/settings/api-keys/status')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data || data.status !== 'ok') {
+                throw new Error('Status endpoint returned an invalid payload');
+            }
+            setButtonLoading(btn, false);
+            var keyData = (data.keys || {})[keyName] || {};
+            var mapped = mapApiKeyLifecycleStatus(keyData);
+            updateKeyStatus(keyName, mapped.statusClass, mapped.text);
+            if ((mapped.statusClass === 'invalid' || mapped.statusClass === 'warning') && keyData.last_error) {
+                showKeyError(keyName, keyData.last_error);
+            }
+        })
+        .catch(function() {
+            setButtonLoading(btn, false);
+        });
+    }
+
+    function updateKeyStatus(keyName, status, text) {
+        var el = document.getElementById('status-' + keyName);
+        if (!el) return;
+        el.className = 'api-key-status ' + status;
+        el.querySelector('.api-key-status-text').textContent = text;
+    }
+
+    function mapApiKeyLifecycleStatus(keyData) {
+        var lifecycle = window.TokenLifecycle;
+        if (lifecycle && typeof lifecycle.mapTokenMetadataToUi === 'function') {
+            return lifecycle.mapTokenMetadataToUi(keyData || {});
+        }
+        return (keyData && keyData.configured)
+            ? { statusClass: 'valid', text: 'Connected' }
+            : { statusClass: 'missing', text: 'Not configured' };
+    }
+
+    function mapClaudeValidation(validation) {
+        switch (validation) {
+            case 'valid':
+                return { statusClass: 'valid', text: 'Connected' };
+            case 'rate_limited':
+                return { statusClass: 'warning', text: 'Rate limited' };
+            case 'unsupported':
+                return { statusClass: 'invalid', text: 'Unsupported auth type' };
+            case 'unknown':
+                return { statusClass: 'warning', text: 'Accepted (runtime verify)' };
+            case 'unreachable':
+                return { statusClass: 'warning', text: 'Validation unreachable' };
+            case 'expired':
+                return { statusClass: 'invalid', text: 'Expired or unauthorized' };
+            case 'invalid':
+                return { statusClass: 'invalid', text: 'Invalid token' };
+            default:
+                return { statusClass: 'missing', text: 'Not configured' };
+        }
+    }
+
+    function saveClaudeToken() {
+        var input = document.getElementById('input-claude');
+        var value = input.value.trim();
+        clearKeyError('claude');
+
+        if (!value) {
+            showKeyError('claude', 'Please paste an Anthropic API key (sk-ant-...).');
+            return;
+        }
+
+        var btn = document.querySelector('#claude-token-card .api-key-actions [data-action="save"]');
+        setButtonLoading(btn, true, 'Saving...');
+        setTokenActionStatus('claude', 'save');
+
+        fetch('/api/chat/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: value })
+        })
+        .then(function(response) {
+            return response.json().then(function(data) {
+                return { ok: response.ok, data: data };
+            });
+        })
+        .then(function(result) {
+            setButtonLoading(btn, false);
+            if (!result.ok || result.data.status !== 'ok') {
+                var msg = result.data.message || 'Failed to save token';
+                showKeyError('claude', msg);
+                updateKeyStatus('claude', 'invalid', 'Invalid token');
+                if (typeof showToast === 'function') {
+                    showToast(msg, 'error');
+                }
+                return;
+            }
+
+            var mapped = mapClaudeValidation(result.data.validation);
+            updateKeyStatus('claude', mapped.statusClass, mapped.text);
+            input.value = '';
+            input.placeholder = 'API key saved — paste new key to rotate';
+            if (typeof showToast === 'function') {
+                showToast('Claude API key saved', 'success');
+            }
+        })
+        .catch(function() {
+            setButtonLoading(btn, false);
+            showKeyError('claude', 'Request failed. Please try again.');
+            if (typeof showToast === 'function') {
+                showToast('Failed to save Claude token.', 'error');
+            }
+        });
+    }
+
+    function testClaudeToken() {
+        var input = document.getElementById('input-claude');
+        var value = input.value.trim();
+        clearKeyError('claude');
+
+        var btn = document.querySelector('#claude-token-card .api-key-actions [data-action="validate"]');
+        setButtonLoading(btn, true, 'Testing...');
+        setTokenActionStatus('claude', 'validate');
+
+        fetch('/api/chat/token/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: value })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            setButtonLoading(btn, false);
+            var mapped = mapClaudeValidation(data.validation);
+            updateKeyStatus('claude', mapped.statusClass, mapped.text);
+
+            if (data.validation === 'invalid' || data.validation === 'expired' || data.validation === 'unsupported') {
+                showKeyError('claude', (data.validation_detail && data.validation_detail.message) || 'Token validation failed.');
+            } else if (typeof showToast === 'function') {
+                showToast('Claude token check complete: ' + mapped.text, 'info');
+            }
+        })
+        .catch(function() {
+            setButtonLoading(btn, false);
+            updateKeyStatus('claude', 'warning', 'Validation failed');
+            if (typeof showToast === 'function') {
+                showToast('Could not validate Claude token.', 'warning');
+            }
+        });
+    }
+
+    // Save preferences
+    function savePreferences() {
+        var btn = document.getElementById('savePrefsBtn');
+        setButtonLoading(btn, true, 'Saving...');
+
+        var prefs = {
+            tone: document.getElementById('pref-tone').value,
+            length: document.getElementById('pref-length').value,
+            format: document.getElementById('pref-format').value,
+            default_chat_profile: document.getElementById('pref-default-chat-profile').value,
+            auto_gdocs: document.getElementById('pref-auto-gdocs').checked,
+            slack_notify: document.getElementById('pref-slack-notify').checked
+        };
+
+        fetch('/api/v2/settings/preferences', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(prefs)
+        })
+        .then(function() {
+            setButtonLoading(btn, false);
+            var status = document.getElementById('prefsSaveStatus');
+            status.classList.add('visible');
+            setTimeout(function() { status.classList.remove('visible'); }, 2000);
+        })
+        .catch(function() {
+            setButtonLoading(btn, false);
+            if (typeof showToast === 'function') {
+                showToast('Failed to save preferences. Please try again.', 'error');
+            }
+        });
+    }
+
+    // Save profile
+    function saveProfile() {
+        var btn = document.getElementById('saveProfileBtn');
+        setButtonLoading(btn, true, 'Saving...');
+
+        var profile = {
+            name: document.getElementById('profile-name').value,
+            company: document.getElementById('profile-company').value,
+            industry: document.getElementById('profile-industry').value
+        };
+
+        fetch('/api/v2/settings/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(profile)
+        })
+        .then(function() {
+            setButtonLoading(btn, false);
+            var status = document.getElementById('profileSaveStatus');
+            status.classList.add('visible');
+            setTimeout(function() { status.classList.remove('visible'); }, 2000);
+        })
+        .catch(function() {
+            setButtonLoading(btn, false);
+            if (typeof showToast === 'function') {
+                showToast('Failed to save profile. Please try again.', 'error');
+            }
+        });
+    }
+
+    // Load current status on page load
+    (function() {
+        fetch('/api/v2/settings/api-keys/status')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data || data.status !== 'ok') {
+                return;
+            }
+            Object.keys(data.keys || {}).forEach(function(key) {
+                var mapped = mapApiKeyLifecycleStatus(data.keys[key] || {});
+                updateKeyStatus(key, mapped.statusClass, mapped.text);
+            });
+        })
+        .catch(function() {});
+
+        fetch('/api/chat/token/status')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data || !data.configured) {
+                return;
+            }
+            var mapped = mapClaudeValidation(data.validation);
+            updateKeyStatus('claude', mapped.statusClass, mapped.text);
+        })
+        .catch(function() {});
+    })();
+
+    // Deep-link: highlight a specific API key if ?highlight=keyname is present
+    (function() {
+        var params = new URLSearchParams(window.location.search);
+        var highlight = params.get('highlight');
+        var tab = params.get('tab');
+
+        // Switch to specified tab if present
+        if (tab) {
+            document.querySelectorAll('.settings-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.settings-panel').forEach(function(p) { p.classList.remove('active'); });
+            var targetTab = document.querySelector('.settings-tab[data-tab="' + tab + '"]');
+            var targetPanel = document.getElementById('panel-' + tab);
+            if (targetTab) targetTab.classList.add('active');
+            if (targetPanel) targetPanel.classList.add('active');
+        }
+
+        // Highlight specific API key
+        if (highlight) {
+            var keyItem = document.querySelector('.api-key-item[data-key="' + highlight + '"]');
+            if (keyItem) {
+                // Scroll into view
+                setTimeout(function() {
+                    keyItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 200);
+
+                // Add highlight animation
+                keyItem.classList.add('api-key-highlighted');
+
+                // Focus the input field
+                var input = keyItem.querySelector('input');
+                if (input) {
+                    setTimeout(function() { input.focus(); }, 500);
+                }
+
+                // Remove highlight after animation
+                setTimeout(function() {
+                    keyItem.classList.remove('api-key-highlighted');
+                }, 4000);
+            }
+        }
+    })();
+</script>
+{% endblock %}

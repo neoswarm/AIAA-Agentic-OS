@@ -21,18 +21,19 @@ import os
 import re
 from pathlib import Path
 
-BASE_DIR = Path(os.path.expanduser("/Users/lucasnolan/Agentic OS"))
+BASE_DIR = Path(__file__).resolve().parents[2]
 EXECUTION_DIR = BASE_DIR / "execution"
+SKILLS_DIR = BASE_DIR / ".claude" / "skills"
 
 
 def extract_script_path(command):
     """Extract the script path from a command like 'python3 execution/foo.py --args'.
 
-    Returns the resolved absolute path to the script, or None if not an execution command.
+    Returns the resolved absolute path to the script, or None if not an execution/skills command.
     """
-    # Match python3 execution/script.py or python execution/script.py
+    # Match python3 execution/script.py or .claude/skills/name/script.py
     # Also handle absolute paths
-    match = re.search(r'python3?\s+((?:\S*/)?execution/\S+\.py)', command)
+    match = re.search(r'python3?\s+((?:\S*/)?(?:execution|\.claude/skills/\S+)/\S+\.py)', command)
     if not match:
         return None
 
@@ -52,13 +53,21 @@ def handle_status():
     if EXECUTION_DIR.exists():
         scripts = list(EXECUTION_DIR.glob("*.py"))
         print(f"  Scripts in execution/: {len(scripts)}")
-        # Show first 10 for reference
         for s in sorted(scripts)[:10]:
             print(f"    - {s.name}")
         if len(scripts) > 10:
             print(f"    ... and {len(scripts) - 10} more")
     else:
         print("  execution/ directory not found!")
+    if SKILLS_DIR.exists():
+        skill_scripts = list(SKILLS_DIR.glob("*/*.py"))
+        print(f"  Scripts in .claude/skills/: {len(skill_scripts)}")
+        for s in sorted(skill_scripts)[:10]:
+            print(f"    - {s.parent.name}/{s.name}")
+        if len(skill_scripts) > 10:
+            print(f"    ... and {len(skill_scripts) - 10} more")
+    else:
+        print("  .claude/skills/ directory not found!")
     sys.exit(0)
 
 
@@ -110,6 +119,7 @@ def main():
             f"  Full path: {script_path}\n"
             f"  Check available scripts:\n"
             f"    ls execution/ | grep -i '<keyword>'\n"
+            f"    ls .claude/skills/ | grep -i '<keyword>'\n"
             f"  Or create the script using the Leader Manufacturing process.\n"
         )
         sys.exit(2)

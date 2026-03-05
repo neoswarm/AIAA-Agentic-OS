@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block title %}API Keys — AIAA Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">API Keys</h1>
+        <p class="page-subtitle">Manage API keys for automation</p>
+    </div>
+    <button class="btn" onclick="openCreateKeyModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Generate New Key
+    </button>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="usage-note">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+            <div>
+                <strong>API Key Usage</strong>
+                <p>Add <code class="mono">X-API-Key: your-key</code> header to any API request for authentication.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if api_keys and api_keys|length > 0 %}
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Key</th>
+                <th>Name</th>
+                <th>Permissions</th>
+                <th>Last Used</th>
+                <th>Created</th>
+                <th>Expires</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for key in api_keys %}
+            <tr data-key-id="{{ key.id }}">
+                <td>
+                    <code class="mono">{{ key.prefix }}...</code>
+                </td>
+                <td>
+                    <strong>{{ key.name }}</strong>
+                </td>
+                <td>
+                    <div class="permission-badges">
+                        {% if key.permissions.read %}
+                        <span class="badge badge-info">Read</span>
+                        {% endif %}
+                        {% if key.permissions.write %}
+                        <span class="badge badge-warning">Write</span>
+                        {% endif %}
+                        {% if key.permissions.deploy %}
+                        <span class="badge badge-error">Deploy</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <span class="text-muted">{{ key.last_used or 'Never' }}</span>
+                </td>
+                <td>
+                    <span class="text-muted">{{ key.created }}</span>
+                </td>
+                <td>
+                    {% if key.expires %}
+                    <span class="text-muted">{{ key.expires }}</span>
+                    {% else %}
+                    <span class="badge badge-muted">Never</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <button class="btn-icon" onclick="revokeKey('{{ key.id }}', '{{ key.name }}')" title="Revoke key">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                        </svg>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+{% from "components/empty_state.html" import empty_state %}
+{{ empty_state('key', 'No API Keys', 'Generate an API key to enable automation and integrations.') }}
+{% endif %}
+
+{# Create API Key Modal #}
+<div id="create-key-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="create-key-modal-title">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title" id="create-key-modal-title">Generate New API Key</h2>
+            <button class="modal-close" onclick="closeCreateKeyModal()" aria-label="Close dialog">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label" for="key-name-input">Key Name</label>
+                <input type="text" id="key-name-input" class="form-input" placeholder="e.g., CI/CD Pipeline">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" id="perm-label">Permissions</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="perm-read" checked>
+                        <span>Read (view workflows, logs, env)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="perm-write">
+                        <span>Write (create/update workflows, env vars)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="perm-deploy">
+                        <span>Deploy (trigger deployments to Railway)</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="key-expiry">Expiration</label>
+                <select id="key-expiry" class="form-input">
+                    <option value="30">30 days</option>
+                    <option value="90" selected>90 days</option>
+                    <option value="365">1 year</option>
+                    <option value="never">Never</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeCreateKeyModal()">Cancel</button>
+            <button class="btn" onclick="createApiKey()">Generate Key</button>
+        </div>
+    </div>
+</div>
+
+{# Show Key Modal (one-time display) #}
+<div id="show-key-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="show-key-modal-title">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title" id="show-key-modal-title">API Key Generated</h2>
+            <button class="modal-close" onclick="closeShowKeyModal()" aria-label="Close dialog">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="alert alert-warning">
+                <strong>Save this key now!</strong> You won't be able to see it again.
+            </div>
+            
+            <div class="key-display">
+                <code class="mono" id="generated-key">aiaa_xxxxxxxxxxxxxxxxxxxxxxxxxx</code>
+                <button class="btn-icon" onclick="copyKey()" title="Copy to clipboard">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn" onclick="closeShowKeyModal()">Done</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.usage-note {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--accent-muted);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+}
+
+.usage-note p {
+    margin: 0.5rem 0 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.permission-badges {
+    display: flex;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.btn-icon:hover {
+    transform: scale(1.1);
+}
+
+.key-display {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--bg-elevated);
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.key-display code {
+    flex: 1;
+    font-size: 0.9375rem;
+    word-break: break-all;
+}
+</style>
+
+<script>
+var createKeyTrigger = null;
+var createKeyFocusCleanup = null;
+var showKeyFocusCleanup = null;
+
+function openCreateKeyModal() {
+    createKeyTrigger = document.activeElement;
+    var modal = document.getElementById('create-key-modal');
+    modal.classList.remove('hidden');
+    if (typeof trapFocus === 'function') {
+        createKeyFocusCleanup = trapFocus(modal);
+    }
+    modal.addEventListener('modal-escape', function onEsc() {
+        modal.removeEventListener('modal-escape', onEsc);
+        closeCreateKeyModal();
+    });
+}
+
+function closeCreateKeyModal() {
+    var modal = document.getElementById('create-key-modal');
+    modal.classList.add('hidden');
+    if (createKeyFocusCleanup) { createKeyFocusCleanup(); createKeyFocusCleanup = null; }
+    if (createKeyTrigger) { createKeyTrigger.focus(); createKeyTrigger = null; }
+}
+
+function closeShowKeyModal() {
+    var modal = document.getElementById('show-key-modal');
+    modal.classList.add('hidden');
+    if (showKeyFocusCleanup) { showKeyFocusCleanup(); showKeyFocusCleanup = null; }
+    window.location.reload();
+}
+
+async function createApiKey() {
+    const name = document.getElementById('key-name-input').value;
+    const read = document.getElementById('perm-read').checked;
+    const write = document.getElementById('perm-write').checked;
+    const deploy = document.getElementById('perm-deploy').checked;
+    const expiry = document.getElementById('key-expiry').value;
+    
+    if (!name) {
+        alert('Please enter a key name');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/keys/create', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                name,
+                permissions: {read, write, deploy},
+                expiry: expiry === 'never' ? null : parseInt(expiry)
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            document.getElementById('generated-key').textContent = result.key;
+            closeCreateKeyModal();
+            var showModal = document.getElementById('show-key-modal');
+            showModal.classList.remove('hidden');
+            if (typeof trapFocus === 'function') {
+                showKeyFocusCleanup = trapFocus(showModal);
+            }
+            showModal.addEventListener('modal-escape', function onEsc() {
+                showModal.removeEventListener('modal-escape', onEsc);
+                closeShowKeyModal();
+            });
+        } else {
+            alert('Failed to create API key');
+        }
+    } catch (error) {
+        console.error('Error creating API key:', error);
+        alert('Error creating API key: ' + error.message);
+    }
+}
+
+async function revokeKey(keyId, keyName) {
+    const confirmed = await confirmAction(`Are you sure you want to revoke "${keyName}"? This cannot be undone.`);
+    if (!confirmed) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/keys/${keyId}/revoke`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            alert('Failed to revoke key');
+        }
+    } catch (error) {
+        console.error('Error revoking key:', error);
+        alert('Error revoking key: ' + error.message);
+    }
+}
+
+function copyKey() {
+    const key = document.getElementById('generated-key').textContent;
+    navigator.clipboard.writeText(key).then(() => {
+        alert('API key copied to clipboard!');
+    });
+}
+</script>
+{% endblock %}

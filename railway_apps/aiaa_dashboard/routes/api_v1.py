@@ -1,0 +1,259 @@
+#!/usr/bin/env python3
+"""AIAA Dashboard API v1 routes."""
+
+from __future__ import annotations
+
+import os
+import re
+from functools import wraps
+
+from flask import Blueprint, jsonify, request, session
+
+import models
+from services.profile_service import ProfileServiceError, upsert_profile
+from services.gateway_runtime_canary import run_gateway_runtime_canary
+
+
+api_v1_bp = Blueprint("api_v1", __name__, url_prefix="/v1")
+
+_PROFILE_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{0,99}$")
+_PROFILE_LIFECYCLE_EVENT_TYPE = "gateway_profile_lifecycle"
+_PROFILE_LIFECYCLE_SUCCESS_OUTCOMES = frozenset(
+    {"created", "updated", "valid", "invalid", "deleted", "invalidated"}
+)
+
+
+def _validation_error(errors: dict[str, str]):
+    return (
+        jsonify(
+            {
+                "status": "error",
+                "message": "Validation failed",
+                "errors": errors,
+            }
+        ),
+        400,
+    )
+
+
+def _token_setting_key(profile_id: str) -> str:
+    normalized = profile_id.strip().lower()
+    if normalized == "default":
+        return "claude_setup_token"
+    return f"{normalized}.claude_setup_token"
+
+
+def _record_profile_lifecycle_outcome(
+    action: str,
+    outcome: str,
+    *,
+    source: str = "api_v1",
+) -> None:
+    """Best-effort metrics event for gateway profile lifecycle outcomes."""
+    normalized_action = str(action or "").strip().lower()
+    normalized_outcome = str(outcome or "").strip().lower()
+    if not normalized_action or not normalized_outcome:
+        return
+
+    status = (
+        "success"
+        if normalized_outcome in _PROFILE_LIFECYCLE_SUCCESS_OUTCOMES
+        else "error"
+    )
+    try:
+        models.log_event(
+            event_type=_PROFILE_LIFECYCLE_EVENT_TYPE,
+            status=status,
+            data={"action": normalized_action, "outcome": normalized_outcome},
+            source=source,
+        )
+    except Exception:
+        # Metrics must not affect endpoint responses.
+        pass
+
+
+def validate_profile_token(profile_id: str, token: str = "") -> tuple[dict, int]:
+    """Validate a setup-token profile token using gateway runtime canary checks."""
+    normalized_profile_id = str(profile_id or "").strip().lower()
+    candidate_token = str(token or "").strip()
+    errors: dict[str, str] = {}
+
+    if not normalized_profile_id:
+        errors["profile_id"] = "profile_id is required"
+    elif not _PROFILE_ID_PATTERN.fullmatch(normalized_profile_id):
+        errors["profile_id"] = (
+            "profile_id must use lowercase letters, numbers, and hyphens only"
+        )
+
+    setting_key = ""
+    if normalized_profile_id:
+        setting_key = _token_setting_key(normalized_profile_id)
+        if not candidate_token:
+            candidate_token = (models.get_setting(setting_key) or "").strip()
+        if not candidate_token:
+            errors["token"] = (
+                f"No token configured for profile: {normalized_profile_id}"
+            )
+
+    if errors:
+        return (
+            {
+                "status": "error",
+                "message": "Validation failed",
+                "errors": errors,
+            },
+            400,
+        )
+
+    validation = run_gateway_runtime_canary(candidate_token)
+    validation_status = str(validation.get("status") or "invalid")
+    last_error = (
+        str(validation.get("error") or "").strip()
+        or str(validation.get("message") or "").strip()
+    )
+    if validation_status == "valid":
+        last_error = None
+
+    try:
+        models.update_setting_metadata(
+            setting_key,
+            validation_status=validation_status,
+            last_error=last_error,
+        )
+    except Exception:
+        # Validation response should still be returned even if metadata update fails.
+        pass
+
+    response_payload = {
+        "status": "ok",
+        "profile_id": normalized_profile_id,
+        "validation": validation_status,
+        "validation_detail": validation,
+    }
+
+    if validation_status in {"runtime_unavailable", "runtime_error"}:
+        response_payload["status"] = "error"
+        response_payload["message"] = "Gateway runtime canary failed"
+        return response_payload, 502
+
+    return response_payload, 200
+
+
+def login_required(f):
+    """Require session login or API key auth for v1 API endpoints."""
+
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if session.get("logged_in"):
+            return f(*args, **kwargs)
+        api_key = request.headers.get("X-API-Key")
+        if api_key and api_key == os.getenv("DASHBOARD_API_KEY"):
+            return f(*args, **kwargs)
+        return jsonify({"status": "error", "message": "Authentication required"}), 401
+
+    return decorated
+
+
+@api_v1_bp.route("/profiles/upsert", methods=["POST"])
+@login_required
+def api_upsert_profile():
+    """Create or update a setup-token profile or client profile."""
+    data = request.get_json(silent=True)
+    if data is None:
+        data = {}
+    if not isinstance(data, dict):
+        return _validation_error({"body": "Request body must be a JSON object"})
+
+    if "profile_id" in data or "token" in data:
+        profile_id = str(data.get("profile_id") or "").strip().lower()
+        token = str(data.get("token") or "").strip()
+        errors: dict[str, str] = {}
+
+        if not profile_id:
+            errors["profile_id"] = "profile_id is required"
+        elif not _PROFILE_ID_PATTERN.fullmatch(profile_id):
+            errors["profile_id"] = (
+                "profile_id must use lowercase letters, numbers, and hyphens only"
+            )
+
+        if not token:
+            errors["token"] = "token is required"
+
+        if errors:
+            return _validation_error(errors)
+
+        try:
+            setting_key = _token_setting_key(profile_id)
+            existing_profile = models.get_setup_token_profile(profile_id)
+            models.set_setting(setting_key, token)
+            stored_profile = models.get_setup_token_profile(profile_id) or {}
+            stored_profile.pop("token", None)
+
+            action = "created" if existing_profile is None else "updated"
+            status_code = 201 if action == "created" else 200
+            return (
+                jsonify(
+                    {
+                        "status": "ok",
+                        "action": action,
+                        "profile_id": profile_id,
+                        "profile": stored_profile,
+                    }
+                ),
+                status_code,
+            )
+        except Exception as exc:
+            return jsonify({"status": "error", "message": str(exc)}), 500
+
+    try:
+        result = upsert_profile(data)
+        status_code = 201 if result.get("action") == "created" else 200
+        _record_profile_lifecycle_outcome(
+            "upsert",
+            str(result.get("action") or "updated"),
+        )
+        payload = {"status": "ok"}
+        payload.update(result)
+        return jsonify(payload), status_code
+    except ProfileServiceError as exc:
+        outcome = "validation_failed" if exc.status_code == 400 else "conflict"
+        if exc.status_code >= 500:
+            outcome = "error"
+        _record_profile_lifecycle_outcome("upsert", outcome)
+        payload = {"status": "error", "message": exc.message}
+        if exc.errors:
+            payload["errors"] = exc.errors
+        return jsonify(payload), exc.status_code
+    except Exception as exc:
+        _record_profile_lifecycle_outcome("upsert", "error")
+        return jsonify({"status": "error", "message": str(exc)}), 500
+
+
+@api_v1_bp.route("/profiles/validate", methods=["POST"])
+@login_required
+def api_validate_profile():
+    """Validate a setup-token profile by running a gateway runtime canary."""
+    payload = request.get_json(silent=True)
+    if payload is None:
+        payload = {}
+    if not isinstance(payload, dict):
+        _record_profile_lifecycle_outcome("validate", "validation_failed")
+        return _validation_error({"body": "Request body must be a JSON object"})
+
+    try:
+        response_payload, status_code = validate_profile_token(
+            profile_id=str(payload.get("profile_id") or ""),
+            token=str(payload.get("token") or ""),
+        )
+    except Exception:
+        _record_profile_lifecycle_outcome("validate", "error")
+        raise
+    if status_code == 400 and response_payload.get("errors"):
+        _record_profile_lifecycle_outcome("validate", "validation_failed")
+        return _validation_error(response_payload["errors"])
+
+    validation_outcome = str(response_payload.get("validation") or "").strip().lower()
+    if not validation_outcome:
+        validation_outcome = "error" if status_code >= 500 else "unknown"
+    _record_profile_lifecycle_outcome("validate", validation_outcome)
+    return jsonify(response_payload), status_code
