@@ -1,4 +1,4 @@
-"""Tests for setup-token runtime canary OAuth behavior."""
+"""Tests for runtime canary authentication and setup-token behavior."""
 
 from __future__ import annotations
 
@@ -14,59 +14,71 @@ if str(APP_DIR) not in sys.path:
 from aiaa_gateway.services import runtime_canary
 
 
-class _FakeResponse:
-    def __init__(self, status_code: int, payload: Any):
-        self.status_code = status_code
-        self._payload = payload
-        self.text = str(payload)
+class _FakeProcess:
+    def __init__(
+        self,
+        *,
+        stdout: bytes = b"OK",
+        stderr: bytes = b"",
+        returncode: int = 0,
+    ):
+        self._stdout = stdout
+        self._stderr = stderr
+        self.returncode = returncode
+        self.killed = False
 
-    def json(self) -> Any:
-        return self._payload
+    async def communicate(self):
+        return self._stdout, self._stderr
+
+    def kill(self):
+        self.killed = True
 
 
-def test_setup_token_canary_uses_oauth_headers(monkeypatch):
+def test_setup_token_canary_uses_runtime_cli_and_oauth_env(monkeypatch):
     captured: dict[str, Any] = {}
 
-    def fake_post(url: str, *, json: dict[str, Any], headers: dict[str, str], timeout: float):
-        captured["url"] = url
-        captured["json"] = json
-        captured["headers"] = headers
-        captured["timeout"] = timeout
-        return _FakeResponse(
-            200,
-            {"content": [{"type": "text", "text": "OK"}]},
-        )
-
-    monkeypatch.setattr(runtime_canary.http_requests, "post", fake_post)
+    async def fake_create_subprocess_exec(*args, **kwargs):
+        captured["args"] = args
+        captured["kwargs"] = kwargs
+        return _FakeProcess(stdout=b"OK", returncode=0)
 
     result = runtime_canary.run_gateway_runtime_canary(
         "sk-ant-oat01-example-token",
         timeout_seconds=7,
+        create_subprocess_exec=fake_create_subprocess_exec,
     )
 
     assert result["status"] == "valid"
-    assert "OAuth canary succeeded" in result["message"]
-    assert captured["url"] == "https://api.anthropic.com/v1/messages"
-    assert captured["headers"]["authorization"] == "Bearer sk-ant-oat01-example-token"
-    assert "oauth-2025-04-20" in captured["headers"]["anthropic-beta"]
-    assert captured["json"]["model"] == "claude-sonnet-4-6"
+    assert "runtime canary succeeded" in result["message"].lower()
+    assert result["output"] == "OK"
+
+    args = list(captured["args"])
+    assert args[0] == "claude"
+    assert "--print" in args
+    assert "--output-format" in args
+    assert args[args.index("--output-format") + 1] == "text"
+
+    env = captured["kwargs"]["env"]
+    assert env["CLAUDE_SETUP_TOKEN"] == "sk-ant-oat01-example-token"
+    assert env["CLAUDE_CODE_OAUTH_TOKEN"] == "sk-ant-oat01-example-token"
+    assert "ANTHROPIC_AUTH_TOKEN" not in env
 
 
-def test_setup_token_canary_maps_non_200_to_invalid(monkeypatch):
-    def fake_post(url: str, *, json: dict[str, Any], headers: dict[str, str], timeout: float):
-        del url, json, headers, timeout
-        return _FakeResponse(
-            401,
-            {"error": {"type": "authentication_error", "message": "bad token"}},
+def test_setup_token_canary_maps_nonzero_exit_to_invalid():
+    async def fake_create_subprocess_exec(*args, **kwargs):
+        del args, kwargs
+        return _FakeProcess(
+            stdout=b"",
+            stderr=b"Failed to authenticate. API Error: 401",
+            returncode=1,
         )
-
-    monkeypatch.setattr(runtime_canary.http_requests, "post", fake_post)
 
     result = runtime_canary.run_gateway_runtime_canary(
         "sk-ant-oat01-bad-token",
         timeout_seconds=5,
+        create_subprocess_exec=fake_create_subprocess_exec,
     )
 
     assert result["status"] == "invalid"
-    assert "OAuth canary failed" in result["message"]
-    assert "authentication_error" in result["error"]
+    assert "runtime canary failed" in result["message"].lower()
+    assert "401" in result["error"]

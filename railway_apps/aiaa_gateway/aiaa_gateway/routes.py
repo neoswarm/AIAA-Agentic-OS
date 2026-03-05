@@ -6,6 +6,7 @@ import json
 import logging
 import hashlib
 import os
+import re
 import secrets
 import shutil
 import threading
@@ -41,7 +42,11 @@ from .services.responses_service import (
     normalize_gateway_request_fields,
 )
 from .services.runtime_canary import run_gateway_runtime_canary
-from .services.runtime_query import is_setup_token, run_gateway_runtime_query
+from .services.runtime_query import (
+    is_setup_token,
+    run_gateway_runtime_query,
+    run_gateway_runtime_query_stream,
+)
 
 gateway_bp = Blueprint("gateway", __name__)
 _SUPPORTED_PROFILE_VALIDATION_STATES = {
@@ -65,7 +70,10 @@ _RUNTIME_WORKSPACE_REQUIRED_PATHS = (
     ".claude/agents",
     "context",
     "clients",
+    "directives",
     "execution",
+    "AGENTS.md",
+    "CLAUDE.md",
     ".tmp",
 )
 logger = logging.getLogger(__name__)
@@ -77,6 +85,13 @@ _auth_failure_lock = threading.RLock()
 _auth_failure_windows: dict[str, deque[float]] = {}
 _project_context_lock = threading.RLock()
 _project_context_prompt_cache: str | None = None
+_INTERNAL_TOOL_TRACE_PATTERN = re.compile(
+    r"<tool_(?:call|response)>[\s\S]*?</tool_(?:call|response)>",
+    flags=re.IGNORECASE,
+)
+_SCAFFOLDING_LINE_PATTERN = re.compile(
+    r"(?im)^\s*(phase\s+\d+[^\n]*|let me [^\n]*|i(?:'|’)ll [^\n]*(?:run|load|research)[^\n]*)\s*$\n?"
+)
 
 
 def _resolve_correlation_id() -> str:
@@ -329,8 +344,15 @@ def _get_profile_store_readiness() -> dict[str, Any]:
     }
 
 
+def _resolve_workspace_root() -> str:
+    configured = str(current_app.config.get("GATEWAY_WORKSPACE_ROOT") or "").strip()
+    if configured:
+        return configured
+    return (os.getenv("GATEWAY_WORKSPACE_ROOT") or "/app").strip() or "/app"
+
+
 def _get_runtime_readiness() -> dict[str, Any]:
-    workspace_root = (os.getenv("GATEWAY_WORKSPACE_ROOT") or "/app").strip() or "/app"
+    workspace_root = _resolve_workspace_root()
     workspace_path = Path(workspace_root)
     workspace_accessible = workspace_path.is_dir()
     missing_workspace_paths: list[str] = []
@@ -628,6 +650,28 @@ def _runtime_text_to_response_payload(text: str, *, model: str) -> dict[str, Any
     }
 
 
+def _sanitize_runtime_output_text(text: str) -> str:
+    """Remove internal tool-trace scaffolding from runtime text output."""
+    raw = str(text or "")
+    if not raw:
+        return ""
+
+    cleaned = _INTERNAL_TOOL_TRACE_PATTERN.sub("", raw)
+    had_tool_traces = cleaned != raw
+    cleaned = re.sub(
+        r"</?tool_(?:call|response)>",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    if had_tool_traces:
+        cleaned = _SCAFFOLDING_LINE_PATTERN.sub("", cleaned)
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned).strip()
+    if cleaned:
+        return cleaned
+    return re.sub(r"\n{3,}", "\n\n", raw).strip()
+
+
 def _stream_runtime_response_events(text: str, *, model: str):
     response_id = f"resp_{uuid.uuid4().hex}"
     created_ts = int(time.time())
@@ -720,6 +764,541 @@ def _runtime_error_status_code(reason: str) -> int:
     return 502
 
 
+def _extract_runtime_tool_result_content(value: Any) -> str:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, list):
+        parts: list[str] = []
+        for item in value:
+            if isinstance(item, str):
+                if item:
+                    parts.append(item)
+                continue
+            if not isinstance(item, Mapping):
+                continue
+            text = item.get("text")
+            if isinstance(text, str) and text:
+                parts.append(text)
+                continue
+            content = item.get("content")
+            if isinstance(content, str) and content:
+                parts.append(content)
+        return "\n".join(parts).strip()
+    return str(value or "")
+
+
+_TOOL_REQUIRED_KEYWORDS = (
+    "research",
+    "analyze",
+    "analysis",
+    "summarize",
+    "summary",
+    "market",
+    "competitor",
+    "positioning",
+    "run",
+    "execute",
+    "workflow",
+    "skill",
+    "script",
+)
+
+
+def _latest_user_message_text(messages: list[dict[str, Any]]) -> str:
+    for message in reversed(messages):
+        if not isinstance(message, Mapping):
+            continue
+        role = str(message.get("role") or "").strip().lower()
+        if role != "user":
+            continue
+        content = message.get("content")
+        if isinstance(content, str):
+            return content.strip()
+    return ""
+
+
+def _requires_tool_activity(user_text: str) -> bool:
+    normalized = str(user_text or "").strip().lower()
+    if not normalized:
+        return False
+    if "http://" in normalized or "https://" in normalized:
+        return True
+    if len(normalized) < 24:
+        return False
+    if any(keyword in normalized for keyword in _TOOL_REQUIRED_KEYWORDS):
+        return True
+    return normalized.startswith(
+        (
+            "run ",
+            "use ",
+            "research ",
+            "analyze ",
+            "summarize ",
+            "execute ",
+        )
+    )
+
+
+def _stream_setup_token_runtime_events(
+    *,
+    runtime_token: str,
+    gateway_fields: dict[str, str | None],
+    upstream_payload: dict[str, Any],
+):
+    response_id = f"resp_{uuid.uuid4().hex}"
+    created_ts = int(time.time())
+    response_model = (
+        str(upstream_payload.get("model") or "").strip()
+        or str(current_app.config["DEFAULT_ANTHROPIC_MODEL"])
+    )
+
+    text_parts: list[str] = []
+    final_result_text = ""
+    input_tokens = 0
+    output_tokens = 0
+    pending_tool_inputs: dict[int, str] = {}
+    pending_tool_names: dict[int, str] = {}
+    assistant_snapshot_text = ""
+    saw_stream_text_delta = False
+    saw_stream_tool_use = False
+    emitted_assistant_tool_ids: set[str] = set()
+    messages = list(upstream_payload.get("messages") or [])
+    requires_tools = _requires_tool_activity(_latest_user_message_text(messages))
+    saw_tool_use = False
+
+    yield _format_sse_data(
+        {
+            "type": "response.created",
+            "response": {
+                "id": response_id,
+                "object": "response",
+                "created": created_ts,
+                "model": response_model,
+                "status": "in_progress",
+                "output": [],
+            },
+        }
+    )
+
+    timeout_seconds = _resolve_runtime_query_timeout_seconds()
+    runtime_stream = run_gateway_runtime_query_stream(
+        token=runtime_token,
+        messages=list(upstream_payload.get("messages") or []),
+        cwd=str(gateway_fields["cwd"]),
+        timeout_seconds=timeout_seconds,
+        model=str(upstream_payload.get("model") or ""),
+        system_prompt=str(upstream_payload.get("system") or "").strip() or None,
+        session_id=str(gateway_fields["session_id"] or "").strip() or None,
+    )
+
+    for runtime_event in runtime_stream:
+        if not isinstance(runtime_event, Mapping):
+            continue
+
+        top_type = str(runtime_event.get("type") or "").strip().lower()
+        if top_type == "keepalive":
+            yield _format_sse_data(
+                {
+                    "type": "response.in_progress",
+                    "response": {
+                        "id": response_id,
+                        "object": "response",
+                        "created": created_ts,
+                        "model": response_model,
+                        "status": "in_progress",
+                    },
+                }
+            )
+            continue
+
+        if top_type == "runtime_error":
+            detail = redact_token_like_text(
+                str(
+                    runtime_event.get("error")
+                    or runtime_event.get("message")
+                    or "Claude runtime execution failed."
+                )
+            )
+            yield _format_sse_data(
+                {
+                    "type": "response.failed",
+                    "response": {
+                        "id": response_id,
+                        "object": "response",
+                        "created": created_ts,
+                        "model": response_model,
+                        "status": "failed",
+                        "error": {"message": detail},
+                    },
+                }
+            )
+            yield _format_sse_data("[DONE]")
+            return
+
+        if top_type == "stream_event":
+            event = runtime_event.get("event")
+            if not isinstance(event, Mapping):
+                continue
+            event_type = str(event.get("type") or "").strip().lower()
+
+            if event_type == "message_start":
+                message_obj = event.get("message")
+                if isinstance(message_obj, Mapping):
+                    usage = message_obj.get("usage")
+                    if isinstance(usage, Mapping):
+                        try:
+                            input_tokens = int(usage.get("input_tokens") or 0)
+                        except (TypeError, ValueError):
+                            input_tokens = 0
+                continue
+
+            if event_type == "message_delta":
+                usage = event.get("usage")
+                if isinstance(usage, Mapping):
+                    try:
+                        output_tokens = int(usage.get("output_tokens") or 0)
+                    except (TypeError, ValueError):
+                        output_tokens = 0
+                continue
+
+            if event_type == "content_block_start":
+                block = event.get("content_block")
+                if not isinstance(block, Mapping):
+                    continue
+                block_index = int(event.get("index") or 0)
+                block_type = str(block.get("type") or "").strip().lower()
+
+                if block_type == "text":
+                    text_chunk = str(block.get("text") or "")
+                    if text_chunk:
+                        saw_stream_text_delta = True
+                        text_parts.append(text_chunk)
+                        yield _format_sse_data(
+                            {
+                                "type": "response.output_text.delta",
+                                "response_id": response_id,
+                                "output_index": 0,
+                                "content_index": 0,
+                                "delta": text_chunk,
+                            }
+                        )
+                    continue
+
+                if block_type == "tool_use":
+                    saw_tool_use = True
+                    saw_stream_tool_use = True
+                    tool_name = str(block.get("name") or "Tool")
+                    pending_tool_names[block_index] = tool_name
+                    tool_input = block.get("input")
+                    arguments = ""
+                    if isinstance(tool_input, (dict, list)):
+                        if tool_input not in ({}, []):
+                            arguments = json.dumps(tool_input, ensure_ascii=False)
+                    elif tool_input not in (None, ""):
+                        arguments = str(tool_input)
+                    pending_tool_inputs[block_index] = arguments
+                    yield _format_sse_data(
+                        {
+                            "type": "response.output_item.added",
+                            "response_id": response_id,
+                            "item": {
+                                "type": "function_call",
+                                "name": tool_name,
+                                "arguments": arguments,
+                            },
+                        }
+                    )
+                    continue
+
+                continue
+
+            if event_type == "content_block_delta":
+                delta = event.get("delta")
+                if not isinstance(delta, Mapping):
+                    continue
+                delta_type = str(delta.get("type") or "").strip().lower()
+                block_index = int(event.get("index") or 0)
+
+                if delta_type == "text_delta":
+                    text_chunk = str(delta.get("text") or "")
+                    if text_chunk:
+                        saw_stream_text_delta = True
+                        text_parts.append(text_chunk)
+                        yield _format_sse_data(
+                            {
+                                "type": "response.output_text.delta",
+                                "response_id": response_id,
+                                "output_index": 0,
+                                "content_index": 0,
+                                "delta": text_chunk,
+                            }
+                        )
+                    continue
+
+                if delta_type == "input_json_delta":
+                    fragment = str(delta.get("partial_json") or "")
+                    if fragment:
+                        pending_tool_inputs[block_index] = (
+                            pending_tool_inputs.get(block_index, "") + fragment
+                        )
+                    continue
+
+                continue
+
+            if event_type == "content_block_stop":
+                block_index = int(event.get("index") or 0)
+                if block_index in pending_tool_inputs:
+                    yield _format_sse_data(
+                        {
+                            "type": "response.output_item.done",
+                            "response_id": response_id,
+                            "item": {
+                                "type": "function_call",
+                                "name": pending_tool_names.get(block_index, "Tool"),
+                                "arguments": pending_tool_inputs.get(block_index, ""),
+                            },
+                        }
+                    )
+                    pending_tool_inputs.pop(block_index, None)
+                    pending_tool_names.pop(block_index, None)
+                continue
+
+            if event_type == "error":
+                message = _extract_error_message(event)
+                yield _format_sse_data(
+                    {
+                        "type": "response.failed",
+                        "response": {
+                            "id": response_id,
+                            "object": "response",
+                            "created": created_ts,
+                            "model": response_model,
+                            "status": "failed",
+                            "error": {"message": message},
+                        },
+                    }
+                )
+                yield _format_sse_data("[DONE]")
+                return
+
+            continue
+
+        if top_type == "assistant":
+            message_obj = runtime_event.get("message")
+            if not isinstance(message_obj, Mapping):
+                continue
+
+            content_blocks = message_obj.get("content")
+            if not isinstance(content_blocks, list):
+                continue
+
+            snapshot_parts: list[str] = []
+            for block_index, block in enumerate(content_blocks):
+                if not isinstance(block, Mapping):
+                    continue
+                block_type = str(block.get("type") or "").strip().lower()
+
+                if block_type == "text":
+                    snapshot_parts.append(str(block.get("text") or ""))
+                    continue
+
+                if block_type == "tool_use":
+                    saw_tool_use = True
+                    if saw_stream_tool_use:
+                        continue
+                    tool_name = str(block.get("name") or "Tool")
+                    tool_input = block.get("input")
+                    arguments = ""
+                    if isinstance(tool_input, (dict, list)):
+                        if tool_input not in ({}, []):
+                            arguments = json.dumps(tool_input, ensure_ascii=False)
+                    elif tool_input not in (None, ""):
+                        arguments = str(tool_input)
+
+                    block_id = str(block.get("id") or "").strip()
+                    signature = block_id or f"{tool_name}:{arguments}:{block_index}"
+                    if signature in emitted_assistant_tool_ids:
+                        continue
+                    emitted_assistant_tool_ids.add(signature)
+
+                    yield _format_sse_data(
+                        {
+                            "type": "response.output_item.added",
+                            "response_id": response_id,
+                            "item": {
+                                "type": "function_call",
+                                "name": tool_name,
+                                "arguments": arguments,
+                            },
+                        }
+                    )
+                    yield _format_sse_data(
+                        {
+                            "type": "response.output_item.done",
+                            "response_id": response_id,
+                            "item": {
+                                "type": "function_call",
+                                "name": tool_name,
+                                "arguments": arguments,
+                            },
+                        }
+                    )
+                    continue
+
+            assistant_snapshot = "".join(snapshot_parts)
+            if assistant_snapshot and not saw_stream_text_delta:
+                if assistant_snapshot_text and assistant_snapshot.startswith(
+                    assistant_snapshot_text
+                ):
+                    delta_text = assistant_snapshot[len(assistant_snapshot_text) :]
+                else:
+                    delta_text = assistant_snapshot
+                assistant_snapshot_text = assistant_snapshot
+
+                if delta_text:
+                    text_parts.append(delta_text)
+                    yield _format_sse_data(
+                        {
+                            "type": "response.output_text.delta",
+                            "response_id": response_id,
+                            "output_index": 0,
+                            "content_index": 0,
+                            "delta": delta_text,
+                        }
+                    )
+            continue
+
+        if top_type == "user":
+            message_obj = runtime_event.get("message")
+            if not isinstance(message_obj, Mapping):
+                continue
+            content_blocks = message_obj.get("content")
+            if not isinstance(content_blocks, list):
+                continue
+            for block in content_blocks:
+                if not isinstance(block, Mapping):
+                    continue
+                if str(block.get("type") or "").strip().lower() != "tool_result":
+                    continue
+                output_text = _extract_runtime_tool_result_content(block.get("content"))
+                yield _format_sse_data(
+                    {
+                        "type": "response.output_item.added",
+                        "response_id": response_id,
+                        "item": {
+                            "type": "function_call_output",
+                            "output": output_text,
+                        },
+                    }
+                )
+            continue
+
+        if top_type == "result":
+            if bool(runtime_event.get("is_error")):
+                message = redact_token_like_text(
+                    str(
+                        runtime_event.get("result")
+                        or runtime_event.get("error")
+                        or "Claude runtime execution failed."
+                    )
+                )
+                yield _format_sse_data(
+                    {
+                        "type": "response.failed",
+                        "response": {
+                            "id": response_id,
+                            "object": "response",
+                            "created": created_ts,
+                            "model": response_model,
+                            "status": "failed",
+                            "error": {"message": message},
+                        },
+                    }
+                )
+                yield _format_sse_data("[DONE]")
+                return
+            final_result_text = str(runtime_event.get("result") or "")
+            usage = runtime_event.get("usage")
+            if isinstance(usage, Mapping):
+                try:
+                    input_tokens = int(usage.get("input_tokens") or input_tokens)
+                except (TypeError, ValueError):
+                    pass
+                try:
+                    output_tokens = int(usage.get("output_tokens") or output_tokens)
+                except (TypeError, ValueError):
+                    pass
+            continue
+
+    if requires_tools and not saw_tool_use:
+        yield _format_sse_data(
+            {
+                "type": "response.failed",
+                "response": {
+                    "id": response_id,
+                    "object": "response",
+                    "created": created_ts,
+                    "model": response_model,
+                    "status": "failed",
+                    "error": {
+                        "message": (
+                            "No tool activity was observed for this request. "
+                            "Runtime execution was blocked to prevent fabricated results."
+                        )
+                    },
+                },
+            }
+        )
+        yield _format_sse_data("[DONE]")
+        return
+
+    final_text = "".join(text_parts).strip()
+    if not final_text:
+        final_text = final_result_text.strip()
+    final_text = _sanitize_runtime_output_text(final_text)
+
+    yield _format_sse_data(
+        {
+            "type": "response.output_text.done",
+            "response_id": response_id,
+            "output_index": 0,
+            "content_index": 0,
+            "text": final_text,
+        }
+    )
+    yield _format_sse_data(
+        {
+            "type": "response.completed",
+            "response": {
+                "id": response_id,
+                "object": "response",
+                "created": created_ts,
+                "model": response_model,
+                "status": "completed",
+                "output": [
+                    {
+                        "type": "message",
+                        "role": "assistant",
+                        "content": [
+                            {
+                                "type": "output_text",
+                                "text": final_text,
+                                "annotations": [],
+                            }
+                        ],
+                    }
+                ],
+                "usage": {
+                    "input_tokens": input_tokens,
+                    "output_tokens": output_tokens,
+                    "total_tokens": input_tokens + output_tokens,
+                },
+            },
+        }
+    )
+    yield _format_sse_data("[DONE]")
+
+
 def _run_setup_token_runtime_response(
     *,
     runtime_token: str,
@@ -727,6 +1306,28 @@ def _run_setup_token_runtime_response(
     upstream_payload: dict[str, Any],
     stream_mode: bool,
 ):
+    if stream_mode:
+        _log_gateway_event(
+            "gateway.responses",
+            "success",
+            stream=True,
+            backend="claude_runtime",
+        )
+        response = Response(
+            stream_with_context(
+                _stream_setup_token_runtime_events(
+                    runtime_token=runtime_token,
+                    gateway_fields=gateway_fields,
+                    upstream_payload=upstream_payload,
+                )
+            ),
+            mimetype="text/event-stream",
+        )
+        response.headers["Cache-Control"] = "no-cache"
+        response.headers["X-Accel-Buffering"] = "no"
+        response.headers["Connection"] = "keep-alive"
+        return response
+
     timeout_seconds = _resolve_runtime_query_timeout_seconds()
     max_attempts = _resolve_runtime_query_max_attempts()
     runtime_result: dict[str, Any] = {}
@@ -769,7 +1370,7 @@ def _run_setup_token_runtime_response(
             error_type="upstream_error",
         )
 
-    response_text = str(runtime_result.get("output_text") or "").strip()
+    response_text = _sanitize_runtime_output_text(runtime_result.get("output_text") or "")
     response_model = (
         str(runtime_result.get("model") or "").strip()
         or str(upstream_payload.get("model") or "").strip()
@@ -778,21 +1379,9 @@ def _run_setup_token_runtime_response(
     _log_gateway_event(
         "gateway.responses",
         "success",
-        stream=stream_mode,
+        stream=False,
         backend="claude_runtime",
     )
-    if stream_mode:
-        response = Response(
-            stream_with_context(
-                _stream_runtime_response_events(response_text, model=response_model)
-            ),
-            mimetype="text/event-stream",
-        )
-        response.headers["Cache-Control"] = "no-cache"
-        response.headers["X-Accel-Buffering"] = "no"
-        response.headers["Connection"] = "keep-alive"
-        return response
-
     return jsonify(_runtime_text_to_response_payload(response_text, model=response_model))
 
 
@@ -811,11 +1400,7 @@ def _read_prompt_snippet(path: Path, *, max_chars: int) -> str:
 
 
 def _build_project_context_prompt() -> str:
-    workspace_root = (
-        str(current_app.config.get("GATEWAY_WORKSPACE_ROOT") or os.getenv("GATEWAY_WORKSPACE_ROOT") or "/app")
-        .strip()
-        or "/app"
-    )
+    workspace_root = _resolve_workspace_root()
     workspace = Path(workspace_root)
     if not workspace.is_dir():
         return ""
@@ -837,6 +1422,19 @@ def _build_project_context_prompt() -> str:
     sections: list[str] = [
         "You are answering for the AIAA Agentic OS workspace. Respect the project operating model and available capabilities.",
         "Assume this repository is the active project root and prioritize its documented workflows.",
+        (
+            "Execution policy: when a relevant native skill exists, invoke that skill first, "
+            "run the required tools/scripts, and ground the answer in execution results."
+        ),
+        (
+            "Do not fabricate workflow execution, research findings, or deliverables from memory. "
+            "If tooling or external APIs are unavailable, explicitly report the blocker."
+        ),
+        (
+            "User output policy: return clean user-facing markdown only. "
+            "Do not include internal execution narration, phase logs, tool call markup "
+            "(for example <tool_call>/<tool_response>), or raw tool payloads."
+        ),
     ]
     if skill_names:
         sections.append(
@@ -1120,7 +1718,10 @@ def create_response():
     _log_gateway_event("gateway.responses", "received", stream=stream_mode)
 
     try:
-        gateway_fields = normalize_gateway_request_fields(body)
+        gateway_fields = normalize_gateway_request_fields(
+            body,
+            default_cwd=_resolve_workspace_root(),
+        )
     except ValueError as exc:
         return _json_error(str(exc), 400)
 

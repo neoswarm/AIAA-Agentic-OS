@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import time
 from dataclasses import dataclass
+from collections.abc import Generator
 from typing import Any, Callable, Mapping, Protocol, TypeVar
 
 import requests
@@ -27,6 +29,7 @@ class RequestSession(Protocol):
         json: RequestPayload = None,
         headers: Mapping[str, str] | None = None,
         timeout: float | None = None,
+        stream: bool | None = None,
     ) -> requests.Response:
         """Execute an HTTP request."""
 
@@ -212,6 +215,71 @@ class GatewayClient:
             headers=headers,
             timeout_seconds=timeout_seconds,
         )
+
+    def post_stream(
+        self,
+        path: str,
+        *,
+        payload: RequestPayload = None,
+        params: QueryParams = None,
+        headers: Mapping[str, str] | None = None,
+        timeout_seconds: float | None = None,
+    ) -> Generator[dict[str, Any], None, None]:
+        """
+        Execute a streaming POST request and yield parsed SSE JSON events.
+
+        Only `data:` lines containing JSON objects are yielded. `[DONE]` and
+        other non-JSON payload lines are ignored.
+        """
+        request_timeout = (
+            self.timeout_seconds if timeout_seconds is None else timeout_seconds
+        )
+        url = self._build_url(path)
+        merged_headers = dict(self._base_headers)
+        merged_headers.setdefault("Accept", "text/event-stream")
+        if headers:
+            merged_headers.update(headers)
+
+        try:
+            response = self._session.request(
+                "POST",
+                url,
+                params=params,
+                json=payload,
+                headers=merged_headers,
+                timeout=request_timeout,
+                stream=True,
+            )
+        except requests.RequestException as exc:
+            raise GatewayClientError(
+                f"Gateway stream request failed for POST {url}: {exc}"
+            ) from exc
+
+        if response.status_code >= 400:
+            raise GatewayHTTPError(
+                response.status_code,
+                f"Gateway returned HTTP {response.status_code} for POST {url}",
+                response_text=response.text,
+            )
+
+        try:
+            for raw_line in response.iter_lines(decode_unicode=True):
+                if raw_line is None:
+                    continue
+                line = str(raw_line).strip()
+                if not line or not line.startswith("data:"):
+                    continue
+                data = line[5:].strip()
+                if not data or data == "[DONE]":
+                    continue
+                try:
+                    parsed = json.loads(data)
+                except ValueError:
+                    continue
+                if isinstance(parsed, dict):
+                    yield parsed
+        finally:
+            response.close()
 
     def get_typed(
         self,

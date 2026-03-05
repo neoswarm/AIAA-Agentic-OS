@@ -19,7 +19,16 @@ WORKDIR /app
 # Copy full repo so gateway runtime can access skills/rules/hooks/context.
 COPY . /app
 
-RUN pip install -r railway_apps/aiaa_gateway/requirements.txt \
-    && npm install -g @anthropic-ai/claude-code
+RUN set -eux; \
+    if [ -f "/app/railway_apps/aiaa_gateway/requirements.txt" ]; then \
+        pip install -r /app/railway_apps/aiaa_gateway/requirements.txt; \
+    else \
+        pip install -r /app/requirements.txt; \
+    fi; \
+    npm install -g @anthropic-ai/claude-code
 
-RUN mkdir -p /app/.tmp
+RUN useradd --create-home --shell /bin/bash appuser \
+    && mkdir -p /app/.tmp \
+    && chown -R appuser:appuser /app
+
+USER appuser

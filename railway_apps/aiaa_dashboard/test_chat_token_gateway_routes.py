@@ -100,10 +100,9 @@ def test_save_token_calls_gateway_profile_upsert(auth_client, app, monkeypatch):
     assert body["status"] == "ok"
     assert app.config["TOKEN_STORE"][chat_routes.CLAUDE_TOKEN_SETTING_KEY] == token
     assert _FakeGatewayClient.calls[-1]["path"] == "/v1/profiles/upsert"
-    assert _FakeGatewayClient.calls[-1]["payload"] == {
-        "profile_id": "default",
-        "token": token,
-    }
+    payload = _FakeGatewayClient.calls[-1]["payload"]
+    assert payload["profile_id"] == "default"
+    assert payload["token"] == token
 
 
 def test_validate_token_calls_gateway_profile_validate(auth_client, monkeypatch):
@@ -189,3 +188,58 @@ def test_rotate_token_calls_gateway_profile_upsert(auth_client, app, monkeypatch
     }
     assert app.config["TOKEN_STORE"][chat_routes.CLAUDE_TOKEN_SETTING_KEY] == new_token
     assert chat_routes.os.environ["CLAUDE_SETUP_TOKEN"] == new_token
+
+
+def test_railway_persist_uses_config_fallback_service_id(monkeypatch):
+    captured = {}
+
+    class _OkResponse:
+        status_code = 200
+        text = ""
+
+        @staticmethod
+        def json():
+            return {"data": {"variableUpsert": True}}
+
+    def _fake_post(url, *, json=None, headers=None, timeout=None):
+        captured["url"] = url
+        captured["json"] = json or {}
+        captured["headers"] = headers or {}
+        captured["timeout"] = timeout
+        return _OkResponse()
+
+    monkeypatch.setenv("RAILWAY_API_TOKEN", "railway-api-token")
+    monkeypatch.delenv("RAILWAY_SERVICE_ID", raising=False)
+    monkeypatch.setattr(
+        chat_routes.Config,
+        "RAILWAY_SERVICE_ID",
+        "service-from-config",
+        raising=False,
+    )
+    monkeypatch.setattr(chat_routes.http_requests, "post", _fake_post)
+
+    persisted = chat_routes._persist_to_railway_async(
+        {"CLAUDE_SETUP_TOKEN": "sk-ant-oat01-test-token"}
+    )
+
+    assert persisted is True
+    assert captured["json"]["variables"]["input"]["serviceId"] == "service-from-config"
+
+
+def test_railway_persist_returns_false_on_graphql_errors(monkeypatch):
+    class _ErrorResponse:
+        status_code = 200
+        text = ""
+
+        @staticmethod
+        def json():
+            return {"errors": [{"message": "bad request"}]}
+
+    monkeypatch.setenv("RAILWAY_API_TOKEN", "railway-api-token")
+    monkeypatch.setenv("RAILWAY_SERVICE_ID", "service-id")
+    monkeypatch.setattr(
+        chat_routes.http_requests, "post", lambda *args, **kwargs: _ErrorResponse()
+    )
+
+    persisted = chat_routes._persist_to_railway_async({"CLAUDE_SETUP_TOKEN": "token"})
+    assert persisted is False

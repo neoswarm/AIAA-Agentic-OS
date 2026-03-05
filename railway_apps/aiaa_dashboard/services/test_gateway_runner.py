@@ -57,6 +57,46 @@ class FakeGatewayClient:
             raise item
         return dict(item)
 
+    def post_stream(
+        self,
+        path: str,
+        *,
+        payload: dict[str, Any] | None = None,
+        params: Any = None,
+        headers: dict[str, str] | None = None,
+        timeout_seconds: float | None = None,
+    ):
+        del params, timeout_seconds
+        self.calls.append(
+            {
+                "path": path,
+                "payload": dict(payload or {}),
+                "headers": dict(headers or {}),
+            }
+        )
+        if not self._scripted:
+            raise AssertionError("No scripted gateway response available")
+        item = self._scripted.pop(0)
+        if isinstance(item, Exception):
+            raise item
+        events = item if isinstance(item, list) else [item]
+        for event in events:
+            if isinstance(event, Exception):
+                raise event
+            if isinstance(event, dict):
+                yield dict(event)
+
+
+class FakeMessageStore:
+    def __init__(self, messages_by_session: dict[str, list[dict[str, Any]]]) -> None:
+        self._messages = messages_by_session
+
+    def get_messages(self, session_id: str, limit: int | None = None) -> list[dict[str, Any]]:
+        messages = list(self._messages.get(session_id, []))
+        if limit is not None:
+            return messages[-limit:]
+        return messages
+
 
 def _runner() -> GatewayRunner:
     return GatewayRunner(cwd="/tmp", token_provider=lambda: "test-token")
@@ -186,7 +226,18 @@ def test_gateway_runner_stream_emits_terminal_done_and_stops() -> None:
 
 
 def test_gateway_runner_transport_calls_gateway_client_and_emits_result() -> None:
-    gateway_client = FakeGatewayClient([{"output_text": "hello from gateway"}])
+    gateway_client = FakeGatewayClient(
+        [
+            [
+                {"type": "response.output_text.delta", "delta": "hello "},
+                {"type": "response.output_text.delta", "delta": "from gateway"},
+                {
+                    "type": "response.completed",
+                    "response": {"output_text": "hello from gateway"},
+                },
+            ]
+        ]
+    )
     runner = GatewayRunner(
         cwd="/tmp",
         token_provider=lambda: "sk-ant-test-token",
@@ -200,22 +251,89 @@ def test_gateway_runner_transport_calls_gateway_client_and_emits_result() -> Non
     call = gateway_client.calls[0]
     assert call["path"] == "/v1/responses"
     assert call["payload"]["input"] == "hello"
-    assert call["payload"]["stream"] is False
+    assert call["payload"]["stream"] is True
     assert call["payload"]["cwd"] == "/app"
     assert call["payload"]["tools_profile"] == "full"
-    assert isinstance(call["payload"]["session_id"], str)
-    assert len(call["payload"]["session_id"]) == 36
+    assert "session_id" not in call["payload"]
     assert call["headers"]["X-Anthropic-Api-Key"] == "sk-ant-test-token"
 
     events = _drain_events(runner, session_id)
-    assert [event["type"] for event in events] == ["result", "done"]
-    assert events[0]["content"] == "hello from gateway"
+    assert [event["type"] for event in events] == ["text", "text", "done"]
+    assert events[0]["content"] == "hello "
+    assert events[1]["content"] == "from gateway"
 
     session = runner.get_session(session_id)
     assert session is not None
     assert session["status"] == "idle"
     assert session["last_error"] is None
     assert session["messages"][-1]["content"] == "hello from gateway"
+
+
+def test_gateway_runner_transport_sends_full_history_when_available() -> None:
+    gateway_client = FakeGatewayClient(
+        [
+            [
+                {
+                    "type": "response.completed",
+                    "response": {"output_text": "history-aware reply"},
+                }
+            ]
+        ]
+    )
+    session_id = "session-history-1"
+    message_store = FakeMessageStore(
+        {
+            session_id: [
+                {"role": "user", "content": "first user turn"},
+                {"role": "assistant", "content": "first assistant turn"},
+                {"role": "user", "content": "latest user turn"},
+            ]
+        }
+    )
+    runner = GatewayRunner(
+        cwd="/tmp",
+        token_provider=lambda: "sk-ant-test-token",
+        gateway_client=gateway_client,
+        session_store=message_store,
+    )
+    runner.ensure_session(session_id)
+
+    runner._run_agent(session_id, "latest user turn")
+
+    assert len(gateway_client.calls) == 1
+    payload_input = gateway_client.calls[0]["payload"]["input"]
+    assert isinstance(payload_input, list)
+    assert payload_input == [
+        {"role": "user", "content": "first user turn"},
+        {"role": "assistant", "content": "first assistant turn"},
+        {"role": "user", "content": "latest user turn"},
+    ]
+
+    events = _drain_events(runner, session_id)
+    assert [event["type"] for event in events] == ["result", "done"]
+    assert events[0]["content"] == "history-aware reply"
+
+
+def test_gateway_runner_includes_runtime_session_id_when_pinning_enabled(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("CHAT_GATEWAY_PIN_RUNTIME_SESSION", "true")
+    gateway_client = FakeGatewayClient(
+        [[{"type": "response.completed", "response": {"output_text": "ok"}}]]
+    )
+    runner = GatewayRunner(
+        cwd="/tmp",
+        token_provider=lambda: "sk-ant-test-token",
+        gateway_client=gateway_client,
+    )
+    session_id = runner.create_session()["id"]
+
+    runner._run_agent(session_id, "hello")
+
+    assert len(gateway_client.calls) == 1
+    payload = gateway_client.calls[0]["payload"]
+    assert isinstance(payload.get("session_id"), str)
+    assert len(str(payload.get("session_id"))) == 36
 
 
 def test_gateway_runner_transport_emits_error_when_gateway_fails() -> None:
@@ -238,6 +356,133 @@ def test_gateway_runner_transport_emits_error_when_gateway_fails() -> None:
     assert session is not None
     assert session["status"] == "error"
     assert "gateway unavailable" in str(session["last_error"])
+
+
+def test_gateway_runner_transport_maps_tool_events_from_response_stream() -> None:
+    gateway_client = FakeGatewayClient(
+        [
+            [
+                {
+                    "type": "response.output_item.added",
+                    "item": {
+                        "type": "function_call",
+                        "name": "Read",
+                        "arguments": "{\"file_path\":\"README.md\"}",
+                    },
+                },
+                {
+                    "type": "response.output_item.added",
+                    "item": {
+                        "type": "function_call_output",
+                        "output": "Read complete",
+                    },
+                },
+                {"type": "response.output_text.delta", "delta": "Done."},
+                {"type": "response.completed", "response": {"output_text": "Done."}},
+            ]
+        ]
+    )
+    runner = GatewayRunner(
+        cwd="/tmp",
+        token_provider=lambda: "sk-ant-test-token",
+        gateway_client=gateway_client,
+    )
+    session_id = runner.create_session()["id"]
+
+    runner._run_agent(session_id, "run tools")
+
+    events = _drain_events(runner, session_id)
+    assert [event["type"] for event in events] == [
+        "tool_use",
+        "tool_result",
+        "text",
+        "done",
+    ]
+    assert events[0]["tool"] == "Read"
+    assert "README.md" in events[0]["input"]
+    assert events[1]["content"] == "Read complete"
+    assert events[2]["content"] == "Done."
+
+
+def test_gateway_runner_ignores_output_item_done_tool_duplicates() -> None:
+    gateway_client = FakeGatewayClient(
+        [
+            [
+                {
+                    "type": "response.output_item.added",
+                    "item": {
+                        "type": "function_call",
+                        "name": "Bash",
+                        "arguments": "{\"command\":\"echo hi\"}",
+                    },
+                },
+                {
+                    "type": "response.output_item.done",
+                    "item": {
+                        "type": "function_call",
+                        "name": "Bash",
+                        "arguments": "{\"command\":\"echo hi\"}",
+                    },
+                },
+                {
+                    "type": "response.output_item.added",
+                    "item": {
+                        "type": "function_call_output",
+                        "output": "hi",
+                    },
+                },
+                {
+                    "type": "response.output_item.done",
+                    "item": {
+                        "type": "function_call_output",
+                        "output": "hi",
+                    },
+                },
+                {"type": "response.completed", "response": {"output_text": "done"}},
+            ]
+        ]
+    )
+    runner = GatewayRunner(
+        cwd="/tmp",
+        token_provider=lambda: "sk-ant-test-token",
+        gateway_client=gateway_client,
+    )
+    session_id = runner.create_session()["id"]
+
+    runner._run_agent(session_id, "run tool")
+
+    events = _drain_events(runner, session_id)
+    assert [event["type"] for event in events] == ["tool_use", "tool_result", "result", "done"]
+
+
+def test_gateway_runner_ignores_output_text_done_duplicate_payload() -> None:
+    gateway_client = FakeGatewayClient(
+        [
+            [
+                {"type": "response.output_text.delta", "delta": "Part A "},
+                {"type": "response.output_text.delta", "delta": "Part B"},
+                {"type": "response.output_text.done", "text": "Part A Part B"},
+                {"type": "response.completed", "response": {"output_text": "Part A Part B"}},
+            ]
+        ]
+    )
+    runner = GatewayRunner(
+        cwd="/tmp",
+        token_provider=lambda: "sk-ant-test-token",
+        gateway_client=gateway_client,
+    )
+    session_id = runner.create_session()["id"]
+
+    runner._run_agent(session_id, "stream please")
+
+    events = _drain_events(runner, session_id)
+    assert [event["type"] for event in events] == ["text", "text", "done"]
+    assert events[0]["content"] == "Part A "
+    assert events[1]["content"] == "Part B"
+
+    session = runner.get_session(session_id)
+    assert session is not None
+    assert session["messages"][-1]["content"] == "Part A Part B"
 
 
 def test_gateway_runner_maps_gateway_session_and_correlation_ids() -> None:
@@ -388,7 +633,7 @@ def test_gateway_runner_blocks_concurrent_send_for_same_session() -> None:
     allow_finish = threading.Event()
 
     class BlockingGatewayClient:
-        def post_json(
+        def post_stream(
             self,
             path: str,
             *,
@@ -396,7 +641,7 @@ def test_gateway_runner_blocks_concurrent_send_for_same_session() -> None:
             params: Any = None,
             headers: dict[str, str] | None = None,
             timeout_seconds: float | None = None,
-        ) -> dict[str, Any]:
+        ):
             del path, payload, params, headers, timeout_seconds
             call_count["value"] += 1
             if call_count["value"] == 1:
@@ -404,7 +649,7 @@ def test_gateway_runner_blocks_concurrent_send_for_same_session() -> None:
                     runner._sessions[session_id]["status"] = "idle"
                 run_started.set()
                 allow_finish.wait(timeout=3)
-            return {"output_text": "ok"}
+            yield {"type": "response.completed", "response": {"output_text": "ok"}}
 
     runner = GatewayRunner(
         cwd="/tmp",

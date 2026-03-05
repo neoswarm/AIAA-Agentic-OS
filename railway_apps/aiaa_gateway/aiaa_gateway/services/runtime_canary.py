@@ -3,13 +3,10 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import os
 from asyncio.subprocess import PIPE
 from collections.abc import Awaitable, Callable
 from typing import Any
-
-import requests as http_requests
 
 
 CreateSubprocessExec = Callable[..., Awaitable[asyncio.subprocess.Process]]
@@ -23,14 +20,6 @@ _AUTH_ENV_KEYS = (
     "ANTHROPIC_API_KEY",
     "CLAUDE_API_KEY",
 )
-_OAUTH_ANTHROPIC_BETA_HEADER = (
-    "claude-code-20250219,"
-    "oauth-2025-04-20,"
-    "fine-grained-tool-streaming-2025-05-14,"
-    "interleaved-thinking-2025-05-14"
-)
-
-
 def build_runtime_auth_env(token: str) -> dict[str, str]:
     """Map token format to auth env vars recognized by Claude runtime."""
     candidate = (token or "").strip()
@@ -40,7 +29,6 @@ def build_runtime_auth_env(token: str) -> dict[str, str]:
     env = {"CLAUDE_SETUP_TOKEN": candidate}
     if candidate.startswith("sk-ant-oat"):
         env["CLAUDE_CODE_OAUTH_TOKEN"] = candidate
-        env["ANTHROPIC_AUTH_TOKEN"] = candidate
         return env
     if candidate.startswith("sk-ant-"):
         env["ANTHROPIC_API_KEY"] = candidate
@@ -48,78 +36,7 @@ def build_runtime_auth_env(token: str) -> dict[str, str]:
         return env
 
     env["CLAUDE_CODE_OAUTH_TOKEN"] = candidate
-    env["ANTHROPIC_AUTH_TOKEN"] = candidate
     return env
-
-
-def _is_setup_token(token: str) -> bool:
-    return (token or "").strip().lower().startswith("sk-ant-oat")
-
-
-def _run_oauth_canary(token: str, *, timeout_seconds: float) -> dict[str, Any]:
-    headers = {
-        "authorization": f"Bearer {token}",
-        "anthropic-version": "2023-06-01",
-        "anthropic-beta": _OAUTH_ANTHROPIC_BETA_HEADER,
-        "content-type": "application/json",
-        "accept": "application/json",
-    }
-    payload = {
-        "model": os.getenv("DEFAULT_ANTHROPIC_MODEL", "claude-sonnet-4-6"),
-        "max_tokens": 8,
-        "messages": [{"role": "user", "content": _CANARY_PROMPT}],
-    }
-    try:
-        response = http_requests.post(
-            "https://api.anthropic.com/v1/messages",
-            json=payload,
-            headers=headers,
-            timeout=timeout_seconds,
-        )
-    except http_requests.RequestException as exc:
-        return {
-            "status": "runtime_unavailable",
-            "message": "Gateway OAuth canary request failed",
-            "error": str(exc)[:_MAX_ERROR_LEN],
-        }
-
-    try:
-        body = response.json()
-    except ValueError:
-        body = {"raw_body": response.text[:_MAX_ERROR_LEN]}
-
-    if response.status_code == 200:
-        text = ""
-        if isinstance(body, dict):
-            content = body.get("content")
-            if isinstance(content, list):
-                for block in content:
-                    if not isinstance(block, dict):
-                        continue
-                    if str(block.get("type") or "").lower() != "text":
-                        continue
-                    candidate = block.get("text")
-                    if isinstance(candidate, str) and candidate.strip():
-                        text = candidate.strip()
-                        break
-        return {
-            "status": "valid",
-            "message": "Gateway OAuth canary succeeded",
-            "output": text or "OK",
-        }
-
-    if response.status_code == 429:
-        return {
-            "status": "valid",
-            "message": "Gateway OAuth canary is rate limited",
-            "error": json.dumps(body)[:_MAX_ERROR_LEN],
-        }
-
-    return {
-        "status": "invalid",
-        "message": "Gateway OAuth canary failed",
-        "error": json.dumps(body)[:_MAX_ERROR_LEN],
-    }
 
 
 async def _run_canary(
@@ -198,9 +115,6 @@ def run_gateway_runtime_canary(
             timeout = max(1.0, float(raw_timeout))
         except (TypeError, ValueError):
             timeout = 12.0
-
-    if _is_setup_token(candidate):
-        return _run_oauth_canary(candidate, timeout_seconds=timeout)
 
     try:
         return asyncio.run(

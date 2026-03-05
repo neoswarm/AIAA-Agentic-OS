@@ -278,6 +278,39 @@ def test_send_message_uses_store_state_then_runner(auth_client, monkeypatch):
     assert ("send_message", "s-3", "hello from user") in runner.calls
 
 
+def test_send_message_rehydrates_missing_session_in_store(auth_client, monkeypatch):
+    store = FakeStore()
+
+    class RunnerWithSession(FakeRunner):
+        def get_session(self, session_id: str) -> dict[str, Any]:
+            return {
+                "id": session_id,
+                "title": "Recovered from runner",
+                "sdk_session_id": "sdk-recovered-1",
+                "status": "idle",
+            }
+
+    runner = RunnerWithSession()
+
+    monkeypatch.setattr(chat_routes, "_get_chat_store", lambda: store)
+    monkeypatch.setattr(chat_routes, "_get_runner", lambda: runner)
+    monkeypatch.setattr(chat_routes, "get_claude_token", lambda: "eyJ.valid.token")
+    monkeypatch.setattr(chat_routes, "_is_gateway_mode_enabled", lambda: False)
+    monkeypatch.setattr(chat_routes, "_chat_backend", lambda: "sdk")
+
+    resp = auth_client.post(
+        "/api/chat/message",
+        json={"session_id": "lost-session-1", "message": "continue this chat"},
+    )
+    assert resp.status_code == 202
+    assert resp.get_json()["status"] == "ok"
+    assert ("create_session", "lost-session-1") in store.calls
+    assert ("append_message", "lost-session-1") in store.calls
+    assert ("ensure_session", "lost-session-1") in runner.calls
+    assert ("send_message", "lost-session-1", "continue this chat") in runner.calls
+    assert store.sessions["lost-session-1"]["title"] == "Recovered from runner"
+
+
 @pytest.mark.parametrize(
     ("gateway_mode_enabled", "chat_backend"),
     [
@@ -542,6 +575,34 @@ def test_stream_translates_gateway_events_to_dashboard_model(auth_client, monkey
     assert payloads[0]["input"] == "npm test"
     assert payloads[1]["content"] == "Hello"
     assert payloads[2]["content"] == "All tests passed"
+
+
+def test_stream_returns_sse_error_when_runner_stream_raises(auth_client, monkeypatch):
+    store = FakeStore()
+    store.create_session("s-stream-fail", title="Failing Stream")
+    runner = FakeRunner()
+
+    def failing_stream(session_id: str):
+        runner.calls.append(("get_stream", session_id))
+        if False:  # pragma: no cover - keeps this as a generator
+            yield ""
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(chat_routes, "_get_chat_store", lambda: store)
+    monkeypatch.setattr(chat_routes, "_get_runner", lambda: runner)
+    monkeypatch.setattr(runner, "get_stream", failing_stream)
+
+    resp = auth_client.get("/api/chat/stream/s-stream-fail")
+    assert resp.status_code == 200
+
+    payloads = []
+    for line in resp.get_data(as_text=True).splitlines():
+        if line.startswith("data: "):
+            payloads.append(json.loads(line[6:]))
+
+    assert payloads
+    assert payloads[0]["type"] == "error"
+    assert payloads[0]["content"] == "Chat stream failed before completion. Please retry."
 
 
 def test_v1_responses_stream_requires_auth(app):

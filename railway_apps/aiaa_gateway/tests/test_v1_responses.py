@@ -547,6 +547,7 @@ def test_post_v1_responses_rejects_unsupported_input_payload(monkeypatch):
 def test_post_v1_responses_routes_setup_tokens_through_runtime(monkeypatch):
     client = _make_client()
     captured: dict[str, Any] = {}
+
     def fake_runtime_query(**kwargs):
         captured["kwargs"] = kwargs
         return {
@@ -582,16 +583,73 @@ def test_post_v1_responses_routes_setup_tokens_through_runtime(monkeypatch):
     assert captured["kwargs"]["messages"] == [{"role": "user", "content": "Say hello"}]
 
 
-def test_post_v1_responses_streams_setup_token_runtime_result(monkeypatch):
+def test_post_v1_responses_sanitizes_runtime_tool_trace_text(monkeypatch):
     client = _make_client()
     monkeypatch.setattr(
         routes,
         "run_gateway_runtime_query",
         lambda **kwargs: {
             "status": "ok",
-            "output_text": "runtime stream text",
+            "output_text": (
+                "I'll research this company.\n"
+                "Phase 1-3: Skill Check\n\n"
+                "<tool_call>{\"name\":\"read_file\"}</tool_call>\n"
+                "<tool_response>Loaded context</tool_response>\n\n"
+                "## Final Summary\n"
+                "Client Ascension is positioned as an automation partner."
+            ),
             "model": "claude-sonnet-4-6",
         },
+    )
+    monkeypatch.setattr(
+        routes.http_requests,
+        "post",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("Direct Anthropic /v1/messages should not run for setup tokens")
+        ),
+    )
+
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-sonnet-4-6", "input": "Research this company"},
+        headers={
+            **_auth_headers(),
+            "X-Anthropic-Api-Key": "sk-ant-oat01-test-setup-token",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.get_json()
+    assert "<tool_call>" not in body["output_text"]
+    assert "<tool_response>" not in body["output_text"]
+    assert "Phase 1-3" not in body["output_text"]
+    assert "Final Summary" in body["output_text"]
+
+
+def test_post_v1_responses_streams_setup_token_runtime_result(monkeypatch):
+    client = _make_client()
+
+    def fake_runtime_stream(**kwargs):
+        del kwargs
+        yield {
+            "type": "stream_event",
+            "event": {
+                "type": "content_block_start",
+                "index": 0,
+                "content_block": {"type": "text", "text": "runtime stream text"},
+            },
+        }
+        yield {
+            "type": "result",
+            "subtype": "success",
+            "is_error": False,
+            "result": "runtime stream text",
+        }
+
+    monkeypatch.setattr(
+        routes,
+        "run_gateway_runtime_query_stream",
+        fake_runtime_stream,
     )
     monkeypatch.setattr(
         routes.http_requests,
@@ -626,6 +684,401 @@ def test_post_v1_responses_streams_setup_token_runtime_result(monkeypatch):
         for event in typed_events
     )
     assert typed_events[-1]["type"] == "response.completed"
+
+
+def test_post_v1_responses_does_not_duplicate_text_when_both_stream_and_snapshot_exist(
+    monkeypatch,
+):
+    client = _make_client()
+
+    def fake_runtime_stream(**kwargs):
+        del kwargs
+        yield {
+            "type": "stream_event",
+            "event": {
+                "type": "content_block_start",
+                "index": 0,
+                "content_block": {"type": "text", "text": "Hello "},
+            },
+        }
+        yield {
+            "type": "stream_event",
+            "event": {
+                "type": "content_block_delta",
+                "index": 0,
+                "delta": {"type": "text_delta", "text": "there"},
+            },
+        }
+        # Some runtime builds also emit top-level assistant snapshots.
+        yield {
+            "type": "assistant",
+            "message": {
+                "role": "assistant",
+                "content": [{"type": "text", "text": "Hello there"}],
+            },
+        }
+        yield {
+            "type": "result",
+            "subtype": "success",
+            "is_error": False,
+            "result": "Hello there",
+        }
+
+    monkeypatch.setattr(routes, "run_gateway_runtime_query_stream", fake_runtime_stream)
+    monkeypatch.setattr(
+        routes.http_requests,
+        "post",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("Direct Anthropic /v1/messages should not run for setup tokens")
+        ),
+    )
+
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-sonnet-4-6", "input": "Say hello", "stream": True},
+        headers={
+            **_auth_headers(),
+            "X-Anthropic-Api-Key": "sk-ant-oat01-test-setup-token",
+        },
+    )
+
+    assert response.status_code == 200
+    typed_events = [
+        json.loads(line[6:])
+        for line in response.get_data(as_text=True).splitlines()
+        if line.startswith("data: ") and line[6:] != "[DONE]"
+    ]
+    deltas = [
+        event.get("delta")
+        for event in typed_events
+        if event.get("type") == "response.output_text.delta"
+    ]
+    assert deltas == ["Hello ", "there"]
+
+
+def test_post_v1_responses_streams_setup_token_runtime_tool_events(monkeypatch):
+    client = _make_client()
+
+    def fake_runtime_stream(**kwargs):
+        del kwargs
+        yield {
+            "type": "stream_event",
+            "event": {
+                "type": "content_block_start",
+                "index": 0,
+                "content_block": {
+                    "type": "tool_use",
+                    "name": "Read",
+                    "input": {"file_path": "README.md"},
+                },
+            },
+        }
+        yield {
+            "type": "user",
+            "message": {
+                "role": "user",
+                "content": [{"type": "tool_result", "content": "Read complete"}],
+            },
+        }
+        yield {
+            "type": "stream_event",
+            "event": {
+                "type": "content_block_start",
+                "index": 1,
+                "content_block": {"type": "text", "text": "Done"},
+            },
+        }
+        yield {"type": "result", "subtype": "success", "is_error": False, "result": "Done"}
+
+    monkeypatch.setattr(routes, "run_gateway_runtime_query_stream", fake_runtime_stream)
+    monkeypatch.setattr(
+        routes.http_requests,
+        "post",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("Direct Anthropic /v1/messages should not run for setup tokens")
+        ),
+    )
+
+    response = client.post(
+        "/v1/responses",
+        json={"model": "claude-sonnet-4-6", "input": "Run workflow", "stream": True},
+        headers={
+            **_auth_headers(),
+            "X-Anthropic-Api-Key": "sk-ant-oat01-test-setup-token",
+        },
+    )
+
+    assert response.status_code == 200
+    events = [
+        json.loads(line[6:])
+        for line in response.get_data(as_text=True).splitlines()
+        if line.startswith("data: ") and line[6:] != "[DONE]"
+    ]
+    assert any(
+        event.get("type") == "response.output_item.added"
+        and event.get("item", {}).get("type") == "function_call"
+        and event.get("item", {}).get("name") == "Read"
+        for event in events
+    )
+    assert any(
+        event.get("type") == "response.output_item.added"
+        and event.get("item", {}).get("type") == "function_call_output"
+        and event.get("item", {}).get("output") == "Read complete"
+        for event in events
+    )
+
+
+def test_post_v1_responses_streams_assistant_snapshot_events(monkeypatch):
+    client = _make_client()
+
+    def fake_runtime_stream(**kwargs):
+        del kwargs
+        yield {
+            "type": "assistant",
+            "message": {
+                "role": "assistant",
+                "content": [
+                    {
+                        "type": "tool_use",
+                        "id": "toolu_1",
+                        "name": "Read",
+                        "input": {"file_path": "AGENTS.md"},
+                    },
+                    {"type": "text", "text": "Loaded context."},
+                ],
+            },
+        }
+        yield {
+            "type": "assistant",
+            "message": {
+                "role": "assistant",
+                "content": [
+                    {
+                        "type": "tool_use",
+                        "id": "toolu_1",
+                        "name": "Read",
+                        "input": {"file_path": "AGENTS.md"},
+                    },
+                    {"type": "text", "text": "Loaded context. Done."},
+                ],
+            },
+        }
+        yield {
+            "type": "result",
+            "subtype": "success",
+            "is_error": False,
+            "result": "Loaded context. Done.",
+        }
+
+    monkeypatch.setattr(routes, "run_gateway_runtime_query_stream", fake_runtime_stream)
+    monkeypatch.setattr(
+        routes.http_requests,
+        "post",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("Direct Anthropic /v1/messages should not run for setup tokens")
+        ),
+    )
+
+    response = client.post(
+        "/v1/responses",
+        json={
+            "model": "claude-sonnet-4-6",
+            "input": "Read AGENTS.md and confirm",
+            "stream": True,
+        },
+        headers={
+            **_auth_headers(),
+            "X-Anthropic-Api-Key": "sk-ant-oat01-test-setup-token",
+        },
+    )
+
+    assert response.status_code == 200
+    events = [
+        json.loads(line[6:])
+        for line in response.get_data(as_text=True).splitlines()
+        if line.startswith("data: ") and line[6:] != "[DONE]"
+    ]
+    assert any(
+        event.get("type") == "response.output_item.added"
+        and event.get("item", {}).get("type") == "function_call"
+        and event.get("item", {}).get("name") == "Read"
+        for event in events
+    )
+    deltas = [
+        event.get("delta")
+        for event in events
+        if event.get("type") == "response.output_text.delta"
+    ]
+    assert deltas == ["Loaded context.", " Done."]
+    assert events[-1]["type"] == "response.completed"
+
+
+def test_post_v1_responses_does_not_duplicate_tool_events_when_stream_and_snapshot_exist(
+    monkeypatch,
+):
+    client = _make_client()
+
+    def fake_runtime_stream(**kwargs):
+        del kwargs
+        yield {
+            "type": "stream_event",
+            "event": {
+                "type": "content_block_start",
+                "index": 0,
+                "content_block": {
+                    "type": "tool_use",
+                    "name": "Read",
+                    "input": {"file_path": "AGENTS.md"},
+                },
+            },
+        }
+        yield {
+            "type": "assistant",
+            "message": {
+                "role": "assistant",
+                "content": [
+                    {
+                        "type": "tool_use",
+                        "id": "toolu_1",
+                        "name": "Read",
+                        "input": {"file_path": "AGENTS.md"},
+                    },
+                    {"type": "text", "text": "Loaded context."},
+                ],
+            },
+        }
+        yield {
+            "type": "result",
+            "subtype": "success",
+            "is_error": False,
+            "result": "Loaded context.",
+        }
+
+    monkeypatch.setattr(routes, "run_gateway_runtime_query_stream", fake_runtime_stream)
+    monkeypatch.setattr(
+        routes.http_requests,
+        "post",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("Direct Anthropic /v1/messages should not run for setup tokens")
+        ),
+    )
+
+    response = client.post(
+        "/v1/responses",
+        json={
+            "model": "claude-sonnet-4-6",
+            "input": "Load AGENTS",
+            "stream": True,
+        },
+        headers={
+            **_auth_headers(),
+            "X-Anthropic-Api-Key": "sk-ant-oat01-test-setup-token",
+        },
+    )
+
+    assert response.status_code == 200
+    events = [
+        json.loads(line[6:])
+        for line in response.get_data(as_text=True).splitlines()
+        if line.startswith("data: ") and line[6:] != "[DONE]"
+    ]
+    tool_events = [
+        event
+        for event in events
+        if event.get("type") == "response.output_item.added"
+        and event.get("item", {}).get("type") == "function_call"
+    ]
+    assert len(tool_events) == 1
+
+
+def test_post_v1_responses_fails_complex_request_without_tool_activity(monkeypatch):
+    client = _make_client()
+
+    def fake_runtime_stream(**kwargs):
+        del kwargs
+        yield {
+            "type": "result",
+            "subtype": "success",
+            "is_error": False,
+            "result": "Here is a synthetic answer with no tools.",
+        }
+
+    monkeypatch.setattr(routes, "run_gateway_runtime_query_stream", fake_runtime_stream)
+    monkeypatch.setattr(
+        routes.http_requests,
+        "post",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("Direct Anthropic /v1/messages should not run for setup tokens")
+        ),
+    )
+
+    response = client.post(
+        "/v1/responses",
+        json={
+            "model": "claude-sonnet-4-6",
+            "input": "Research this company and summarize market + competitors: https://clientascension.io",
+            "stream": True,
+        },
+        headers={
+            **_auth_headers(),
+            "X-Anthropic-Api-Key": "sk-ant-oat01-test-setup-token",
+        },
+    )
+
+    assert response.status_code == 200
+    events = [
+        json.loads(line[6:])
+        for line in response.get_data(as_text=True).splitlines()
+        if line.startswith("data: ") and line[6:] != "[DONE]"
+    ]
+    assert any(event.get("type") == "response.failed" for event in events)
+    assert not any(event.get("type") == "response.completed" for event in events)
+
+
+def test_post_v1_responses_allows_simple_non_tool_writing_without_guard_failure(
+    monkeypatch,
+):
+    client = _make_client()
+
+    def fake_runtime_stream(**kwargs):
+        del kwargs
+        yield {
+            "type": "result",
+            "subtype": "success",
+            "is_error": False,
+            "result": "- Point A\\n- Point B",
+        }
+
+    monkeypatch.setattr(routes, "run_gateway_runtime_query_stream", fake_runtime_stream)
+    monkeypatch.setattr(
+        routes.http_requests,
+        "post",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("Direct Anthropic /v1/messages should not run for setup tokens")
+        ),
+    )
+
+    response = client.post(
+        "/v1/responses",
+        json={
+            "model": "claude-sonnet-4-6",
+            "input": "Write 2 bullet points about oranges.",
+            "stream": True,
+        },
+        headers={
+            **_auth_headers(),
+            "X-Anthropic-Api-Key": "sk-ant-oat01-test-setup-token",
+        },
+    )
+
+    assert response.status_code == 200
+    events = [
+        json.loads(line[6:])
+        for line in response.get_data(as_text=True).splitlines()
+        if line.startswith("data: ") and line[6:] != "[DONE]"
+    ]
+    assert any(event.get("type") == "response.completed" for event in events)
+    assert not any(event.get("type") == "response.failed" for event in events)
 
 
 def test_post_v1_responses_returns_error_when_setup_token_runtime_fails(monkeypatch):

@@ -115,46 +115,284 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+function _stripInternalTranscriptArtifacts(text) {
+    const raw = String(text || '');
+    if (!raw) {
+        return '';
+    }
+
+    let cleaned = raw;
+    const hadToolTrace = /<tool_(?:call|response)>/i.test(cleaned);
+    cleaned = cleaned.replace(/<tool_(?:call|response)>[\s\S]*?<\/tool_(?:call|response)>/gi, '');
+    cleaned = cleaned.replace(/<\/?tool_(?:call|response)>/gi, '');
+
+    if (hadToolTrace) {
+        cleaned = cleaned.replace(
+            /^\s*(phase\s+\d+[^\n]*|let me [^\n]*|i(?:'|’)ll [^\n]*(?:run|load|research)[^\n]*)\s*$/gim,
+            '',
+        );
+    }
+
+    cleaned = cleaned.replace(/\n{3,}/g, '\n\n').trim();
+    return cleaned || raw;
+}
+
+function _splitTableRow(line) {
+    const normalized = String(line || '').trim();
+    if (!normalized.includes('|')) {
+        return [];
+    }
+    const withoutEdges = normalized.replace(/^\|/, '').replace(/\|$/, '');
+    return withoutEdges.split('|').map((cell) => cell.trim());
+}
+
+function _isTableSeparatorCell(cell) {
+    return /^:?-{3,}:?$/.test(String(cell || '').replace(/\s+/g, ''));
+}
+
+function _isTableSeparatorRow(line) {
+    const cells = _splitTableRow(line);
+    return cells.length > 0 && cells.every((cell) => _isTableSeparatorCell(cell));
+}
+
+function _tableAlignmentFromCell(cell) {
+    const compact = String(cell || '').replace(/\s+/g, '');
+    const starts = compact.startsWith(':');
+    const ends = compact.endsWith(':');
+    if (starts && ends) {
+        return 'center';
+    }
+    if (ends) {
+        return 'right';
+    }
+    return 'left';
+}
+
+function _renderInlineMarkdown(text) {
+    let output = String(text || '');
+    const codeTokens = [];
+
+    output = output.replace(/`([^`]+)`/g, (_match, code) => {
+        const token = `@@CODE_SPAN_${codeTokens.length}@@`;
+        codeTokens.push(`<code>${code}</code>`);
+        return token;
+    });
+
+    output = output.replace(
+        /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+        '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+    );
+
+    output = output.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+    output = output.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    output = output.replace(/(^|[\s(>])\*([^*\n]+)\*(?=$|[\s),.!?:;])/g, '$1<em>$2</em>');
+    output = output.replace(/(^|[\s(>])_([^_\n]+)_(?=$|[\s),.!?:;])/g, '$1<em>$2</em>');
+    output = output.replace(/~~([^~\n]+)~~/g, '<del>$1</del>');
+
+    output = output.replace(/@@CODE_SPAN_(\d+)@@/g, (_match, index) => {
+        const parsed = Number(index);
+        return codeTokens[parsed] || '';
+    });
+
+    return output.replace(/\n/g, '<br>');
+}
+
+function _renderMarkdownTable(headers, alignments, rows) {
+    const headerHtml = headers.map((cell, index) => {
+        const align = alignments[index] || 'left';
+        const attr = align === 'left' ? '' : ` style="text-align:${align};"`;
+        return `<th${attr}>${_renderInlineMarkdown(cell)}</th>`;
+    }).join('');
+
+    const bodyHtml = rows.map((row) => {
+        const cells = row.map((cell, index) => {
+            const align = alignments[index] || 'left';
+            const attr = align === 'left' ? '' : ` style="text-align:${align};"`;
+            return `<td${attr}>${_renderInlineMarkdown(cell)}</td>`;
+        }).join('');
+        return `<tr>${cells}</tr>`;
+    }).join('');
+
+    return `<div class="chat-md-table-wrap"><table><thead><tr>${headerHtml}</tr></thead><tbody>${bodyHtml}</tbody></table></div>`;
+}
+
+function _isMarkdownBlockBoundary(line, nextLine) {
+    const trimmed = String(line || '').trim();
+    if (!trimmed) {
+        return true;
+    }
+    if (/^@@CODE_BLOCK_\d+@@$/.test(trimmed)) {
+        return true;
+    }
+    if (/^(#{1,6})\s+/.test(trimmed)) {
+        return true;
+    }
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
+        return true;
+    }
+    if (/^&gt;\s?/.test(trimmed)) {
+        return true;
+    }
+    if (/^[-*+]\s+/.test(trimmed)) {
+        return true;
+    }
+    if (/^\d+\.\s+/.test(trimmed)) {
+        return true;
+    }
+    if (String(line || '').includes('|') && _isTableSeparatorRow(nextLine || '')) {
+        return true;
+    }
+    return false;
+}
+
 function renderChatMarkdown(text) {
     if (!text) {
         return '';
     }
 
-    let html = escapeHtml(text);
+    const source = _stripInternalTranscriptArtifacts(String(text).replace(/\r\n/g, '\n'));
+    const escaped = escapeHtml(source);
+    const codeBlocks = [];
+    const withCodePlaceholders = escaped.replace(/```([\w-]*)\n?([\s\S]*?)```/g, (_match, language, code) => {
+        const token = `@@CODE_BLOCK_${codeBlocks.length}@@`;
+        const safeLanguage = String(language || '').trim().replace(/[^\w-]/g, '');
+        const classAttr = safeLanguage ? ` class="language-${safeLanguage}"` : '';
+        codeBlocks.push(`<pre><code${classAttr}>${code}</code></pre>`);
+        return token;
+    });
 
-    // Code fences
-    html = html.replace(/```([\w-]*)\n?([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
-    // Inline code
-    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    const lines = withCodePlaceholders.split('\n');
+    const blocks = [];
+    let index = 0;
 
-    // Headings
-    html = html.replace(/^### (.+)$/gm, '<h4>$1</h4>');
-    html = html.replace(/^## (.+)$/gm, '<h3>$1</h3>');
-    html = html.replace(/^# (.+)$/gm, '<h2>$1</h2>');
+    while (index < lines.length) {
+        const line = lines[index];
+        const trimmed = String(line || '').trim();
 
-    // Emphasis
-    html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
-    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+        if (!trimmed) {
+            index += 1;
+            continue;
+        }
 
-    // Links
-    html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+        if (/^@@CODE_BLOCK_\d+@@$/.test(trimmed)) {
+            blocks.push(trimmed);
+            index += 1;
+            continue;
+        }
 
-    // Blockquotes and horizontal rules
-    html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
-    html = html.replace(/^---$/gm, '<hr>');
+        if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
+            blocks.push('<hr>');
+            index += 1;
+            continue;
+        }
 
-    // Lists
-    html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
-    html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
-    html = html.replace(/<\/ul>\s*<ul>/g, '');
+        const headingMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
+        if (headingMatch) {
+            const level = Math.min(6, Math.max(1, headingMatch[1].length));
+            blocks.push(`<h${level}>${_renderInlineMarkdown(headingMatch[2])}</h${level}>`);
+            index += 1;
+            continue;
+        }
 
-    // Paragraphs and line breaks
-    html = html.replace(/^(?!<h\d|<ul>|<li>|<pre>|<blockquote>|<hr>|<\/)(.+)$/gm, '<p>$1</p>');
-    html = html.replace(/<p><\/p>/g, '');
-    html = html.replace(/\n/g, '<br>');
-    html = html.replace(/<\/(h2|h3|h4|ul|pre|blockquote|hr)><br>/g, '</$1>');
+        if (/^&gt;\s?/.test(trimmed)) {
+            const quoteLines = [];
+            while (index < lines.length) {
+                const quoteLine = String(lines[index] || '').trim();
+                const match = quoteLine.match(/^&gt;\s?(.*)$/);
+                if (!match) {
+                    break;
+                }
+                quoteLines.push(match[1]);
+                index += 1;
+            }
+            blocks.push(`<blockquote>${_renderInlineMarkdown(quoteLines.join('\n'))}</blockquote>`);
+            continue;
+        }
 
+        if (String(line || '').includes('|') && _isTableSeparatorRow(lines[index + 1] || '')) {
+            const headers = _splitTableRow(line);
+            const separator = _splitTableRow(lines[index + 1] || '');
+            if (headers.length > 0 && separator.length === headers.length) {
+                const alignments = separator.map((cell) => _tableAlignmentFromCell(cell));
+                const rows = [];
+                index += 2;
+                while (index < lines.length) {
+                    const rowLine = String(lines[index] || '');
+                    const rowTrimmed = rowLine.trim();
+                    if (!rowTrimmed || !rowLine.includes('|')) {
+                        break;
+                    }
+                    let rowCells = _splitTableRow(rowLine);
+                    if (rowCells.length === 0) {
+                        break;
+                    }
+                    if (rowCells.length < headers.length) {
+                        rowCells = rowCells.concat(Array(headers.length - rowCells.length).fill(''));
+                    } else if (rowCells.length > headers.length) {
+                        rowCells = rowCells.slice(0, headers.length);
+                    }
+                    rows.push(rowCells);
+                    index += 1;
+                }
+                blocks.push(_renderMarkdownTable(headers, alignments, rows));
+                continue;
+            }
+        }
+
+        const unordered = trimmed.match(/^[-*+]\s+(.+)$/);
+        if (unordered) {
+            const items = [];
+            while (index < lines.length) {
+                const itemLine = String(lines[index] || '').trim();
+                const match = itemLine.match(/^[-*+]\s+(.+)$/);
+                if (!match) {
+                    break;
+                }
+                items.push(`<li>${_renderInlineMarkdown(match[1])}</li>`);
+                index += 1;
+            }
+            blocks.push(`<ul>${items.join('')}</ul>`);
+            continue;
+        }
+
+        const ordered = trimmed.match(/^\d+\.\s+(.+)$/);
+        if (ordered) {
+            const items = [];
+            while (index < lines.length) {
+                const itemLine = String(lines[index] || '').trim();
+                const match = itemLine.match(/^\d+\.\s+(.+)$/);
+                if (!match) {
+                    break;
+                }
+                items.push(`<li>${_renderInlineMarkdown(match[1])}</li>`);
+                index += 1;
+            }
+            blocks.push(`<ol>${items.join('')}</ol>`);
+            continue;
+        }
+
+        const paragraphLines = [line];
+        index += 1;
+        while (index < lines.length) {
+            const nextLine = lines[index];
+            const nextTrimmed = String(nextLine || '').trim();
+            if (!nextTrimmed) {
+                break;
+            }
+            if (_isMarkdownBlockBoundary(nextLine, lines[index + 1])) {
+                break;
+            }
+            paragraphLines.push(nextLine);
+            index += 1;
+        }
+        blocks.push(`<p>${_renderInlineMarkdown(paragraphLines.join('\n'))}</p>`);
+    }
+
+    let html = blocks.join('\n');
+    html = html.replace(/@@CODE_BLOCK_(\d+)@@/g, (_match, tokenIndex) => {
+        const parsed = Number(tokenIndex);
+        return codeBlocks[parsed] || '';
+    });
     return html;
 }
 
@@ -167,9 +405,14 @@ if (typeof globalThis !== 'undefined') {
     globalThis.ChatUIStreamEvents = {
         normalizeStreamEvent,
     };
+    globalThis.ChatUIMarkdown = {
+        renderChatMarkdown,
+    };
 }
 
 class ChatUI {
+    static STREAM_RENDER_MIN_INTERVAL_MS = 48;
+
     constructor() {
         this.sessionId = null;
         this.eventSource = null;
@@ -284,6 +527,46 @@ class ChatUI {
         return `${status} • ${updated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     }
 
+    getSessionStatus(sessionId) {
+        const session = this.sessions.find((item) => item.id === sessionId);
+        return session ? String(session.status || '').toLowerCase() : '';
+    }
+
+    getSessionLastError(sessionId) {
+        const session = this.sessions.find((item) => item.id === sessionId);
+        return session ? String(session.last_error || '').trim() : '';
+    }
+
+    async fetchSessionState(sessionId) {
+        if (!sessionId) {
+            return null;
+        }
+        const resp = await fetchAPI(`/api/chat/sessions/${encodeURIComponent(sessionId)}`, {
+            method: 'GET',
+            showError: false,
+        });
+        const sessionObj = resp && resp.session && typeof resp.session === 'object'
+            ? resp.session
+            : null;
+        if (!sessionObj) {
+            return null;
+        }
+        const snapshot = {
+            id: String(sessionObj.id || sessionId),
+            title: String(sessionObj.title || 'New chat'),
+            status: String(sessionObj.status || ''),
+            last_error: String(sessionObj.last_error || ''),
+            updated_at: sessionObj.updated_at || '',
+        };
+        const existingIndex = this.sessions.findIndex((item) => item.id === snapshot.id);
+        if (existingIndex >= 0) {
+            this.sessions[existingIndex] = { ...this.sessions[existingIndex], ...snapshot };
+        } else {
+            this.sessions.unshift(snapshot);
+        }
+        return snapshot;
+    }
+
     async createNewSession(selectAfterCreate = false) {
         if (!this.hasToken) {
             showToast('Claude token is required before creating sessions.', 'warning');
@@ -396,24 +679,88 @@ class ChatUI {
         bubble.dataset.rawContent = '';
         bubble.innerHTML = '';
 
+        const trace = document.createElement('details');
+        trace.className = 'chat-tool-trace';
+        trace.hidden = true;
+
+        const summary = document.createElement('summary');
+        summary.className = 'chat-tool-trace-summary';
+
+        const traceLabel = document.createElement('span');
+        traceLabel.className = 'chat-tool-trace-label';
+        traceLabel.textContent = 'Agent activity';
+
+        const traceCount = document.createElement('span');
+        traceCount.className = 'chat-tool-trace-count';
+        traceCount.textContent = '(0)';
+
+        summary.appendChild(traceLabel);
+        summary.appendChild(traceCount);
+
         const steps = document.createElement('div');
         steps.className = 'chat-tool-steps';
 
+        trace.appendChild(summary);
+        trace.appendChild(steps);
         row.appendChild(bubble);
-        row.appendChild(steps);
+        row.appendChild(trace);
         this.messagesEl.appendChild(row);
         this.scrollToBottom();
-        return { row, bubble, steps };
+        return {
+            row,
+            bubble,
+            trace,
+            steps,
+            traceCount,
+            stepCount: 0,
+            lastStepSignature: '',
+            lastStepRepeatCount: 1,
+            lastStepEl: null,
+            pendingText: '',
+            renderScheduled: false,
+            lastRenderAt: 0,
+        };
     }
 
     appendText(agentBubble, content) {
         if (!agentBubble || !content) {
             return;
         }
+        agentBubble.pendingText = (agentBubble.pendingText || '') + content;
+        this.scheduleBubbleRender(agentBubble);
+    }
+
+    scheduleBubbleRender(agentBubble) {
+        if (!agentBubble || agentBubble.renderScheduled) {
+            return;
+        }
+        agentBubble.renderScheduled = true;
+
+        const flush = () => {
+            agentBubble.renderScheduled = false;
+            this.flushBubbleRender(agentBubble);
+        };
+        const now = Date.now();
+        const lastRenderAt = Number(agentBubble.lastRenderAt || 0);
+        const elapsed = Math.max(0, now - lastRenderAt);
+        const delay = Math.max(0, ChatUI.STREAM_RENDER_MIN_INTERVAL_MS - elapsed);
+        setTimeout(flush, delay);
+    }
+
+    flushBubbleRender(agentBubble) {
+        if (!agentBubble) {
+            return;
+        }
+        const pending = String(agentBubble.pendingText || '');
+        if (!pending) {
+            return;
+        }
         const existing = agentBubble.bubble.dataset.rawContent || '';
-        const next = existing + content;
+        const next = existing + pending;
+        agentBubble.pendingText = '';
         agentBubble.bubble.dataset.rawContent = next;
         agentBubble.bubble.innerHTML = renderChatMarkdown(next);
+        agentBubble.lastRenderAt = Date.now();
         this.scrollToBottom();
     }
 
@@ -421,10 +768,33 @@ class ChatUI {
         if (!agentBubble) {
             return;
         }
+
+        const safeLabel = String(label || 'Tool').trim() || 'Tool';
+        const safeContent = String(content || '').trim();
+        const signature = `${safeLabel}::${safeContent}`;
+
+        if (signature && agentBubble.lastStepSignature === signature && agentBubble.lastStepEl) {
+            agentBubble.lastStepRepeatCount += 1;
+            const suffix = ` (x${agentBubble.lastStepRepeatCount})`;
+            agentBubble.lastStepEl.textContent = `${safeLabel}: ${safeContent}${suffix}`;
+            this.scrollToBottom();
+            return;
+        }
+
         const item = document.createElement('div');
         item.className = 'chat-tool-step';
-        item.textContent = `${label}: ${content || ''}`;
+        item.textContent = `${safeLabel}: ${safeContent}`;
         agentBubble.steps.appendChild(item);
+        agentBubble.stepCount = Number(agentBubble.stepCount || 0) + 1;
+        if (agentBubble.traceCount) {
+            agentBubble.traceCount.textContent = `(${agentBubble.stepCount})`;
+        }
+        if (agentBubble.trace) {
+            agentBubble.trace.hidden = false;
+        }
+        agentBubble.lastStepSignature = signature;
+        agentBubble.lastStepEl = item;
+        agentBubble.lastStepRepeatCount = 1;
         this.scrollToBottom();
     }
 
@@ -526,6 +896,7 @@ class ChatUI {
                     break;
                 case 'error':
                     terminalReceived = true;
+                    this.flushBubbleRender(agentBubble);
                     this.appendError(agentBubble, parsed.content || 'Agent failed');
                     this.setSending(false);
                     this.closeStream();
@@ -533,6 +904,7 @@ class ChatUI {
                     break;
                 case 'done':
                     terminalReceived = true;
+                    this.flushBubbleRender(agentBubble);
                     this.markComplete(agentBubble);
                     this.setSending(false);
                     this.closeStream();
@@ -543,10 +915,44 @@ class ChatUI {
             }
         };
 
-        es.onerror = () => {
-            // EventSource may emit onerror once before close; close defensively.
+        es.onerror = async () => {
+            // EventSource may emit an error event when the server closes normally.
             if (!terminalReceived) {
-                this.appendError(agentBubble, 'The chat runtime connection dropped before completion.');
+                // Let EventSource reconnect automatically for transient network interruptions.
+                if (es.readyState === EventSource.CONNECTING) {
+                    return;
+                }
+                let shouldShowDropError = true;
+                let fallbackMessage = '';
+                try {
+                    const state = await this.fetchSessionState(sessionId);
+                    if (state) {
+                        const status = String(state.status || '').toLowerCase();
+                        fallbackMessage = String(state.last_error || '').trim();
+                        if (!fallbackMessage) {
+                            shouldShowDropError = status === 'running';
+                        }
+                    } else if (es.readyState === EventSource.CLOSED) {
+                        await this.refreshSessions();
+                        shouldShowDropError = this.getSessionStatus(sessionId) === 'running';
+                        fallbackMessage = this.getSessionLastError(sessionId);
+                    }
+                } catch (error) {
+                    if (es.readyState === EventSource.CLOSED) {
+                        try {
+                            await this.refreshSessions();
+                            shouldShowDropError = this.getSessionStatus(sessionId) === 'running';
+                            fallbackMessage = this.getSessionLastError(sessionId);
+                        } catch (_refreshError) {
+                            shouldShowDropError = true;
+                        }
+                    }
+                }
+                if (fallbackMessage) {
+                    this.appendError(agentBubble, fallbackMessage);
+                } else if (shouldShowDropError) {
+                    this.appendError(agentBubble, 'The chat runtime connection dropped before completion.');
+                }
             }
             this.setSending(false);
             this.closeStream();

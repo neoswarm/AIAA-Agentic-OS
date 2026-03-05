@@ -87,7 +87,12 @@ def test_health_endpoint_emits_iso8601_utc_timestamp():
 
 def test_health_endpoint_reports_ready_details(monkeypatch, tmp_path):
     for relative_path in routes._RUNTIME_WORKSPACE_REQUIRED_PATHS:
-        (tmp_path / relative_path).mkdir(parents=True, exist_ok=True)
+        target = tmp_path / relative_path
+        if target.suffix:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text("ok", encoding="utf-8")
+        else:
+            target.mkdir(parents=True, exist_ok=True)
 
     monkeypatch.setenv("CHAT_TOKEN_ENCRYPTION_KEY", "x" * 32)
     monkeypatch.setenv("GATEWAY_WORKSPACE_ROOT", str(tmp_path))

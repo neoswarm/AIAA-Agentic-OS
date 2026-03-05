@@ -47,14 +47,16 @@ def create_app(test_config: dict | None = None) -> Flask:
             os.getenv("UPSTREAM_REQUEST_TIMEOUT_SECONDS", "30")
         ),
         GATEWAY_RUNTIME_QUERY_TIMEOUT_SECONDS=float(
-            os.getenv("GATEWAY_RUNTIME_QUERY_TIMEOUT_SECONDS", "120")
+            os.getenv("GATEWAY_RUNTIME_QUERY_TIMEOUT_SECONDS", "360")
         ),
         GATEWAY_RUNTIME_QUERY_MAX_ATTEMPTS=int(
             os.getenv("GATEWAY_RUNTIME_QUERY_MAX_ATTEMPTS", "2")
         ),
         SETUP_TOKEN_EXECUTION_MODE=os.getenv(
-            "SETUP_TOKEN_EXECUTION_MODE", "anthropic_oauth"
+            "SETUP_TOKEN_EXECUTION_MODE", "runtime"
         ).strip(),
+        GATEWAY_WORKSPACE_ROOT=(os.getenv("GATEWAY_WORKSPACE_ROOT") or "/app").strip()
+        or "/app",
         PROFILE_STORE={},
         GATEWAY_RUNTIME_CANARY_TIMEOUT_SECONDS=float(
             os.getenv("GATEWAY_RUNTIME_CANARY_TIMEOUT_SECONDS", "12")

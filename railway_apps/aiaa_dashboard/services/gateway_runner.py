@@ -31,6 +31,10 @@ class GatewayRunner(AgentRunner):
     RESPONSES_PATH = "/v1/responses"
     _CHUNK_ID_FIELDS = ("chunk_id", "delta_id", "event_id", "id")
     _CHUNK_SEQUENCE_FIELDS = ("chunk_index", "delta_index", "sequence", "seq", "index")
+    _HISTORY_ROLES = frozenset({"user", "assistant"})
+    _DEFAULT_HISTORY_LIMIT = 30
+    _DEFAULT_HISTORY_MAX_CHARS = 32000
+    _DEFAULT_HISTORY_MESSAGE_MAX_CHARS = 4000
 
     def __init__(
         self,
@@ -58,7 +62,7 @@ class GatewayRunner(AgentRunner):
         timeout_raw = (
             gateway_timeout_seconds
             if gateway_timeout_seconds is not None
-            else os.getenv("GATEWAY_REQUEST_TIMEOUT_SECONDS", "120")
+            else os.getenv("GATEWAY_REQUEST_TIMEOUT_SECONDS", "360")
         )
         try:
             self._gateway_timeout_seconds = max(1.0, float(timeout_raw))
@@ -296,6 +300,11 @@ class GatewayRunner(AgentRunner):
             return generated
 
     @staticmethod
+    def _pin_runtime_session_enabled() -> bool:
+        raw = (os.getenv("CHAT_GATEWAY_PIN_RUNTIME_SESSION") or "").strip().lower()
+        return raw in {"1", "true", "yes", "on"}
+
+    @staticmethod
     def _extract_gateway_error(payload: Mapping[str, Any]) -> str:
         error_obj = payload.get("error")
         if isinstance(error_obj, Mapping):
@@ -338,9 +347,239 @@ class GatewayRunner(AgentRunner):
                     chunks.append(text)
         return "".join(chunks)
 
+    @classmethod
+    def _history_limit(cls) -> int:
+        raw_value = os.getenv("CHAT_GATEWAY_HISTORY_LIMIT", str(cls._DEFAULT_HISTORY_LIMIT))
+        try:
+            return max(1, int(raw_value))
+        except (TypeError, ValueError):
+            return cls._DEFAULT_HISTORY_LIMIT
+
+    @classmethod
+    def _history_max_chars(cls) -> int:
+        raw_value = os.getenv(
+            "CHAT_GATEWAY_HISTORY_MAX_CHARS",
+            str(cls._DEFAULT_HISTORY_MAX_CHARS),
+        )
+        try:
+            return max(1000, int(raw_value))
+        except (TypeError, ValueError):
+            return cls._DEFAULT_HISTORY_MAX_CHARS
+
+    @classmethod
+    def _history_message_max_chars(cls) -> int:
+        raw_value = os.getenv(
+            "CHAT_GATEWAY_HISTORY_MESSAGE_MAX_CHARS",
+            str(cls._DEFAULT_HISTORY_MESSAGE_MAX_CHARS),
+        )
+        try:
+            return max(100, int(raw_value))
+        except (TypeError, ValueError):
+            return cls._DEFAULT_HISTORY_MESSAGE_MAX_CHARS
+
+    def _load_message_history(self, session_id: str) -> list[dict[str, str]]:
+        store = self._session_store
+        if store is None:
+            return []
+
+        get_messages = getattr(store, "get_messages", None)
+        if not callable(get_messages):
+            return []
+
+        history_limit = self._history_limit()
+        try:
+            raw_messages = get_messages(session_id)
+        except TypeError:
+            raw_messages = get_messages(session_id, limit=None)
+        except Exception:
+            logger.exception("Failed to load chat history for session %s", session_id)
+            return []
+
+        if not isinstance(raw_messages, list):
+            return []
+        if len(raw_messages) > history_limit:
+            raw_messages = raw_messages[-history_limit:]
+
+        message_limit = self._history_limit()
+        message_max_chars = self._history_message_max_chars()
+        total_max_chars = self._history_max_chars()
+
+        collected_reversed: list[dict[str, str]] = []
+        used_chars = 0
+        for raw_message in reversed(raw_messages):
+            if len(collected_reversed) >= message_limit:
+                break
+            if not isinstance(raw_message, Mapping):
+                continue
+
+            role = str(raw_message.get("role") or "").strip().lower()
+            if role not in self._HISTORY_ROLES:
+                continue
+
+            content = self._stringify(raw_message.get("content")).strip()
+            if not content:
+                continue
+
+            if len(content) > message_max_chars:
+                content = content[-message_max_chars:]
+
+            remaining = total_max_chars - used_chars
+            if remaining <= 0:
+                break
+            if len(content) > remaining:
+                content = content[-remaining:]
+            if not content:
+                continue
+
+            used_chars += len(content)
+            collected_reversed.append({"role": role, "content": content})
+
+        collected_reversed.reverse()
+        return collected_reversed
+
+    def _build_gateway_input(self, session_id: str, user_message: str) -> str | list[dict[str, str]]:
+        history = self._load_message_history(session_id)
+        latest_user_message = (user_message or "").strip()
+        if latest_user_message:
+            needs_append = (
+                not history
+                or history[-1].get("role") != "user"
+                or history[-1].get("content", "").strip() != latest_user_message
+            )
+            if needs_append:
+                history.append({"role": "user", "content": latest_user_message})
+
+        if not history:
+            return latest_user_message
+        if len(history) == 1 and history[0].get("role") == "user":
+            return history[0].get("content", "")
+        return history
+
+    @staticmethod
+    def _as_mapping(value: Any) -> Mapping[str, Any]:
+        return value if isinstance(value, Mapping) else {}
+
+    @staticmethod
+    def _first_non_empty_string(*values: Any) -> str:
+        for value in values:
+            if value is None:
+                continue
+            text = str(value).strip()
+            if text:
+                return text
+        return ""
+
+    def _extract_stream_error_message(self, event: Mapping[str, Any]) -> str:
+        response_obj = self._as_mapping(event.get("response"))
+        response_error = self._as_mapping(response_obj.get("error"))
+        event_error = self._as_mapping(event.get("error"))
+        message = self._first_non_empty_string(
+            event.get("message"),
+            event.get("content"),
+            response_error.get("message"),
+            event_error.get("message"),
+        )
+        return message or "Gateway execution failed"
+
+    def _translate_gateway_stream_event(
+        self, event: Mapping[str, Any]
+    ) -> Optional[dict[str, Any]]:
+        event_type = str(event.get("type") or "").strip().lower()
+        if not event_type:
+            return None
+
+        timestamp = self._first_non_empty_string(event.get("timestamp")) or _utc_now_iso()
+
+        if event_type == "response.output_text.done":
+            # `response.output_text.done` carries the full final text. Streaming this as a
+            # regular text delta duplicates already-streamed content and breaks incremental
+            # markdown rendering behavior in the chat UI.
+            return None
+
+        if event_type == "response.output_text.delta":
+            content = ""
+            for key in ("delta", "text", "content"):
+                value = event.get(key)
+                if isinstance(value, str) and value != "":
+                    content = value
+                    break
+            if not content:
+                return None
+            return {"type": "text", "content": content, "timestamp": timestamp}
+
+        if event_type in ("response.output_item.added", "response.output_item.done"):
+            item = self._as_mapping(event.get("item"))
+            item_type = str(item.get("type") or "").strip().lower()
+            if not item_type:
+                return None
+
+            if item_type in ("function_call", "tool_call"):
+                if event_type == "response.output_item.done":
+                    return None
+                tool = self._first_non_empty_string(
+                    item.get("name"),
+                    item.get("tool_name"),
+                ) or "Tool"
+                tool_input: Any = item.get("arguments")
+                if tool_input is None:
+                    tool_input = item.get("input")
+                if isinstance(tool_input, (dict, list)):
+                    tool_input = json.dumps(tool_input, ensure_ascii=False)
+                return {
+                    "type": "tool_use",
+                    "tool": tool,
+                    "input": self._truncate(self._stringify(tool_input), 800),
+                    "timestamp": timestamp,
+                }
+
+            if item_type in ("function_call_output", "tool_result"):
+                if event_type == "response.output_item.done":
+                    return None
+                content: Any = item.get("output")
+                if content is None:
+                    content = item.get("content")
+                return {
+                    "type": "tool_result",
+                    "content": self._truncate(self._stringify(content), 800),
+                    "timestamp": timestamp,
+                }
+
+            if item_type == "message":
+                content = self._extract_gateway_text({"output": [dict(item)]})
+                if not content:
+                    return None
+                return {"type": "text", "content": content, "timestamp": timestamp}
+
+            return None
+
+        if event_type == "response.completed":
+            response = self._as_mapping(event.get("response"))
+            content = self._extract_gateway_text(response)
+            if not content:
+                return None
+            return {"type": "result", "content": content, "timestamp": timestamp}
+
+        if event_type in (
+            "response.created",
+            "response.in_progress",
+            "response.content_part.added",
+            "response.content_part.done",
+        ):
+            return None
+
+        if event_type in ("response.failed", "error"):
+            return {
+                "type": "error",
+                "content": self._extract_stream_error_message(event),
+                "timestamp": timestamp,
+            }
+
+        return None
+
     def _run_agent(self, session_id: str, user_message: str) -> None:
         local_session_id = self._resolve_session_id(session_id)
         q = self._get_queue_or_raise(local_session_id)
+        emitted_error_event = False
 
         try:
             self._record_run_started(local_session_id)
@@ -349,40 +588,62 @@ class GatewayRunner(AgentRunner):
                 raise RunnerError("Claude token is not configured")
 
             client = self._resolve_gateway_client()
-            runtime_session_id = self._resolve_runtime_session_id(local_session_id)
-            response = client.post_json(
+            gateway_input = self._build_gateway_input(local_session_id, user_message)
+            payload: dict[str, Any] = {
+                "input": gateway_input,
+                "stream": True,
+                "cwd": self.cwd,
+                "tools_profile": "full",
+            }
+            if self._pin_runtime_session_enabled():
+                payload["session_id"] = self._resolve_runtime_session_id(local_session_id)
+            stream_events = client.post_stream(
                 self.RESPONSES_PATH,
-                payload={
-                    "input": user_message,
-                    "stream": False,
-                    "session_id": runtime_session_id,
-                    "cwd": self.cwd,
-                    "tools_profile": "full",
-                },
+                payload=payload,
                 headers={"X-Anthropic-Api-Key": token},
                 timeout_seconds=self._gateway_timeout_seconds,
             )
 
-            if not isinstance(response, dict):
-                raise RunnerError("Gateway response body must be a JSON object")
+            assistant_chunks: list[str] = []
+            saw_text_delta = False
+            for response_event in stream_events:
+                if not isinstance(response_event, dict):
+                    continue
 
-            self._capture_sdk_session_id(local_session_id, response, response)
+                self._capture_sdk_session_id(
+                    local_session_id,
+                    response_event,
+                    response_event,
+                )
 
-            error_message = self._extract_gateway_error(response)
-            if error_message:
-                raise RunnerError(error_message)
+                translated = self._translate_gateway_stream_event(response_event)
+                if translated is None:
+                    continue
 
-            result_text = self._extract_gateway_text(response)
-            if result_text:
-                event = {
-                    "type": "result",
-                    "content": result_text,
-                    "timestamp": _utc_now_iso(),
-                }
+                event_type = str(translated.get("type") or "").strip().lower()
+                content = str(translated.get("content") or "")
+
+                if event_type == "text" and content:
+                    assistant_chunks.append(content)
+                    saw_text_delta = True
+                elif event_type == "result" and content:
+                    if not saw_text_delta:
+                        assistant_chunks.append(content)
+                    else:
+                        # Completed payload often repeats already-streamed text.
+                        continue
+
                 self._record_first_event_latency(local_session_id)
-                q.put(event)
-                self._persist_event(local_session_id, event)
-                self._append_assistant_message(local_session_id, result_text)
+                q.put(translated)
+                self._persist_event(local_session_id, translated)
+
+                if event_type == "error":
+                    emitted_error_event = True
+                    raise RunnerError(content or "Gateway execution failed")
+
+            assistant_text = "".join(assistant_chunks).strip()
+            if assistant_text:
+                self._append_assistant_message(local_session_id, assistant_text)
 
             self._set_session_state(local_session_id, status="idle", last_error=None)
             q.put(
@@ -396,14 +657,15 @@ class GatewayRunner(AgentRunner):
             message = _redact_token_like_text(str(exc) or "Gateway execution failed")
             logger.exception("Gateway run failed for session %s: %s", local_session_id, message)
             self._set_session_state(local_session_id, status="error", last_error=message)
-            q.put(
-                {
-                    "type": "error",
-                    "content": message,
-                    "timestamp": _utc_now_iso(),
-                    "metrics": self._record_total_runtime(local_session_id),
-                }
-            )
+            if not emitted_error_event:
+                q.put(
+                    {
+                        "type": "error",
+                        "content": message,
+                        "timestamp": _utc_now_iso(),
+                        "metrics": self._record_total_runtime(local_session_id),
+                    }
+                )
         finally:
             with self._send_guard_lock:
                 self._inflight_sends.discard(local_session_id)

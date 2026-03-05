@@ -35,6 +35,7 @@ from flask import (
 )
 
 import models
+from config import Config
 from services.chat_backend import build_chat_runner
 from services.chat_runner import ChatRunnerBackend, RunnerError
 from services.chat_store import (
@@ -619,15 +620,31 @@ def validate_claude_token(token: str) -> Dict[str, Any]:
     }
 
 
-def _persist_to_railway(variables: Dict[str, str]) -> None:
+def _persist_to_railway(variables: Dict[str, str]) -> bool:
     """Persist environment variables via Railway GraphQL API."""
-    api_token = os.getenv("RAILWAY_API_TOKEN", "")
-    service_id = os.getenv("RAILWAY_SERVICE_ID", "")
-    environment_id = os.getenv("RAILWAY_ENVIRONMENT_ID", "")
-    project_id = os.getenv("RAILWAY_PROJECT_ID", "")
+    api_token = (
+        os.getenv("RAILWAY_API_TOKEN", "")
+        or getattr(Config, "RAILWAY_API_TOKEN", "")
+    )
+    service_id = (
+        os.getenv("RAILWAY_SERVICE_ID", "")
+        or getattr(Config, "RAILWAY_SERVICE_ID", "")
+    )
+    environment_id = (
+        os.getenv("RAILWAY_ENVIRONMENT_ID", "")
+        or os.getenv("RAILWAY_ENV_ID", "")
+        or getattr(Config, "RAILWAY_ENVIRONMENT_ID", "")
+    )
+    project_id = (
+        os.getenv("RAILWAY_PROJECT_ID", "")
+        or getattr(Config, "RAILWAY_PROJECT_ID", "")
+    )
 
     if not api_token or not service_id:
-        return
+        logger.warning(
+            "Railway persistence skipped: RAILWAY_API_TOKEN or RAILWAY_SERVICE_ID not configured"
+        )
+        return False
 
     endpoint = "https://backboard.railway.app/graphql/v2"
     headers = {
@@ -640,6 +657,7 @@ def _persist_to_railway(variables: Dict[str, str]) -> None:
     }
     """
 
+    all_persisted = True
     for name, value in variables.items():
         payload = {
             "query": mutation,
@@ -654,19 +672,64 @@ def _persist_to_railway(variables: Dict[str, str]) -> None:
             },
         }
         try:
-            http_requests.post(endpoint, json=payload, headers=headers, timeout=15)
+            response = http_requests.post(
+                endpoint, json=payload, headers=headers, timeout=15
+            )
+        except Exception as exc:
+            all_persisted = False
+            logger.warning("Railway variableUpsert for %s failed: %s", name, exc)
+            continue
+
+        if response.status_code != 200:
+            all_persisted = False
+            logger.warning(
+                "Railway variableUpsert for %s returned %s: %s",
+                name,
+                response.status_code,
+                response.text[:200],
+            )
+            continue
+
+        body = None
+        try:
+            body = response.json()
         except Exception:
-            pass
+            body = None
+
+        if isinstance(body, dict) and body.get("errors"):
+            all_persisted = False
+            logger.warning(
+                "Railway variableUpsert for %s returned GraphQL errors: %s",
+                name,
+                str(body.get("errors"))[:300],
+            )
+            continue
+
+        if isinstance(body, dict):
+            data = body.get("data")
+            if isinstance(data, dict) and data.get("variableUpsert") is False:
+                all_persisted = False
+                logger.warning(
+                    "Railway variableUpsert for %s returned false result", name
+                )
+
+    return all_persisted
 
 
 def _persist_to_railway_async(variables: Dict[str, str]) -> bool:
-    if not os.getenv("RAILWAY_API_TOKEN") or not os.getenv("RAILWAY_SERVICE_ID"):
-        return False
-    thread = threading.Thread(
-        target=_persist_to_railway, args=(variables,), daemon=True
+    # Despite the legacy name, persist synchronously so token-save/rotate can
+    # report actual persistence success.
+    api_token = (
+        os.getenv("RAILWAY_API_TOKEN", "")
+        or getattr(Config, "RAILWAY_API_TOKEN", "")
     )
-    thread.start()
-    return True
+    service_id = (
+        os.getenv("RAILWAY_SERVICE_ID", "")
+        or getattr(Config, "RAILWAY_SERVICE_ID", "")
+    )
+    if not api_token or not service_id:
+        return False
+    return bool(_persist_to_railway(variables))
 
 
 def _gateway_client() -> GatewayClient:
@@ -1016,27 +1079,37 @@ def _translate_gateway_stream_event(event: dict[str, Any]) -> dict[str, Any] | N
 
 
 def _translate_runner_stream(raw_stream: Any):
-    for raw_event in raw_stream:
-        if _stream_contains_done_sentinel(raw_event):
-            yield _format_sse_data({"type": "done", "timestamp": _utc_now_iso()})
-            continue
+    try:
+        for raw_event in raw_stream:
+            if _stream_contains_done_sentinel(raw_event):
+                yield _format_sse_data({"type": "done", "timestamp": _utc_now_iso()})
+                continue
 
-        event = _parse_runner_sse_event(raw_event)
-        if event is None:
-            yield raw_event
-            continue
+            event = _parse_runner_sse_event(raw_event)
+            if event is None:
+                yield raw_event
+                continue
 
-        translated = _translate_gateway_stream_event(event)
-        if translated is None:
-            continue
+            translated = _translate_gateway_stream_event(event)
+            if translated is None:
+                continue
 
-        if translated == event:
-            yield raw_event
-            continue
+            if translated == event:
+                yield raw_event
+                continue
 
-        if "timestamp" not in translated:
-            translated["timestamp"] = _utc_now_iso()
-        yield _format_sse_data(translated)
+            if "timestamp" not in translated:
+                translated["timestamp"] = _utc_now_iso()
+            yield _format_sse_data(translated)
+    except Exception:
+        logger.exception("Chat stream translation failed")
+        yield _format_sse_data(
+            {
+                "type": "error",
+                "content": "Chat stream failed before completion. Please retry.",
+                "timestamp": _utc_now_iso(),
+            }
+        )
 
 
 def _format_sse_data(payload: dict[str, Any]) -> str:
@@ -1123,6 +1196,56 @@ def _gateway_mode_send_runner(store: ChatStore) -> ChatRunnerBackend:
                 backend="gateway",
             )
         return _runner
+
+
+def _rehydrate_missing_chat_session(
+    store: ChatStore,
+    runner: ChatRunnerBackend,
+    session_id: str,
+) -> dict[str, Any] | None:
+    """
+    Recreate a missing store session envelope for an existing session id.
+
+    This avoids user-facing 404s when process-local chat state is lost between
+    requests (for example after worker restart) while preserving the same
+    session id for downstream runtime resume behavior.
+    """
+    session_obj = store.get_session(session_id)
+    if session_obj is not None:
+        return session_obj
+
+    recovered_title = "Recovered chat"
+    recovered_sdk_session_id = None
+
+    runner_get_session = getattr(runner, "get_session", None)
+    if callable(runner_get_session):
+        try:
+            runner_session = runner_get_session(session_id)
+        except Exception:
+            runner_session = None
+        if isinstance(runner_session, dict):
+            recovered_title = str(runner_session.get("title") or recovered_title)
+            recovered_sdk_session_id = runner_session.get("sdk_session_id")
+
+    try:
+        store.create_session(
+            session_id,
+            title=recovered_title,
+            status="idle",
+            sdk_session_id=recovered_sdk_session_id,
+        )
+    except Exception:
+        return None
+
+    session_obj = store.get_session(session_id)
+    if session_obj is not None:
+        _log_chat_session_lifecycle(
+            action="send_message",
+            status="recovered",
+            session_id=session_id,
+            reason="session_rehydrated",
+        )
+    return session_obj
 
 
 @chat_bp.route("/chat")
@@ -1261,7 +1384,8 @@ def send_message():
         )
 
     store = _get_chat_store()
-    session_obj = store.get_session(session_id)
+    runner = _gateway_mode_send_runner(store)
+    session_obj = _rehydrate_missing_chat_session(store, runner, session_id)
     if session_obj is None:
         _log_chat_session_lifecycle(
             action="send_message",
@@ -1307,7 +1431,6 @@ def send_message():
             },
             session_updates=session_updates,
         )
-        runner = _gateway_mode_send_runner(store)
         runner.ensure_session(
             session_id,
             title=session_updates.get("title") or session_obj.get("title"),
