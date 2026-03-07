@@ -870,11 +870,28 @@ For each run dir with `phase1_data.json`:
 2. Read `phase1_data.json` + `build_phase2_prompt()` + `CLAUDE_JSON_SCHEMA` from runner → write `phase2_output.json`
 3. Read `phase2_output.json` + `APP_BUILDER_PROMPT` from runner → build `health_assessment.html` natively
 
-**Step 3 — Gamma + Slack (runner):**
+**Step 2b — Build seo_report.html (Claude Code native, zero cost):**
+For each run dir with `phase2_output.json` (and `phase1_data.json`):
+- Read both JSON files + `skills/SKILL_D100_report_builder.md`
+- Build the full 14-section deliverables page as `seo_report.html` (target: 80–150KB)
+- Includes: Loom embed, Calendly widgets, Google Ads campaigns, email sequences, SEO audit, embedded health assessment modal
+
+**Step 3 — Deploy deliverables page + Slack (runner):**
 ```bash
 python3 -u scripts/d100_v3_runner.py --csv batch.csv --phase3-only
 ```
-Runner auto-finds run dirs with `phase2_output.json`, submits to Gamma, fires Slack.
+Runner auto-finds run dirs with `phase2_output.json` + `seo_report.html`, deploys to GitHub Pages, fires Slack with live URL.
+
+**Deliverables page repo slug format:**
+```
+Plug-and-play-AI-SEO-and-Ad-Strategy-for-{Company-Name}
+```
+Live URL: `https://{GHUSER}.github.io/Plug-and-play-AI-SEO-and-Ad-Strategy-for-{Company-Name}/`
+
+**Error handling (circuit breaker):**
+- 3 failure categories: `SCRAPE_FAILED` | `SEMRUSH_FAILED` | `BUILD_FAILED`
+- Each failure: Slack alert with debug context, skip to next URL
+- 3 consecutive failures → Slack critical alert → `sys.exit(1)`
 
 ### Key Files Per Run Dir
 | File | Written By | Purpose |
@@ -882,9 +899,8 @@ Runner auto-finds run dirs with `phase2_output.json`, submits to Gamma, fires Sl
 | `phase1_data.json` | Runner | All scraped data — Claude Code input |
 | `seo_report.md` | Claude Code native | SEO analysis |
 | `phase2_output.json` | Claude Code native | Keywords + ads + emails + app_config |
-| `health_assessment.html` | Claude Code native | Patient app (60-85KB) |
-| `app_build_pending.json` | Runner | Marker: app not yet built |
-| `gamma_response.json` | Runner `--phase3-only` | Gamma submission result |
+| `seo_report.html` | Claude Code native | Full 14-section deliverables page (80–150KB) |
+| `gamma_response.json` | Runner `--phase3-only` | Shim — now contains `report_url` (GitHub Pages URL) |
 
 ### Prompt Source of Truth (in runner — Claude Code reads directly)
 - `build_phase2_prompt()` — Phase 2 merged prompt template

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-d100_v3_runner.py — D100 v3.0 Batch Runner
-Processes a CSV of practices end-to-end: scrape → Claude Sonnet 4.6 → Gamma + App → poll → notify
+d100_v3_runner.py — D100 v3.2 Batch Runner
+Processes a CSV of practices end-to-end: scrape → Claude Code native → GitHub Pages deploy → Slack
 
 Usage:
   python3 d100_v3_runner.py --csv /path/to/practices.csv
@@ -15,8 +15,12 @@ CSV Format:
 
 Environment (.env at project root):
   ANTHROPIC_API_KEY=sk-ant-...
-  GAMMA_API_KEY=sk-gamma-...
   SLACK_WEBHOOK_URL=https://hooks.slack.com/...
+  SEMRUSH_API_KEY=...
+
+Phase 3 deploys seo_report.html to GitHub Pages as a personalized deliverables page.
+Repo slug format: Plug-and-play-AI-SEO-and-Ad-Strategy-for-{Company-Name}
+Live URL: https://{GHUSER}.github.io/Plug-and-play-AI-SEO-and-Ad-Strategy-for-{Company-Name}/
 """
 
 import argparse
@@ -39,16 +43,10 @@ PROJECT_ROOT = SCRIPT_DIR.parent
 TEMPLATE_PATH = PROJECT_ROOT / "skills" / "templates" / "health_assessment_template.html"
 OUTPUT_ROOT = PROJECT_ROOT / "output" / "d100_runs"
 
-# ── Gamma config ───────────────────────────────────────────────────────────────
-GAMMA_API = "https://public-api.gamma.app/v1.0"
-GAMMA_TEMPLATE_ID = "g_tibdaac6hk58l4v"
-GAMMA_HEADERS_BASE = {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-    "Origin": "https://gamma.app",
-    "Referer": "https://gamma.app/",
-}
+# ── GitHub deploy config ────────────────────────────────────────────────────────
+# Deliverables page slug format: Plug-and-play-AI-SEO-and-Ad-Strategy-for-{Company-Name}
+# GitHub user is resolved at runtime via: gh api user --jq '.login'
+DELIVERABLES_SLUG_PREFIX = "Plug-and-play-AI-SEO-and-Ad-Strategy-for-"
 
 # ── Load .env ──────────────────────────────────────────────────────────────────
 def load_env():
@@ -61,7 +59,7 @@ def load_env():
                 k, v = line.split("=", 1)
                 env[k.strip()] = v.strip()
     # Override with real environment (only if non-empty — Claude Code sets ANTHROPIC_API_KEY='' itself)
-    for k in ("ANTHROPIC_API_KEY", "GAMMA_API_KEY", "SLACK_WEBHOOK_URL", "SEMRUSH_API_KEY"):
+    for k in ("ANTHROPIC_API_KEY", "SLACK_WEBHOOK_URL", "SEMRUSH_API_KEY"):
         if os.environ.get(k):
             env[k] = os.environ[k]
     return env
@@ -718,13 +716,152 @@ Rules: Verbatim numbers only. Doctor's report tone. No SEO jargon. No fluff. 400
 # Runner writes phase1_data.json; Claude Code reads build_seo_analysis_prompt() and writes seo_report.md.
 
 
-# ── Phase 3a: Gamma submit ─────────────────────────────────────────────────────
-# NOTE: YouTube/Loom/Calendly URLs are set directly in the Gamma template editor.
-# Passing them via prompt caused Gamma's AI to corrupt embed URLs (watch→embed,
-# dropping query params, converting iframes to hyperlinks). Template editor is
-# the correct place for static embeds — the AI never touches them there.
+# ── Phase 3: GitHub Pages deploy ───────────────────────────────────────────────
+
+def make_deliverable_slug(practice_name: str) -> str:
+    """Plug-and-play-AI-SEO-and-Ad-Strategy-for-{Company-Name-Slug}"""
+    clean = re.sub(r"[^a-zA-Z0-9\s-]", "", practice_name).strip()
+    return DELIVERABLES_SLUG_PREFIX + "-".join(clean.split())
 
 
+def deploy_report_to_github(run_dir, practice_name: str, dry_run: bool = False) -> str:
+    """Deploy seo_report.html to GitHub Pages. Returns live URL."""
+    import subprocess, shutil, tempfile
+
+    slug = make_deliverable_slug(practice_name)
+    report_path = Path(run_dir) / "seo_report.html"
+
+    if not report_path.exists():
+        raise RuntimeError(f"seo_report.html not found in {run_dir}")
+    if report_path.stat().st_size < 10_000:
+        raise RuntimeError(f"seo_report.html too small ({report_path.stat().st_size} bytes) — build may have failed")
+
+    if dry_run:
+        print(f"  [DRY RUN] Would deploy {slug} to GitHub Pages")
+        return f"https://DRY-RUN.github.io/{slug}/"
+
+    def run(cmd, **kwargs):
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, **kwargs)
+        if result.returncode != 0:
+            raise RuntimeError(f"Command failed: {cmd}\n{result.stderr}")
+        return result.stdout.strip()
+
+    # Get GitHub username
+    ghuser = run("gh api user --jq '.login'")
+    if not ghuser:
+        raise RuntimeError("Could not determine GitHub username via gh CLI")
+
+    # Create repo (idempotent — ok if already exists)
+    try:
+        run(f"gh repo create {ghuser}/{slug} --public --confirm 2>/dev/null || true")
+    except Exception:
+        pass  # Repo may already exist
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Clone (empty is fine — Pages just needs index.html on main)
+        try:
+            run(f"git clone https://github.com/{ghuser}/{slug}.git {tmpdir}/repo")
+            repo_dir = f"{tmpdir}/repo"
+        except Exception:
+            # Fresh repo: init locally
+            repo_dir = f"{tmpdir}/repo"
+            os.makedirs(repo_dir, exist_ok=True)
+            run(f"git -C {repo_dir} init")
+            run(f"git -C {repo_dir} remote add origin https://github.com/{ghuser}/{slug}.git")
+
+        # Copy seo_report.html as index.html
+        shutil.copy(str(report_path), f"{repo_dir}/index.html")
+
+        # Commit & push
+        run(f"git -C {repo_dir} add index.html")
+        run(f'git -C {repo_dir} -c user.email="d100@aiaa.app" -c user.name="D100 Runner" commit --allow-empty -m "D100 deliverables page — {practice_name}"')
+        run(f"git -C {repo_dir} push --force origin HEAD:main")
+
+    # Enable GitHub Pages on main branch
+    try:
+        run(f'gh api repos/{ghuser}/{slug}/pages --method POST -f source[branch]=main -f source[path]=/ 2>/dev/null || true')
+    except Exception:
+        pass  # Pages may already be enabled
+
+    live_url = f"https://{ghuser}.github.io/{slug}/"
+    print(f"  ✓ Deployed → {live_url}")
+    return live_url
+
+
+# ── Phase 3: Slack notifications ────────────────────────────────────────────────
+
+def _slack_post(webhook: str, msg: dict) -> bool:
+    req = urllib.request.Request(
+        webhook,
+        data=json.dumps(msg).encode(),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        return resp.status == 200
+
+
+def notify_slack_report_live(webhook: str, practice: str, report_url: str,
+                              website: str, semrush: dict, run_id: str) -> bool:
+    ai_serp  = semrush.get("ai_overview_serp_count", "N/A")
+    ai_cited = semrush.get("ai_overview_cited_count", "N/A")
+    msg = {
+        "blocks": [
+            {"type": "header", "text": {"type": "plain_text",
+                "text": f"📊 D100 Report Live — {practice}"}},
+            {"type": "section", "fields": [
+                {"type": "mrkdwn", "text": f"*Website:*\n{website}"},
+                {"type": "mrkdwn", "text": f"*Run ID:*\n`{run_id}`"},
+                {"type": "mrkdwn", "text": f"*Keywords Ranked:*\n{semrush.get('unique_keywords', 0):,}"},
+                {"type": "mrkdwn", "text": f"*Quick Wins:*\n{semrush.get('quick_wins_count', 0)}"},
+                {"type": "mrkdwn", "text": f"*Traffic Value:*\n${semrush.get('traffic_value', 0):,}/mo"},
+                {"type": "mrkdwn", "text": f"*AI Overview Gap:*\n{ai_serp} SERPs, cited in {ai_cited}"},
+            ]},
+            {"type": "section", "text": {"type": "mrkdwn",
+                "text": f"*Deliverables Page:*\n<{report_url}|{report_url}>"}},
+        ],
+    }
+    return _slack_post(webhook, msg)
+
+
+def notify_slack_error(webhook: str, name: str, website: str, failure_type: str,
+                       error: str, run_id: str) -> bool:
+    """Send error alert to Slack. failure_type: SCRAPE_FAILED | SEMRUSH_FAILED | BUILD_FAILED"""
+    msg = {
+        "blocks": [
+            {"type": "header", "text": {"type": "plain_text",
+                "text": f"🔴 D100 Error — {name}"}},
+            {"type": "section", "fields": [
+                {"type": "mrkdwn", "text": f"*Website:*\n{website}"},
+                {"type": "mrkdwn", "text": f"*Failure Type:*\n`{failure_type}`"},
+                {"type": "mrkdwn", "text": f"*Run Dir:*\n`output/d100_runs/{run_id}/`"},
+                {"type": "mrkdwn", "text": f"*Error:*\n{error[:300]}"},
+            ]},
+            {"type": "section", "text": {"type": "mrkdwn",
+                "text": "Next: skipping to next URL"}},
+        ],
+    }
+    try:
+        return _slack_post(webhook, msg)
+    except Exception:
+        return False
+
+
+def notify_slack_critical(webhook: str, message: str) -> bool:
+    """Send circuit-breaker critical alert."""
+    msg = {
+        "blocks": [
+            {"type": "header", "text": {"type": "plain_text", "text": "🛑 D100 HALTED"}},
+            {"type": "section", "text": {"type": "mrkdwn", "text": message}},
+        ],
+    }
+    try:
+        return _slack_post(webhook, msg)
+    except Exception:
+        return False
+
+
+# Legacy shim — kept so old Gamma function references don't crash if called
 def build_gamma_prompt(gamma_content: dict) -> str:
     gc = gamma_content
     return f"""[COMPANY]
@@ -903,35 +1040,9 @@ No explanations. No filler. No assumptions."""
 # Runner writes app_build_pending.json; user triggers "build the apps" in Claude Code.
 
 
-# ── Phase 3a: Slack notify (fires at Gamma submit, not URL confirmation) ────────
-def notify_slack_submit(webhook: str, practice: str, gen_id: str, website: str,
-                        semrush: dict, run_id: str) -> bool:
-    ai_serp  = semrush.get("ai_overview_serp_count", "N/A")
-    ai_cited = semrush.get("ai_overview_cited_count", "N/A")
-    msg = {
-        "blocks": [
-            {"type": "header", "text": {"type": "plain_text",
-                "text": f"🚀 D100 Submitted — {practice}"}},
-            {"type": "section", "fields": [
-                {"type": "mrkdwn", "text": f"*Website:*\n{website}"},
-                {"type": "mrkdwn", "text": f"*Run ID:*\n`{run_id}`"},
-                {"type": "mrkdwn", "text": f"*Keywords Ranked:*\n{semrush.get('unique_keywords', 0):,}"},
-                {"type": "mrkdwn", "text": f"*Quick Wins:*\n{semrush.get('quick_wins_count', 0)}"},
-                {"type": "mrkdwn", "text": f"*Traffic Value:*\n${semrush.get('traffic_value', 0):,}/mo"},
-                {"type": "mrkdwn", "text": f"*AI Overview Gap:*\n{ai_serp} SERPs, cited in {ai_cited}"},
-            ]},
-            {"type": "section", "text": {"type": "mrkdwn",
-                "text": f"*Gamma Generation ID:*\n`{gen_id}`\nDeck generating — check gamma.app in a few minutes."}},
-        ],
-    }
-    req = urllib.request.Request(
-        webhook,
-        data=json.dumps(msg).encode(),
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        return resp.status == 200
+# notify_slack_submit kept as shim for any direct callers
+def notify_slack_submit(webhook, practice, gen_id, website, semrush, run_id):
+    return notify_slack_report_live(webhook, practice, f"PENDING:{gen_id}", website, semrush, run_id)
 
 
 # ── Main run logic (single site) ───────────────────────────────────────────────
@@ -1105,69 +1216,74 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
 
     print(f"  Quick wins: {semrush.get('quick_wins_count', 0)}")
 
-    # ── PHASE 3 ────────────────────────────────────────────────────────────────
-    print("\n🚀 Phase 3: Gamma submit + App inject...")
+    # ── PHASE 3: Deploy deliverables page to GitHub Pages ───────────────────────
+    print("\n🚀 Phase 3: Deploying deliverables page to GitHub Pages...")
     t3 = time.time()
-    gamma_key = env.get("GAMMA_API_KEY", "")
-    if not gamma_key:
-        raise ValueError("GAMMA_API_KEY not found in .env")
 
-    # 3a: Gamma submit
-    practice_name = phase2_data.get("gamma_content", {}).get("company", website)
+    # Extract practice name from phase2 app_config (fallback: gamma_content or website)
+    practice_name = (
+        phase2_data.get("app_config", {}).get("practiceName")
+        or phase2_data.get("gamma_content", {}).get("company")
+        or re.sub(r"https?://", "", website).rstrip("/")
+    )
     slack_webhook = env.get("SLACK_WEBHOOK_URL", "")
-    gamma_prompt = build_gamma_prompt(phase2_data.get("gamma_content", {}))
-    gen_id = submit_gamma(gamma_prompt, gamma_key)
-    print(f"  ✓ Gamma submitted — generationId: {gen_id}")
-    # Fire Slack immediately at submit — before any polling
-    if slack_webhook:
-        try:
-            notify_slack_submit(slack_webhook, practice_name, gen_id, website, semrush, run_id)
-            print("  ✓ Slack notified (at submit)")
-        except Exception as e:
-            print(f"  ⚠️  Slack failed: {e}")
 
-    # 3b: App build — Claude Code native (NO API cost). Write pending marker.
-    health_path = run_dir / "health_assessment.html"
-    if health_path.exists():
-        print(f"  ✓ App exists: {health_path.stat().st_size // 1024}KB")
-    else:
-        pending = {
-            "run_id": run_id,
-            "website": website,
-            "practice_name": practice_name,
-            "status": "pending_app_build",
-        }
-        (run_dir / "app_build_pending.json").write_text(
-            json.dumps(pending, indent=2), encoding="utf-8"
+    # Verify seo_report.html exists and is large enough
+    report_path = run_dir / "seo_report.html"
+    if not report_path.exists():
+        raise RuntimeError(
+            f"BUILD_FAILED: seo_report.html not found in {run_dir}. "
+            "Claude Code must build it first (run SKILL_D100_report_builder)."
         )
-        print(f"  ℹ️  App build pending — tell Claude Code 'build the apps'")
+    if report_path.stat().st_size < 10_000:
+        raise RuntimeError(
+            f"BUILD_FAILED: seo_report.html too small ({report_path.stat().st_size} bytes). "
+            "Build likely failed or was incomplete."
+        )
+    print(f"  ✓ seo_report.html ready — {report_path.stat().st_size // 1024}KB")
+
+    # Deploy to GitHub Pages
+    report_url = deploy_report_to_github(run_dir, practice_name, dry_run=dry_run)
+    print(f"  ✓ Live URL: {report_url}")
     print(f"  Phase 3 complete ({time.time()-t3:.1f}s)")
 
-    # ── PHASE 4: Write pending response and proceed immediately ────────────────
-    gamma_response = {
-        "generationId": gen_id,
-        "status": "pending",
-        "gammaUrl": f"PENDING:{gen_id}",
-        "templateId": GAMMA_TEMPLATE_ID,
-        "practice": practice_name,
-        "run_id": run_id,
-    }
+    # Write report_url to phase2_output.json
+    try:
+        p2 = json.loads((run_dir / "phase2_output.json").read_text(encoding="utf-8"))
+        p2["report_url"] = report_url
+        (run_dir / "phase2_output.json").write_text(
+            json.dumps(p2, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
+    except Exception:
+        pass
+
+    # Shim: write gamma_response.json so downstream scripts don't break
     (run_dir / "gamma_response.json").write_text(
-        json.dumps(gamma_response, indent=2), encoding="utf-8"
+        json.dumps({"report_url": report_url, "practice": practice_name, "run_id": run_id}, indent=2),
+        encoding="utf-8",
     )
+
+    # Slack success
+    if slack_webhook:
+        try:
+            notify_slack_report_live(slack_webhook, practice_name, report_url, website, semrush, run_id)
+            print("  ✓ Slack notified")
+        except Exception as e:
+            print(f"  ⚠️  Slack failed: {e}")
 
     # ── Summary ────────────────────────────────────────────────────────────────
     files = list(run_dir.rglob("*"))
     file_list = [str(f.relative_to(run_dir)) for f in files if f.is_file()]
     print(f"\n✅ COMPLETE — {run_id}")
-    print(f"   Gamma: PENDING:{gen_id} (check gamma.app in ~5 min)")
+    print(f"   Report: {report_url}")
     print(f"   Files: {', '.join(file_list)}")
 
     return {
         "run_id": run_id,
-        "status": "submitted",
+        "status": "completed",
         "website": website,
-        "gamma_url": f"PENDING:{gen_id}",
+        "report_url": report_url,
+        "gamma_url": report_url,   # shim — CSV column kept for backward compat
         "keywords_count": len(phase2_data.get("keywords", [])),
         "quick_wins": semrush.get("quick_wins_count", 0),
         "traffic_value": semrush.get("traffic_value", 0),
@@ -1209,10 +1325,10 @@ def main():
 
     env = load_env()
     semrush_status = "✓ (API)" if env.get("SEMRUSH_API_KEY") else "✗ (CSV fallback)"
-    print(f"✓ Env loaded: Gamma={'✓' if env.get('GAMMA_API_KEY') else '✗'} | "
-          f"SEMrush={semrush_status} | "
+    print(f"✓ Env loaded: SEMrush={semrush_status} | "
           f"Slack={'✓' if env.get('SLACK_WEBHOOK_URL') else '✗'}")
     print(f"  Note: All LLM generation is Claude Code native (Claude Max — zero API cost)")
+    print(f"  Note: Phase 3 deploys to GitHub Pages (Gamma replaced)")
 
     with open(args.csv, newline="", encoding="utf-8-sig") as f:
         rows = list(csv.DictReader(f))
@@ -1230,10 +1346,16 @@ def main():
     # ── Run all sites ────────────────────────────────────────────────────────────
     n = len(rows)
     results = []
+    consecutive_failures = 0
+    FAILURE_LIMIT = 3
+    slack_webhook = env.get("SLACK_WEBHOOK_URL", "")
 
     for i, row in enumerate(rows):
         label = f"[{i+1}/{n}]"
         website = row.get("website", "?")
+        context = row.get("context", "")
+        # Best-effort practice name from context (before run_single parses it)
+        practice_name_hint = context.split(";")[0].strip() if context else website
         print(f"\n{label} {website}")
 
         # --phase3-only: resolve existing run dir automatically per site
@@ -1242,9 +1364,11 @@ def main():
             existing_run_dir = find_run_dir_for_site(website)
             if not existing_run_dir:
                 print(f"  ⚠️  No run dir with phase2_output.json found for {website} — skipping")
-                results.append({"website": website, "status": "skipped_no_phase2", "gamma_url": ""})
+                results.append({"website": website, "status": "skipped_no_phase2", "report_url": ""})
                 continue
             print(f"  📁 Using run dir: {existing_run_dir}")
+
+        run_id_hint = Path(existing_run_dir).name if existing_run_dir else "unknown"
 
         try:
             result = run_single(
@@ -1254,16 +1378,55 @@ def main():
                 existing_run_dir=existing_run_dir,
             )
             results.append(result)
+            # Reset circuit breaker on any success (even phase2_pending counts)
+            if result.get("status") not in ("failed", "scrape_failed", "semrush_failed", "build_failed"):
+                consecutive_failures = 0
+
         except Exception as e:
-            print(f"  ❌ FAILED: {e}")
-            results.append({"website": website, "status": "failed", "error": str(e)})
+            err_str = str(e)
+            print(f"  ❌ FAILED: {err_str}")
+
+            # Classify failure type from error message
+            if "SCRAPE_FAILED" in err_str or "scrape" in err_str.lower():
+                failure_type = "SCRAPE_FAILED"
+            elif "SEMRUSH_FAILED" in err_str or "semrush" in err_str.lower():
+                failure_type = "SEMRUSH_FAILED"
+            elif "BUILD_FAILED" in err_str or "seo_report" in err_str.lower():
+                failure_type = "BUILD_FAILED"
+            else:
+                failure_type = "BUILD_FAILED"  # default for phase 3 errors
+
+            result = {
+                "website": website,
+                "status": failure_type.lower(),
+                "error": err_str[:500],
+                "report_url": "",
+                "gamma_url": "",
+            }
+            results.append(result)
+
+            # Slack error alert
+            if slack_webhook:
+                notify_slack_error(slack_webhook, practice_name_hint, website,
+                                   failure_type, err_str, run_id_hint)
+
+            # Circuit breaker
+            consecutive_failures += 1
+            print(f"  ⚠️  Consecutive failures: {consecutive_failures}/{FAILURE_LIMIT}")
+            if consecutive_failures >= FAILURE_LIMIT:
+                msg = f"🛑 D100 halted — {FAILURE_LIMIT} consecutive failures. Last error on {website}: {err_str[:200]}"
+                print(f"\n{msg}")
+                if slack_webhook:
+                    notify_slack_critical(slack_webhook, msg)
+                sys.exit(1)
 
     # Write results summary CSV — union of all keys so failed + success rows coexist
     results_path = OUTPUT_ROOT / f"d100_v3_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
     if results:
         # Build ordered fieldnames: preferred columns first, then any extras
-        preferred = ["run_id", "website", "status", "gamma_url", "keywords_count",
-                     "quick_wins", "traffic_value", "ai_overview_serp_count", "error"]
+        preferred = ["run_id", "website", "status", "report_url", "gamma_url",
+                     "keywords_count", "quick_wins", "traffic_value",
+                     "ai_overview_serp_count", "error"]
         all_keys: list = list(preferred)
         for r in results:
             for k in r:
@@ -1275,7 +1438,7 @@ def main():
             writer.writerows(results)
         print(f"\n📊 Results written: {results_path}")
 
-    success = sum(1 for r in results if r.get("status") in ("completed", "submitted"))
+    success = sum(1 for r in results if r.get("status") in ("completed", "submitted", "phase2_pending"))
     print(f"\n{'='*60}")
     print(f"BATCH COMPLETE: {success}/{len(results)} succeeded")
     print(f"{'='*60}")
