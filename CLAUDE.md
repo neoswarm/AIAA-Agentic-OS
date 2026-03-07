@@ -901,6 +901,73 @@ Runner auto-finds run dirs with `phase2_output.json`, submits to Gamma, fires Sl
 
 ---
 
+## D100 Funnel Builder Workflow
+
+**Purpose:** Given a CSV of Dream 100 prospects (name + website), research each prospect's live site, build a high-converting demo landing page, deploy to GitHub Pages, and Slack the live URL.
+
+**Runner:** `scripts/d100_funnel_builder.py` — data collection ONLY (Phase 1) + GitHub deploy (Phase 3)
+**Skill file:** `skills/SKILL_D100_funnel_builder.md` — Claude Code prompt for building `index.html`
+**Output dir:** `output/funnel_builds/{slug}_{YYYYMMDD_HHMMSS}/`
+
+### CSV Format
+```csv
+name,website,notes,assessment_url
+Dr. Aaron Hartman,https://richmondfunctionalmedicine.com,"Focuses on autoimmune. Has a book.",https://username.github.io/richmond-funnel/
+```
+- `notes` — optional intel injected into page context
+- `assessment_url` — URL of the D100-built health assessment; used as primary CTA; `[PATIENT ASSESSMENT LINK]` placeholder if absent
+
+### Three-Step Flow
+
+**Step 1 — Phase 1: Research (runner, no LLM):**
+```bash
+python3 -u scripts/d100_funnel_builder.py --csv prospects.csv
+# Single prospect:
+python3 -u scripts/d100_funnel_builder.py --csv prospects.csv --site-index 0
+```
+Runner scrapes 12 pages, extracts brand colors/images/testimonials/social presence. Writes `prospect_data.json` per run dir.
+
+**Step 2 — Phase 2: Build landing page (Claude Code native — zero cost):**
+For each run dir with `prospect_data.json` but no `index.html`:
+1. Read `prospect_data.json` + `skills/SKILL_D100_funnel_builder.md`
+2. Build `index.html` — 10-section high-converting landing page
+3. Write to run dir
+
+**Step 3 — Phase 3: Deploy (runner `--deploy-only`):**
+```bash
+python3 -u scripts/d100_funnel_builder.py --csv prospects.csv --deploy-only
+```
+Creates GitHub repo, pushes `index.html`, enables GitHub Pages, updates CSV with live URL, fires Slack.
+
+### Key Files Per Run Dir
+| File | Written By | Purpose |
+|------|-----------|---------|
+| `prospect_data.json` | Runner Phase 1 | All researched data — Claude Code input |
+| `scrape_data/raw_scrape.md` | Runner Phase 1 | Full site scrape (12 pages) |
+| `index.html` | Claude Code native | Complete landing page (30-80KB) |
+
+### Landing Page Sections (built by Claude Code)
+1. Navbar — logo + sticky CTA
+2. Hero — headshot/hero image + pain-point headline + primary CTA → assessment
+3. Credibility bar — media mentions (only if found)
+4. Problem-Agitation — their language verbatim from scrape
+5. Solution/Mechanism — their unique framework/method
+6. Social Proof — scraped testimonials or `[ADD TESTIMONIALS]` placeholder (NEVER fabricated)
+7. Patient Assessment CTA — prominent full-width section → `assessment_url`
+8. Offer/Pricing — their offer structure or "Book a Call"
+9. Authority/About — bio, credentials, photo from scrape
+10. Final CTA + Footer
+
+### Gotchas
+- **`gh auth login` required** before `--deploy-only`; `gh` CLI at `/opt/homebrew/bin/gh`
+- **Testimonials:** NEVER fabricate — use scraped verbatim or `[ADD TESTIMONIALS]` placeholder
+- **Images:** hotlinked from their CDN — no stock images, no base64
+- **GitHub Pages** goes live ~1-2 min after deploy; runner records URL immediately in CSV + `prospect_data.json`
+- **Demo build only** — placeholders fine throughout; credentials used as-is from scrape, no verification
+- **Python < 3.10** — use `Optional[str]` not `str | None`
+
+---
+
 ## Quick Commands Reference
 
 ```bash
