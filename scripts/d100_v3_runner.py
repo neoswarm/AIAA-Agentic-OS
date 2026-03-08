@@ -59,7 +59,7 @@ def load_env():
                 k, v = line.split("=", 1)
                 env[k.strip()] = v.strip()
     # Override with real environment (only if non-empty — Claude Code sets ANTHROPIC_API_KEY='' itself)
-    for k in ("ANTHROPIC_API_KEY", "SLACK_WEBHOOK_URL", "SEMRUSH_API_KEY"):
+    for k in ("ANTHROPIC_API_KEY", "SLACK_WEBHOOK_URL", "SEMRUSH_API_KEY", "VERCEL_TOKEN"):
         if os.environ.get(k):
             env[k] = os.environ[k]
     return env
@@ -1216,34 +1216,76 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
 
     print(f"  Quick wins: {semrush.get('quick_wins_count', 0)}")
 
-    # ── PHASE 3: Deploy deliverables page to GitHub Pages ───────────────────────
-    print("\n🚀 Phase 3: Deploying deliverables page to GitHub Pages...")
+    # ── PHASE 3: Inject template → index.html → Deploy ──────────────────────────
+    print("\n🚀 Phase 3: Building deliverables page from template + deploying...")
     t3 = time.time()
 
-    # Extract practice name from phase2 app_config (fallback: gamma_content or website)
-    practice_name = (
-        phase2_data.get("app_config", {}).get("practiceName")
-        or phase2_data.get("gamma_content", {}).get("company")
-        or re.sub(r"https?://", "", website).rstrip("/")
-    )
+    # Extract practice name from phase1_data.json (most reliable source)
+    phase1_data_path = run_dir / "phase1_data.json"
+    practice_name = None
+    if phase1_data_path.exists():
+        try:
+            p1_loaded = json.loads(phase1_data_path.read_text(encoding="utf-8"))
+            practice_name = p1_loaded.get("name")
+        except Exception:
+            pass
+    if not practice_name:
+        practice_name = (
+            phase2_data.get("app_config", {}).get("practice_name")
+            or phase2_data.get("app_config", {}).get("practiceName")
+            or re.sub(r"https?://", "", website).rstrip("/")
+        )
+
     slack_webhook = env.get("SLACK_WEBHOOK_URL", "")
 
-    # Verify seo_report.html exists and is large enough
-    report_path = run_dir / "seo_report.html"
-    if not report_path.exists():
-        raise RuntimeError(
-            f"BUILD_FAILED: seo_report.html not found in {run_dir}. "
-            "Claude Code must build it first (run SKILL_D100_report_builder)."
+    # ── 3a: Inject template → index.html ────────────────────────────────────────
+    injector_path = SCRIPT_DIR / "inject_report.py"
+    if injector_path.exists():
+        # Run injector as subprocess to isolate imports
+        import subprocess as _sp
+        inj_result = _sp.run(
+            [sys.executable, str(injector_path), str(run_dir)],
+            capture_output=True, text=True, timeout=60,
         )
-    if report_path.stat().st_size < 10_000:
-        raise RuntimeError(
-            f"BUILD_FAILED: seo_report.html too small ({report_path.stat().st_size} bytes). "
-            "Build likely failed or was incomplete."
-        )
-    print(f"  ✓ seo_report.html ready — {report_path.stat().st_size // 1024}KB")
+        if inj_result.returncode != 0:
+            raise RuntimeError(
+                f"BUILD_FAILED: inject_report.py failed:\n{inj_result.stderr}\n{inj_result.stdout}"
+            )
+        print(inj_result.stdout.strip())
+    else:
+        # Fall back: seo_report.html must already exist (legacy mode)
+        seo_report_path = run_dir / "seo_report.html"
+        if not seo_report_path.exists():
+            raise RuntimeError(
+                f"BUILD_FAILED: Neither inject_report.py nor seo_report.html found. "
+                f"Ensure {injector_path} exists or run SKILL_D100_report_builder first."
+            )
+        import shutil as _sh
+        _sh.copy(str(seo_report_path), str(run_dir / "index.html"))
+        print(f"  ✓ Copied seo_report.html → index.html (legacy mode)")
 
-    # Deploy to GitHub Pages
-    report_url = deploy_report_to_github(run_dir, practice_name, dry_run=dry_run)
+    index_path = run_dir / "index.html"
+    if not index_path.exists():
+        raise RuntimeError(f"BUILD_FAILED: index.html not found in {run_dir} after injection")
+    if index_path.stat().st_size < 10_000:
+        raise RuntimeError(
+            f"BUILD_FAILED: index.html too small ({index_path.stat().st_size} bytes)"
+        )
+    print(f"  ✓ index.html ready — {index_path.stat().st_size // 1024}KB")
+
+    # ── 3b: Deploy ────────────────────────────────────────────────────────────────
+    vercel_token = env.get("VERCEL_TOKEN", "")
+    if vercel_token and not dry_run:
+        # Vercel deploy (preferred — 10–15 sec, auto subdomain)
+        sys.path.insert(0, str(SCRIPT_DIR))
+        from inject_report import deploy_to_vercel
+        report_url = deploy_to_vercel(run_dir, practice_name, dry_run=dry_run)
+    else:
+        # Fall back to GitHub Pages
+        if not vercel_token:
+            print("  ℹ VERCEL_TOKEN not set — falling back to GitHub Pages")
+        report_url = deploy_report_to_github(run_dir, practice_name, dry_run=dry_run)
+
     print(f"  ✓ Live URL: {report_url}")
     print(f"  Phase 3 complete ({time.time()-t3:.1f}s)")
 
@@ -1314,7 +1356,7 @@ def main():
                              "Claude Code then generates seo_report.md + phase2_output.json natively.")
     parser.add_argument("--phase3-only", action="store_true",
                         help="Skip Phase 1+2. Find existing run dirs with phase2_output.json and "
-                             "run Phase 3 (Gamma submit + Slack) only.")
+                             "run Phase 3 (template inject → Vercel/GitHub Pages + Slack) only.")
     parser.add_argument("--run-dir", type=str, default=None,
                         help="Existing run directory to use (single-site override for --phase3-only).")
     args = parser.parse_args()
@@ -1328,7 +1370,8 @@ def main():
     print(f"✓ Env loaded: SEMrush={semrush_status} | "
           f"Slack={'✓' if env.get('SLACK_WEBHOOK_URL') else '✗'}")
     print(f"  Note: All LLM generation is Claude Code native (Claude Max — zero API cost)")
-    print(f"  Note: Phase 3 deploys to GitHub Pages (Gamma replaced)")
+    vercel_tok = env.get("VERCEL_TOKEN", "")
+    print(f"  Note: Phase 3 = template inject → {'Vercel' if vercel_tok else 'GitHub Pages'}")
 
     with open(args.csv, newline="", encoding="utf-8-sig") as f:
         rows = list(csv.DictReader(f))
