@@ -135,29 +135,65 @@ Write `phase2_output.json` to the same run directory.
 - Base campaign themes on `phase1_data.raw_scrape` — use real services, real conditions, real location.
 
 ### Patient Email Sequence (3 emails)
-**CRITICAL: These emails go to PATIENTS after they complete the health assessment app.**
-They are NOT sales emails to the doctor. They are automated follow-up emails sent to website visitors who just finished the assessment.
 
-**Email 1 — Value Drop (sent immediately after assessment)**
-- Subject: acknowledges their specific concern
-- Opens with empathy + validation of their assessment results
-- Provides 1-2 genuine health education points relevant to their top concern
-- Soft CTA: "Here's what we can do together → [Book Free Consultation]"
+**CRITICAL:** These go TO PATIENTS after they complete the health assessment app.
+They are NOT sales emails to the doctor. NOT newsletters. NOT generic.
+They are hyper-relevant, short, empathetic, insight-driven emails that:
+- Validate the patient's specific symptoms
+- Demonstrate clinical intelligence and credibility
+- Build belief using mechanisms + real patient outcomes
+- Prepare the patient emotionally to book
 
-**Email 2 — Mechanism Story (sent Day 2)**
-- Subject: curiosity-driven
-- Explains the root-cause approach specific to their condition
-- Why conventional medicine misses this / why functional medicine finds it
-- CTA: "Schedule your discovery call"
+Use the assessment capture data. Each email must feel valuable on its own.
 
-**Email 3 — Proof & Results (sent Day 4)**
-- Subject: social proof focused
-- Real patient outcome story (appropriate for the practice specialty)
-- Addresses most common objection (cost, time, skepticism)
-- Strong CTA with urgency: "We only take X new patients per month"
+**HARD RULES:**
+- Use ONLY the practice context from `phase1_data.raw_scrape`
+- Do NOT invent symptoms, conditions, treatments, or results
+- Do NOT diagnose or make medical guarantees
+- Tone: calm, confident, intelligent, reassuring — not marketing hype
+- 150–300 words max per email. Short paragraphs. No walls of text.
+- End with doctor name + practice name, not "The Marketing Team"
 
-Write all 3 as if from the doctor/practice directly to the patient. Warm, expert, hopeful tone.
-Personalize to the specific conditions in `phase1_data.raw_scrape`. NO generic copy.
+**Personalization variables to use** (automation platform fills these at send time):
+`[FIRST_NAME]`, `[PRIMARY_SYMPTOM]`, `[SECONDARY_SYMPTOM]`,
+`[DURATION_OR_TRIGGER]`, `[IMPACT_ON_LIFE]`, `[KEY_ASSESSMENT_INSIGHT]`,
+`[RECOMMENDED_SERVICE_OR_FOCUS]`, `[PATIENT_GOAL]`, `[BOOKING_LINK]`
+
+---
+
+**Email 1 — Smart Practice Value Drop** (sent immediately after assessment)
+
+Purpose: Immediate validation. "We understand what's going on."
+- Subject: acknowledges [PRIMARY_SYMPTOM] — feels personal, not generic
+- Empathetic opening referencing [PRIMARY_SYMPTOM]
+- ONE high-value clinical insight tied to [KEY_ASSESSMENT_INSIGHT]
+- Why generic solutions often fail — without attacking other providers
+- Soft CTA to book or "review your next steps"
+
+---
+
+**Email 2 — Mechanism Story** (sent Day 2)
+
+Purpose: Explain the *why* behind their symptoms. Root cause, not surface.
+- Subject: curiosity hook about why [PRIMARY_SYMPTOM] keeps returning
+- Simple analogy or story explaining the mechanism in plain language
+- Tie mechanism back to patient's assessment answers
+- What typically gets missed in standard care (no blame, just clinical reality)
+- Position the practice's approach as different — no claims, just framing
+- CTA to book a new patient consultation
+
+---
+
+**Email 3 — Proof & Results** (sent Day 4)
+
+Purpose: Transfer belief using a relatable patient story. Reduce fear. Invite next step.
+- Subject: social proof focused, patient story angle
+- Short anonymized patient story with similar symptom pattern to [PRIMARY_SYMPTOM]
+- What changed when the right root cause was addressed
+- Clear disclaimer: "Results vary significantly from person to person"
+- Calm, clear CTA using [BOOKING_LINK] — not urgent, not pushy
+- Close: "This is not a commitment. It's a chance to get clear answers."
+- Compliance line at footer: "This email is for informational purposes only and does not constitute medical advice."
 
 ### Assessment App Config
 - `concerns`: 10–12 conditions based on what the practice actually treats (from scrape)
