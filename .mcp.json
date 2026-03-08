@@ -1,11 +1,9 @@
 {
   "mcpServers": {
-    "semrush": {
-      "command": "npx",
-      "args": ["-y", "semrush-mcp"],
-      "env": {
-        "SEMRUSH_API_KEY": "YOUR_SEMRUSH_API_KEY_HERE"
-      }
+    "googleworkspace": {
+      "command": "/Users/neo/.local/bin/gws",
+      "args": ["mcp", "--services", "all", "--helpers", "--workflows"],
+      "env": {}
     }
   }
 }
