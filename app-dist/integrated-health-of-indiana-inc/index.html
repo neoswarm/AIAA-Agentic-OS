@@ -5,267 +5,1031 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Health Assessment — Integrated Health of Indiana, Inc.</title>
 <meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Complete a free health assessment with Integrated Health of Indiana, Inc. to discover your personalized care plan.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --brand-primary: #036797;
-    --brand-accent:  #0b6088;
-    --bg:            #080d18;
-    --card:          #0f1420;
-    --card2:         #111827;
-    --border:        #1e2d3d;
-    --text:          #f0f4ff;
-    --text-muted:    #94a3b8;
-  }
-  html { background: var(--bg); }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 24px 16px 60px;
-  }
+/* ── RESET & ROOT ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+:root {
+  --primary:    #036797;
+  --accent:     #0b6088;
+  --dark:       #0a0f1e;
+  --dark2:      #111827;
+  --dark3:      #1f2937;
+  --border:     #2d3748;
+  --text:       #f1f5f9;
+  --muted:      #94a3b8;
+  --radius-sm:  8px;
+  --radius-md:  14px;
+  --radius-lg:  22px;
+  --shadow-md:  0 4px 24px rgba(0,0,0,0.35);
+  --shadow-lg:  0 16px 56px rgba(0,0,0,0.5);
+  --trans:      0.25s cubic-bezier(0.4,0,0.2,1);
+}
+body { font-family: 'Inter', sans-serif; background: var(--dark); color: var(--text); line-height: 1.6; }
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
 
-  /* ── HEADER ── */
-  .app-header {
-    width: 100%;
-    max-width: 660px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 32px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-  }
-  .app-header img {
-    height: 40px;
-    width: auto;
-    border-radius: 6px;
-    object-fit: contain;
-  }
-  .app-header .practice { font-size: 1.1rem; font-weight: 700; color: #fff; }
-  .app-header .tagline  { font-size: 0.9rem; color: var(--text-muted); }
+/* ── TRACKING BEACON ───────────────────────────────────────────────────────── */
+/* Open tracking fires on page load via src attribute */
 
-  /* ── CARD ── */
-  .assessment-card {
-    background: var(--card);
-    border-radius: 20px;
-    padding: 40px;
-    width: 100%;
-    max-width: 660px;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.4);
-  }
+/* ── NAVBAR ────────────────────────────────────────────────────────────────── */
+.navbar {
+  position: sticky; top: 0; z-index: 1000;
+  background: rgba(10,15,30,0.85); backdrop-filter: blur(18px);
+  border-bottom: 1px solid transparent;
+  padding: 16px 0; transition: var(--trans);
+}
+.navbar.scrolled { border-bottom-color: var(--border); background: rgba(10,15,30,0.97); }
+.navbar-inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+}
+.nav-logo { display: flex; align-items: center; gap: 12px; }
+.nav-logo img { height: 36px; width: auto; border-radius: 6px; }
+.nav-logo-text { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+.nav-cta {
+  background: var(--primary); color: #fff; padding: 10px 22px;
+  border-radius: var(--radius-sm); font-weight: 600; font-size: 0.92rem;
+  transition: var(--trans); white-space: nowrap; flex-shrink: 0;
+}
+.nav-cta:hover { opacity: 0.88; text-decoration: none; transform: translateY(-1px); }
+.nav-links { display: flex; gap: 28px; list-style: none; }
+.nav-links a { color: var(--muted); font-size: 0.92rem; font-weight: 500; transition: color var(--trans); }
+.nav-links a:hover { color: var(--text); text-decoration: none; }
+@media (max-width: 680px) { .nav-links { display: none; } }
 
-  /* ── PROGRESS ── */
-  .progress-wrap {
-    height: 5px;
-    background: var(--border);
-    border-radius: 3px;
-    margin-bottom: 28px;
-  }
-  .progress-bar {
-    height: 100%;
-    background: var(--brand-accent);
-    border-radius: 3px;
-    transition: width 0.3s;
-    width: 16.6%;
-  }
-  .step-counter {
-    font-size: 1rem;
-    color: var(--brand-accent);
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
+/* ── HERO ──────────────────────────────────────────────────────────────────── */
+.hero {
+  padding: 90px 0 80px;
+  background: linear-gradient(160deg, rgba(10,15,30,1) 0%, rgba(15,24,42,1) 50%, rgba(10,15,30,1) 100%);
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 60% 40%, color-mix(in srgb, var(--primary) 12%, transparent), transparent);
+  pointer-events: none;
+}
+.hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; }
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+  color: var(--accent); font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 6px 14px; border-radius: 100px; margin-bottom: 22px;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif; font-size: clamp(2.1rem,4.5vw,3.2rem);
+  font-weight: 800; line-height: 1.18; color: #fff; margin-bottom: 22px;
+}
+.hero h1 span { color: var(--accent); }
+.hero p { font-size: 1.15rem; color: var(--muted); line-height: 1.75; margin-bottom: 36px; max-width: 520px; }
+.hero-ctas { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 36px; }
+.btn-hero {
+  background: var(--primary); color: #fff; padding: 16px 32px;
+  border-radius: var(--radius-sm); font-weight: 700; font-size: 1.05rem;
+  transition: var(--trans); display: inline-block; border: none; cursor: pointer;
+}
+.btn-hero:hover { opacity: 0.88; transform: translateY(-2px); box-shadow: var(--shadow-md); text-decoration: none; }
+.btn-ghost {
+  background: transparent; color: var(--muted); font-size: 0.95rem; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-ghost:hover { color: var(--text); text-decoration: none; }
+.hero-trust { display: flex; flex-wrap: wrap; gap: 18px; }
+.hero-trust-item { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--muted); }
+.hero-trust-item span:first-child { color: var(--accent); font-size: 1rem; }
+.hero-img-wrap {
+  border-radius: var(--radius-lg); overflow: hidden;
+  background: var(--dark2); min-height: 380px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+  position: relative;
+}
+.hero-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.hero-img-placeholder {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; padding: 40px; text-align: center;
+}
+.hero-img-placeholder .icon { font-size: 3.5rem; }
+.hero-img-placeholder p { color: var(--muted); font-size: 0.9rem; }
+@media (max-width: 860px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+  .hero-img-wrap { min-height: 260px; }
+}
 
-  /* ── BUTTONS (reused from main template) ── */
-  .btn-primary {
-    width: 100%;
-    background: var(--brand-accent);
-    color: #0a0e1a;
-    border: none;
-    padding: 18px;
-    border-radius: 8px;
-    font-weight: 800;
-    font-size: 1.2rem;
-    cursor: pointer;
-    margin-top: 16px;
-  }
-  .btn-back {
-    flex: 1;
-    background: var(--card2);
-    color: #fff;
-    border: none;
-    padding: 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1.1rem;
-  }
-  .btn-next {
-    flex: 2;
-    background: var(--brand-accent);
-    color: #0a0e1a;
-    border: none;
-    padding: 16px;
-    border-radius: 8px;
-    font-weight: 800;
-    font-size: 1.1rem;
-    cursor: pointer;
-  }
+/* ── HOW IT WORKS ──────────────────────────────────────────────────────────── */
+.how { padding: 80px 0; background: var(--dark2); }
+.section-label {
+  text-align: center; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+}
+.section-title {
+  text-align: center; font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem,3.5vw,2.4rem); font-weight: 700; color: #fff;
+  margin-bottom: 14px; line-height: 1.25;
+}
+.section-sub { text-align: center; color: var(--muted); font-size: 1.1rem; max-width: 580px; margin: 0 auto 56px; line-height: 1.7; }
+.steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.step-card {
+  background: var(--dark3); border-radius: var(--radius-md); padding: 32px 28px;
+  border: 1px solid var(--border); transition: var(--trans); text-align: center;
+}
+.step-card:hover { border-color: color-mix(in srgb, var(--primary) 50%, transparent); transform: translateY(-3px); }
+.step-num {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 20%, transparent);
+  border: 2px solid color-mix(in srgb, var(--primary) 50%, transparent);
+  color: var(--accent); font-weight: 800; font-size: 1.3rem;
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
+}
+.step-card h3 { color: #fff; font-weight: 700; font-size: 1.1rem; margin-bottom: 10px; }
+.step-card p { color: var(--muted); font-size: 0.95rem; line-height: 1.65; }
+@media (max-width: 680px) { .steps-grid { grid-template-columns: 1fr; } }
 
-  /* ── RESPONSIVE ── */
-  @media (max-width: 480px) {
-    .assessment-card { padding: 28px 20px; }
-    .app-header { flex-direction: column; text-align: center; }
-  }
+/* ── CONDITIONS ────────────────────────────────────────────────────────────── */
+.conditions { padding: 80px 0; }
+.concerns-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+.concern-card {
+  background: var(--dark2); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 24px 22px; transition: var(--trans); cursor: default;
+}
+.concern-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 60%, transparent);
+  background: color-mix(in srgb, var(--primary) 8%, var(--dark2));
+  transform: translateY(-2px);
+}
+.concern-card .icon { font-size: 1.8rem; margin-bottom: 12px; }
+.concern-card h4 { color: #fff; font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
+.concern-card p { color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
+
+/* ── ABOUT ─────────────────────────────────────────────────────────────────── */
+.about { padding: 80px 0; background: var(--dark2); }
+.about-grid { display: grid; grid-template-columns: 360px 1fr; gap: 60px; align-items: start; }
+.about-img {
+  border-radius: var(--radius-lg); overflow: hidden; background: var(--dark3);
+  min-height: 420px; display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border);
+}
+.about-img img { width: 100%; height: 100%; object-fit: cover; }
+.about-tag { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+.about-content h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.7rem,3vw,2.2rem); font-weight: 700; color: #fff; line-height: 1.25; margin-bottom: 20px; }
+.about-content p { color: var(--muted); font-size: 1rem; line-height: 1.8; margin-bottom: 16px; }
+.cred-badges { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0; }
+.cred-badge {
+  background: var(--dark3); border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 14px; font-size: 0.82rem; font-weight: 600; color: var(--muted);
+}
+@media (max-width: 860px) {
+  .about-grid { grid-template-columns: 1fr; }
+  .about-img { min-height: 240px; }
+}
+
+/* ── SOCIAL PROOF ──────────────────────────────────────────────────────────── */
+.proof { padding: 80px 0; }
+.testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.testimonial-card {
+  background: var(--dark2); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 30px 26px;
+}
+.testimonial-card.placeholder { border-style: dashed; opacity: 0.55; }
+.stars { color: #facc15; font-size: 1rem; margin-bottom: 14px; letter-spacing: 2px; }
+.testimonial-card blockquote { color: var(--text); font-size: 0.97rem; line-height: 1.75; margin-bottom: 20px; font-style: italic; }
+.testimonial-card cite { color: var(--muted); font-size: 0.88rem; font-weight: 600; font-style: normal; }
+.placeholder-note { color: var(--muted); font-size: 0.82rem; font-style: italic; margin-top: 8px; }
+@media (max-width: 860px) { .testimonials-grid { grid-template-columns: 1fr; } }
+
+/* ── ASSESSMENT SECTION ────────────────────────────────────────────────────── */
+.assessment-section {
+  padding: 90px 0;
+  background: linear-gradient(160deg, var(--dark3) 0%, var(--dark) 100%);
+  border-top: 1px solid var(--border);
+}
+.assessment-wrap { max-width: 720px; margin: 0 auto; }
+.progress-bar-wrap { height: 5px; background: var(--dark3); border-radius: 3px; margin-bottom: 10px; }
+.progress-bar-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 0.4s ease; width: 14.2%; }
+.step-counter-label { font-size: 0.88rem; color: var(--accent); font-weight: 700; margin-bottom: 32px; }
+.assessment-card {
+  background: var(--dark2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 44px 40px;
+  box-shadow: var(--shadow-lg);
+}
+@media (max-width: 600px) { .assessment-card { padding: 28px 20px; } }
+.step-title { font-size: 1.75rem; font-weight: 800; color: #fff; line-height: 1.25; margin-bottom: 10px; }
+.step-sub { font-size: 1rem; color: var(--muted); margin-bottom: 28px; line-height: 1.65; }
+.step-context { font-size: 0.95rem; color: var(--accent); font-weight: 700; margin-bottom: 6px; }
+
+/* Input fields */
+.field-group { display: flex; flex-direction: column; gap: 14px; margin-bottom: 4px; }
+.field-label { font-size: 0.88rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+.field-input {
+  width: 100%; background: var(--dark3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px 18px; color: var(--text);
+  font-size: 1rem; font-family: 'Inter', sans-serif;
+  transition: border-color var(--trans), box-shadow var(--trans);
+  outline: none;
+}
+.field-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent); }
+.field-input::placeholder { color: var(--muted); opacity: 0.7; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 520px) { .field-row { grid-template-columns: 1fr; } }
+
+/* Concern cards (Step 2) */
+.concern-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 4px; }
+@media (max-width: 520px) { .concern-select-grid { grid-template-columns: 1fr; } }
+.concern-btn {
+  background: var(--dark3); border: 2px solid var(--border); border-radius: var(--radius-md);
+  padding: 18px 16px; cursor: pointer; text-align: left; transition: var(--trans);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.concern-btn:hover { border-color: color-mix(in srgb, var(--primary) 60%, transparent); }
+.concern-btn.selected { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 12%, var(--dark3)); }
+.concern-btn .c-icon { font-size: 1.5rem; }
+.concern-btn .c-title { font-size: 0.97rem; font-weight: 700; color: #fff; }
+.concern-btn .c-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+/* Symptom chips (Step 3) */
+.symptom-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 4px; }
+.chip {
+  background: var(--dark3); border: 1.5px solid var(--border); border-radius: 100px;
+  padding: 9px 18px; font-size: 0.92rem; color: var(--muted);
+  cursor: pointer; transition: var(--trans); user-select: none;
+}
+.chip:hover { border-color: color-mix(in srgb, var(--primary) 60%, transparent); color: var(--text); }
+.chip.selected {
+  border-color: var(--primary); background: color-mix(in srgb, var(--primary) 18%, var(--dark3));
+  color: #fff; font-weight: 600;
+}
+
+/* Duration / severity icon grid (Step 4) */
+.option-grid { display: grid; gap: 12px; margin-bottom: 4px; }
+.option-grid-2 { grid-template-columns: 1fr 1fr; }
+.option-grid-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 520px) { .option-grid-4 { grid-template-columns: repeat(2,1fr); } .option-grid-2 { grid-template-columns: 1fr; } }
+.option-btn {
+  background: var(--dark3); border: 2px solid var(--border); border-radius: var(--radius-md);
+  padding: 18px 12px; cursor: pointer; transition: var(--trans);
+  display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
+}
+.option-btn:hover { border-color: color-mix(in srgb, var(--primary) 60%, transparent); }
+.option-btn.selected { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 12%, var(--dark3)); }
+.option-btn .o-icon { font-size: 1.7rem; }
+.option-btn .o-label { font-size: 0.88rem; font-weight: 600; color: #fff; line-height: 1.35; }
+.option-btn .o-sub { font-size: 0.78rem; color: var(--muted); }
+
+/* Checkboxes (Step 5) */
+.checkbox-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
+.checkbox-row {
+  display: flex; align-items: flex-start; gap: 14px; padding: 14px 18px;
+  background: var(--dark3); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  cursor: pointer; transition: var(--trans);
+}
+.checkbox-row:hover { border-color: color-mix(in srgb, var(--primary) 50%, transparent); }
+.checkbox-row.selected { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, var(--dark3)); }
+.checkbox-row input[type=checkbox] { accent-color: var(--primary); width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0; }
+.checkbox-row span { font-size: 0.97rem; color: var(--text); line-height: 1.55; }
+
+/* Nav buttons */
+.step-nav { display: flex; gap: 12px; margin-top: 32px; }
+.btn-back {
+  flex: 1; background: var(--dark3); color: var(--text); border: 1px solid var(--border);
+  padding: 14px; border-radius: var(--radius-sm); cursor: pointer; font-size: 1rem; font-family: 'Inter', sans-serif;
+  transition: var(--trans);
+}
+.btn-back:hover { background: var(--dark); }
+.btn-next {
+  flex: 2.5; background: var(--primary); color: #fff; border: none;
+  padding: 14px; border-radius: var(--radius-sm); cursor: pointer; font-size: 1rem; font-weight: 700;
+  font-family: 'Inter', sans-serif; transition: var(--trans);
+}
+.btn-next:hover { opacity: 0.9; }
+.btn-full {
+  width: 100%; background: var(--primary); color: #fff; border: none;
+  padding: 18px; border-radius: var(--radius-sm); cursor: pointer; font-size: 1.1rem; font-weight: 700;
+  font-family: 'Inter', sans-serif; margin-top: 20px; transition: var(--trans);
+}
+.btn-full:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-full-ghost {
+  width: 100%; background: none; border: none; color: var(--muted);
+  padding: 12px; cursor: pointer; font-size: 0.92rem; font-family: 'Inter', sans-serif;
+}
+
+/* Review (Step 7) */
+.review-block { background: var(--dark3); border-radius: var(--radius-md); padding: 22px; margin-bottom: 14px; }
+.review-block dt { font-size: 0.82rem; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+.review-block dd { color: var(--text); font-size: 0.97rem; line-height: 1.6; }
+
+/* Results (Step 8) */
+.result-score {
+  text-align: center; padding: 32px 0 20px;
+}
+.result-score .score-icon { font-size: 4rem; margin-bottom: 12px; }
+.result-score h2 { font-size: 1.9rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
+.result-score .score-label { font-size: 1.2rem; color: var(--accent); font-weight: 700; margin-bottom: 20px; }
+.result-summary {
+  background: var(--dark3); border-radius: var(--radius-md); padding: 24px; margin-bottom: 20px;
+}
+.result-summary p { color: var(--text); font-size: 1rem; line-height: 1.8; margin-bottom: 12px; }
+.result-summary p:last-child { margin-bottom: 0; }
+.copy-wrap { display: flex; gap: 10px; margin-bottom: 16px; }
+.copy-area {
+  flex: 1; background: var(--dark); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px 14px; color: var(--muted); font-size: 0.85rem; line-height: 1.6;
+  resize: none; font-family: 'Inter', sans-serif; height: 80px;
+}
+.copy-btn {
+  background: var(--dark3); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 10px 16px; cursor: pointer; color: var(--text); font-size: 0.88rem; font-family: 'Inter', sans-serif;
+  transition: var(--trans); white-space: nowrap; height: fit-content; align-self: flex-start; margin-top: 4px;
+}
+.copy-btn:hover { background: var(--border); }
+.emergency-note {
+  background: color-mix(in srgb, #dc2626 10%, transparent);
+  border: 1px solid #dc2626; border-radius: var(--radius-sm);
+  padding: 14px 18px; margin-top: 16px;
+  font-size: 0.88rem; color: #fca5a5; line-height: 1.6;
+}
+.emergency-note strong { color: #ef4444; }
+
+/* ── FINAL CTA SECTION ─────────────────────────────────────────────────────── */
+.final-cta-section {
+  padding: 80px 0; text-align: center;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--primary) 15%, var(--dark)) 0%, var(--dark) 100%);
+}
+.final-cta-section h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem,3.5vw,2.4rem); font-weight: 700; color: #fff; margin-bottom: 14px; }
+.final-cta-section p { color: var(--muted); font-size: 1.05rem; max-width: 520px; margin: 0 auto 32px; line-height: 1.75; }
+
+/* ── FOOTER ────────────────────────────────────────────────────────────────── */
+footer {
+  background: var(--dark); border-top: 1px solid var(--border);
+  padding: 44px 0 32px;
+}
+.footer-inner { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; margin-bottom: 36px; }
+@media (max-width: 680px) { .footer-inner { grid-template-columns: 1fr; gap: 24px; } }
+.footer-brand img { height: 36px; width: auto; border-radius: 6px; margin-bottom: 14px; }
+.footer-brand p { color: var(--muted); font-size: 0.88rem; line-height: 1.7; }
+.footer-col h4 { color: #fff; font-size: 0.88rem; font-weight: 700; margin-bottom: 14px; letter-spacing: 0.06em; text-transform: uppercase; }
+.footer-col p, .footer-col a { color: var(--muted); font-size: 0.88rem; line-height: 1.8; display: block; }
+.footer-col a:hover { color: var(--text); text-decoration: none; }
+.footer-bottom {
+  border-top: 1px solid var(--border); padding-top: 24px;
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px;
+}
+.footer-bottom p { color: var(--muted); font-size: 0.8rem; }
+.footer-disclaimer {
+  margin-top: 16px; padding: 14px 18px;
+  background: var(--dark2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--muted); font-size: 0.8rem; line-height: 1.7;
+}
+
+/* ── SCROLL REVEAL ─────────────────────────────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.55s ease, transform 0.55s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
 </style>
 </head>
 <body>
 
-<!-- Open Tracking Beacon -->
+<!-- Open Tracking Beacon (fires on page load → Vercel edge fn → Slack #d100-opens) -->
 <img src="https://healthbizleads.com/api/track?c=integrated-health-of-indiana-inc&n=Integrated%20Health%20of%20Indiana%2C%20Inc.&s=integrated-health-of-indiana-inc&src=app"
      width="1" height="1" alt="" style="position:absolute;opacity:0;pointer-events:none;" loading="eager">
 
-<!-- HEADER -->
-<header class="app-header">
-  <img src="" alt="Integrated Health of Indiana, Inc." onerror="this.style.display='none'">
-  <div>
-    <div class="practice">Integrated Health of Indiana, Inc.</div>
-    <div class="tagline">Patient Health Assessment</div>
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  NAVBAR
+══════════════════════════════════════════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="container navbar-inner">
+    <div class="nav-logo">
+      <img src="" alt="Integrated Health of Indiana, Inc." onerror="this.style.display='none'">
+      <span class="nav-logo-text">Integrated Health of Indiana, Inc.</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#conditions">Conditions</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#assessment">Assessment</a></li>
+    </ul>
+    <a href="#assessment" class="nav-cta">Start Free Assessment →</a>
   </div>
-</header>
+</nav>
 
-<!-- ASSESSMENT CARD -->
-<div class="assessment-card">
-  <div class="progress-wrap"><div class="progress-bar" id="modal-progress"></div></div>
-  <div class="step-counter" id="step-counter">Step 1 of 6</div>
-  <div id="assessment-content"></div>
-</div>
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  HERO
+══════════════════════════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="hero-tag">✦ Functional Medicine · Free Assessment</div>
+      <h1>Your Symptoms Have a <span>Root Cause</span>. Let's Find It.</h1>
+      <p>Integrated Health of Indiana, Inc. uses advanced lab testing and personalized care to address what's actually driving your health challenges — not just managing symptoms.</p>
+      <div class="hero-ctas">
+        <a href="#assessment" class="btn-hero">Take the Free Assessment →</a>
+        <a href="https://integratedhealthofindiana.com/new-patients/" class="btn-ghost" target="_blank" rel="noopener">Or book a discovery call ↗</a>
+      </div>
+      <div class="hero-trust">
+        <div class="hero-trust-item"><span>✓</span><span>Free &amp; Confidential</span></div>
+        <div class="hero-trust-item"><span>✓</span><span>Takes ~5 Minutes</span></div>
+        <div class="hero-trust-item"><span>✓</span><span>Personalized Results</span></div>
+      </div>
+    </div>
+    <div class="hero-img-wrap" id="hero-img-wrap">
+      <img src="" alt="Integrated Health of Indiana, Inc." id="hero-img"
+           style="max-height:340px;object-fit:contain;padding:40px;"
+           onerror="document.getElementById('hero-img-wrap').innerHTML=heroPlaceholder()">
+    </div>
+  </div>
+</section>
 
-<!-- Footer -->
-<p style="color:var(--text-muted);font-size:0.88rem;text-align:center;margin-top:28px;max-width:500px;line-height:1.6;">
-  Your responses are private and only shared with Integrated Health of Indiana, Inc.'s clinical team. This tool is for informational purposes only and does not constitute medical advice.
-</p>
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  HOW IT WORKS
+══════════════════════════════════════════════════════════════════════════════ -->
+<section class="how" id="how">
+  <div class="container">
+    <p class="section-label">The Process</p>
+    <h2 class="section-title">Your Path to Answers</h2>
+    <p class="section-sub">Three simple steps from uncertainty to a clear, personalized care plan.</p>
+    <div class="steps-grid reveal">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h3>Complete the Assessment</h3>
+        <p>Answer 6 focused questions about your health history, symptoms, and goals. No medical jargon. Takes ~5 minutes.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h3>See Your Results</h3>
+        <p>Get a personalized summary identifying key patterns in your health profile and how Integrated Health of Indiana, Inc.'s approach can help.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h3>Book a Consultation</h3>
+        <p>Connect with Dr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP's team to review your results and design a care plan built around your unique biology.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  CONDITIONS WE TREAT
+══════════════════════════════════════════════════════════════════════════════ -->
+<section class="conditions" id="conditions">
+  <div class="container">
+    <p class="section-label">Areas of Focus</p>
+    <h2 class="section-title">What We Address</h2>
+    <p class="section-sub">Integrated Health of Indiana, Inc. specializes in identifying the root cause behind these common health challenges.</p>
+    <div class="concerns-grid reveal" id="conditions-grid">
+      <!-- Populated by JS from ASSESSMENT_CONCERNS_JSON -->
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  ABOUT
+══════════════════════════════════════════════════════════════════════════════ -->
+<section class="about" id="about">
+  <div class="container about-grid reveal">
+    <div class="about-img" id="about-img-wrap">
+      <img src="" alt="Dr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP" style="max-height:360px;object-fit:contain;padding:40px;"
+           onerror="document.getElementById('about-img-wrap').innerHTML='<div style=\'padding:60px;text-align:center;color:var(--muted);\'><div style=\'font-size:4rem;margin-bottom:12px;\'>👨‍⚕️</div><p>Dr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP</p></div>'">
+    </div>
+    <div class="about-content">
+      <p class="about-tag">Meet Your Provider</p>
+      <h2>Dr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP</h2>
+      <p>Dr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP and the team at Integrated Health of Indiana, Inc. take a root-cause approach to healthcare — combining advanced diagnostics, functional nutrition, and personalized protocols to help patients finally get answers after years of feeling unheard by conventional medicine.</p>
+      <p>Instead of treating symptoms in isolation, the practice works to understand the full picture of your health — genetics, gut function, hormones, lifestyle, and environment — to create a care plan that works with your body's natural healing capacity.</p>
+      <div class="cred-badges" id="cred-badges">
+        <span class="cred-badge">Functional Medicine</span>
+        <span class="cred-badge">Root Cause Analysis</span>
+        <span class="cred-badge">Advanced Lab Testing</span>
+        <span class="cred-badge">Personalized Care Plans</span>
+      </div>
+      <a href="#assessment" class="btn-hero" style="margin-top:8px;display:inline-block;">Start Your Assessment →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  SOCIAL PROOF
+══════════════════════════════════════════════════════════════════════════════ -->
+<section class="proof" id="proof">
+  <div class="container">
+    <p class="section-label">Patient Stories</p>
+    <h2 class="section-title">What Our Patients Say</h2>
+    <div class="testimonials-grid reveal">
+      <div class="testimonial-card placeholder">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Real patient testimonial will go here."</blockquote>
+        <cite>— Anonymous Patient</cite>
+        <p class="placeholder-note">Add testimonials to your profile</p>
+      </div>
+      <div class="testimonial-card placeholder">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Real patient testimonial will go here."</blockquote>
+        <cite>— Anonymous Patient</cite>
+        <p class="placeholder-note">Add testimonials to your profile</p>
+      </div>
+      <div class="testimonial-card placeholder">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Real patient testimonial will go here."</blockquote>
+        <cite>— Anonymous Patient</cite>
+        <p class="placeholder-note">Add testimonials to your profile</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  HEALTH ASSESSMENT  (the main interactive section)
+══════════════════════════════════════════════════════════════════════════════ -->
+<section class="assessment-section" id="assessment">
+  <div class="container">
+    <p class="section-label">Free Health Assessment</p>
+    <h2 class="section-title">Discover What's Driving Your Symptoms</h2>
+    <p class="section-sub" style="margin-bottom:40px;">Complete the assessment below. Integrated Health of Indiana, Inc.'s clinical team will review your responses before your first conversation.</p>
+
+    <div class="assessment-wrap">
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog-bar"></div></div>
+      <div class="step-counter-label" id="step-label">Step 1 of 7</div>
+      <div class="assessment-card" id="assessment-card">
+        <!-- Steps rendered by JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  FINAL CTA
+══════════════════════════════════════════════════════════════════════════════ -->
+<section class="final-cta-section">
+  <div class="container">
+    <h2>Ready to Find Your Answers?</h2>
+    <p>Take the free assessment above or book directly with Integrated Health of Indiana, Inc.'s team today.</p>
+    <a href="https://integratedhealthofindiana.com/new-patients/" target="_blank" rel="noopener" class="btn-hero">Book a Consultation →</a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  FOOTER
+══════════════════════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="" alt="Integrated Health of Indiana, Inc." onerror="this.style.display='none'">
+        <p>Integrated Health of Indiana, Inc.<br>Root-cause functional medicine.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Practice</h4>
+        <a href="https://integratedhealthofindiana.com" target="_blank" rel="noopener">https://integratedhealthofindiana.com</a>
+        <a href="https://integratedhealthofindiana.com/new-patients/" target="_blank" rel="noopener">Book Appointment</a>
+        <a href="#assessment">Health Assessment</a>
+      </div>
+      <div class="footer-col">
+        <h4>Provider</h4>
+        <p>Dr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP</p>
+        <p>Integrated Health of Indiana, Inc.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Integrated Health of Indiana, Inc.. All rights reserved.</p>
+      <p><a href="#">Privacy Policy</a> · <a href="#">Terms</a></p>
+    </div>
+    <div class="footer-disclaimer">
+      <strong>Medical Disclaimer:</strong> This website and health assessment are for informational purposes only and do not constitute medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified healthcare provider with any questions you may have regarding a medical condition. <strong>If you are experiencing a medical emergency, call 911 immediately.</strong>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  JAVASCRIPT
+══════════════════════════════════════════════════════════════════════════════ -->
 <script>
-// ─── CONFIG ──────────────────────────────────────────────────────────────────
+// ── CONFIG ─────────────────────────────────────────────────────────────────
 const CONFIG = {
-  practice_name: "Integrated Health of Indiana, Inc.",
-  doctor_name:   "Dr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP",
-  website:       "https://integratedhealthofindiana.com",
-  logo_url:      "",
-  booking_url:   "https://integratedhealthofindiana.com/new-patients/",
-  brand_primary: "#036797",
-  brand_accent:  "#0b6088"
+  practice: "Integrated Health of Indiana, Inc.",
+  doctor:   "Dr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP",
+  booking:  "https://integratedhealthofindiana.com/new-patients/",
+  website:  "https://integratedhealthofindiana.com",
+  slug:     "integrated-health-of-indiana-inc",
 };
 
-// ─── ASSESSMENT DATA ──────────────────────────────────────────────────────────
-const CONCERNS = ["Fatigue & Energy", "Gut Health", "Hormonal Balance", "Brain Fog / Cognitive", "Weight & Metabolism", "Chronic Pain / Inflammation"];
-const SYMPTOMS = {};
+// ── ASSESSMENT DATA ─────────────────────────────────────────────────────────
+const CONCERN_DATA = ["Fatigue & Energy", "Gut Health", "Hormonal Balance", "Brain Fog / Cognitive", "Weight & Metabolism", "Chronic Pain / Inflammation"];
+const SYMPTOM_DATA = {};
 
-let state = JSON.parse(localStorage.getItem('d100_app_' + CONFIG.practice_name) || '{"step":1}');
-function save() { localStorage.setItem('d100_app_' + CONFIG.practice_name, JSON.stringify(state)); }
+// Icons for each concern (auto-assigned by index)
+const CONCERN_ICONS = ["⚡","🌿","🧠","⚖️","🔥","🌊","💤","💊","🏃","🧬","❤️","🔬"];
+const CONCERN_DESCS = {
+  "Fatigue & Energy":       "Persistent low energy, crashing after meals, or never feeling rested despite sleep.",
+  "Gut Health":             "Bloating, IBS, constipation, diarrhea, food sensitivities, or leaky gut symptoms.",
+  "Hormonal Balance":       "Irregular cycles, PMS, low testosterone, thyroid issues, or adrenal fatigue.",
+  "Brain Fog / Cognitive":  "Memory issues, difficulty concentrating, mental fatigue, or word-finding problems.",
+  "Weight & Metabolism":    "Stubborn weight gain, slow metabolism, insulin resistance, or metabolic syndrome.",
+  "Chronic Pain / Inflammation": "Joint pain, fibromyalgia, migraines, or widespread inflammation.",
+  "Thyroid":                "Underactive or overactive thyroid, temperature sensitivity, hair loss, or sluggish metabolism.",
+  "Adrenal / Stress":       "Burnout, cortisol dysregulation, difficulty handling stress, or wired-but-tired feeling.",
+  "Sleep":                  "Insomnia, poor sleep quality, frequent waking, or non-restorative sleep.",
+  "Autoimmune":             "Diagnosed or suspected autoimmune condition, chronic inflammation, or immune dysregulation.",
+  "Women's Health":         "PCOS, perimenopause, menopause, fertility concerns, or hormonal mood swings.",
+  "Men's Health":           "Low testosterone, prostate concerns, libido, or male hormone optimization.",
+};
 
+// ── STATE ───────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'd100_app_' + CONFIG.slug;
+let state = {};
+try { state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"step":1}'); } catch(e) { state = {step:1}; }
+function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {} }
+const TOTAL_STEPS = 7;
+
+// ── PROGRESS ────────────────────────────────────────────────────────────────
 function updateProgress() {
-  const pct = Math.max(((state.step - 1) / 6) * 100, 16.6);
-  const bar = document.getElementById('modal-progress');
-  const ctr = document.getElementById('step-counter');
+  const pct = Math.max(((state.step - 1) / TOTAL_STEPS) * 100, 14);
+  const bar = document.getElementById('prog-bar');
+  const lbl = document.getElementById('step-label');
   if (bar) bar.style.width = pct + '%';
-  if (ctr) ctr.textContent = 'Step ' + state.step + ' of 6';
+  if (lbl) lbl.textContent = state.step <= TOTAL_STEPS
+    ? `Step ${state.step} of ${TOTAL_STEPS}`
+    : 'Complete ✓';
 }
 
-function renderStep() {
-  const el = document.getElementById('assessment-content');
+// ── RENDER ──────────────────────────────────────────────────────────────────
+function render() {
+  const el = document.getElementById('assessment-card');
   if (!el) return;
   updateProgress();
-  const s = state.step;
-  const btnStyle = 'width:100%;background:var(--brand-accent);color:#0a0e1a;border:none;padding:18px;border-radius:8px;font-weight:800;font-size:1.2rem;cursor:pointer;margin-top:16px;';
-  const backStyle = 'flex:1;background:#1e2d3d;color:#fff;border:none;padding:16px;border-radius:8px;cursor:pointer;font-size:1.1rem;';
-  const nextStyle = 'flex:2;background:var(--brand-accent);color:#0a0e1a;border:none;padding:16px;border-radius:8px;font-weight:800;font-size:1.1rem;cursor:pointer;';
+  el.innerHTML = '';
 
-  if (s === 1) {
-    el.innerHTML = `
-      <h2 style="font-size:2rem;font-weight:800;color:#fff;margin:0 0 16px;">Find Your Path to Better Health</h2>
-      <p style="font-size:1.25rem;color:#94a3b8;line-height:1.75;margin-bottom:28px;">This quick assessment helps ${CONFIG.practice_name}'s team understand your situation before your first conversation. About 3 minutes.</p>
-      <div style="background:#111827;border-radius:10px;padding:24px;margin-bottom:24px;">
-        <p style="color:var(--brand-accent);font-weight:700;font-size:1.15rem;margin:0 0 6px;">✓ 100% Private</p>
-        <p style="color:#94a3b8;font-size:1.15rem;margin:0 0 16px;">Your answers are only shared with ${CONFIG.practice_name}'s clinical team.</p>
-        <p style="color:var(--brand-accent);font-weight:700;font-size:1.15rem;margin:0 0 6px;">✓ 3 Minutes</p>
-        <p style="color:#94a3b8;font-size:1.15rem;margin:0 0 16px;">6 quick questions. No medical forms.</p>
-        <p style="color:var(--brand-accent);font-weight:700;font-size:1.15rem;margin:0 0 6px;">✓ Personalized Results</p>
-        <p style="color:#94a3b8;font-size:1.15rem;margin:0;">We match your concerns to the right care approach.</p>
-      </div>
-      <button onclick="state.step=2;save();renderStep();" style="${btnStyle}">Start My Assessment →</button>`;
-  } else if (s === 2) {
-    const sel = state.concern || '';
-    el.innerHTML = `
-      <h2 style="font-size:1.9rem;font-weight:800;color:#fff;margin:0 0 8px;">What's your primary health concern?</h2>
-      <p style="color:#94a3b8;font-size:1.15rem;margin-bottom:20px;">Select the one affecting your life most right now.</p>
-      <div>${CONCERNS.map(c => `<button onclick="state.concern='${c}';save();document.querySelectorAll('.c-btn').forEach(b=>b.style.borderColor='#1e2d3d');this.style.borderColor='var(--brand-accent)';" class="c-btn" style="width:100%;text-align:left;background:#111827;border:2px solid ${sel===c?'var(--brand-accent)':'#1e2d3d'};border-radius:8px;padding:18px 22px;margin-bottom:10px;cursor:pointer;color:#fff;font-size:1.15rem;font-weight:600;">${c}</button>`).join('')}</div>
-      <div style="display:flex;gap:12px;margin-top:16px;">
-        <button onclick="state.step=1;save();renderStep();" style="${backStyle}">← Back</button>
-        <button onclick="state.concern?((state.step=3),save(),renderStep()):alert('Please select a concern');" style="${nextStyle}">Next →</button>
-      </div>`;
-  } else if (s === 3) {
-    const syms = SYMPTOMS[state.concern] || [];
-    const sel = state.symptoms || [];
-    el.innerHTML = `
-      <h2 style="font-size:1.9rem;font-weight:800;color:#fff;margin:0 0 8px;">Which apply to you?</h2>
-      <p style="color:var(--brand-accent);font-weight:700;font-size:1.1rem;margin-bottom:6px;">${state.concern}</p>
-      <p style="color:#94a3b8;font-size:1.1rem;margin-bottom:18px;">Select all that apply.</p>
-      <div>${syms.map((sym,i)=>`<label style="display:flex;align-items:flex-start;gap:14px;padding:16px 18px;background:#111827;border-radius:8px;margin-bottom:10px;cursor:pointer;border:1px solid ${sel.includes(i)?'var(--brand-accent)':'#1e2d3d'};">
-        <input type="checkbox" ${sel.includes(i)?'checked':''} onchange="const a=state.symptoms||[];const idx=${i};this.checked?(!a.includes(idx)&&a.push(idx)):a.splice(a.indexOf(idx),1);state.symptoms=a;save();this.closest('label').style.borderColor=this.checked?'var(--brand-accent)':'#1e2d3d';" style="margin-top:4px;accent-color:var(--brand-accent);width:20px;height:20px;flex-shrink:0;">
-        <span style="font-size:1.15rem;color:#f0f4ff;line-height:1.6;">${sym}</span>
-      </label>`).join('')}</div>
-      <div style="display:flex;gap:12px;margin-top:16px;">
-        <button onclick="state.step=2;save();renderStep();" style="${backStyle}">← Back</button>
-        <button onclick="state.step=4;save();renderStep();" style="${nextStyle}">Next →</button>
-      </div>`;
-  } else if (s === 4) {
-    const opts=['Less than 3 months','3 months – 1 year','1 – 3 years','3+ years'];
-    const sel=state.duration||'';
-    el.innerHTML=`
-      <h2 style="font-size:1.9rem;font-weight:800;color:#fff;margin:0 0 8px;">How long have you been dealing with this?</h2>
-      <p style="color:#94a3b8;font-size:1.15rem;margin-bottom:20px;">This helps us understand severity and the right approach.</p>
-      <div>${opts.map(o=>`<button onclick="state.duration='${o}';save();document.querySelectorAll('.d-btn').forEach(b=>b.style.borderColor='#1e2d3d');this.style.borderColor='var(--brand-accent)';" class="d-btn" style="width:100%;text-align:left;background:#111827;border:2px solid ${sel===o?'var(--brand-accent)':'#1e2d3d'};border-radius:8px;padding:18px 22px;margin-bottom:10px;cursor:pointer;color:#fff;font-size:1.15rem;font-weight:600;">${o}</button>`).join('')}</div>
-      <div style="display:flex;gap:12px;margin-top:16px;">
-        <button onclick="state.step=3;save();renderStep();" style="${backStyle}">← Back</button>
-        <button onclick="state.duration?((state.step=5),save(),renderStep()):alert('Please select a duration');" style="${nextStyle}">Next →</button>
-      </div>`;
-  } else if (s === 5) {
-    const opts=['No — this is my first step','Yes — conventional medicine only','Yes — other functional/integrative providers','Yes — multiple specialists without resolution'];
-    const sel=state.prior||'';
-    el.innerHTML=`
-      <h2 style="font-size:1.9rem;font-weight:800;color:#fff;margin:0 0 8px;">Have you seen other providers for this?</h2>
-      <p style="color:#94a3b8;font-size:1.15rem;margin-bottom:20px;">Helps ${CONFIG.practice_name}'s team understand your journey.</p>
-      <div>${opts.map(o=>`<button onclick="state.prior='${o}';save();document.querySelectorAll('.p-btn').forEach(b=>b.style.borderColor='#1e2d3d');this.style.borderColor='var(--brand-accent)';" class="p-btn" style="width:100%;text-align:left;background:#111827;border:2px solid ${sel===o?'var(--brand-accent)':'#1e2d3d'};border-radius:8px;padding:18px 22px;margin-bottom:10px;cursor:pointer;color:#fff;font-size:1.15rem;font-weight:600;">${o}</button>`).join('')}</div>
-      <div style="display:flex;gap:12px;margin-top:16px;">
-        <button onclick="state.step=4;save();renderStep();" style="${backStyle}">← Back</button>
-        <button onclick="state.prior?((state.step=6),save(),renderStep()):alert('Please select an option');" style="${nextStyle}">See My Results →</button>
-      </div>`;
-  } else if (s === 6) {
-    const n=(state.symptoms||[]).length;
-    const score=n>=5?'Strong Match':n>=3?'Good Match':'Potential Match';
-    el.innerHTML=`
-      <div style="text-align:center;margin-bottom:28px;">
-        <div style="font-size:3.5rem;margin-bottom:12px;">✅</div>
-        <h2 style="font-size:2rem;font-weight:800;color:#fff;margin:0 0 10px;">Assessment Complete</h2>
-        <p style="color:var(--brand-accent);font-weight:700;font-size:1.3rem;margin:0;">${score} for ${CONFIG.practice_name}</p>
-      </div>
-      <div style="background:#111827;border-radius:10px;padding:24px;margin-bottom:24px;">
-        <p style="color:#f0f4ff;font-size:1.2rem;line-height:1.8;margin:0 0 14px;">Based on your responses — <strong style="color:var(--brand-accent);">${state.concern||'your concern'}</strong>, dealing with this for <strong style="color:var(--brand-accent);">${state.duration||'some time'}</strong>, with ${n} matching symptoms — ${CONFIG.practice_name}'s root cause approach may be a strong fit.</p>
-        <p style="color:#94a3b8;font-size:1.1rem;line-height:1.8;margin:0;">${CONFIG.doctor_name}'s team uses advanced lab testing, personalized care plans, and natural therapies to address the underlying cause — not just symptoms.</p>
-      </div>
-      <a href="${CONFIG.booking_url}" target="_blank" rel="noopener" style="display:block;width:100%;box-sizing:border-box;background:var(--brand-accent);color:#0a0e1a;border:none;padding:20px;border-radius:8px;font-weight:800;font-size:1.2rem;text-align:center;text-decoration:none;margin-bottom:12px;">Book a Consultation →</a>
-      <button onclick="state={step:1};save();renderStep();" style="width:100%;background:none;border:none;color:#4a5568;padding:12px;cursor:pointer;font-size:1rem;">Start Over</button>`;
+  switch(state.step) {
+    case 1: renderContact(el); break;
+    case 2: renderConcerns(el); break;
+    case 3: renderSymptoms(el); break;
+    case 4: renderDuration(el); break;
+    case 5: renderSeverity(el); break;
+    case 6: renderHistory(el); break;
+    case 7: renderGoals(el); break;
+    case 8: renderResults(el); break;
+    default: renderResults(el);
   }
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// Init
-document.addEventListener('DOMContentLoaded', renderStep);
+// ── STEP 1: CONTACT INFO ────────────────────────────────────────────────────
+function renderContact(el) {
+  el.innerHTML = `
+    <h2 class="step-title">Let's Start with Your Information</h2>
+    <p class="step-sub">Your responses are private and shared only with ${CONFIG.practice}'s clinical team.</p>
+    <div class="field-group">
+      <div class="field-row">
+        <div>
+          <div class="field-label">First Name *</div>
+          <input class="field-input" id="f-first" type="text" placeholder="Jane" value="${state.first||''}">
+        </div>
+        <div>
+          <div class="field-label">Last Name *</div>
+          <input class="field-input" id="f-last" type="text" placeholder="Smith" value="${state.last||''}">
+        </div>
+      </div>
+      <div>
+        <div class="field-label">Email Address *</div>
+        <input class="field-input" id="f-email" type="email" placeholder="jane@example.com" value="${state.email||''}">
+      </div>
+      <div>
+        <div class="field-label">Phone Number</div>
+        <input class="field-input" id="f-phone" type="tel" placeholder="(555) 000-0000" value="${state.phone||''}">
+      </div>
+      <div>
+        <div class="field-label">Preferred Contact Method</div>
+        <div class="option-grid option-grid-2" style="margin-top:4px;">
+          ${['Email','Phone Call','Text Message','Any'].map(m=>`
+            <button class="option-btn ${state.contact===m?'selected':''}"
+              onclick="state.contact='${m}';save();this.closest('.option-grid').querySelectorAll('.option-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected');">
+              <div class="o-icon">${{Email:'📧','Phone Call':'📞','Text Message':'💬',Any:'✅'}[m]}</div>
+              <div class="o-label">${m}</div>
+            </button>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn-next" onclick="submitContact()">Next: Health Concerns →</button>
+    </div>`;
+}
+function submitContact() {
+  const first = document.getElementById('f-first').value.trim();
+  const last  = document.getElementById('f-last').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  if (!first || !last || !email) { alert('Please enter your name and email to continue.'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Please enter a valid email address.'); return; }
+  state.first = first; state.last = last; state.email = email;
+  state.phone = document.getElementById('f-phone').value.trim();
+  state.step = 2; save(); render();
+}
+
+// ── STEP 2: PRIMARY CONCERN ─────────────────────────────────────────────────
+function renderConcerns(el) {
+  const concerns = Array.isArray(CONCERN_DATA) ? CONCERN_DATA : Object.keys(CONCERN_DATA);
+  el.innerHTML = `
+    <h2 class="step-title">What's Your Primary Health Concern?</h2>
+    <p class="step-sub">Select the challenge affecting your life most right now. You'll be able to share more context in the next steps.</p>
+    <div class="concern-select-grid">
+      ${concerns.map((c,i)=>{
+        const icon = CONCERN_ICONS[i % CONCERN_ICONS.length];
+        const desc = CONCERN_DESCS[c] || 'Click to select this area of focus.';
+        return `<button class="concern-btn ${state.concern===c?'selected':''}"
+          onclick="selectConcern('${c.replace(/'/g,"\\'")}',this)">
+          <div class="c-icon">${icon}</div>
+          <div class="c-title">${c}</div>
+          <div class="c-desc">${desc}</div>
+        </button>`;
+      }).join('')}
+    </div>
+    <div class="step-nav">
+      <button class="btn-back" onclick="state.step=1;save();render();">← Back</button>
+      <button class="btn-next" onclick="state.concern?((state.step=3,state.symptoms=[],save(),render())):alert('Please select a concern to continue.');">Next: Symptoms →</button>
+    </div>`;
+}
+function selectConcern(c, btn) {
+  state.concern = c;
+  document.querySelectorAll('.concern-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  save();
+}
+
+// ── STEP 3: SYMPTOMS ────────────────────────────────────────────────────────
+function renderSymptoms(el) {
+  // Get symptoms for selected concern, fallback to generic list
+  let syms = [];
+  if (state.concern && SYMPTOM_DATA) {
+    syms = SYMPTOM_DATA[state.concern] || SYMPTOM_DATA[Object.keys(SYMPTOM_DATA)[0]] || [];
+  }
+  if (!syms.length) syms = ['Fatigue','Brain fog','Poor sleep','Digestive issues','Mood changes','Weight changes','Chronic pain','Low motivation'];
+  const sel = state.symptoms || [];
+  el.innerHTML = `
+    <h2 class="step-title">Which of These Apply to You?</h2>
+    <p class="step-context">${state.concern || 'Your Concern'}</p>
+    <p class="step-sub">Select all that apply. This helps ${CONFIG.practice}'s team understand the full picture.</p>
+    <div class="symptom-chips">
+      ${syms.map((s,i)=>`
+        <button class="chip ${sel.includes(i)?'selected':''}"
+          onclick="toggleSym(${i},this)">${s}</button>`).join('')}
+    </div>
+    <div class="step-nav" style="margin-top:28px;">
+      <button class="btn-back" onclick="state.step=2;save();render();">← Back</button>
+      <button class="btn-next" onclick="state.step=4;save();render();">Next: Duration →</button>
+    </div>`;
+}
+function toggleSym(i, btn) {
+  if (!state.symptoms) state.symptoms = [];
+  const idx = state.symptoms.indexOf(i);
+  if (idx === -1) { state.symptoms.push(i); btn.classList.add('selected'); }
+  else { state.symptoms.splice(idx,1); btn.classList.remove('selected'); }
+  save();
+}
+
+// ── STEP 4: DURATION ────────────────────────────────────────────────────────
+function renderDuration(el) {
+  const opts = [
+    {label:'Less than\n3 months', icon:'🌱', sub:'Recent onset'},
+    {label:'3–12\nmonths',        icon:'📅', sub:'Under a year'},
+    {label:'1–3\nyears',          icon:'🗓️',  sub:'A few years'},
+    {label:'3+ years',            icon:'⏳',  sub:'Chronic'},
+  ];
+  el.innerHTML = `
+    <h2 class="step-title">How Long Have You Had These Symptoms?</h2>
+    <p class="step-sub">Duration helps ${CONFIG.practice}'s team understand severity and the most appropriate care approach.</p>
+    <div class="option-grid option-grid-4">
+      ${opts.map(o=>`
+        <button class="option-btn ${state.duration===o.label?'selected':''}"
+          onclick="state.duration='${o.label}';save();document.querySelectorAll('.option-grid .option-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected');">
+          <div class="o-icon">${o.icon}</div>
+          <div class="o-label">${o.label.replace('\n','<br>')}</div>
+          <div class="o-sub">${o.sub}</div>
+        </button>`).join('')}
+    </div>
+    <div class="step-nav">
+      <button class="btn-back" onclick="state.step=3;save();render();">← Back</button>
+      <button class="btn-next" onclick="state.duration?((state.step=5,save(),render())):alert('Please select a duration.');">Next: Impact Level →</button>
+    </div>`;
+}
+
+// ── STEP 5: SEVERITY / LIFE IMPACT ─────────────────────────────────────────
+function renderSeverity(el) {
+  const opts = [
+    {label:'Mild',        icon:'🟢', sub:'Noticeable but manageable'},
+    {label:'Moderate',    icon:'🟡', sub:'Affecting daily activities'},
+    {label:'Significant', icon:'🟠', sub:'Major impact on quality of life'},
+    {label:'Severe',      icon:'🔴', sub:'Affecting work, relationships, or daily function'},
+  ];
+  el.innerHTML = `
+    <h2 class="step-title">How Much Is This Affecting Your Life?</h2>
+    <p class="step-sub">Be honest — this directly shapes the care recommendations ${CONFIG.doctor} will make for you.</p>
+    <div class="option-grid option-grid-2">
+      ${opts.map(o=>`
+        <button class="option-btn ${state.severity===o.label?'selected':''}"
+          onclick="state.severity='${o.label}';save();document.querySelectorAll('.option-grid .option-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected');">
+          <div class="o-icon">${o.icon}</div>
+          <div class="o-label">${o.label}</div>
+          <div class="o-sub">${o.sub}</div>
+        </button>`).join('')}
+    </div>
+    <div class="step-nav">
+      <button class="btn-back" onclick="state.step=4;save();render();">← Back</button>
+      <button class="btn-next" onclick="state.severity?((state.step=6,save(),render())):alert('Please select an impact level.');">Next: Medical History →</button>
+    </div>`;
+}
+
+// ── STEP 6: MEDICAL HISTORY ─────────────────────────────────────────────────
+function renderHistory(el) {
+  const priorOpts = [
+    'No — this is my first step',
+    'Yes — conventional medicine only',
+    'Yes — other functional / integrative providers',
+    'Yes — multiple specialists without resolution',
+  ];
+  const sel = state.prior || '';
+  const histItems = [
+    'Currently taking prescription medications',
+    'Have one or more diagnosed chronic conditions',
+    'Had lab work done in the last 12 months',
+    'Family history of autoimmune or metabolic conditions',
+    'Currently seeing another healthcare provider',
+    'Have had recent surgery or major medical event',
+  ];
+  const hist = state.history || [];
+  el.innerHTML = `
+    <h2 class="step-title">A Little Medical Background</h2>
+    <p class="step-sub">This helps ${CONFIG.practice}'s team prepare for your consultation and order the right initial labs.</p>
+    <div style="margin-bottom:22px;">
+      <div class="field-label" style="margin-bottom:10px;">Have you seen other providers for this concern?</div>
+      ${priorOpts.map(o=>`
+        <button class="option-btn ${sel===o?'selected':''}"
+          style="flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;margin-bottom:10px;text-align:left;padding:14px 16px;"
+          onclick="state.prior='${o.replace(/'/g,"\\'")}';save();document.querySelectorAll('.prior-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected');" class="option-btn prior-btn ${sel===o?'selected':''}">
+          <div class="o-label" style="font-size:0.95rem;">${o}</div>
+        </button>`).join('')}
+    </div>
+    <div>
+      <div class="field-label" style="margin-bottom:10px;">Check any that apply:</div>
+      <div class="checkbox-group">
+        ${histItems.map((item,i)=>`
+          <label class="checkbox-row ${hist.includes(i)?'selected':''}">
+            <input type="checkbox" ${hist.includes(i)?'checked':''}
+              onchange="toggleHist(${i},this.closest('label'))" style="accent-color:var(--primary);width:18px;height:18px;">
+            <span>${item}</span>
+          </label>`).join('')}
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn-back" onclick="state.step=5;save();render();">← Back</button>
+      <button class="btn-next" onclick="state.step=7;save();render();">Next: Your Goals →</button>
+    </div>`;
+}
+function toggleHist(i, el) {
+  if (!state.history) state.history = [];
+  const idx = state.history.indexOf(i);
+  if (idx === -1) { state.history.push(i); el.classList.add('selected'); }
+  else { state.history.splice(idx,1); el.classList.remove('selected'); }
+  save();
+}
+
+// ── STEP 7: GOALS ───────────────────────────────────────────────────────────
+function renderGoals(el) {
+  const goals = [
+    {label:'Get a clear diagnosis',      icon:'🔬'},
+    {label:'Reduce or eliminate symptoms',icon:'📉'},
+    {label:'Get off medications',         icon:'💊'},
+    {label:'Optimize energy & vitality',  icon:'⚡'},
+    {label:'Improve gut health',          icon:'🌿'},
+    {label:'Balance hormones naturally',  icon:'⚖️'},
+    {label:'Lose weight sustainably',     icon:'🏃'},
+    {label:'Understand my lab results',   icon:'📊'},
+  ];
+  const sel = state.goals || [];
+  el.innerHTML = `
+    <h2 class="step-title">What Are Your Top Health Goals?</h2>
+    <p class="step-sub">Select all that apply. This shapes the conversation with ${CONFIG.doctor}'s team.</p>
+    <div class="symptom-chips">
+      ${goals.map((g,i)=>`
+        <button class="chip ${sel.includes(i)?'selected':''}"
+          onclick="toggleGoal(${i},this)">${g.icon} ${g.label}</button>`).join('')}
+    </div>
+    <div style="margin-top:24px;">
+      <div class="field-label">Anything else you'd like ${CONFIG.practice}'s team to know?</div>
+      <textarea class="field-input" id="f-notes" style="height:100px;resize:vertical;margin-top:8px;"
+        placeholder="Any additional context, specific questions, or concerns...">${state.notes||''}</textarea>
+    </div>
+    <div class="step-nav">
+      <button class="btn-back" onclick="state.step=6;save();render();">← Back</button>
+      <button class="btn-next" onclick="submitGoals()">See My Results →</button>
+    </div>`;
+}
+function toggleGoal(i, btn) {
+  if (!state.goals) state.goals = [];
+  const idx = state.goals.indexOf(i);
+  if (idx === -1) { state.goals.push(i); btn.classList.add('selected'); }
+  else { state.goals.splice(idx,1); btn.classList.remove('selected'); }
+  save();
+}
+function submitGoals() {
+  state.notes = (document.getElementById('f-notes')||{}).value || '';
+  state.step = 8; save(); render();
+}
+
+// ── STEP 8: RESULTS ─────────────────────────────────────────────────────────
+const GOALS_LIST = ['Get a clear diagnosis','Reduce or eliminate symptoms','Get off medications','Optimize energy & vitality','Improve gut health','Balance hormones naturally','Lose weight sustainably','Understand my lab results'];
+const HISTORY_LIST = ['Currently taking prescription medications','Have a diagnosed chronic condition','Had lab work in the last 12 months','Family history of autoimmune or metabolic conditions','Currently seeing another provider','Recent surgery or major medical event'];
+
+function renderResults(el) {
+  const symCount = (state.symptoms||[]).length;
+  const score = symCount >= 6 ? 'Strong Match' : symCount >= 3 ? 'Good Match' : 'Potential Match';
+  const goalLabels = (state.goals||[]).map(i => GOALS_LIST[i]).filter(Boolean);
+  const histLabels = (state.history||[]).map(i => HISTORY_LIST[i]).filter(Boolean);
+
+  const summary = buildSummary(score, goalLabels, histLabels);
+
+  el.innerHTML = `
+    <div class="result-score">
+      <div class="score-icon">✅</div>
+      <h2>Assessment Complete</h2>
+      <div class="score-label">${score} for ${CONFIG.practice}</div>
+    </div>
+    <div class="result-summary">
+      <p>Based on your responses — <strong style="color:var(--accent);">${state.concern||'your health concern'}</strong> affecting you for <strong style="color:var(--accent);">${state.duration||'some time'}</strong> at a <strong style="color:var(--accent);">${state.severity||'moderate'}</strong> level — ${CONFIG.practice}'s root-cause approach may be a strong fit for your situation.</p>
+      <p>${CONFIG.doctor}'s team uses advanced lab testing, personalized care plans, and natural therapies to address underlying causes — not just symptoms.</p>
+      ${goalLabels.length ? `<p><strong style="color:var(--accent);">Your goals:</strong> ${goalLabels.join(', ')}.</p>` : ''}
+    </div>
+    <div class="field-label" style="margin-bottom:8px;">Your booking summary (copy &amp; share):</div>
+    <div class="copy-wrap">
+      <textarea class="copy-area" id="summary-area" readonly>${summary}</textarea>
+      <button class="copy-btn" onclick="copySummary()">📋 Copy</button>
+    </div>
+    <a href="${CONFIG.booking}" target="_blank" rel="noopener" class="btn-full">Book a Consultation →</a>
+    <button class="btn-full-ghost" onclick="state={step:1};save();render();">Start Over</button>
+    <div class="emergency-note">
+      <strong>⚠️ Emergency:</strong> If you are experiencing a medical emergency, please call <strong>911</strong> immediately. This assessment is for informational purposes only and does not constitute medical advice or diagnosis.
+    </div>`;
+}
+function buildSummary(score, goals, hist) {
+  const syms = (state.symptoms||[]);
+  const symLabels = [];
+  if (state.concern && SYMPTOM_DATA && SYMPTOM_DATA[state.concern]) {
+    syms.forEach(i => { const s = SYMPTOM_DATA[state.concern][i]; if(s) symLabels.push(s); });
+  }
+  const lines = [
+    `Patient: ${state.first||''} ${state.last||''} | ${state.email||''} | ${state.phone||''}`,
+    `Concern: ${state.concern||'N/A'} | Duration: ${state.duration||'N/A'} | Impact: ${state.severity||'N/A'}`,
+    symLabels.length ? `Symptoms: ${symLabels.slice(0,6).join(', ')}` : '',
+    state.prior ? `Prior care: ${state.prior}` : '',
+    goals.length ? `Goals: ${goals.join(', ')}` : '',
+    hist.length ? `History: ${hist.join('; ')}` : '',
+    state.notes ? `Notes: ${state.notes}` : '',
+    `Match: ${score} | Source: ${CONFIG.practice} App`,
+  ].filter(Boolean);
+  return lines.join('\n');
+}
+function copySummary() {
+  const ta = document.getElementById('summary-area');
+  if (!ta) return;
+  ta.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  const btn = ta.nextElementSibling;
+  if (btn) { btn.textContent = '✓ Copied'; setTimeout(()=>btn.textContent='📋 Copy', 2000); }
+}
+
+// ── CONDITIONS GRID (landing page section) ──────────────────────────────────
+function buildConditionsGrid() {
+  const grid = document.getElementById('conditions-grid');
+  if (!grid) return;
+  const concerns = Array.isArray(CONCERN_DATA) ? CONCERN_DATA : Object.keys(CONCERN_DATA);
+  grid.innerHTML = concerns.map((c,i) => `
+    <div class="concern-card">
+      <div class="icon">${CONCERN_ICONS[i % CONCERN_ICONS.length]}</div>
+      <h4>${c}</h4>
+      <p>${CONCERN_DESCS[c] || 'Click to learn more about our approach to this condition.'}</p>
+    </div>`).join('');
+}
+
+// ── HERO PLACEHOLDER ────────────────────────────────────────────────────────
+function heroPlaceholder() {
+  return `<div class="hero-img-placeholder"><div class="icon">🏥</div><p style="color:var(--muted);font-size:0.9rem;">${CONFIG.practice}</p></div>`;
+}
+
+// ── SCROLL REVEAL ────────────────────────────────────────────────────────────
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); } });
+}, { threshold: 0.08 });
+
+// ── NAVBAR SCROLL ────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar')?.classList.toggle('scrolled', window.scrollY > 60);
+}, { passive: true });
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  buildConditionsGrid();
+  render();
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+});
 </script>
 </body>
 </html>
