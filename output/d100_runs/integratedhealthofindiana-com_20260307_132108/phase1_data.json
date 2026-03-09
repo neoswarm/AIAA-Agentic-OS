@@ -1,0 +1,104 @@
+{
+  "name": "Integrated Health of Indiana, Inc.",
+  "doctor_name": "Dr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP",
+  "context": "Integrated Health of Indiana, Inc.; Dr. Trevor Miller DC IFMCP LAc CFMP Owner; functional medicine, chiropractic, acupuncture, holistic health; North Vernon Indiana; 3-5 practitioners (Dr. Trevor Miller, Jessica Miller RN, Rebecca Lester PTA); cash-pay model with memberships/packages; 20 Hours Package $780, 10 Hours Package $400, 3 Month Membership $1800 unlimited sessions, 12 Month Membership $950; DrMiller@integratedhealthofindiana.com; LinkedIn: https://www.linkedin.com/in/trevor-miller-dc-ifmcp-l-ac-cfmp-2930a7b7; Instagram: https://www.instagram.com/integratedhealthofindiana/; Facebook: https://www.facebook.com/IntegratedHealthofIndiana/; ~1.4K Facebook followers; Tier 1 Building Asset\nBooking URL: https://integratedhealthofindiana.com/new-patients/",
+  "raw_scrape": "## PAGE: https://integratedhealthofindiana.com\n\nIntegrated Health of Indiana | Functional Medicine &amp; Care Institute for Functional Medicine Certified Practitioner Conditions We Treat Chiropractic Care Services Chiropractic Care Functional Medicine Shockwave Therapy Thrive In 63 Products Blog FAQs Pricing Functional Medicine Chiropractic Care About Us Nutritional IV Therapy Contact 0 Your Cart $ 0.00 USD : Remove Subtotal Pay with browser. Continue to Checkout You have not chosen any sessions yet. Order Sessions Product is not available in this quantity. Get Started Let&#x27;s get started Join thousands of satisfied patients Total health from the inside-out, using laboratory testing and results based approach to your health problem. Find the root cause of your problem and solve it. Learn More Sign up to get our FREE health guide! Learn how functional medicine can improve your health so you can get back to living your best life. Download Now! We treat many different conditions Whatever pain, irritation, or issue you may be facing, we can help guide you in the direction of healing from the inside out. Headaches &amp; Migraines Back Pain Irritable Bowel Syndrome Hormone Imbalance Pediatrics More Conditions We Treat Discover The IHI Way— How We Do Health Differently A journey toward whole-body wellness rooted in compassion, expertise, and lifelong healing. At Integrated Health of Indiana, we believe health is more than absence of disease—it's thriving in body, mind, and spirit. The \"IHI Way\" is our guiding philosophy: combining functional medicine, natural therapies, and patient education to uncover root causes and promote lasting wellness. Founded by Dr. Trevor Miller and Jessica Miller, RN, we bring together decades of experience in chiropractic, nursing, clinical nutrition, hormone support, and lab diagnostics. We don't just treat symptoms, we partner with you to understand your unique body, your story, and design a plan that empowers transformation. Whether you're struggling with pain, digestive issues, hormone imbalance, or looking to optimize energy, our compassionate team is here to guide you. At IHI, you're more than a patient, you're a collaborator on your healing journey. Join Our 7 O'Clock Talk Each week we have a 7 O'Clock talk about health. Watch us live on Facebook or YouTube! Our quality staff is here for all your health needs. Chiropractic Care & Services: holistic, natural care that utilizes treating the central nervous system. Functional Medicine: root cause-focused approach to healthcare for long-term patient wellbeing. Factors like genetics, diet, lifestyle, hormones, and optimal lab results are considered in creating personalized care plans. Shockwave Therapy. Nutritional IV Therapy. Thrive In 63 program.\n\n---\n\n## PAGE: https://integratedhealthofindiana.com/contact/\n\nContact | Integrated Health of Indiana. Email: frontdesk@integratedhealthofindiana.com. Address: Main Office/Clinic 209 S State St. North Vernon, IN 47265. Phone: (812) 346-1757. Hours: Monday 8am-12pm & 3pm-6pm, Tuesday 8am-1pm, Wednesday 8am-12pm & 3pm-6pm, Thursday 8am-12pm & 3pm-6pm, Friday 8am-1pm. Services: Functional Medicine, Shockwave Therapy, Chiropractic Care, Thrive In 63, Conditions We Treat, Nutritional IV Therapy.",
+  "images": {
+    "logo_url": "https://cdn.prod.website-files.com/62b084560eca255967494e5d/62cd039bdfafc034c7b9afed_Main%20Nav%20Logo%201100x238_IHI%20Logo.png",
+    "hero_url": "",
+    "headshot_url": ""
+  },
+  "booking_url": "https://integratedhealthofindiana.com/new-patients/",
+  "semrush": {
+    "source": "semrush_api",
+    "units_used": 630,
+    "domain_rank": 4561840,
+    "unique_keywords": 38,
+    "estimated_traffic": 58,
+    "traffic_value": 0,
+    "serp_features_traffic": 0,
+    "serp_features_value": 0,
+    "ai_overview_serp_count": 0,
+    "ai_overview_cited_count": 0,
+    "pos1_count": 1,
+    "pos2_3_count": 0,
+    "pos4_10_count": 1,
+    "pos11_20_count": 1,
+    "pos1_3_count": 1,
+    "quick_wins_count": 1,
+    "top_quick_wins": [
+      {
+        "keyword": "shockwave therapy for women indianapolis",
+        "position": 9,
+        "volume": 110,
+        "kd": 0.0
+      }
+    ],
+    "top3_sample": [
+      {
+        "keyword": "integrated health of indiana",
+        "position": 1,
+        "volume": 70
+      }
+    ],
+    "top_by_volume": [
+      {
+        "keyword": "integrative health specialists of indiana",
+        "position": 16,
+        "volume": 260,
+        "kd": 28.0
+      },
+      {
+        "keyword": "shockwave therapy for women indianapolis",
+        "position": 9,
+        "volume": 110,
+        "kd": 0.0
+      },
+      {
+        "keyword": "integrated health of indiana",
+        "position": 1,
+        "volume": 70,
+        "kd": 23.0
+      }
+    ],
+    "competitors": [
+      {
+        "domain": "indymyopain.com",
+        "relevance": "0.16",
+        "keywords": 45,
+        "traffic": 11,
+        "traffic_value": 17
+      },
+      {
+        "domain": "indywomenpt.com",
+        "relevance": "0.12",
+        "keywords": 12,
+        "traffic": 247,
+        "traffic_value": 60
+      },
+      {
+        "domain": "ptspecialists.net",
+        "relevance": "0.05",
+        "keywords": 161,
+        "traffic": 127,
+        "traffic_value": 46
+      }
+    ]
+  },
+  "crawl": {
+    "ai_status": "AI ACCESSIBLE",
+    "blocked_crawlers": [],
+    "sitemap_urls": 36,
+    "llms_txt": "NOT FOUND"
+  },
+  "brand_colors": {
+    "primary": "#036797",
+    "background": "#FFFFFF",
+    "source": "css_extraction_webflow",
+    "accent": "#0b6088",
+    "secondary": "#84bdbb"
+  },
+  "prebuilt_seo_report": "",
+  "run_id": "integratedhealthofindiana-com_20260307_132108",
+  "website": "https://integratedhealthofindiana.com"
+}

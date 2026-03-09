@@ -20,6 +20,7 @@ import sys
 import os
 import shutil
 import urllib.request
+import urllib.parse
 import tempfile
 import subprocess
 from pathlib import Path
@@ -388,8 +389,13 @@ def build_replacements(p1: dict, p2: dict) -> dict:
 
     competitors = semrush.get("competitors", [])
 
+    practice_name_raw = p1.get("name", "Your Practice")
+    company_slug = make_company_slug(practice_name_raw)
+
     return {
-        "PRACTICE_NAME":             p1.get("name", "Your Practice"),
+        "PRACTICE_NAME":             practice_name_raw,
+        "PRACTICE_NAME_ENCODED":     urllib.parse.quote(practice_name_raw, safe=""),
+        "COMPANY_SLUG":              company_slug,
         "DOCTOR_NAME":               p1.get("doctor_name", "Your Doctor"),
         "WEBSITE":                   p1.get("website", ""),
         "LOGO_URL":                  images.get("logo_url", ""),

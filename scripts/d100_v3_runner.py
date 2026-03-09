@@ -1276,15 +1276,26 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
     # ── 3b: Deploy ────────────────────────────────────────────────────────────────
     vercel_token = env.get("VERCEL_TOKEN", "")
     if vercel_token and not dry_run:
-        # Vercel deploy (preferred — 10–15 sec, auto subdomain)
+        # Vercel incremental deploy — single project, subfolder per company
+        # healthbizleads.com/[slug]/  +  app.healthbizleads.com/[slug]/
         sys.path.insert(0, str(SCRIPT_DIR))
-        from inject_report import deploy_to_vercel
-        report_url = deploy_to_vercel(run_dir, practice_name, dry_run=dry_run)
+        from deploy_vercel_incremental import deploy_deliverables, deploy_assessment_app
+        report_url = deploy_deliverables(run_dir, practice_name, vercel_token, dry_run=False)
+        # Deploy assessment app (best-effort — don't fail the run if app deploy errors)
+        try:
+            p1_data = json.loads((run_dir / "phase1_data.json").read_text(encoding="utf-8"))
+            p2_data = json.loads((run_dir / "phase2_output.json").read_text(encoding="utf-8")) if (run_dir / "phase2_output.json").exists() else {}
+            app_url = deploy_assessment_app(run_dir, practice_name, vercel_token, p1_data, p2_data, dry_run=False)
+            print(f"  ✓ App URL: {app_url}")
+        except Exception as app_err:
+            print(f"  ⚠ App deploy failed (non-fatal): {app_err}")
+            app_url = None
     else:
         # Fall back to GitHub Pages
         if not vercel_token:
             print("  ℹ VERCEL_TOKEN not set — falling back to GitHub Pages")
         report_url = deploy_report_to_github(run_dir, practice_name, dry_run=dry_run)
+        app_url = None
 
     print(f"  ✓ Live URL: {report_url}")
     print(f"  Phase 3 complete ({time.time()-t3:.1f}s)")
@@ -1301,11 +1312,16 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
 
     # Shim: write gamma_response.json so downstream scripts don't break
     (run_dir / "gamma_response.json").write_text(
-        json.dumps({"report_url": report_url, "practice": practice_name, "run_id": run_id}, indent=2),
+        json.dumps({
+            "report_url": report_url,
+            "app_url":    app_url,
+            "practice":   practice_name,
+            "run_id":     run_id,
+        }, indent=2),
         encoding="utf-8",
     )
 
-    # Slack success
+    # Slack success — #d100-runs (deploy notification)
     if slack_webhook:
         try:
             notify_slack_report_live(slack_webhook, practice_name, report_url, website, semrush, run_id)
@@ -1318,6 +1334,8 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
     file_list = [str(f.relative_to(run_dir)) for f in files if f.is_file()]
     print(f"\n✅ COMPLETE — {run_id}")
     print(f"   Report: {report_url}")
+    if app_url:
+        print(f"   App:    {app_url}")
     print(f"   Files: {', '.join(file_list)}")
 
     return {

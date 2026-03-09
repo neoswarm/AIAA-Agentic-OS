@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Assessment — {{PRACTICE_NAME}}</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --brand-primary: {{BRAND_PRIMARY}};
+    --brand-accent:  {{BRAND_ACCENT}};
+    --bg:            #080d18;
+    --card:          #0f1420;
+    --card2:         #111827;
+    --border:        #1e2d3d;
+    --text:          #f0f4ff;
+    --text-muted:    #94a3b8;
+  }
+  html { background: var(--bg); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 24px 16px 60px;
+  }
+
+  /* ── HEADER ── */
+  .app-header {
+    width: 100%;
+    max-width: 660px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .app-header img {
+    height: 40px;
+    width: auto;
+    border-radius: 6px;
+    object-fit: contain;
+  }
+  .app-header .practice { font-size: 1.1rem; font-weight: 700; color: #fff; }
+  .app-header .tagline  { font-size: 0.9rem; color: var(--text-muted); }
+
+  /* ── CARD ── */
+  .assessment-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 660px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+  }
+
+  /* ── PROGRESS ── */
+  .progress-wrap {
+    height: 5px;
+    background: var(--border);
+    border-radius: 3px;
+    margin-bottom: 28px;
+  }
+  .progress-bar {
+    height: 100%;
+    background: var(--brand-accent);
+    border-radius: 3px;
+    transition: width 0.3s;
+    width: 16.6%;
+  }
+  .step-counter {
+    font-size: 1rem;
+    color: var(--brand-accent);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  /* ── BUTTONS (reused from main template) ── */
+  .btn-primary {
+    width: 100%;
+    background: var(--brand-accent);
+    color: #0a0e1a;
+    border: none;
+    padding: 18px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+  .btn-back {
+    flex: 1;
+    background: var(--card2);
+    color: #fff;
+    border: none;
+    padding: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+  }
+  .btn-next {
+    flex: 2;
+    background: var(--brand-accent);
+    color: #0a0e1a;
+    border: none;
+    padding: 16px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    cursor: pointer;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 480px) {
+    .assessment-card { padding: 28px 20px; }
+    .app-header { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Open Tracking Beacon -->
+<img src="https://healthbizleads.com/api/track?c={{COMPANY_SLUG}}&n={{PRACTICE_NAME_ENCODED}}&s={{COMPANY_SLUG}}&src=app"
+     width="1" height="1" alt="" style="position:absolute;opacity:0;pointer-events:none;" loading="eager">
+
+<!-- HEADER -->
+<header class="app-header">
+  <img src="{{LOGO_URL}}" alt="{{PRACTICE_NAME}}" onerror="this.style.display='none'">
+  <div>
+    <div class="practice">{{PRACTICE_NAME}}</div>
+    <div class="tagline">Patient Health Assessment</div>
+  </div>
+</header>
+
+<!-- ASSESSMENT CARD -->
+<div class="assessment-card">
+  <div class="progress-wrap"><div class="progress-bar" id="modal-progress"></div></div>
+  <div class="step-counter" id="step-counter">Step 1 of 6</div>
+  <div id="assessment-content"></div>
+</div>
+
+<!-- Footer -->
+<p style="color:var(--text-muted);font-size:0.88rem;text-align:center;margin-top:28px;max-width:500px;line-height:1.6;">
+  Your responses are private and only shared with {{PRACTICE_NAME}}'s clinical team. This tool is for informational purposes only and does not constitute medical advice.
+</p>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+const CONFIG = {
+  practice_name: "{{PRACTICE_NAME}}",
+  doctor_name:   "{{DOCTOR_NAME}}",
+  website:       "{{WEBSITE}}",
+  logo_url:      "{{LOGO_URL}}",
+  booking_url:   "{{BOOKING_URL}}",
+  brand_primary: "{{BRAND_PRIMARY}}",
+  brand_accent:  "{{BRAND_ACCENT}}"
+};
+
+// ─── ASSESSMENT DATA ──────────────────────────────────────────────────────────
+const CONCERNS = {{ASSESSMENT_CONCERNS_JSON}};
+const SYMPTOMS = {{ASSESSMENT_SYMPTOMS_JSON}};
+
+let state = JSON.parse(localStorage.getItem('d100_app_' + CONFIG.practice_name) || '{"step":1}');
+function save() { localStorage.setItem('d100_app_' + CONFIG.practice_name, JSON.stringify(state)); }
+
+function updateProgress() {
+  const pct = Math.max(((state.step - 1) / 6) * 100, 16.6);
+  const bar = document.getElementById('modal-progress');
+  const ctr = document.getElementById('step-counter');
+  if (bar) bar.style.width = pct + '%';
+  if (ctr) ctr.textContent = 'Step ' + state.step + ' of 6';
+}
+
+function renderStep() {
+  const el = document.getElementById('assessment-content');
+  if (!el) return;
+  updateProgress();
+  const s = state.step;
+  const btnStyle = 'width:100%;background:var(--brand-accent);color:#0a0e1a;border:none;padding:18px;border-radius:8px;font-weight:800;font-size:1.2rem;cursor:pointer;margin-top:16px;';
+  const backStyle = 'flex:1;background:#1e2d3d;color:#fff;border:none;padding:16px;border-radius:8px;cursor:pointer;font-size:1.1rem;';
+  const nextStyle = 'flex:2;background:var(--brand-accent);color:#0a0e1a;border:none;padding:16px;border-radius:8px;font-weight:800;font-size:1.1rem;cursor:pointer;';
+
+  if (s === 1) {
+    el.innerHTML = `
+      <h2 style="font-size:2rem;font-weight:800;color:#fff;margin:0 0 16px;">Find Your Path to Better Health</h2>
+      <p style="font-size:1.25rem;color:#94a3b8;line-height:1.75;margin-bottom:28px;">This quick assessment helps ${CONFIG.practice_name}'s team understand your situation before your first conversation. About 3 minutes.</p>
+      <div style="background:#111827;border-radius:10px;padding:24px;margin-bottom:24px;">
+        <p style="color:var(--brand-accent);font-weight:700;font-size:1.15rem;margin:0 0 6px;">✓ 100% Private</p>
+        <p style="color:#94a3b8;font-size:1.15rem;margin:0 0 16px;">Your answers are only shared with ${CONFIG.practice_name}'s clinical team.</p>
+        <p style="color:var(--brand-accent);font-weight:700;font-size:1.15rem;margin:0 0 6px;">✓ 3 Minutes</p>
+        <p style="color:#94a3b8;font-size:1.15rem;margin:0 0 16px;">6 quick questions. No medical forms.</p>
+        <p style="color:var(--brand-accent);font-weight:700;font-size:1.15rem;margin:0 0 6px;">✓ Personalized Results</p>
+        <p style="color:#94a3b8;font-size:1.15rem;margin:0;">We match your concerns to the right care approach.</p>
+      </div>
+      <button onclick="state.step=2;save();renderStep();" style="${btnStyle}">Start My Assessment →</button>`;
+  } else if (s === 2) {
+    const sel = state.concern || '';
+    el.innerHTML = `
+      <h2 style="font-size:1.9rem;font-weight:800;color:#fff;margin:0 0 8px;">What's your primary health concern?</h2>
+      <p style="color:#94a3b8;font-size:1.15rem;margin-bottom:20px;">Select the one affecting your life most right now.</p>
+      <div>${CONCERNS.map(c => `<button onclick="state.concern='${c}';save();document.querySelectorAll('.c-btn').forEach(b=>b.style.borderColor='#1e2d3d');this.style.borderColor='var(--brand-accent)';" class="c-btn" style="width:100%;text-align:left;background:#111827;border:2px solid ${sel===c?'var(--brand-accent)':'#1e2d3d'};border-radius:8px;padding:18px 22px;margin-bottom:10px;cursor:pointer;color:#fff;font-size:1.15rem;font-weight:600;">${c}</button>`).join('')}</div>
+      <div style="display:flex;gap:12px;margin-top:16px;">
+        <button onclick="state.step=1;save();renderStep();" style="${backStyle}">← Back</button>
+        <button onclick="state.concern?((state.step=3),save(),renderStep()):alert('Please select a concern');" style="${nextStyle}">Next →</button>
+      </div>`;
+  } else if (s === 3) {
+    const syms = SYMPTOMS[state.concern] || [];
+    const sel = state.symptoms || [];
+    el.innerHTML = `
+      <h2 style="font-size:1.9rem;font-weight:800;color:#fff;margin:0 0 8px;">Which apply to you?</h2>
+      <p style="color:var(--brand-accent);font-weight:700;font-size:1.1rem;margin-bottom:6px;">${state.concern}</p>
+      <p style="color:#94a3b8;font-size:1.1rem;margin-bottom:18px;">Select all that apply.</p>
+      <div>${syms.map((sym,i)=>`<label style="display:flex;align-items:flex-start;gap:14px;padding:16px 18px;background:#111827;border-radius:8px;margin-bottom:10px;cursor:pointer;border:1px solid ${sel.includes(i)?'var(--brand-accent)':'#1e2d3d'};">
+        <input type="checkbox" ${sel.includes(i)?'checked':''} onchange="const a=state.symptoms||[];const idx=${i};this.checked?(!a.includes(idx)&&a.push(idx)):a.splice(a.indexOf(idx),1);state.symptoms=a;save();this.closest('label').style.borderColor=this.checked?'var(--brand-accent)':'#1e2d3d';" style="margin-top:4px;accent-color:var(--brand-accent);width:20px;height:20px;flex-shrink:0;">
+        <span style="font-size:1.15rem;color:#f0f4ff;line-height:1.6;">${sym}</span>
+      </label>`).join('')}</div>
+      <div style="display:flex;gap:12px;margin-top:16px;">
+        <button onclick="state.step=2;save();renderStep();" style="${backStyle}">← Back</button>
+        <button onclick="state.step=4;save();renderStep();" style="${nextStyle}">Next →</button>
+      </div>`;
+  } else if (s === 4) {
+    const opts=['Less than 3 months','3 months – 1 year','1 – 3 years','3+ years'];
+    const sel=state.duration||'';
+    el.innerHTML=`
+      <h2 style="font-size:1.9rem;font-weight:800;color:#fff;margin:0 0 8px;">How long have you been dealing with this?</h2>
+      <p style="color:#94a3b8;font-size:1.15rem;margin-bottom:20px;">This helps us understand severity and the right approach.</p>
+      <div>${opts.map(o=>`<button onclick="state.duration='${o}';save();document.querySelectorAll('.d-btn').forEach(b=>b.style.borderColor='#1e2d3d');this.style.borderColor='var(--brand-accent)';" class="d-btn" style="width:100%;text-align:left;background:#111827;border:2px solid ${sel===o?'var(--brand-accent)':'#1e2d3d'};border-radius:8px;padding:18px 22px;margin-bottom:10px;cursor:pointer;color:#fff;font-size:1.15rem;font-weight:600;">${o}</button>`).join('')}</div>
+      <div style="display:flex;gap:12px;margin-top:16px;">
+        <button onclick="state.step=3;save();renderStep();" style="${backStyle}">← Back</button>
+        <button onclick="state.duration?((state.step=5),save(),renderStep()):alert('Please select a duration');" style="${nextStyle}">Next →</button>
+      </div>`;
+  } else if (s === 5) {
+    const opts=['No — this is my first step','Yes — conventional medicine only','Yes — other functional/integrative providers','Yes — multiple specialists without resolution'];
+    const sel=state.prior||'';
+    el.innerHTML=`
+      <h2 style="font-size:1.9rem;font-weight:800;color:#fff;margin:0 0 8px;">Have you seen other providers for this?</h2>
+      <p style="color:#94a3b8;font-size:1.15rem;margin-bottom:20px;">Helps ${CONFIG.practice_name}'s team understand your journey.</p>
+      <div>${opts.map(o=>`<button onclick="state.prior='${o}';save();document.querySelectorAll('.p-btn').forEach(b=>b.style.borderColor='#1e2d3d');this.style.borderColor='var(--brand-accent)';" class="p-btn" style="width:100%;text-align:left;background:#111827;border:2px solid ${sel===o?'var(--brand-accent)':'#1e2d3d'};border-radius:8px;padding:18px 22px;margin-bottom:10px;cursor:pointer;color:#fff;font-size:1.15rem;font-weight:600;">${o}</button>`).join('')}</div>
+      <div style="display:flex;gap:12px;margin-top:16px;">
+        <button onclick="state.step=4;save();renderStep();" style="${backStyle}">← Back</button>
+        <button onclick="state.prior?((state.step=6),save(),renderStep()):alert('Please select an option');" style="${nextStyle}">See My Results →</button>
+      </div>`;
+  } else if (s === 6) {
+    const n=(state.symptoms||[]).length;
+    const score=n>=5?'Strong Match':n>=3?'Good Match':'Potential Match';
+    el.innerHTML=`
+      <div style="text-align:center;margin-bottom:28px;">
+        <div style="font-size:3.5rem;margin-bottom:12px;">✅</div>
+        <h2 style="font-size:2rem;font-weight:800;color:#fff;margin:0 0 10px;">Assessment Complete</h2>
+        <p style="color:var(--brand-accent);font-weight:700;font-size:1.3rem;margin:0;">${score} for ${CONFIG.practice_name}</p>
+      </div>
+      <div style="background:#111827;border-radius:10px;padding:24px;margin-bottom:24px;">
+        <p style="color:#f0f4ff;font-size:1.2rem;line-height:1.8;margin:0 0 14px;">Based on your responses — <strong style="color:var(--brand-accent);">${state.concern||'your concern'}</strong>, dealing with this for <strong style="color:var(--brand-accent);">${state.duration||'some time'}</strong>, with ${n} matching symptoms — ${CONFIG.practice_name}'s root cause approach may be a strong fit.</p>
+        <p style="color:#94a3b8;font-size:1.1rem;line-height:1.8;margin:0;">${CONFIG.doctor_name}'s team uses advanced lab testing, personalized care plans, and natural therapies to address the underlying cause — not just symptoms.</p>
+      </div>
+      <a href="${CONFIG.booking_url}" target="_blank" rel="noopener" style="display:block;width:100%;box-sizing:border-box;background:var(--brand-accent);color:#0a0e1a;border:none;padding:20px;border-radius:8px;font-weight:800;font-size:1.2rem;text-align:center;text-decoration:none;margin-bottom:12px;">Book a Consultation →</a>
+      <button onclick="state={step:1};save();renderStep();" style="width:100%;background:none;border:none;color:#4a5568;padding:12px;cursor:pointer;font-size:1rem;">Start Over</button>`;
+  }
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', renderStep);
+</script>
+</body>
+</html>

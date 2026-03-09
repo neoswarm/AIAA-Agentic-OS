@@ -1,0 +1,190 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 98622,
+  "unique_keywords": 13691,
+  "estimated_traffic": 19132,
+  "traffic_value": 55591,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 17,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 2,
+  "pos2_3_count": 5,
+  "pos4_10_count": 13,
+  "pos11_20_count": 30,
+  "pos1_3_count": 7,
+  "quick_wins_count": 4,
+  "top_quick_wins": [
+    {
+      "keyword": "cirs symptoms",
+      "position": 6,
+      "volume": 3600,
+      "kd": 13.0
+    },
+    {
+      "keyword": "cleerly heart scan",
+      "position": 6,
+      "volume": 1600,
+      "kd": 11.0
+    },
+    {
+      "keyword": "functional medicine news",
+      "position": 4,
+      "volume": 1300,
+      "kd": 17.0
+    },
+    {
+      "keyword": "reactivated epstein barr virus symptoms",
+      "position": 8,
+      "volume": 1000,
+      "kd": 32.0
+    }
+  ],
+  "top3_sample": [],
+  "top_by_volume": [
+    {
+      "keyword": "epstein barr virus symptoms",
+      "position": 19,
+      "volume": 18100,
+      "kd": 50.0
+    },
+    {
+      "keyword": "mold toxicity",
+      "position": 20,
+      "volume": 6600,
+      "kd": 66.0
+    },
+    {
+      "keyword": "karen fields",
+      "position": 14,
+      "volume": 4400,
+      "kd": 22.0
+    },
+    {
+      "keyword": "herx reaction",
+      "position": 12,
+      "volume": 4400,
+      "kd": 27.0
+    },
+    {
+      "keyword": "dutch test hormones",
+      "position": 11,
+      "volume": 3600,
+      "kd": 26.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 19,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 16,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 15,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 10,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 9,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 8,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 6,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 5,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 3,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 2,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 1,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "cirs symptoms",
+      "position": 6,
+      "volume": 3600,
+      "kd": 13.0
+    },
+    {
+      "keyword": "hormones by design",
+      "position": 13,
+      "volume": 2400,
+      "kd": 29.0
+    },
+    {
+      "keyword": "hormones by design",
+      "position": 3,
+      "volume": 2400,
+      "kd": 29.0
+    },
+    {
+      "keyword": "power2patient",
+      "position": 13,
+      "volume": 2400,
+      "kd": 6.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "drdanlukaczer.com",
+      "relevance": "0.08",
+      "keywords": 840,
+      "traffic": 282,
+      "traffic_value": 510
+    },
+    {
+      "domain": "fullyfunctional.com",
+      "relevance": "0.08",
+      "keywords": 7081,
+      "traffic": 6262,
+      "traffic_value": 5336
+    },
+    {
+      "domain": "doctormather.com",
+      "relevance": "0.07",
+      "keywords": 1389,
+      "traffic": 642,
+      "traffic_value": 1014
+    }
+  ]
+}
