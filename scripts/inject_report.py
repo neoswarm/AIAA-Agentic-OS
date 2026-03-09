@@ -418,6 +418,7 @@ def build_replacements(p1: dict, p2: dict) -> dict:
         "PATIENT_EMAIL_SEQUENCE_HTML": build_patient_email_html(p2.get("emails", [])),
         "ASSESSMENT_CONCERNS_JSON":  assessment_concerns_json,
         "ASSESSMENT_SYMPTOMS_JSON":  assessment_symptoms_json,
+        "LOOM_ID":                   p1.get("loom_id", "PASTE_LOOM_ID_HERE"),
     }
 
 

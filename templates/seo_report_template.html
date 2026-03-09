@@ -979,9 +979,42 @@
 </head>
 <body>
 
-<!-- Open Tracking Beacon — fires on page load, server-side posts to Slack #d100-opens -->
-<img src="https://healthbizleads.com/api/track?c={{COMPANY_SLUG}}&n={{PRACTICE_NAME_ENCODED}}&s={{COMPANY_SLUG}}"
-     width="1" height="1" alt="" style="position:absolute;opacity:0;pointer-events:none;" loading="eager">
+<!-- Open Tracking — JS beacon fires on load with rich device/session info -->
+<!-- Skip tracking: add ?preview=1 to URL, OR run: localStorage.setItem('hbl_notrack','1') in console -->
+<script>
+(function() {
+  try {
+    // ── Bypass checks ──────────────────────────────────────────────────────────
+    if (new URLSearchParams(window.location.search).get('preview') === '1') return;
+    if (localStorage.getItem('hbl_notrack') === '1') return;
+
+    var SK  = 'hbl_sid_{{COMPANY_SLUG}}';
+    var sid = localStorage.getItem(SK);
+    var isNew = !sid ? '1' : '0';
+    if (!sid) {
+      sid = Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+      localStorage.setItem(SK, sid);
+    }
+    var tz  = (Intl && Intl.DateTimeFormat) ? (Intl.DateTimeFormat().resolvedOptions().timeZone || '') : '';
+    var mob = (window.innerWidth < 768) ? '1' : '0';
+    var scr = (window.screen ? window.screen.width + 'x' + window.screen.height : '');
+    var lp  = encodeURIComponent(window.location.pathname);
+    var params = [
+      'c={{COMPANY_SLUG}}',
+      'n={{PRACTICE_NAME_ENCODED}}',
+      's={{COMPANY_SLUG}}',
+      'tz=' + encodeURIComponent(tz),
+      'mob=' + mob,
+      'scr=' + encodeURIComponent(scr),
+      'sid=' + encodeURIComponent(sid),
+      'new=' + isNew,
+      'lp=' + lp,
+    ].join('&');
+    fetch('/api/track?' + params, { method: 'GET', mode: 'no-cors', keepalive: true })
+      .catch(function(){});
+  } catch(e) {}
+})();
+</script>
 
 <div id="progress-bar" style="position:fixed;top:0;left:0;height:4px;width:0%;background:var(--brand-accent);z-index:9999;transition:width 0.1s;"></div>
 
@@ -1012,7 +1045,7 @@
     <div class="loom-wrapper">
       <iframe
         id="loom-frame"
-        src="https://www.loom.com/embed/PASTE_LOOM_ID_HERE"
+        src="https://www.loom.com/embed/{{LOOM_ID}}"
         allow="fullscreen; encrypted-media"
         title="Personalized strategy video for {{PRACTICE_NAME}}"
       ></iframe>
@@ -1384,7 +1417,7 @@
         <div style="font-size:1rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--brand-accent);font-weight:700;margin-bottom:8px;">🎬 Live Demo — Built for {{PRACTICE_NAME}}</div>
         <p style="font-size:1.2rem;color:var(--text-muted);margin:0 0 32px;line-height:1.65;">6 steps &nbsp;·&nbsp; 3 minutes &nbsp;·&nbsp; Qualifies patients clinically before they reach your calendar</p>
         <button
-          onclick="document.getElementById('assessment-modal').style.display='flex';setTimeout(renderStep,10);"
+          onclick="openAssessment()"
           style="display:inline-flex;align-items:center;justify-content:center;gap:14px;background:linear-gradient(135deg,var(--brand-primary) 0%,var(--brand-accent) 100%);color:#fff;font-size:1.45rem;font-weight:900;padding:24px 52px;border-radius:16px;border:none;cursor:pointer;letter-spacing:0.01em;box-shadow:0 0 60px rgba(3,103,151,0.55),0 12px 40px rgba(0,0,0,0.5);text-shadow:0 1px 3px rgba(0,0,0,0.4);transition:transform 0.15s ease,box-shadow 0.15s ease;"
           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 0 80px rgba(3,103,151,0.7),0 16px 48px rgba(0,0,0,0.6)';"
           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 0 60px rgba(3,103,151,0.55),0 12px 40px rgba(0,0,0,0.5)';">
@@ -1923,14 +1956,18 @@
   <p style="color:#4a5568;font-size:1rem;margin:8px 0 0;">This page was built exclusively for {{PRACTICE_NAME}} and is not publicly indexed.</p>
 </footer>
 
-<!-- ASSESSMENT MODAL -->
-<div id="assessment-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;overflow-y:auto;align-items:flex-start;padding:20px;">
-  <div style="background:#0f1420;border-radius:16px;padding:40px;max-width:660px;width:100%;margin:40px auto;position:relative;">
-    <button onclick="document.getElementById('assessment-modal').style.display='none'" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#94a3b8;font-size:2rem;cursor:pointer;line-height:1;">×</button>
-    <div style="height:5px;background:#1e2d3d;border-radius:3px;margin-bottom:28px;"><div id="modal-progress" style="height:100%;background:var(--brand-accent);border-radius:3px;transition:width 0.3s;width:16.6%;"></div></div>
-    <div id="step-counter" style="font-size:1.1rem;color:var(--brand-accent);font-weight:700;margin-bottom:8px;">Step 1 of 6</div>
-    <div id="assessment-content"></div>
-  </div>
+<!-- ASSESSMENT OVERLAY — full-screen iFrame to app.healthbizleads.com -->
+<div id="assessment-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#070c18;animation:slideUp 0.3s ease;">
+  <style>@keyframes slideUp{from{transform:translateY(40px);opacity:0;}to{transform:translateY(0);opacity:1;}}</style>
+  <!-- Close button -->
+  <button onclick="closeAssessment()"
+    style="position:fixed;top:14px;right:14px;z-index:10000;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#fff;font-size:1.3rem;font-weight:700;width:44px;height:44px;border-radius:50%;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;line-height:1;transition:background 0.15s;"
+    onmouseover="this.style.background='rgba(255,255,255,0.18)'"
+    onmouseout="this.style.background='rgba(255,255,255,0.1)'">✕</button>
+  <!-- The actual app in an iFrame -->
+  <iframe id="assessment-frame" src="" title="Patient Health Assessment"
+    style="width:100%;height:100%;border:none;display:block;"
+    allow="clipboard-write; clipboard-read"></iframe>
 </div>
 
 <!-- JAVASCRIPT -->
@@ -1941,7 +1978,7 @@ const CONFIG = {
   doctor_name: "{{DOCTOR_NAME}}",
   website: "{{WEBSITE}}",
   logo_url: "{{LOGO_URL}}",
-  loom_id: "PASTE_LOOM_ID_HERE",
+  loom_id: "{{LOOM_ID}}",
   booking_url: "{{BOOKING_URL}}",
   brand_primary: "{{BRAND_PRIMARY}}",
   brand_accent: "{{BRAND_ACCENT}}"
@@ -1962,111 +1999,24 @@ window.addEventListener('scroll', function() {
   if (bar) bar.style.width = pct + '%';
 }, { passive: true });
 
-// ─── ASSESSMENT ───────────────────────────────────────────────────────────────
-const CONCERNS = {{ASSESSMENT_CONCERNS_JSON}};
-const SYMPTOMS = {{ASSESSMENT_SYMPTOMS_JSON}};
-
-let state = JSON.parse(localStorage.getItem('d100_assessment_' + CONFIG.practice_name) || '{"step":1}');
-function save() { localStorage.setItem('d100_assessment_' + CONFIG.practice_name, JSON.stringify(state)); }
-
-function updateProgress() {
-  const pct = Math.max(((state.step - 1) / 6) * 100, 16.6);
-  const bar = document.getElementById('modal-progress');
-  const ctr = document.getElementById('step-counter');
-  if (bar) bar.style.width = pct + '%';
-  if (ctr) ctr.textContent = 'Step ' + state.step + ' of 6';
-}
-
-function renderStep() {
-  const el = document.getElementById('assessment-content');
-  if (!el) return;
-  updateProgress();
-  const s = state.step;
-  const btnStyle = 'width:100%;background:var(--brand-accent);color:#0a0e1a;border:none;padding:18px;border-radius:8px;font-weight:800;font-size:1.2rem;cursor:pointer;margin-top:16px;';
-  const backStyle = 'flex:1;background:#1e2d3d;color:#fff;border:none;padding:16px;border-radius:8px;cursor:pointer;font-size:1.1rem;';
-  const nextStyle = 'flex:2;background:var(--brand-accent);color:#0a0e1a;border:none;padding:16px;border-radius:8px;font-weight:800;font-size:1.1rem;cursor:pointer;';
-
-  if (s === 1) {
-    el.innerHTML = `
-      <h2 style="font-size:2rem;font-weight:800;color:#fff;margin:0 0 16px;">Find Your Path to Better Health</h2>
-      <p style="font-size:1.25rem;color:#94a3b8;line-height:1.75;margin-bottom:28px;">This quick assessment helps ${CONFIG.practice_name}'s team understand your situation before your first conversation. About 3 minutes.</p>
-      <div style="background:#111827;border-radius:10px;padding:24px;margin-bottom:24px;">
-        <p style="color:var(--brand-accent);font-weight:700;font-size:1.15rem;margin:0 0 6px;">✓ 100% Private</p>
-        <p style="color:#94a3b8;font-size:1.15rem;margin:0 0 16px;">Your answers are only shared with ${CONFIG.practice_name}'s clinical team.</p>
-        <p style="color:var(--brand-accent);font-weight:700;font-size:1.15rem;margin:0 0 6px;">✓ 3 Minutes</p>
-        <p style="color:#94a3b8;font-size:1.15rem;margin:0 0 16px;">6 quick questions. No medical forms.</p>
-        <p style="color:var(--brand-accent);font-weight:700;font-size:1.15rem;margin:0 0 6px;">✓ Personalized Results</p>
-        <p style="color:#94a3b8;font-size:1.15rem;margin:0;">We match your concerns to the right care approach.</p>
-      </div>
-      <button onclick="state.step=2;save();renderStep();" style="${btnStyle}">Start My Assessment →</button>`;
-  } else if (s === 2) {
-    const sel = state.concern || '';
-    el.innerHTML = `
-      <h2 style="font-size:1.9rem;font-weight:800;color:#fff;margin:0 0 8px;">What's your primary health concern?</h2>
-      <p style="color:#94a3b8;font-size:1.15rem;margin-bottom:20px;">Select the one affecting your life most right now.</p>
-      <div>${CONCERNS.map(c => `<button onclick="state.concern='${c}';save();document.querySelectorAll('.c-btn').forEach(b=>b.style.borderColor='#1e2d3d');this.style.borderColor='var(--brand-accent)';" class="c-btn" style="width:100%;text-align:left;background:#111827;border:2px solid ${sel===c?'var(--brand-accent)':'#1e2d3d'};border-radius:8px;padding:18px 22px;margin-bottom:10px;cursor:pointer;color:#fff;font-size:1.15rem;font-weight:600;">${c}</button>`).join('')}</div>
-      <div style="display:flex;gap:12px;margin-top:16px;">
-        <button onclick="state.step=1;save();renderStep();" style="${backStyle}">← Back</button>
-        <button onclick="state.concern?((state.step=3),save(),renderStep()):alert('Please select a concern');" style="${nextStyle}">Next →</button>
-      </div>`;
-  } else if (s === 3) {
-    const syms = SYMPTOMS[state.concern] || [];
-    const sel = state.symptoms || [];
-    el.innerHTML = `
-      <h2 style="font-size:1.9rem;font-weight:800;color:#fff;margin:0 0 8px;">Which apply to you?</h2>
-      <p style="color:var(--brand-accent);font-weight:700;font-size:1.1rem;margin-bottom:6px;">${state.concern}</p>
-      <p style="color:#94a3b8;font-size:1.1rem;margin-bottom:18px;">Select all that apply.</p>
-      <div>${syms.map((sym,i)=>`<label style="display:flex;align-items:flex-start;gap:14px;padding:16px 18px;background:#111827;border-radius:8px;margin-bottom:10px;cursor:pointer;border:1px solid ${sel.includes(i)?'var(--brand-accent)':'#1e2d3d'};">
-        <input type="checkbox" ${sel.includes(i)?'checked':''} onchange="const a=state.symptoms||[];const idx=${i};this.checked?(!a.includes(idx)&&a.push(idx)):a.splice(a.indexOf(idx),1);state.symptoms=a;save();this.closest('label').style.borderColor=this.checked?'var(--brand-accent)':'#1e2d3d';" style="margin-top:4px;accent-color:var(--brand-accent);width:20px;height:20px;flex-shrink:0;">
-        <span style="font-size:1.15rem;color:#f0f4ff;line-height:1.6;">${sym}</span>
-      </label>`).join('')}</div>
-      <div style="display:flex;gap:12px;margin-top:16px;">
-        <button onclick="state.step=2;save();renderStep();" style="${backStyle}">← Back</button>
-        <button onclick="state.step=4;save();renderStep();" style="${nextStyle}">Next →</button>
-      </div>`;
-  } else if (s === 4) {
-    const opts=['Less than 3 months','3 months – 1 year','1 – 3 years','3+ years'];
-    const sel=state.duration||'';
-    el.innerHTML=`
-      <h2 style="font-size:1.9rem;font-weight:800;color:#fff;margin:0 0 8px;">How long have you been dealing with this?</h2>
-      <p style="color:#94a3b8;font-size:1.15rem;margin-bottom:20px;">This helps us understand severity and the right approach.</p>
-      <div>${opts.map(o=>`<button onclick="state.duration='${o}';save();document.querySelectorAll('.d-btn').forEach(b=>b.style.borderColor='#1e2d3d');this.style.borderColor='var(--brand-accent)';" class="d-btn" style="width:100%;text-align:left;background:#111827;border:2px solid ${sel===o?'var(--brand-accent)':'#1e2d3d'};border-radius:8px;padding:18px 22px;margin-bottom:10px;cursor:pointer;color:#fff;font-size:1.15rem;font-weight:600;">${o}</button>`).join('')}</div>
-      <div style="display:flex;gap:12px;margin-top:16px;">
-        <button onclick="state.step=3;save();renderStep();" style="${backStyle}">← Back</button>
-        <button onclick="state.duration?((state.step=5),save(),renderStep()):alert('Please select a duration');" style="${nextStyle}">Next →</button>
-      </div>`;
-  } else if (s === 5) {
-    const opts=['No — this is my first step','Yes — conventional medicine only','Yes — other functional/integrative providers','Yes — multiple specialists without resolution'];
-    const sel=state.prior||'';
-    el.innerHTML=`
-      <h2 style="font-size:1.9rem;font-weight:800;color:#fff;margin:0 0 8px;">Have you seen other providers for this?</h2>
-      <p style="color:#94a3b8;font-size:1.15rem;margin-bottom:20px;">Helps ${CONFIG.practice_name}'s team understand your journey.</p>
-      <div>${opts.map(o=>`<button onclick="state.prior='${o}';save();document.querySelectorAll('.p-btn').forEach(b=>b.style.borderColor='#1e2d3d');this.style.borderColor='var(--brand-accent)';" class="p-btn" style="width:100%;text-align:left;background:#111827;border:2px solid ${sel===o?'var(--brand-accent)':'#1e2d3d'};border-radius:8px;padding:18px 22px;margin-bottom:10px;cursor:pointer;color:#fff;font-size:1.15rem;font-weight:600;">${o}</button>`).join('')}</div>
-      <div style="display:flex;gap:12px;margin-top:16px;">
-        <button onclick="state.step=4;save();renderStep();" style="${backStyle}">← Back</button>
-        <button onclick="state.prior?((state.step=6),save(),renderStep()):alert('Please select an option');" style="${nextStyle}">See My Results →</button>
-      </div>`;
-  } else if (s === 6) {
-    const n=(state.symptoms||[]).length;
-    const score=n>=5?'Strong Match':n>=3?'Good Match':'Potential Match';
-    el.innerHTML=`
-      <div style="text-align:center;margin-bottom:28px;">
-        <div style="font-size:3.5rem;margin-bottom:12px;">✅</div>
-        <h2 style="font-size:2rem;font-weight:800;color:#fff;margin:0 0 10px;">Assessment Complete</h2>
-        <p style="color:var(--brand-accent);font-weight:700;font-size:1.3rem;margin:0;">${score} for ${CONFIG.practice_name}</p>
-      </div>
-      <div style="background:#111827;border-radius:10px;padding:24px;margin-bottom:24px;">
-        <p style="color:#f0f4ff;font-size:1.2rem;line-height:1.8;margin:0 0 14px;">Based on your responses — <strong style="color:var(--brand-accent);">${state.concern||'your concern'}</strong>, dealing with this for <strong style="color:var(--brand-accent);">${state.duration||'some time'}</strong>, with ${n} matching symptoms — ${CONFIG.practice_name}'s root cause approach may be a strong fit.</p>
-        <p style="color:#94a3b8;font-size:1.1rem;line-height:1.8;margin:0;">${CONFIG.doctor_name}'s team uses advanced lab testing, personalized care plans, and natural therapies to address the underlying cause — not just symptoms.</p>
-      </div>
-      <a href="${CONFIG.booking_url}" target="_blank" rel="noopener" style="display:block;width:100%;box-sizing:border-box;background:var(--brand-accent);color:#0a0e1a;border:none;padding:20px;border-radius:8px;font-weight:800;font-size:1.2rem;text-align:center;text-decoration:none;margin-bottom:12px;">Book a Consultation →</a>
-      <button onclick="state={step:1};save();renderStep();" style="width:100%;background:none;border:none;color:#4a5568;padding:12px;cursor:pointer;font-size:1rem;">Start Over</button>`;
+// ─── ASSESSMENT — Full-screen iFrame overlay ──────────────────────────────────
+function openAssessment() {
+  const overlay = document.getElementById('assessment-overlay');
+  const frame   = document.getElementById('assessment-frame');
+  // Lazy-load the iFrame src so it only loads when the user clicks
+  if (!frame.src || frame.src === window.location.href) {
+    frame.src = 'https://app.healthbizleads.com/{{COMPANY_SLUG}}/';
   }
+  overlay.style.display = 'block';
+  document.body.style.overflow = 'hidden';
 }
-
-// Close modal on backdrop click
-document.getElementById('assessment-modal').addEventListener('click', function(e) {
-  if (e.target === this) this.style.display = 'none';
+function closeAssessment() {
+  document.getElementById('assessment-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+// Close on ESC key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeAssessment();
 });
 
 // Calendly loader

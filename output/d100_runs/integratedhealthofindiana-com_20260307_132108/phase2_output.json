@@ -109,20 +109,20 @@
         "Find the Root Cause of Your Symptoms",
         "Board-Certified Functional Medicine",
         "Chiropractic + Functional Medicine",
-        "IHI — The IHI Way to True Health",
+        "IHI \u2014 The IHI Way to True Health",
         "Stop Treating Symptoms. Fix the Cause.",
         "Dr. Trevor Miller DC IFMCP LAc",
         "Lab Testing + Personalized Care Plans",
-        "Hormones, Gut, Brain — We Treat All",
-        "North Vernon IN — Now Accepting Patients",
+        "Hormones, Gut, Brain \u2014 We Treat All",
+        "North Vernon IN \u2014 Now Accepting Patients",
         "Schedule a Free Discovery Call",
         "Results-Based Functional Medicine"
       ],
       "descriptions": [
         "Tired of band-aid fixes? Dr. Miller uses advanced lab testing to find and fix the root cause of your health issues. Book today.",
-        "Combining functional medicine, chiropractic, and acupuncture — Integrated Health of Indiana treats the whole person, not just symptoms.",
+        "Combining functional medicine, chiropractic, and acupuncture \u2014 Integrated Health of Indiana treats the whole person, not just symptoms.",
         "IHI's certified practitioners create personalized care plans using genetics, lab results, nutrition & lifestyle. North Vernon, IN.",
-        "From hormone imbalance to chronic fatigue and gut issues — we uncover why you feel this way and build a plan to fix it for good."
+        "From hormone imbalance to chronic fatigue and gut issues \u2014 we uncover why you feel this way and build a plan to fix it for good."
       ],
       "keywords": [
         "functional medicine indiana",
@@ -167,13 +167,13 @@
       "headlines": [
         "Shockwave Therapy in Indiana",
         "Chronic Pain? Try Shockwave Therapy",
-        "Back Pain & Joint Relief — No Surgery",
+        "Back Pain & Joint Relief \u2014 No Surgery",
         "FDA-Cleared Shockwave Treatment",
-        "Shockwave for Women — Indiana",
+        "Shockwave for Women \u2014 Indiana",
         "Non-Invasive Pain Relief Indiana",
         "Tendon & Muscle Pain Specialists",
         "Chiropractic + Shockwave Combo",
-        "IHI — Pain Solutions That Work",
+        "IHI \u2014 Pain Solutions That Work",
         "North Vernon IN Pain Clinic",
         "Fast Relief from Chronic Pain",
         "Book Your Shockwave Evaluation"
@@ -182,7 +182,7 @@
         "Shockwave therapy promotes healing of chronic tendons, muscles, and joints without surgery or drugs. Covered by most HSA/FSA plans.",
         "Integrated Health of Indiana combines chiropractic care and shockwave therapy to relieve back pain, sciatica, and chronic joint issues.",
         "FDA-cleared shockwave treatment used by elite athletes and everyday patients. Non-invasive, fast recovery, proven results. Book now.",
-        "Serving women with pelvic floor issues, plantar fasciitis, and soft tissue pain — shockwave therapy at IHI gets results in 3–5 sessions."
+        "Serving women with pelvic floor issues, plantar fasciitis, and soft tissue pain \u2014 shockwave therapy at IHI gets results in 3\u20135 sessions."
       ],
       "keywords": [
         "shockwave therapy indiana",
@@ -228,20 +228,20 @@
         "Hormone Imbalance Doctor Indiana",
         "Thyroid & Hormone Testing Indiana",
         "Gut Health Specialist in Indiana",
-        "IBS & Digestive Issues — Root Cause",
+        "IBS & Digestive Issues \u2014 Root Cause",
         "Fatigue, Brain Fog, Low Libido?",
         "Advanced Hormone Lab Testing",
         "Bioidentical Hormone Support Indiana",
         "Leaky Gut & Food Sensitivity Testing",
-        "Dr. Miller — Hormone Specialist",
-        "Feel Like Yourself Again — IHI",
+        "Dr. Miller \u2014 Hormone Specialist",
+        "Feel Like Yourself Again \u2014 IHI",
         "North Vernon Hormone Clinic",
         "Functional Gut & Hormone Care"
       ],
       "descriptions": [
         "Struggling with fatigue, weight gain, or mood swings? Dr. Miller uses advanced hormone panels to find the root cause and restore balance.",
-        "Comprehensive thyroid, adrenal, and sex hormone testing — we go beyond basic bloodwork to find what conventional medicine misses.",
-        "IBS, bloating, food sensitivities, leaky gut — our functional medicine approach heals your gut lining and restores digestive health.",
+        "Comprehensive thyroid, adrenal, and sex hormone testing \u2014 we go beyond basic bloodwork to find what conventional medicine misses.",
+        "IBS, bloating, food sensitivities, leaky gut \u2014 our functional medicine approach heals your gut lining and restores digestive health.",
         "Hormones affect everything: energy, weight, sleep, mood. IHI builds personalized hormone optimization plans that actually work."
       ],
       "keywords": [
@@ -298,19 +298,19 @@
       "type": "value_drop",
       "subject": "What your [PRIMARY_SYMPTOM] is actually telling you",
       "preview": "There's something important in your assessment we want to share.",
-      "body": "Hi [FIRST_NAME],\n\nThank you for completing the health assessment.\n\nYour answers stood out to us — particularly around [PRIMARY_SYMPTOM]. That pattern comes up more often than most people realize, and it's rarely just one thing in isolation.\n\nHere's something worth knowing:\n\nWhen [PRIMARY_SYMPTOM] persists despite doing everything right — eating well, sleeping enough, exercising — it usually means the body is compensating for an underlying imbalance that hasn't been identified yet.\n\nConventional labs check whether you're sick. Functional medicine asks why you feel the way you do — even when those labs come back normal.\n\nThat's the gap we work in at Integrated Health of Indiana.\n\nWe'd like to walk you through what we found in your assessment and what it could mean for you specifically.\n\nReview your next steps: [BOOKING_LINK]\n\nTake care,\nThe Care Team at Integrated Health of Indiana"
+      "body": "Hi [FIRST_NAME],\n\nThank you for completing the health assessment.\n\nYour answers stood out to us \u2014 particularly around [PRIMARY_SYMPTOM]. That pattern comes up more often than most people realize, and it's rarely just one thing in isolation.\n\nHere's something worth knowing:\n\nWhen [PRIMARY_SYMPTOM] persists despite doing everything right \u2014 eating well, sleeping enough, exercising \u2014 it usually means the body is compensating for an underlying imbalance that hasn't been identified yet.\n\nConventional labs check whether you're sick. Functional medicine asks why you feel the way you do \u2014 even when those labs come back normal.\n\nThat's the gap we work in at Integrated Health of Indiana.\n\nWe'd like to walk you through what we found in your assessment and what it could mean for you specifically.\n\nReview your next steps: [BOOKING_LINK]\n\nTake care,\nThe Care Team at Integrated Health of Indiana"
     },
     {
       "type": "mechanism_story",
       "subject": "Why [PRIMARY_SYMPTOM] keeps coming back (even when you try everything)",
       "preview": "Most approaches treat the signal. We look for the source.",
-      "body": "Hi [FIRST_NAME],\n\nImagine your body is sending you a message every single day.\n\nThat message is [PRIMARY_SYMPTOM]. Most approaches silence the notification. They don't read the message.\n\nThat's not a criticism of anyone you've seen before. It's simply how most care systems are structured: identify the symptom, reduce it, move on.\n\nFunctional medicine starts with a different question: what is the body trying to regulate, and why is it struggling?\n\nIn our clinical experience, [PRIMARY_SYMPTOM] combined with [SECONDARY_SYMPTOM] often traces back to disruptions in one of several interconnected systems — hormonal, digestive, neurological, or inflammatory. Which system matters enormously, because the approach changes completely depending on the answer.\n\nYour assessment gave us a clear starting picture. The next step is a deeper conversation — not a sales pitch. Just a clinical look at what may actually be driving your experience.\n\nWhen you're ready: [BOOKING_LINK]\n\nDr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP\nIntegrated Health of Indiana"
+      "body": "Hi [FIRST_NAME],\n\nImagine your body is sending you a message every single day.\n\nThat message is [PRIMARY_SYMPTOM]. Most approaches silence the notification. They don't read the message.\n\nThat's not a criticism of anyone you've seen before. It's simply how most care systems are structured: identify the symptom, reduce it, move on.\n\nFunctional medicine starts with a different question: what is the body trying to regulate, and why is it struggling?\n\nIn our clinical experience, [PRIMARY_SYMPTOM] combined with [SECONDARY_SYMPTOM] often traces back to disruptions in one of several interconnected systems \u2014 hormonal, digestive, neurological, or inflammatory. Which system matters enormously, because the approach changes completely depending on the answer.\n\nYour assessment gave us a clear starting picture. The next step is a deeper conversation \u2014 not a sales pitch. Just a clinical look at what may actually be driving your experience.\n\nWhen you're ready: [BOOKING_LINK]\n\nDr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP\nIntegrated Health of Indiana"
     },
     {
       "type": "proof_results",
-      "subject": "A patient with a similar pattern — what changed for her",
+      "subject": "A patient with a similar pattern \u2014 what changed for her",
       "preview": "Results vary, but this story might feel familiar.",
-      "body": "Hi [FIRST_NAME],\n\nI want to share something from a patient — we'll call her M.\n\nShe came in with a pattern similar to what you described: [PRIMARY_SYMPTOM] for over [DURATION_OR_TRIGGER], plus [SECONDARY_SYMPTOM] that was affecting her work and her sleep. She'd had full bloodwork done twice. Everything came back normal. She was told it was probably stress.\n\nWe ran a different panel. What we found was a combination of hormonal dysregulation and gut permeability that standard tests don't screen for.\n\nOnce we addressed the actual mechanisms — not just the symptoms — her energy began returning within 8 weeks. By month four, she described it as \"feeling like myself again for the first time in years.\"\n\nImportant: results vary significantly from person to person. We don't know yet what's driving your specific experience. That's exactly what a first consultation is designed to find out.\n\nIf her story resonates, the next step is a simple conversation: [BOOKING_LINK]\n\nThis is not a commitment. It's a chance to get clear answers.\n\nDr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP\nIntegrated Health of Indiana\n\nThis email is for informational purposes only and does not constitute medical advice or establish a patient-provider relationship."
+      "body": "Hi [FIRST_NAME],\n\nI want to share something from a patient \u2014 we'll call her M.\n\nShe came in with a pattern similar to what you described: [PRIMARY_SYMPTOM] for over [DURATION_OR_TRIGGER], plus [SECONDARY_SYMPTOM] that was affecting her work and her sleep. She'd had full bloodwork done twice. Everything came back normal. She was told it was probably stress.\n\nWe ran a different panel. What we found was a combination of hormonal dysregulation and gut permeability that standard tests don't screen for.\n\nOnce we addressed the actual mechanisms \u2014 not just the symptoms \u2014 her energy began returning within 8 weeks. By month four, she described it as \"feeling like myself again for the first time in years.\"\n\nImportant: results vary significantly from person to person. We don't know yet what's driving your specific experience. That's exactly what a first consultation is designed to find out.\n\nIf her story resonates, the next step is a simple conversation: [BOOKING_LINK]\n\nThis is not a commitment. It's a chance to get clear answers.\n\nDr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP\nIntegrated Health of Indiana\n\nThis email is for informational purposes only and does not constitute medical advice or establish a patient-provider relationship."
     }
   ],
   "app_config": {
@@ -395,14 +395,14 @@
         "My back or joint pain is affecting my sleep"
       ],
       "Brain Fog & Memory": [
-        "I struggle to concentrate for more than 20–30 minutes",
+        "I struggle to concentrate for more than 20\u201330 minutes",
         "I frequently forget words, names, or what I just said",
         "I feel mentally slow or like I'm 'thinking through mud'",
         "My cognitive symptoms are worse in the afternoon",
         "I have difficulty multitasking like I used to",
         "I misplace things constantly and can't stay organized",
         "Brain fog is affecting my performance at work",
-        "I've noticed cognitive changes over the past 1–2 years",
+        "I've noticed cognitive changes over the past 1\u20132 years",
         "My mental clarity is tied to how well I sleep or eat",
         "I'm worried about early cognitive decline"
       ],
@@ -490,7 +490,7 @@
       },
       {
         "name": "Shockwave Therapy Program",
-        "description": "FDA-cleared extracorporeal shockwave therapy for chronic tendon, muscle, and joint pain. Typically 3–5 sessions for lasting results without surgery or medication."
+        "description": "FDA-cleared extracorporeal shockwave therapy for chronic tendon, muscle, and joint pain. Typically 3\u20135 sessions for lasting results without surgery or medication."
       },
       {
         "name": "Hormone & Thyroid Optimization",
@@ -502,5 +502,69 @@
       }
     ]
   },
-  "report_url": "https://neoswarm.github.io/Plug-and-play-AI-SEO-and-Ad-Strategy-for-Integrated-Health-of-Indiana-Inc/"
+  "report_url": "https://neoswarm.github.io/Plug-and-play-AI-SEO-and-Ad-Strategy-for-Integrated-Health-of-Indiana-Inc/",
+  "assessment_concerns": [
+    "Headaches & Migraines",
+    "Back & Spine Pain",
+    "Gut & Digestive Health",
+    "Hormone Imbalance",
+    "Fatigue & Low Energy",
+    "Functional Medicine"
+  ],
+  "assessment_symptoms": {
+    "Headaches & Migraines": [
+      "Frequent headaches",
+      "Migraines with aura",
+      "Tension headaches",
+      "Light or sound sensitivity",
+      "Neck tension with headache",
+      "Morning headaches",
+      "Headaches after screens"
+    ],
+    "Back & Spine Pain": [
+      "Lower back pain",
+      "Upper back pain",
+      "Sciatica or leg pain",
+      "Stiffness in the morning",
+      "Pain after sitting",
+      "Disc or nerve pain",
+      "Posture problems"
+    ],
+    "Gut & Digestive Health": [
+      "Bloating after meals",
+      "Constipation or diarrhea",
+      "IBS symptoms",
+      "Abdominal cramping",
+      "Gas or discomfort",
+      "Food sensitivities",
+      "Acid reflux or heartburn"
+    ],
+    "Hormone Imbalance": [
+      "Unexplained fatigue",
+      "Weight gain or difficulty losing weight",
+      "Mood swings or anxiety",
+      "Irregular periods",
+      "Hot flashes",
+      "Low libido",
+      "Sleep problems"
+    ],
+    "Fatigue & Low Energy": [
+      "Tired even after sleep",
+      "Brain fog or poor concentration",
+      "Afternoon energy crashes",
+      "Low motivation",
+      "Feeling burned out",
+      "Reliance on caffeine",
+      "Waking unrefreshed"
+    ],
+    "Functional Medicine": [
+      "Chronic symptoms without clear diagnosis",
+      "Multiple medications without relief",
+      "Autoimmune condition",
+      "Thyroid issues",
+      "Lab results in range but still sick",
+      "Want root cause (not just symptom treatment)",
+      "Interest in nutrition-based healing"
+    ]
+  }
 }
