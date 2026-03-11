@@ -93,20 +93,60 @@ def scrape_site(website: str) -> str:
     return "\n\n---\n\n".join(sections)
 
 
+# ── Third-party colors to exclude from brand extraction ────────────────────────
+_THIRD_PARTY_COLORS = {
+    # Google
+    "#4285F4", "#34A853", "#FBBC05", "#EA4335",
+    # Facebook / Meta
+    "#1877F2", "#0866FF",
+    # Twitter / X
+    "#1DA1F2",
+    # LinkedIn
+    "#0077B5", "#0A66C2",
+    # Stripe
+    "#635BFF",
+    # Hotjar
+    "#FF3C00",
+    # HubSpot
+    "#FF7A59",
+    # Calendly
+    "#006BFF",
+    # Webflow
+    "#4353FF",
+    # Wix
+    "#0C6EFC",
+    # Generic blue (Bootstrap default)
+    "#007BFF", "#0D6EFD",
+}
+
+
 # ── Phase 1: CSS brand color extraction ────────────────────────────────────────
-def extract_brand_colors_css(website: str) -> dict:
-    """Extract brand colors via urllib CSS parsing.
-    Priority: Elementor CSS custom properties → frequency-count hex scan → fallback.
-    """
+def _fetch_homepage_html(website: str, timeout: int = 10) -> str:
+    """Fetch homepage HTML. Returns empty string on failure."""
     try:
         req = urllib.request.Request(website, headers={
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
         })
-        with urllib.request.urlopen(req, timeout=10) as r:
-            html = r.read().decode("utf-8", errors="ignore")
-    except Exception as e:
-        return {"note": f"CSS extraction failed: {e}", "background": "#FFFFFF",
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return r.read().decode("utf-8", errors="ignore")
+    except Exception:
+        return ""
+
+
+def extract_brand_colors_css(website: str) -> dict:
+    """Extract brand colors via urllib CSS parsing.
+    Priority: Elementor CSS custom properties → frequency-count hex scan → fallback.
+    Excludes known third-party service colors (Google, Facebook, etc.)
+    """
+    html = _fetch_homepage_html(website)
+    if not html:
+        return {"note": "CSS extraction failed: could not fetch page", "background": "#FFFFFF",
                 "source": "css_extraction_failed"}
+
+    # Strip scripts and iframes before color extraction (removes third-party color noise)
+    html_clean = re.sub(r"<script[^>]*>.*?</script>", "", html, flags=re.DOTALL | re.IGNORECASE)
+    html_clean = re.sub(r"<iframe[^>]*>.*?</iframe>", "", html_clean, flags=re.DOTALL | re.IGNORECASE)
+    html_clean = re.sub(r"<noscript[^>]*>.*?</noscript>", "", html_clean, flags=re.DOTALL | re.IGNORECASE)
 
     # 1. Elementor global CSS custom properties (~70% of functional medicine sites)
     elementor_map = {
@@ -117,20 +157,45 @@ def extract_brand_colors_css(website: str) -> dict:
     }
     colors: dict = {}
     for var, key in elementor_map.items():
-        m = re.search(rf"{re.escape(var)}\s*:\s*(#[0-9a-fA-F]{{3,8}})", html)
+        m = re.search(rf"{re.escape(var)}\s*:\s*(#[0-9a-fA-F]{{3,8}})", html_clean)
         if m:
-            colors[key] = m.group(1).upper()
+            c = m.group(1).upper()
+            if c not in _THIRD_PARTY_COLORS:
+                colors[key] = c
 
     if len(colors) >= 2:
         colors.setdefault("background", "#FFFFFF")
         colors["source"] = "css_extraction_elementor"
         return colors
 
-    # 2. Frequency-count all 6-digit hex colors, exclude near-black/near-white
-    all_hex = re.findall(r"#([0-9a-fA-F]{6})\b", html)
+    # 2. Broader CSS custom property scan (non-Elementor sites)
+    css_var_matches = re.findall(r"--[\w-]+\s*:\s*(#[0-9a-fA-F]{6})\b", html_clean)
+    if css_var_matches:
+        css_freq: dict = {}
+        for h in css_var_matches:
+            c = h.upper()
+            if c not in _THIRD_PARTY_COLORS:
+                css_freq[c] = css_freq.get(c, 0) + 1
+        css_top = sorted(css_freq, key=lambda k: css_freq[k], reverse=True)[:3]
+        if css_top:
+            r_val = int(css_top[0][1:3], 16)
+            g_val = int(css_top[0][3:5], 16)
+            b_val = int(css_top[0][5:7], 16)
+            brightness = (r_val * 299 + g_val * 587 + b_val * 114) / 1000
+            if 20 < brightness < 230:
+                result: dict = {"primary": css_top[0], "background": "#FFFFFF",
+                                "source": "css_extraction_custom_props"}
+                if len(css_top) > 1:
+                    result["accent"] = css_top[1]
+                return result
+
+    # 3. Frequency-count all 6-digit hex colors, exclude near-black/near-white/third-party
+    all_hex = re.findall(r"#([0-9a-fA-F]{6})\b", html_clean)
     freq: dict = {}
     for h in all_hex:
         normalized = "#" + h.upper()
+        if normalized in _THIRD_PARTY_COLORS:
+            continue
         r_val = int(h[0:2], 16)
         g_val = int(h[2:4], 16)
         b_val = int(h[4:6], 16)
@@ -139,8 +204,8 @@ def extract_brand_colors_css(website: str) -> dict:
             freq[normalized] = freq.get(normalized, 0) + 1
     top = sorted(freq, key=lambda k: freq[k], reverse=True)[:3]
     if top:
-        result: dict = {"primary": top[0], "background": "#FFFFFF",
-                        "source": "css_extraction_frequency"}
+        result = {"primary": top[0], "background": "#FFFFFF",
+                  "source": "css_extraction_frequency"}
         if len(top) > 1:
             result["accent"] = top[1]
         if len(top) > 2:
@@ -149,6 +214,156 @@ def extract_brand_colors_css(website: str) -> dict:
 
     return {"note": "No colors detected via CSS", "background": "#FFFFFF",
             "source": "css_extraction_fallback"}
+
+
+# ── Phase 1: Logo + favicon extraction from HTML ────────────────────────────────
+def extract_page_assets(website: str) -> dict:
+    """
+    Extract logo URL and favicon URL from homepage HTML.
+    Returns {"logo_url": str, "favicon_url": str, "hero_url": "", "headshot_url": ""}.
+    """
+    html = _fetch_homepage_html(website)
+    if not html:
+        return {"logo_url": "", "favicon_url": website.rstrip("/") + "/favicon.ico",
+                "hero_url": "", "headshot_url": ""}
+
+    base = website.rstrip("/")
+
+    def make_absolute(href: str) -> str:
+        if not href:
+            return ""
+        href = href.strip()
+        if href.startswith("//"):
+            return "https:" + href
+        if href.startswith("/"):
+            return base + href
+        if href.startswith("http"):
+            return href
+        return base + "/" + href
+
+    # ── Favicon ───────────────────────────────────────────────────────────────
+    favicon_url = ""
+    favicon_patterns = [
+        r'<link[^>]+rel=["\'](?:shortcut )?icon["\'][^>]+href=["\']([^"\']+)["\']',
+        r'<link[^>]+href=["\']([^"\']+)["\'][^>]+rel=["\'](?:shortcut )?icon["\']',
+        r'<link[^>]+rel=["\']apple-touch-icon["\'][^>]+href=["\']([^"\']+)["\']',
+    ]
+    for pat in favicon_patterns:
+        m = re.search(pat, html, re.IGNORECASE)
+        if m:
+            favicon_url = make_absolute(m.group(1))
+            break
+    if not favicon_url:
+        favicon_url = base + "/favicon.ico"
+
+    # ── Logo: look in <header>, <nav>, or elements with logo-related attributes ──
+    logo_url = ""
+
+    def _is_valid_logo(url: str) -> bool:
+        if not url or url.startswith("data:"):
+            return False
+        # Skip common non-logo image patterns
+        skip = ["pixel", "tracker", "analytics", "1x1", "spacer", "clear.gif",
+                "badge", "certified", "award", "seal", "rating",
+                "wellness-services", "-services", "-staff", "-team", "-hero",
+                "-banner", "-slide", "background", "bg-image", "stock-photo"]
+        lower = url.lower()
+        return not any(s in lower for s in skip)
+
+    # Strategy 0: Platform-specific logo class detection (most precise)
+    platform_logo_patterns = [
+        # WordPress: custom-logo (appears on ALL WordPress sites with logo set)
+        r'<img[^>]+class=["\'][^"\']*custom-logo[^"\']*["\'][^>]+src=["\']([^"\']+)["\']',
+        r'<img[^>]+src=["\']([^"\']+)["\'][^>]+class=["\'][^"\']*custom-logo[^"\']*["\']',
+        # WordPress: site-logo
+        r'<img[^>]+class=["\'][^"\']*site-logo[^"\']*["\'][^>]+src=["\']([^"\']+)["\']',
+        r'<img[^>]+src=["\']([^"\']+)["\'][^>]+class=["\'][^"\']*site-logo[^"\']*["\']',
+        # WordPress: custom-logo-link wrapper
+        r'<a[^>]+class=["\'][^"\']*custom-logo-link[^"\']*["\'][^>]*>\s*<img[^>]+src=["\']([^"\']+)["\']',
+        # Squarespace: header-title-logo
+        r'<div[^>]+class=["\'][^"\']*header-title-logo[^"\']*["\'][^>]*>\s*<img[^>]+src=["\']([^"\']+)["\']',
+        # Webflow: navbar-logo
+        r'<img[^>]+class=["\'][^"\']*navbar-logo[^"\']*["\'][^>]+src=["\']([^"\']+)["\']',
+        r'<img[^>]+src=["\']([^"\']+)["\'][^>]+class=["\'][^"\']*navbar-logo[^"\']*["\']',
+        # Generic: site-branding wrapper
+        r'<div[^>]+class=["\'][^"\']*site-branding[^"\']*["\'][^>]*>.*?<img[^>]+src=["\']([^"\']+)["\']',
+        r'<div[^>]+class=["\'][^"\']*brand[^"\']*["\'][^>]*>\s*<(?:a[^>]*>\s*)?<img[^>]+src=["\']([^"\']+)["\']',
+    ]
+    for pat in platform_logo_patterns:
+        m = re.search(pat, html, re.DOTALL | re.IGNORECASE)
+        if m:
+            candidate = make_absolute(m.group(1))
+            if _is_valid_logo(candidate):
+                logo_url = candidate
+                break
+
+    # Strategy 1: First <img> inside <header> or <nav> (most reliable — always the logo)
+    # Try <nav> first (tighter context), then <header>
+    for tag in ["nav", "header"]:
+        header_match = re.search(
+            rf'<{tag}[^>]*>(.*?)</{tag}>',
+            html, re.DOTALL | re.IGNORECASE
+        )
+        if header_match:
+            nav_html = header_match.group(1)
+            # Look for img with logo-related class/id/alt first
+            logo_in_nav_patterns = [
+                r'<img[^>]+(?:class|id)=["\'][^"\']*logo[^"\']*["\'][^>]+src=["\']([^"\']+)["\']',
+                r'<img[^>]+src=["\']([^"\']+)["\'][^>]+(?:class|id)=["\'][^"\']*logo[^"\']*["\']',
+                r'<img[^>]+alt=["\'][^"\']*logo[^"\']*["\'][^>]+src=["\']([^"\']+)["\']',
+                r'<img[^>]+src=["\']([^"\']+)["\'][^>]+alt=["\'][^"\']*logo[^"\']*["\']',
+            ]
+            for pat in logo_in_nav_patterns:
+                m = re.search(pat, nav_html, re.IGNORECASE)
+                if m:
+                    candidate = make_absolute(m.group(1))
+                    if _is_valid_logo(candidate):
+                        logo_url = candidate
+                        break
+            if logo_url:
+                break
+            # Fallback: first img in nav/header
+            img_match = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', nav_html, re.IGNORECASE)
+            if img_match:
+                candidate = make_absolute(img_match.group(1))
+                if _is_valid_logo(candidate):
+                    logo_url = candidate
+                    break
+
+    # Strategy 2: Global img search with logo-related attributes (fallback)
+    if not logo_url:
+        logo_img_patterns = [
+            r'<img[^>]+(?:class|id)=["\'][^"\']*logo[^"\']*["\'][^>]+src=["\']([^"\']+)["\']',
+            r'<img[^>]+src=["\']([^"\']+)["\'][^>]+(?:class|id)=["\'][^"\']*logo[^"\']*["\']',
+            r'<img[^>]+alt=["\'][^"\']*logo[^"\']*["\'][^>]+src=["\']([^"\']+)["\']',
+            r'<img[^>]+src=["\']([^"\']+)["\'][^>]+alt=["\'][^"\']*logo[^"\']*["\']',
+            # Retina logo assets (e.g. practice-name@2x.png) — almost always the logo
+            r'<img[^>]+src=["\']([^"\']+@2x\.[a-z]+)["\']',
+            r'<img[^>]+src=["\']([^"\']*logo[^"\']*\.(?:png|svg|jpg|webp|gif))["\']',
+            r'<img[^>]+src=["\']([^"\']*(?:brand|wordmark)[^"\']*\.(?:png|svg|jpg|webp|gif))["\']',
+        ]
+        for pat in logo_img_patterns:
+            m = re.search(pat, html, re.IGNORECASE)
+            if m:
+                candidate = make_absolute(m.group(1))
+                if _is_valid_logo(candidate):
+                    logo_url = candidate
+                    break
+
+    # Strategy 3: First <img> overall (last resort — logo is almost always first image on page)
+    if not logo_url:
+        first_img = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', html, re.IGNORECASE)
+        if first_img:
+            candidate = make_absolute(first_img.group(1))
+            if _is_valid_logo(candidate):
+                logo_url = candidate
+
+    return {
+        "logo_url":    logo_url,
+        "favicon_url": favicon_url,
+        "hero_url":    "",
+        "headshot_url": "",
+    }
 
 
 # ── Phase 1: robots/llms/sitemap ───────────────────────────────────────────────
@@ -409,27 +624,27 @@ def parse_semrush(csv_path: str) -> dict:
 # ── Phase 2: Merged Claude Sonnet 4.6 call ─────────────────────────────────────
 CLAUDE_JSON_SCHEMA = """
 {
-  "keywords": ["string × 100 — local + national SEO keywords"],
+  "keywords": ["string × 30 — top local + national SEO keywords"],
   "ads": [
     {
       "campaign_name": "string",
       "target_audience": "string",
       "headlines": ["string × 5 (≤30 chars each)"],
       "descriptions": ["string (≤90 chars) × 2"],
-      "keywords": ["[exact]", "\"phrase\"", "broad × 8-10 total"]
+      "keywords": ["[exact]", "\"phrase\"", "broad × 8-10 total"],
+      "extensions": {
+        "Callout Extensions": ["string × 4 callouts, each ≤25 chars — practice-specific benefits (e.g. Free Consultation, No Referral Needed, Root Cause Approach, Same-Week Appointments)"],
+        "Sitelink Extensions": ["Label | short description × 3 (e.g. New Patients | What to expect at your first visit)"]
+      }
     }
   ],
-  "ad_callouts": {
-    "sitelinks": ["Label | /slug × 6"],
-    "callout_extensions": ["string × 8"]
-  },
   "emails": [
     {
       "email_number": 1,
       "type": "smart_practice_value_drop",
       "subject": "string",
       "preview": "string (≤45 chars)",
-      "body": "string — 150-300 words, patient-facing, 2-3 short paragraphs",
+      "body": "string — 150-200 words, patient-facing, 2-3 short paragraphs",
       "cta_text": "string",
       "cta_url": "string (booking URL)"
     },
@@ -438,7 +653,7 @@ CLAUDE_JSON_SCHEMA = """
       "type": "mechanism_story",
       "subject": "string",
       "preview": "string (≤45 chars)",
-      "body": "string — 150-300 words, patient-facing, 2-3 short paragraphs",
+      "body": "string — 150-200 words, patient-facing, 2-3 short paragraphs",
       "cta_text": "string",
       "cta_url": "string (booking URL)"
     },
@@ -447,38 +662,28 @@ CLAUDE_JSON_SCHEMA = """
       "type": "proof_and_results",
       "subject": "string",
       "preview": "string (≤45 chars)",
-      "body": "string — 150-300 words, patient-facing, 2-3 short paragraphs",
+      "body": "string — 150-200 words, patient-facing, 2-3 short paragraphs",
       "cta_text": "string",
       "cta_url": "string (booking URL)"
     }
   ],
-  "gamma_content": {
-    "company": "string",
-    "digital_health_report": "PASSTHROUGH — copy the PRE-BUILT DIGITAL HEALTH REPORT provided at the end of this prompt verbatim into this field. Do not modify, summarize, or regenerate it.",
-    "ad_campaign1": "string (rich markdown)",
-    "ad_campaign2": "string (rich markdown)",
-    "ad_campaign3": "string (rich markdown)",
-    "ad_callouts_slide": "string (rich markdown)",
-    "email1": "string (rich markdown)",
-    "email2": "string (rich markdown)",
-    "email3": "string (rich markdown)",
-    "assessment_url": "string"
-  },
   "app_config": {
     "practiceName": "string",
     "practiceShortName": "string",
     "providerName": "string",
     "providerTitle": "string",
     "tagline": "string",
-    "primaryColor": "#hex",
-    "primaryDark": "#hex",
-    "primaryLight": "#hex",
-    "primaryXLight": "#hex",
-    "backgroundColor": "#hex",
+    "primaryColor": "#hex — dominant BRAND color (not black/white, not a third-party service color like Google blue #4285F4)",
+    "primaryDark": "#hex — darker shade of primaryColor for headers/backgrounds",
+    "primaryLight": "#hex — lighter shade of primaryColor for accents",
+    "primaryXLight": "#hex — very light tint (10-15% opacity) for subtle backgrounds",
+    "backgroundColor": "#hex — page background (usually white or near-white)",
     "bookingUrl": "string",
     "phone": "string",
-    "concerns": [{"label": "string", "emoji": "string"}],
-    "symptoms": ["string × 20-24"],
+    "concerns": [{"label": "string — 2-4 word health concern", "emoji": "string — single relevant emoji"}],
+    "symptom_map": {
+      "<concern label>": ["symptom string × 6-8 — specific, patient-relatable symptoms for this concern"]
+    },
     "careModels": [{"name": "string", "desc": "string", "price": "string"}]
   }
 }
@@ -539,13 +744,6 @@ Page-1 Quick Wins (pos 4-10, vol ≥100):
 Top Organic Competitors:
 {comp_lines or '  (not available)'}"""
 
-    seo_section = ""
-    if prebuilt_seo_report.strip():
-        seo_section = f"""
-PRE-BUILT DIGITAL HEALTH REPORT — copy this VERBATIM into gamma_content.digital_health_report:
-{prebuilt_seo_report}
-"""
-
     return f"""You are a healthcare digital marketing expert building a Dream 100 sales presentation package.
 
 PRACTICE CONTEXT (provided by sales team):
@@ -577,12 +775,10 @@ CRITICAL RULES:
 - Email 2 (mechanism_story): simple analogy explaining the biological mechanism behind symptoms, what standard care typically misses, position practice approach as different — no guarantees or claims
 - Email 3 (proof_and_results): short anonymized patient story with similar symptom pattern, what changed when root cause was addressed, results-vary disclaimer, clear calm booking CTA
 - Use personalization variables: [FIRST_NAME], [PRIMARY_SYMPTOM], [KEY_ASSESSMENT_INSIGHT], [RECOMMENDED_SERVICE_OR_FOCUS], [BOOKING_LINK]
-- 150-300 words per email. Short paragraphs. No emojis. No aggressive urgency. Sign off as the practice name or care team.
-- Keywords: exactly 100 unique strings
-- gamma_content.digital_health_report: copy the PRE-BUILT REPORT below EXACTLY as-is — do not regenerate or modify it
+- 150-200 words per email. Short paragraphs. No emojis. No aggressive urgency. Sign off as the practice name or care team.
+- Keywords: exactly 30 unique strings
 - DO NOT include any YouTube or Calendly URLs anywhere in output
-- JSON SAFETY: NEVER use double-quote characters (") inside string values. Ad headlines, email copy, and descriptions must use single quotes (') or rephrase without internal quotation marks. Unescaped double quotes break JSON parsing.
-{seo_section}"""
+- JSON SAFETY: NEVER use double-quote characters (") inside string values. Ad headlines, email copy, and descriptions must use single quotes (') or rephrase without internal quotation marks. Unescaped double quotes break JSON parsing."""
 
 
 def repair_json(text: str) -> str:
@@ -627,6 +823,35 @@ def repair_json(text: str) -> str:
 # call_claude() removed — all LLM generation is done natively by Claude Code (Claude Max, no API billing).
 # Phase 2 writes phase1_data.json; Claude Code generates phase2_output.json natively.
 # Phase 1.5 reads seo_report.md written by Claude Code natively.
+
+
+def call_anthropic_api(prompt: str, api_key: str, model: str = "claude-sonnet-4-5",
+                       max_tokens: int = 8192) -> str:
+    """Call Anthropic API via urllib (no SDK). Returns raw text content."""
+    payload = {
+        "model": model,
+        "max_tokens": max_tokens,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+    req = urllib.request.Request(
+        "https://api.anthropic.com/v1/messages",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "x-api-key": api_key,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=180) as resp:
+        result = json.loads(resp.read().decode("utf-8"))
+    return result["content"][0]["text"].strip()
+
+
+def extract_json_from_response(text: str) -> dict:
+    """Strip markdown fences and parse JSON from Claude response."""
+    text = re.sub(r"^```(?:json)?\s*", "", text.strip(), flags=re.MULTILINE)
+    text = re.sub(r"\s*```\s*$", "", text.strip(), flags=re.MULTILINE)
+    return json.loads(text.strip())
 
 
 # ── Phase 1.5: Inline SEO analysis via Claude Sonnet 4.6 ──────────────────────
@@ -819,6 +1044,8 @@ def notify_slack_report_live(webhook: str, practice: str, report_url: str,
             ]},
             {"type": "section", "text": {"type": "mrkdwn",
                 "text": f"*Deliverables Page:*\n<{report_url}|{report_url}>"}},
+            {"type": "section", "text": {"type": "mrkdwn",
+                "text": f"*👁 Preview (no Slack ping):* <{report_url}?preview=1|Open with ?preview=1>"}},
         ],
     }
     return _slack_post(webhook, msg)
@@ -1140,8 +1367,10 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
 
         print(f"  Phase 1 complete ({time.time()-t0:.1f}s)")
 
-    # Brand colors: Puppeteer-extracted file takes priority; otherwise auto-extract via CSS
+    # Brand colors + page assets (logo, favicon): load from cache or extract
     brand_colors_path = run_dir / "brand_colors.json"
+    page_assets_path  = run_dir / "page_assets.json"
+
     if brand_colors_path.exists():
         brand_colors = json.loads(brand_colors_path.read_text(encoding="utf-8"))
         print(f"  ✓ Brand colors loaded from brand_colors.json (pre-extracted)")
@@ -1151,6 +1380,16 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         brand_colors_path.write_text(json.dumps(brand_colors, indent=2, ensure_ascii=False), encoding="utf-8")
         n_colors = len([v for v in brand_colors.values() if str(v).startswith("#")])
         print(f"  ✓ Brand colors extracted ({n_colors} colors, method: {brand_colors.get('source', 'unknown')})")
+
+    if page_assets_path.exists():
+        page_assets = json.loads(page_assets_path.read_text(encoding="utf-8"))
+        print(f"  ✓ Page assets loaded from cache (logo: {'yes' if page_assets.get('logo_url') else 'missing'})")
+    else:
+        print(f"  Extracting logo + favicon from HTML ({website})...")
+        page_assets = extract_page_assets(website)
+        page_assets_path.write_text(json.dumps(page_assets, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"  ✓ Logo: {page_assets.get('logo_url') or 'not found'}")
+        print(f"  ✓ Favicon: {page_assets.get('favicon_url') or 'not found'}")
 
     # ── PHASE 1-ONLY EXIT ──────────────────────────────────────────────────────
     if phase1_only or dry_run:
@@ -1187,32 +1426,82 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         phase2_data = json.loads(phase2_output_path.read_text(encoding="utf-8"))
         print(f"\n🤖 Phase 2: Loaded from existing phase2_output.json ({len(phase2_data)} keys)")
     else:
-        # Write phase1_data.json so Claude Code can generate phase2_output.json natively (Claude Max — zero API cost)
-        phase1_data = {
-            "context": context,
-            "raw_scrape": raw_scrape[:6000] if raw_scrape else "",
-            "semrush": semrush,
-            "crawl": crawl,
-            "brand_colors": brand_colors,
-            "prebuilt_seo_report": prebuilt_seo_report,
-            "run_id": run_id,
-            "website": website,
+        # ── Phase 2: Call Anthropic API ───────────────────────────────────────
+        anthropic_key = env.get("ANTHROPIC_API_KEY", "")
+        if not anthropic_key:
+            raise RuntimeError("ANTHROPIC_API_KEY not set — add to .env to enable Phase 2")
+
+        print(f"\n🤖 Phase 2: Calling Anthropic API (claude-sonnet-4-5)...")
+        t2 = time.time()
+        prompt = build_phase2_prompt(context, raw_scrape[:6000] if raw_scrape else "",
+                                     semrush, crawl, brand_colors, prebuilt_seo_report)
+        raw_response = ""
+        try:
+            raw_response = call_anthropic_api(prompt, anthropic_key, max_tokens=16384)
+            # Strip markdown fences
+            clean = re.sub(r"^```(?:json)?\s*", "", raw_response.strip(), flags=re.MULTILINE)
+            clean = re.sub(r"\s*```\s*$", "", clean.strip(), flags=re.MULTILINE).strip()
+            try:
+                phase2_data = json.loads(clean)
+            except json.JSONDecodeError:
+                # Best-effort repair for truncated responses
+                phase2_data = json.loads(repair_json(clean))
+        except json.JSONDecodeError as e:
+            raise RuntimeError(
+                f"BUILD_FAILED: Phase 2 JSON parse error: {e}\n"
+                f"Response snippet: {raw_response[:500]}"
+            )
+        except Exception as e:
+            raise RuntimeError(f"BUILD_FAILED: Phase 2 API call failed: {e}")
+
+        phase2_output_path.write_text(
+            json.dumps(phase2_data, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
+        print(f"  ✓ Phase 2 complete ({time.time()-t2:.1f}s)")
+
+        # ── Write phase1_data.json (required by inject_report.py for Phase 3) ──
+        app_cfg = phase2_data.get("app_config", {})
+
+        # Use Phase 2 colors if they are non-generic, else keep Phase 1 CSS colors
+        p2_primary = app_cfg.get("primaryColor", "")
+        if p2_primary and p2_primary not in _THIRD_PARTY_COLORS and p2_primary.upper() not in ("#333333", "#222222", "#111111", "#000000", "#FFFFFF", "#FAFAFA"):
+            merged_colors = dict(brand_colors)
+            merged_colors["primary"]    = p2_primary
+            merged_colors["accent"]     = app_cfg.get("primaryLight", brand_colors.get("accent", ""))
+            merged_colors["secondary"]  = app_cfg.get("primaryDark", brand_colors.get("secondary", ""))
+            merged_colors["background"] = app_cfg.get("backgroundColor", brand_colors.get("background", "#FFFFFF"))
+            merged_colors["source"]     = "phase2_app_config"
+        else:
+            merged_colors = brand_colors
+
+        logo_url = page_assets.get("logo_url", "")
+        favicon_url = page_assets.get("favicon_url", "")
+
+        phase1_data_for_inject = {
+            "run_id":       run_id,
+            "website":      website,
+            "context":      context,
+            "raw_scrape":   raw_scrape[:6000] if raw_scrape else "",
+            "semrush":      semrush,
+            "crawl":        crawl,
+            "brand_colors": merged_colors,
+            # Enriched from Phase 2 app_config
+            "name":         app_cfg.get("practiceName", app_cfg.get("practice_name", "")),
+            "doctor_name":  app_cfg.get("providerName", app_cfg.get("provider_name", "")),
+            "booking_url":  app_cfg.get("bookingUrl", app_cfg.get("booking_url",
+                            extract_booking_url(raw_scrape, website) if raw_scrape else website)),
+            # Logo + favicon extracted from live HTML
+            "logo_url":     logo_url,
+            "images":       {
+                "logo_url":    logo_url,
+                "favicon_url": favicon_url,
+                "hero_url":    "",
+                "headshot_url": "",
+            },
         }
         (run_dir / "phase1_data.json").write_text(
-            json.dumps(phase1_data, indent=2, ensure_ascii=False), encoding="utf-8"
+            json.dumps(phase1_data_for_inject, indent=2, ensure_ascii=False), encoding="utf-8"
         )
-        print(f"\n🤖 Phase 2: Pending — Claude Code will generate natively (see phase1_data.json)")
-        # Return early — Phase 3 (Gamma) requires phase2_output.json
-        return {
-            "run_id": run_id,
-            "status": "phase2_pending",
-            "website": website,
-            "gamma_url": "",
-            "keywords_count": 0,
-            "quick_wins": semrush.get("quick_wins_count", 0),
-            "traffic_value": semrush.get("traffic_value", 0),
-            "ai_overview_serp_count": semrush.get("ai_overview_serp_count", "N/A"),
-        }
 
     print(f"  Quick wins: {semrush.get('quick_wins_count', 0)}")
 
@@ -1329,6 +1618,29 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         except Exception as e:
             print(f"  ⚠️  Slack failed: {e}")
 
+    # Google Sheets tracking — append row if GOOGLE_SHEETS_ID is set
+    sheets_id = env.get("GOOGLE_SHEETS_ID", "")
+    if sheets_id:
+        try:
+            sys.path.insert(0, str(SCRIPT_DIR))
+            from sheets_helper import append_to_tracking_sheet
+            append_to_tracking_sheet(sheets_id, {
+                "Company Name":     practice_name,
+                "Website":          website,
+                "Run Date":         datetime.now().strftime("%Y-%m-%d"),
+                "Deliverables URL": report_url,
+                "App URL":          app_url or "",
+                "Preview URL":      f"{report_url}?preview=1",
+                "Loom Status":      "PENDING",
+                "SEMrush Traffic":  semrush.get("estimated_traffic", 0),
+                "Keywords":         semrush.get("unique_keywords", 0),
+                "Quick Wins":       semrush.get("quick_wins_count", 0),
+                "Outreach Status":  "NOT_SENT",
+            })
+            print("  ✓ Sheets row appended")
+        except Exception as e:
+            print(f"  ⚠️  Sheets append failed: {e}")
+
     # ── Summary ────────────────────────────────────────────────────────────────
     files = list(run_dir.rglob("*"))
     file_list = [str(f.relative_to(run_dir)) for f in files if f.is_file()]
@@ -1352,6 +1664,9 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────
+MAX_WORKERS = 3  # 3 parallel runs ≈ 3x throughput; safe for SEMrush + Vercel rate limits
+
+
 def find_run_dir_for_site(website: str):
     """Find the most recent run dir for a website that has phase2_output.json ready."""
     slug = re.sub(r"https?://", "", website.rstrip("/")).replace("/", "").replace(".", "-")
@@ -1362,6 +1677,46 @@ def find_run_dir_for_site(website: str):
         reverse=True,
     )
     return str(candidates[0]) if candidates else None
+
+
+def run_with_checkpoint(args_tuple):
+    """Thread worker: checkpoint check → run_single → write checkpoint on success."""
+    i, row, env, dry_run, phase1_only, existing_run_dir = args_tuple
+    website = row.get("website", "")
+
+    # Checkpoint: skip already-completed runs
+    existing = find_run_dir_for_site(website) if not existing_run_dir else existing_run_dir
+    if existing:
+        checkpoint = Path(existing) / "checkpoint.json"
+        if checkpoint.exists():
+            try:
+                chk = json.loads(checkpoint.read_text(encoding="utf-8"))
+                if chk.get("status") == "completed":
+                    return {"website": website, "status": "skipped_checkpoint",
+                            "report_url": chk.get("report_url", ""),
+                            "gamma_url": chk.get("report_url", "")}
+            except Exception:
+                pass
+
+    result = run_single(row, env, dry_run=dry_run, phase1_only=phase1_only,
+                        existing_run_dir=existing_run_dir)
+
+    # Write checkpoint on success
+    if result.get("status") == "completed":
+        run_dir_path = OUTPUT_ROOT / result.get("run_id", "")
+        if run_dir_path.exists():
+            try:
+                (run_dir_path / "checkpoint.json").write_text(
+                    json.dumps({"status": "completed",
+                                "report_url": result.get("report_url", ""),
+                                "timestamp": datetime.now().isoformat()},
+                               indent=2),
+                    encoding="utf-8"
+                )
+            except Exception:
+                pass
+
+    return result
 
 
 def main():
@@ -1404,22 +1759,17 @@ def main():
     else:
         print(f"Running {len(rows)} site(s) from CSV")
 
-    # ── Run all sites ────────────────────────────────────────────────────────────
+    # ── Run all sites (parallel, max_workers=3) ──────────────────────────────────
     n = len(rows)
     results = []
-    consecutive_failures = 0
+    failure_count = 0
     FAILURE_LIMIT = 3
     slack_webhook = env.get("SLACK_WEBHOOK_URL", "")
 
+    # Build args for each row; resolve phase3-only run dirs upfront (serial, fast)
+    worker_args = []
     for i, row in enumerate(rows):
-        label = f"[{i+1}/{n}]"
         website = row.get("website", "?")
-        context = row.get("context", "")
-        # Best-effort practice name from context (before run_single parses it)
-        practice_name_hint = context.split(";")[0].strip() if context else website
-        print(f"\n{label} {website}")
-
-        # --phase3-only: resolve existing run dir automatically per site
         existing_run_dir = args.run_dir
         if args.phase3_only and not existing_run_dir:
             existing_run_dir = find_run_dir_for_site(website)
@@ -1427,59 +1777,64 @@ def main():
                 print(f"  ⚠️  No run dir with phase2_output.json found for {website} — skipping")
                 results.append({"website": website, "status": "skipped_no_phase2", "report_url": ""})
                 continue
-            print(f"  📁 Using run dir: {existing_run_dir}")
+            print(f"  📁 [{i+1}/{n}] {website} → {existing_run_dir}")
+        worker_args.append((i, row, env, args.dry_run, args.phase1_only, existing_run_dir))
 
-        run_id_hint = Path(existing_run_dir).name if existing_run_dir else "unknown"
+    workers = 1 if (args.site_index is not None or args.phase1_only) else MAX_WORKERS
+    print(f"\n🚀 Starting {len(worker_args)} run(s) with max_workers={workers}...")
 
-        try:
-            result = run_single(
-                row, env,
-                dry_run=args.dry_run,
-                phase1_only=args.phase1_only,
-                existing_run_dir=existing_run_dir,
-            )
-            results.append(result)
-            # Reset circuit breaker on any success (even phase2_pending counts)
-            if result.get("status") not in ("failed", "scrape_failed", "semrush_failed", "build_failed"):
-                consecutive_failures = 0
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+        future_to_row = {executor.submit(run_with_checkpoint, a): a[1] for a in worker_args}
+        for future in concurrent.futures.as_completed(future_to_row):
+            row = future_to_row[future]
+            website = row.get("website", "?")
+            context = row.get("context", "")
+            practice_name_hint = context.split(";")[0].strip() if context else website
+            try:
+                result = future.result()
+                results.append(result)
+                status = result.get("status", "")
+                if status == "completed":
+                    failure_count = 0
+                    print(f"  ✅ {website} → {result.get('report_url','')}")
+                elif status == "skipped_checkpoint":
+                    print(f"  ⏭  {website} already done → {result.get('report_url','')}")
+                elif status not in ("failed", "scrape_failed", "semrush_failed", "build_failed"):
+                    failure_count = 0
+            except Exception as e:
+                err_str = str(e)
+                print(f"  ❌ FAILED: {website}: {err_str[:200]}")
 
-        except Exception as e:
-            err_str = str(e)
-            print(f"  ❌ FAILED: {err_str}")
+                if "SCRAPE_FAILED" in err_str or "scrape" in err_str.lower():
+                    failure_type = "SCRAPE_FAILED"
+                elif "SEMRUSH_FAILED" in err_str or "semrush" in err_str.lower():
+                    failure_type = "SEMRUSH_FAILED"
+                elif "BUILD_FAILED" in err_str or "seo_report" in err_str.lower():
+                    failure_type = "BUILD_FAILED"
+                else:
+                    failure_type = "BUILD_FAILED"
 
-            # Classify failure type from error message
-            if "SCRAPE_FAILED" in err_str or "scrape" in err_str.lower():
-                failure_type = "SCRAPE_FAILED"
-            elif "SEMRUSH_FAILED" in err_str or "semrush" in err_str.lower():
-                failure_type = "SEMRUSH_FAILED"
-            elif "BUILD_FAILED" in err_str or "seo_report" in err_str.lower():
-                failure_type = "BUILD_FAILED"
-            else:
-                failure_type = "BUILD_FAILED"  # default for phase 3 errors
+                result = {
+                    "website": website,
+                    "status": failure_type.lower(),
+                    "error": err_str[:500],
+                    "report_url": "",
+                    "gamma_url": "",
+                }
+                results.append(result)
 
-            result = {
-                "website": website,
-                "status": failure_type.lower(),
-                "error": err_str[:500],
-                "report_url": "",
-                "gamma_url": "",
-            }
-            results.append(result)
-
-            # Slack error alert
-            if slack_webhook:
-                notify_slack_error(slack_webhook, practice_name_hint, website,
-                                   failure_type, err_str, run_id_hint)
-
-            # Circuit breaker
-            consecutive_failures += 1
-            print(f"  ⚠️  Consecutive failures: {consecutive_failures}/{FAILURE_LIMIT}")
-            if consecutive_failures >= FAILURE_LIMIT:
-                msg = f"🛑 D100 halted — {FAILURE_LIMIT} consecutive failures. Last error on {website}: {err_str[:200]}"
-                print(f"\n{msg}")
                 if slack_webhook:
-                    notify_slack_critical(slack_webhook, msg)
-                sys.exit(1)
+                    notify_slack_error(slack_webhook, practice_name_hint, website,
+                                       failure_type, err_str, "unknown")
+
+                failure_count += 1
+                print(f"  ⚠️  Failures so far: {failure_count}/{FAILURE_LIMIT}")
+                if failure_count >= FAILURE_LIMIT:
+                    msg = f"🛑 D100 halted — {FAILURE_LIMIT} failures. Last error on {website}: {err_str[:200]}"
+                    print(f"\n{msg}")
+                    if slack_webhook:
+                        notify_slack_critical(slack_webhook, msg)
+                    sys.exit(1)
 
     # Write results summary CSV — union of all keys so failed + success rows coexist
     results_path = OUTPUT_ROOT / f"d100_v3_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
@@ -1499,7 +1854,7 @@ def main():
             writer.writerows(results)
         print(f"\n📊 Results written: {results_path}")
 
-    success = sum(1 for r in results if r.get("status") in ("completed", "submitted", "phase2_pending"))
+    success = sum(1 for r in results if r.get("status") in ("completed", "submitted", "skipped_checkpoint"))
     print(f"\n{'='*60}")
     print(f"BATCH COMPLETE: {success}/{len(results)} succeeded")
     print(f"{'='*60}")

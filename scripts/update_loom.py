@@ -18,7 +18,7 @@ What it does:
 Also supports --all to update every slug at once (broadcast same Loom to all).
 """
 
-import sys, re, json, subprocess
+import sys, re, json, subprocess, time
 from pathlib import Path
 
 SCRIPT_DIR  = Path(__file__).parent
@@ -153,6 +153,89 @@ def update_slug(slug: str, new_id: str, deploy: bool = True):
             print(f"  ⚠ Deploy error: {e}")
 
 
+def _slug_from_url(url: str) -> str:
+    """Extract Vercel slug from a deliverables URL like https://healthbizleads.com/slug/."""
+    m = re.search(r'healthbizleads\.com/([^/?#]+)', url)
+    if m:
+        return m.group(1).strip("/")
+    return ""
+
+
+def update_from_sheet():
+    """Read Google Sheet, find RECORDED rows with no Loom Deployed date, update + redeploy."""
+    try:
+        sys.path.insert(0, str(SCRIPT_DIR))
+        from sheets_helper import read_tracking_sheet, update_cell, find_rows_by_column
+    except ImportError:
+        print("ERROR: sheets_helper.py not found in scripts/")
+        sys.exit(1)
+
+    sheets_id = _get_vercel_token.__module__ and ""  # unused; just import check
+    # Read GOOGLE_SHEETS_ID from .env
+    env_path = ROOT_DIR / ".env"
+    sheets_id = ""
+    if env_path.exists():
+        for line in env_path.read_text().splitlines():
+            if line.startswith("GOOGLE_SHEETS_ID="):
+                sheets_id = line.split("=", 1)[1].strip()
+                break
+    import os
+    sheets_id = sheets_id or os.environ.get("GOOGLE_SHEETS_ID", "")
+    if not sheets_id:
+        print("ERROR: GOOGLE_SHEETS_ID not set in .env")
+        sys.exit(1)
+
+    print(f"Reading Google Sheet {sheets_id}...")
+    rows = read_tracking_sheet(sheets_id)
+
+    todo = [
+        (i, r) for i, r in enumerate(rows)
+        if r.get("Loom Status", "").strip().upper() == "RECORDED"
+        and not r.get("Loom Deployed", "").strip()
+        and r.get("Loom ID", "").strip()
+    ]
+
+    if not todo:
+        print("No rows found with Loom Status=RECORDED and a Loom ID but no Loom Deployed date.")
+        return
+
+    print(f"Found {len(todo)} row(s) to update...")
+    updated = 0
+    t_start = time.time()
+
+    for row_idx, row in todo:
+        practice = row.get("Company Name", row.get("Website", f"row {row_idx+1}"))
+        loom_raw = row.get("Loom ID", "").strip()
+        del_url  = row.get("Deliverables URL", "").strip()
+        slug     = _slug_from_url(del_url)
+
+        if not slug:
+            print(f"  ✗ Could not parse slug from URL: {del_url!r} — skipping")
+            continue
+
+        try:
+            loom_id = extract_loom_id(loom_raw)
+        except ValueError as e:
+            print(f"  ✗ {practice}: {e} — skipping")
+            continue
+
+        print(f"\n  [{updated+1}/{len(todo)}] {practice}")
+        update_slug(slug, loom_id, deploy=True)
+
+        # Write Loom Deployed date back to sheet
+        today = __import__("datetime").date.today().isoformat()
+        try:
+            update_cell(sheets_id, row_idx, "Loom Deployed", today)
+            print(f"  ✓ Marked Loom Deployed = {today}")
+        except Exception as e:
+            print(f"  ⚠ Could not update sheet: {e}")
+
+        updated += 1
+
+    elapsed = int(time.time() - t_start)
+    print(f"\n✅ Updated {updated} Loom(s) in {elapsed}s")
+
+
 def main():
     args = sys.argv[1:]
     if not args or "--help" in args or "-h" in args:
@@ -161,6 +244,11 @@ def main():
 
     deploy = "--no-deploy" not in args
     args = [a for a in args if a != "--no-deploy"]
+
+    # --from-sheet: read Google Sheet and batch-update all RECORDED rows
+    if "--from-sheet" in args:
+        update_from_sheet()
+        return
 
     # --all: broadcast same Loom to every slug in vercel-dist
     if "--all" in args:

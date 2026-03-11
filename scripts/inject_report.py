@@ -246,7 +246,7 @@ def build_ad_campaigns_html(ads: list) -> str:
               <div style="padding:0 18px 18px;">{"".join(ext_lines)}</div>
             </details>'''
 
-        open_attr = "open" if i == 0 else ""
+        open_attr = ""  # All campaigns start collapsed — prospect chooses to expand
         cards.append(f'''<details {open_attr} style="background:var(--bg-card);border-radius:12px;margin-bottom:20px;border:1px solid var(--border);overflow:hidden;">
           <summary style="padding:24px 28px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--bg-card2);">
             <div>
@@ -299,7 +299,7 @@ def build_patient_email_html(emails: list) -> str:
                 for p in paras
             )
 
-        open_attr = "open" if i == 0 else ""
+        open_attr = ""  # All emails start collapsed — prospect chooses to expand
         cards.append(f'''<details {open_attr} style="background:var(--bg-card);border-radius:12px;margin-bottom:20px;border:1px solid var(--border);overflow:hidden;">
           <summary style="padding:24px 28px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--bg-card2);">
             <div>
@@ -339,9 +339,18 @@ def build_replacements(p1: dict, p2: dict) -> dict:
     app_cfg = p2.get("app_config", {})
 
     # ── Brand colors ─────────────────────────────────────────────────────────
-    # Use secondary as accent (usually more vibrant) with fallback
-    brand_primary = brand.get("primary") or "#036797"
-    brand_accent  = brand.get("secondary") or brand.get("accent") or "#84bdbb"
+    # Phase 2 app_config colors take priority (validated in runner, non-generic)
+    # then fall back to Phase 1 CSS extraction results
+    GENERIC_COLORS = {"#333333", "#222222", "#111111", "#000000", "#FFFFFF", "#FAFAFA",
+                      "#4285F4", "#34A853", "#FBBC05", "#EA4335", "#1877F2", "#0866FF"}
+    p2_primary = app_cfg.get("primaryColor", "")
+    if p2_primary and p2_primary.upper() not in GENERIC_COLORS:
+        brand_primary = p2_primary
+        brand_accent  = (app_cfg.get("primaryLight") or app_cfg.get("primaryDark")
+                         or brand.get("accent") or "#84bdbb")
+    else:
+        brand_primary = brand.get("primary") or "#036797"
+        brand_accent  = brand.get("secondary") or brand.get("accent") or "#84bdbb"
 
     # ── SEMrush numbers ──────────────────────────────────────────────────────
     domain_rank      = fmt_domain_rank(semrush.get("domain_rank"))
@@ -365,13 +374,18 @@ def build_replacements(p1: dict, p2: dict) -> dict:
                 pass
 
     # ── Assessment JSON ──────────────────────────────────────────────────────
-    concerns = app_cfg.get("concerns", [])
-    if isinstance(concerns, str):
-        concerns = [c.strip() for c in concerns.split(",") if c.strip()]
+    concerns_raw = app_cfg.get("concerns", [])
+    if isinstance(concerns_raw, str):
+        concerns_raw = [c.strip() for c in concerns_raw.split(",") if c.strip()]
+    # Normalize: [{label, emoji}] → flat string labels (what the app template expects)
+    if concerns_raw and isinstance(concerns_raw, list) and isinstance(concerns_raw[0], dict):
+        concern_labels = [c.get("label", "") for c in concerns_raw if c.get("label")]
+    else:
+        concern_labels = concerns_raw
 
     symptom_map = app_cfg.get("symptom_map", {})
     # Ensure symptom_map keys match concern strings
-    assessment_concerns_json = json.dumps(concerns, ensure_ascii=False)
+    assessment_concerns_json = json.dumps(concern_labels, ensure_ascii=False)
     assessment_symptoms_json = json.dumps(symptom_map, ensure_ascii=False)
 
     # ── Favicon URL ──────────────────────────────────────────────────────────

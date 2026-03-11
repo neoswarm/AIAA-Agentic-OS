@@ -25,6 +25,83 @@ import urllib.request
 import time
 from pathlib import Path
 
+
+# ── Brand-adaptive theme color computation ──────────────────────────────────────
+def _brightness(hex_color: str) -> float:
+    h = hex_color.lstrip("#")
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return (r * 299 + g * 587 + b * 114) / 1000
+
+
+def _tint(hex_color: str, amount: float) -> str:
+    """Mix brand color toward white by amount (0=original, 1=white)."""
+    h = hex_color.lstrip("#")
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    r = min(255, int(r + (255 - r) * amount))
+    g = min(255, int(g + (255 - g) * amount))
+    b = min(255, int(b + (255 - b) * amount))
+    return f"#{r:02X}{g:02X}{b:02X}"
+
+
+def _shade(hex_color: str, amount: float) -> str:
+    """Mix brand color toward black by amount (0=original, 1=black)."""
+    h = hex_color.lstrip("#")
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    r = max(0, int(r * (1 - amount)))
+    g = max(0, int(g * (1 - amount)))
+    b = max(0, int(b * (1 - amount)))
+    return f"#{r:02X}{g:02X}{b:02X}"
+
+
+def _hex_to_rgb_str(hex_color: str) -> str:
+    h = hex_color.lstrip("#")
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return f"{r},{g},{b}"
+
+
+def _compute_app_theme(brand_primary: str, bg_color: str) -> dict:
+    """
+    Compute full app theme palette from brand primary + background color.
+    Light brands (white bg) → light theme; dark brands → dark theme.
+    Both feel distinctly on-brand.
+    """
+    bg_bright = _brightness(bg_color or "#FFFFFF")
+    brand_rgb  = _hex_to_rgb_str(brand_primary)
+
+    if bg_bright > 160:
+        # ── LIGHT THEME (e.g. Sacramento green on white) ──────────────────────
+        dark_text = _shade(brand_primary, 0.80)  # very dark brand-tinted text
+        return {
+            "APP_BG":          _tint(brand_primary, 0.96),   # near-white with brand tint
+            "APP_S1":          _tint(brand_primary, 0.90),
+            "APP_S2":          _tint(brand_primary, 0.82),
+            "APP_S3":          _tint(brand_primary, 0.70),
+            "APP_BORDER":      f"rgba({brand_rgb},0.15)",
+            "APP_BORDER2":     f"rgba({brand_rgb},0.30)",
+            "APP_TEXT":        dark_text,
+            "APP_MUTED":       _shade(brand_primary, 0.50),
+            "APP_MUTED2":      _shade(brand_primary, 0.35),
+            "APP_NAV_BG":      f"rgba({brand_rgb},0.97)",    # solid brand-color nav
+            # On light bg, 'bright' text must be dark (not white) for contrast
+            "APP_TEXT_BRIGHT": dark_text,
+        }
+    else:
+        # ── DARK THEME (e.g. navy/black brands) ───────────────────────────────
+        return {
+            "APP_BG":          _shade(brand_primary, 0.92),
+            "APP_S1":          _shade(brand_primary, 0.87),
+            "APP_S2":          _shade(brand_primary, 0.82),
+            "APP_S3":          _shade(brand_primary, 0.72),
+            "APP_BORDER":      f"rgba({brand_rgb},0.12)",
+            "APP_BORDER2":     f"rgba({brand_rgb},0.22)",
+            "APP_TEXT":        _tint(brand_primary, 0.88),   # near-white text
+            "APP_MUTED":       _tint(brand_primary, 0.40),
+            "APP_MUTED2":      _tint(brand_primary, 0.55),
+            "APP_NAV_BG":      f"rgba({_hex_to_rgb_str(_shade(brand_primary, 0.95))},0.94)",
+            # On dark bg, 'bright' text stays white
+            "APP_TEXT_BRIGHT": "#ffffff",
+        }
+
 # ── Paths ──────────────────────────────────────────────────────────────────────
 REPO_ROOT       = Path(__file__).parent.parent
 VERCEL_DIST     = REPO_ROOT / "vercel-dist"
@@ -331,18 +408,41 @@ def _build_token_map(
     slug: str,
 ) -> dict:
     """Build the {{TOKEN}} → value map for app_template.html."""
-    brand = phase1.get("brand_colors", {})
+    import json as _json
+
+    brand   = phase1.get("brand_colors", {})
+    app_cfg = phase2.get("app_config", {})
+
+    # Brand colors: prefer phase2 app_config colors (already validated in runner),
+    # then fall back to phase1 CSS extraction
     brand_primary = brand.get("primary", "#1a6bff")
     brand_accent  = brand.get("accent",  "#00c2ff")
+    bg_color      = brand.get("background", "#FFFFFF")
 
-    # Assessment data from phase2
-    concerns = phase2.get("assessment_concerns", [
-        "Fatigue & Energy", "Gut Health", "Hormonal Balance",
+    # Compute adaptive app theme (light vs dark based on practice's bg color)
+    app_theme = _compute_app_theme(brand_primary, bg_color)
+
+    # ── Assessment: concerns list (labels for the concern selector) ──────────
+    # Phase2 stores concerns as [{label, emoji}] under app_config.concerns
+    DEFAULT_CONCERNS = [
+        "Fatigue & Low Energy", "Gut & Digestive Health", "Hormone Imbalance",
         "Brain Fog / Cognitive", "Weight & Metabolism", "Chronic Pain / Inflammation"
-    ])
-    symptoms_map = phase2.get("assessment_symptoms", {})
+    ]
+    concerns_raw = app_cfg.get("concerns", [])
+    if concerns_raw and isinstance(concerns_raw, list):
+        if isinstance(concerns_raw[0], dict):
+            # [{label, emoji}] → extract labels
+            concern_labels = [c.get("label", "") for c in concerns_raw if c.get("label")]
+        else:
+            # already flat strings
+            concern_labels = [c for c in concerns_raw if c]
+    else:
+        concern_labels = DEFAULT_CONCERNS
 
-    import json as _json
+    # ── Symptom map: {concern_label: [symptom, ...]} ─────────────────────────
+    # Phase2 now generates app_config.symptom_map keyed by concern label
+    symptom_map = app_cfg.get("symptom_map", {})
+
     return {
         "PRACTICE_NAME":         practice_name,
         "PRACTICE_NAME_ENCODED": url_encode_name(practice_name),
@@ -350,11 +450,14 @@ def _build_token_map(
         "DOCTOR_NAME":           phase1.get("doctor_name", "Dr. Smith"),
         "WEBSITE":               phase1.get("website", ""),
         "LOGO_URL":              phase1.get("logo_url", "") or phase1.get("images", {}).get("logo_url", ""),
+        "FAVICON_URL":           phase1.get("images", {}).get("favicon_url", "") or phase1.get("logo_url", ""),
         "BOOKING_URL":           phase1.get("booking_url", "#") or phase1.get("website", "#"),
         "BRAND_PRIMARY":         brand_primary,
         "BRAND_ACCENT":          brand_accent,
-        "ASSESSMENT_CONCERNS_JSON": _json.dumps(concerns),
-        "ASSESSMENT_SYMPTOMS_JSON": _json.dumps(symptoms_map),
+        "ASSESSMENT_CONCERNS_JSON": _json.dumps(concern_labels, ensure_ascii=False),
+        "ASSESSMENT_SYMPTOMS_JSON": _json.dumps(symptom_map, ensure_ascii=False),
+        # Adaptive theme — computed from brand primary + background
+        **app_theme,
     }
 
 

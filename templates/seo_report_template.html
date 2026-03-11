@@ -975,6 +975,55 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    .step-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent, #10b981);
+      margin-bottom: 0.5rem;
+    }
+    .step-why {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-top: 0.75rem;
+      line-height: 1.5;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 0.5rem;
+    }
+    .booking-intro {
+      text-align: center;
+      opacity: 0.85;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+    .call-agenda {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin: 0 auto 2.5rem;
+      max-width: 860px;
+    }
+    .agenda-item {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      padding: 1rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 0.5rem;
+      border-left: 3px solid var(--accent, #10b981);
+    }
+    .agenda-num {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent, #10b981);
+      white-space: nowrap;
+      padding-top: 2px;
+    }
   </style>
 </head>
 <body>
@@ -1075,50 +1124,60 @@
 
       <li>
         <div class="deliverable-card">
+          <div class="step-label">STEP 1</div>
           <div class="deliverable-card__number">1</div>
           <div class="deliverable-card__content">
             <h4 class="deliverable-card__title">🧠 Patient Assessment App</h4>
             <p class="deliverable-card__desc">A branded, 6-step symptom checker that pre-qualifies patients and routes them to book. Built around {{PRACTICE_NAME}}'s specific conditions and care models. Runs 24/7 without staff involvement.</p>
+            <p class="step-why">When a patient fills this in, you already know their biggest health problem before they ever call you. That means shorter consults, better-fit patients, and fewer no-shows.</p>
           </div>
         </div>
       </li>
 
       <li>
         <div class="deliverable-card">
+          <div class="step-label">STEP 2</div>
           <div class="deliverable-card__number">2</div>
           <div class="deliverable-card__content">
             <h4 class="deliverable-card__title">📢 3 Google Ad Campaigns</h4>
             <p class="deliverable-card__desc">Ready-to-launch campaigns covering your top service categories. 12 headlines + 4 descriptions per campaign. Targeting patients actively searching right now — not casual browsers.</p>
+            <p class="step-why">You don't write a word. You just review and turn them on. Paid ads get you in front of new patients this week — not six months from now.</p>
           </div>
         </div>
       </li>
 
       <li>
         <div class="deliverable-card">
+          <div class="step-label">STEP 3</div>
           <div class="deliverable-card__number">3</div>
           <div class="deliverable-card__content">
             <h4 class="deliverable-card__title">🔍 SEO Quick Wins Map</h4>
             <p class="deliverable-card__desc">{{QUICK_WINS_COUNT}} immediate ranking opportunities identified. Specific pages to optimize, keywords to target, and a 90-day attack plan mapped out.</p>
+            <p class="step-why">We find the 5–10 searches where you're ALMOST on page one. A small improvement here = patients finding you for free, every month, without running ads.</p>
           </div>
         </div>
       </li>
 
       <li>
         <div class="deliverable-card">
+          <div class="step-label">STEP 4</div>
           <div class="deliverable-card__number">4</div>
           <div class="deliverable-card__content">
             <h4 class="deliverable-card__title">📊 Digital AI SEO Health Report</h4>
             <p class="deliverable-card__desc">Complete audit of {{WEBSITE}}: domain rank, keyword gaps, AI Overview citations (currently {{AI_CITED_COUNT}} of {{AI_OVERVIEW_COUNT}}), competitor comparison, and 3-priority attack plan.</p>
+            <p class="step-why">We show you exactly where you stand in AI results — and what it takes to get your practice showing up there.</p>
           </div>
         </div>
       </li>
 
       <li>
         <div class="deliverable-card">
+          <div class="step-label">STEP 5</div>
           <div class="deliverable-card__number">5</div>
           <div class="deliverable-card__content">
             <h4 class="deliverable-card__title">📧 Automated Patient Follow-Up Sequence</h4>
             <p class="deliverable-card__desc">3 patient-focused emails sent automatically after the assessment. Educates, builds trust, and brings them back to book — without your team lifting a finger.</p>
+            <p class="step-why">These 3 automated emails follow up for you so no lead goes cold. Written, personalized, and ready to send.</p>
           </div>
         </div>
       </li>
@@ -1127,52 +1186,7 @@
   </div>
 </section>
 
-<!-- ============================================================
-     SECTION 3 — SOCIAL PROOF
-============================================================ -->
-<section id="section-social-proof">
-  <div class="container">
-    <h2>Don't Take Our Word for It</h2>
-
-    <div class="youtube-wrapper">
-      <iframe
-        src="https://www.youtube.com/embed/1C5OkpnlCvQ?rel=0&start=1"
-        allow="fullscreen; encrypted-media; autoplay"
-        title="Dr. Diane testimonial — Health Biz Scale"
-      ></iframe>
-    </div>
-
-    <div class="quote-block">
-      <p>"Since working with Health Biz Scale (Naturopathic SEO), Dr. Diane saw her new patient calls multiply by 10x. She was able to eliminate all other marketing, hire new doctors, and move to a waiting list model — all within months. 'It's been the most cost-effective way I've found to grow.'"</p>
-    </div>
-
-    <h3 style="margin-top:40px;font-size:1.8rem;">HOW DID WE 10X PATIENT CALLS TO CREATE A WAITING LIST FOR DR. DIANE:</h3>
-
-    <div class="result-cards">
-
-      <div class="result-card">
-        <h4>Closed the Patient Search Gap</h4>
-        <p>We identified the exact keywords and topics her ideal patients were already searching for. We mapped those searches to missing or weak pages and built optimized content so her practice showed up where intent existed.</p>
-      </div>
-
-      <div class="result-card">
-        <h4>Ranked for High-Intent, Patient-Ready Searches</h4>
-        <p>We optimized core service and condition pages to capture people actively looking for care. We focused on searches tied directly to booking behavior, delivering inbound calls from patients already primed to take action.</p>
-      </div>
-
-      <div class="result-card">
-        <h4>Built SEO-Driven Lead Magnets That Convert</h4>
-        <p>We created online software applications and opt-ins tailored to her audience's real problems. Designed to rank in Google and get cited in ChatGPT — capturing qualified leads before any call was booked.</p>
-      </div>
-
-    </div>
-
-    <a href="#section-reviews" class="see-more-link">(SEE MORE TESTIMONIALS AT THE BOTTOM ↓)</a>
-
-  </div>
-</section>
-
-<!-- SECTION 4 — OUR SPECIAL OFFER -->
+<!-- SECTION 3 — OUR SPECIAL OFFER -->
 <section id="section-offer" class="bg-alt" style="padding:80px 24px;">
   <div style="max-width:1100px;margin:0 auto;">
     <h2 style="font-size:clamp(2rem,4vw,2.8rem);font-weight:900;color:var(--text);margin-bottom:16px;">Our Special Offer To You</h2>
@@ -1228,11 +1242,58 @@
   </div>
 </section>
 
+<!-- ============================================================
+     SECTION 4 — SOCIAL PROOF
+============================================================ -->
+<section id="section-social-proof">
+  <div class="container">
+    <h2>Don't Take Our Word for It</h2>
+
+    <div class="youtube-wrapper">
+      <iframe
+        src="https://www.youtube.com/embed/1C5OkpnlCvQ?rel=0&start=1"
+        allow="fullscreen; encrypted-media; autoplay"
+        title="Dr. Diane testimonial — Health Biz Scale"
+      ></iframe>
+    </div>
+
+    <div class="quote-block">
+      <p>"Since working with Health Biz Scale (Naturopathic SEO), Dr. Diane saw her new patient calls multiply by 10x. She was able to eliminate all other marketing, hire new doctors, and move to a waiting list model — all within months. 'It's been the most cost-effective way I've found to grow.'"</p>
+    </div>
+
+    <h3 style="margin-top:40px;font-size:1.8rem;">HOW DID WE 10X PATIENT CALLS TO CREATE A WAITING LIST FOR DR. DIANE:</h3>
+
+    <div class="result-cards">
+
+      <div class="result-card">
+        <h4>Closed the Patient Search Gap</h4>
+        <p>We identified the exact keywords and topics her ideal patients were already searching for. We mapped those searches to missing or weak pages and built optimized content so her practice showed up where intent existed.</p>
+      </div>
+
+      <div class="result-card">
+        <h4>Ranked for High-Intent, Patient-Ready Searches</h4>
+        <p>We optimized core service and condition pages to capture people actively looking for care. We focused on searches tied directly to booking behavior, delivering inbound calls from patients already primed to take action.</p>
+      </div>
+
+      <div class="result-card">
+        <h4>Built SEO-Driven Lead Magnets That Convert</h4>
+        <p>We created online software applications and opt-ins tailored to her audience's real problems. Designed to rank in Google and get cited in ChatGPT — capturing qualified leads before any call was booked.</p>
+      </div>
+
+    </div>
+
+    <a href="#section-reviews" class="see-more-link">(SEE MORE TESTIMONIALS AT THE BOTTOM ↓)</a>
+
+  </div>
+</section>
+
 <!-- SECTION 5 — FIRST CALENDLY -->
 <section id="calendly-1" class="bg-deep" style="padding:80px 24px;">
   <div style="max-width:1100px;margin:0 auto;">
     <h2 style="font-size:clamp(2rem,4vw,2.8rem);font-weight:900;color:var(--text);margin-bottom:16px;">Book Your Free 30-Minute Strategy Call</h2>
     <p style="font-size:1.25rem;color:var(--text-muted);margin-bottom:32px;">Pick a time below. We'll walk through every deliverable we built for {{PRACTICE_NAME}} and map out month one together.</p>
+
+
     <div class="calendly-inline-widget" data-url="https://calendly.com/mike-kohl/30min" style="min-width:320px;height:950px;"></div>
     <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
   </div>
@@ -1378,7 +1439,7 @@
 
     <!-- Label + headline -->
     <div style="text-align:center;margin-bottom:12px;">
-      <span style="background:linear-gradient(135deg,var(--brand-primary),var(--brand-accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.14em;">Deliverable #1 — Live Demo</span>
+      <span style="background:linear-gradient(135deg,var(--brand-primary),var(--brand-accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.14em;">Deliverable 1 — Patient Assessment App</span>
     </div>
     <h2 style="font-size:clamp(2.2rem,5vw,3.4rem);font-weight:900;color:#fff;text-align:center;margin-bottom:14px;line-height:1.1;">Your Custom Patient Assessment App</h2>
     <p style="font-size:1.3rem;color:var(--text-muted);text-align:center;max-width:740px;margin:0 auto 52px;line-height:1.7;">Instead of a generic contact form, patients walk through a guided symptom assessment — pre-qualifying themselves before they ever call. Only serious, informed leads reach your calendar.</p>
@@ -1391,7 +1452,7 @@
       </div>
       <div style="background:linear-gradient(135deg,#0b1f0e,#091508);border:1px solid rgba(13,122,78,0.45);border-radius:16px;padding:28px 26px;display:flex;gap:18px;align-items:flex-start;">
         <div style="width:50px;height:50px;min-width:50px;background:linear-gradient(135deg,#0d7a4e,#18a368);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">📋</div>
-        <div><h3 style="font-size:1.2rem;font-weight:800;color:#fff;margin:0 0 6px;">6-Step Guided Flow</h3><p style="font-size:1.05rem;color:var(--text-muted);line-height:1.6;margin:0;">Patients select their concern, answer symptom questions, and route directly to booking — 3 minutes, start to consultation request.</p></div>
+        <div><h3 style="font-size:1.2rem;font-weight:800;color:#fff;margin:0 0 6px;">Clinically Structured Flow</h3><p style="font-size:1.05rem;color:var(--text-muted);line-height:1.6;margin:0;">Patients walk through a multi-step symptom assessment — selecting their concern, answering targeted health questions, and routing directly to your booking page. Thorough enough to matter, focused enough to complete.</p></div>
       </div>
       <div style="background:linear-gradient(135deg,#16102a,#100c22);border:1px solid rgba(124,58,237,0.45);border-radius:16px;padding:28px 26px;display:flex;gap:18px;align-items:flex-start;">
         <div style="width:50px;height:50px;min-width:50px;background:linear-gradient(135deg,#7c3aed,#9d65f5);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">⚡</div>
@@ -1414,8 +1475,8 @@
     <!-- WOW CTA -->
     <div style="text-align:center;">
       <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:44px 36px;display:inline-block;max-width:680px;width:100%;backdrop-filter:blur(10px);">
-        <div style="font-size:1rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--brand-accent);font-weight:700;margin-bottom:8px;">🎬 Live Demo — Built for {{PRACTICE_NAME}}</div>
-        <p style="font-size:1.2rem;color:var(--text-muted);margin:0 0 32px;line-height:1.65;">6 steps &nbsp;·&nbsp; 3 minutes &nbsp;·&nbsp; Qualifies patients clinically before they reach your calendar</p>
+        <div style="font-size:1rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--brand-accent);font-weight:700;margin-bottom:8px;">Built for {{PRACTICE_NAME}}</div>
+        <p style="font-size:1.2rem;color:var(--text-muted);margin:0 0 32px;line-height:1.65;">Clinically structured &nbsp;·&nbsp; Typically 5–8 minutes &nbsp;·&nbsp; Yields a full symptom profile before they ever call</p>
         <button
           onclick="openAssessment()"
           style="display:inline-flex;align-items:center;justify-content:center;gap:14px;background:linear-gradient(135deg,var(--brand-primary) 0%,var(--brand-accent) 100%);color:#fff;font-size:1.45rem;font-weight:900;padding:24px 52px;border-radius:16px;border:none;cursor:pointer;letter-spacing:0.01em;box-shadow:0 0 60px rgba(3,103,151,0.55),0 12px 40px rgba(0,0,0,0.5);text-shadow:0 1px 3px rgba(0,0,0,0.4);transition:transform 0.15s ease,box-shadow 0.15s ease;"
@@ -1423,11 +1484,6 @@
           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 0 60px rgba(3,103,151,0.55),0 12px 40px rgba(0,0,0,0.5)';">
           🩺 &nbsp;Launch Your Patient Assessment &nbsp;→
         </button>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:22px;">
-          <span style="background:rgba(132,189,187,0.1);border:1px solid rgba(132,189,187,0.3);padding:7px 18px;border-radius:50px;font-size:1rem;color:var(--brand-accent);font-weight:600;">✓ Live demo</span>
-          <span style="background:rgba(132,189,187,0.1);border:1px solid rgba(132,189,187,0.3);padding:7px 18px;border-radius:50px;font-size:1rem;color:var(--brand-accent);font-weight:600;">✓ Branded to {{PRACTICE_NAME}}</span>
-          <span style="background:rgba(132,189,187,0.1);border:1px solid rgba(132,189,187,0.3);padding:7px 18px;border-radius:50px;font-size:1rem;color:var(--brand-accent);font-weight:600;">✓ Works 24/7</span>
-        </div>
       </div>
     </div>
 
@@ -1437,6 +1493,9 @@
 <!-- SECTION 9 — SEO AUDIT -->
 <section id="section-seo" class="bg-deep" style="padding:80px 24px;">
   <div style="max-width:1100px;margin:0 auto;">
+    <div style="text-align:left;margin-bottom:12px;">
+      <span style="background:linear-gradient(135deg,var(--brand-primary),var(--brand-accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.14em;">Deliverable 2 — AI SEO Health Report</span>
+    </div>
     <h2 style="font-size:clamp(2rem,4vw,2.8rem);font-weight:900;color:var(--text);margin-bottom:32px;">Digital AI SEO Health Report &mdash; {{WEBSITE}}</h2>
     <!-- Stats Grid -->
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px;">
@@ -1542,6 +1601,9 @@
 <!-- SECTION 10 — GOOGLE AD CAMPAIGNS -->
 <section id="section-ads" class="bg-alt" style="padding:80px 24px;">
   <div style="max-width:1100px;margin:0 auto;">
+    <div style="text-align:left;margin-bottom:12px;">
+      <span style="background:linear-gradient(135deg,var(--brand-primary),var(--brand-accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.14em;">Deliverable 3 — Google Ad Campaigns</span>
+    </div>
     <h2 style="font-size:clamp(2rem,4vw,2.8rem);font-weight:900;color:var(--text);margin-bottom:16px;">3 Google Ad Campaigns &mdash; Ready to Launch</h2>
     <p style="font-size:1.25rem;color:var(--text-muted);margin-bottom:32px;">All campaigns are written, structured, and ready for {{PRACTICE_NAME}}. Click any campaign to expand.</p>
     {{AD_CAMPAIGNS_HTML}}
@@ -1551,7 +1613,9 @@
 <!-- SECTION 11 — PATIENT EMAIL SEQUENCE -->
 <section id="section-emails" class="bg-deep" style="padding:80px 24px;">
   <div style="max-width:1100px;margin:0 auto;">
-    <div style="display:inline-block;background:rgba(132,189,187,0.1);border:1px solid var(--brand-accent);color:var(--brand-accent);padding:6px 18px;border-radius:50px;font-size:1rem;font-weight:700;margin-bottom:20px;letter-spacing:0.04em;">Automated Patient Follow-Up</div>
+    <div style="text-align:left;margin-bottom:12px;">
+      <span style="background:linear-gradient(135deg,var(--brand-primary),var(--brand-accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.14em;">Deliverable 4 — Patient Email Sequence</span>
+    </div>
     <h2 style="font-size:clamp(2rem,4vw,2.8rem);font-weight:900;color:var(--text);margin-bottom:24px;">Patient Email Sequence</h2>
 
     <!-- Speed-to-Trust intro -->
