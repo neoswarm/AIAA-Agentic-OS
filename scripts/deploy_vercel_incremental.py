@@ -121,6 +121,22 @@ def load_env() -> dict:
     return env
 
 
+def _clarity_snippet(project_id: str) -> str:
+    """Return the Microsoft Clarity <script> tag, or '' if no project_id."""
+    if not project_id:
+        return ""
+    return (
+        '<script type="text/javascript">'
+        "(function(c,l,a,r,i,t,y){"
+        "c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};"
+        "t=l.createElement(r);t.async=1;"
+        't.src="https://www.clarity.ms/tag/"+i;'
+        "y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);"
+        f'}})(window,document,"clarity","script","{project_id}");'
+        "</script>"
+    )
+
+
 def run_cmd(cmd: str, cwd=None) -> str:
     """Run a shell command and return stdout. Raises on non-zero exit."""
     result = subprocess.run(
@@ -456,6 +472,7 @@ def _build_token_map(
         "BRAND_ACCENT":          brand_accent,
         "ASSESSMENT_CONCERNS_JSON": _json.dumps(concern_labels, ensure_ascii=False),
         "ASSESSMENT_SYMPTOMS_JSON": _json.dumps(symptom_map, ensure_ascii=False),
+        "CLARITY_SNIPPET":          _clarity_snippet(load_env().get("CLARITY_PROJECT_ID", "")),
         # Adaptive theme — computed from brand primary + background
         **app_theme,
     }

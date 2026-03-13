@@ -32,8 +32,33 @@ SCRIPT_DIR  = Path(__file__).parent
 PROJECT_DIR = SCRIPT_DIR.parent
 TEMPLATE    = PROJECT_DIR / "templates" / "seo_report_template.html"
 
+# Load .env into os.environ (simple parser — no external dependency)
+_env_path = PROJECT_DIR / ".env"
+if _env_path.exists():
+    for _line in _env_path.read_text(encoding="utf-8").splitlines():
+        _line = _line.strip()
+        if _line and not _line.startswith("#") and "=" in _line:
+            _k, _v = _line.split("=", 1)
+            os.environ.setdefault(_k.strip(), _v.strip())
+
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
+
+
+def _clarity_snippet(project_id: str) -> str:
+    """Return the Microsoft Clarity <script> tag, or '' if no project_id."""
+    if not project_id:
+        return ""
+    return (
+        '<script type="text/javascript">'
+        "(function(c,l,a,r,i,t,y){"
+        "c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};"
+        "t=l.createElement(r);t.async=1;"
+        't.src="https://www.clarity.ms/tag/"+i;'
+        "y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);"
+        f'}})(window,document,"clarity","script","{project_id}");'
+        "</script>"
+    )
 
 def fmt_number(n, default="N/A"):
     """4561840 → '4,561,840'"""
@@ -433,6 +458,7 @@ def build_replacements(p1: dict, p2: dict) -> dict:
         "ASSESSMENT_CONCERNS_JSON":  assessment_concerns_json,
         "ASSESSMENT_SYMPTOMS_JSON":  assessment_symptoms_json,
         "LOOM_ID":                   p1.get("loom_id", "PASTE_LOOM_ID_HERE"),
+        "CLARITY_SNIPPET":           _clarity_snippet(os.environ.get("CLARITY_PROJECT_ID", "")),
     }
 
 
