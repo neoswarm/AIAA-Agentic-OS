@@ -615,7 +615,7 @@ def fetch_dataforseo(domain: str, login: str, password: str) -> dict:
                 "location_code": 2840,
                 "item_types": ["organic"],
                 "limit": 1000,
-                "order_by": ["keyword_data.search_volume,desc"],
+                "order_by": ["keyword_data.keyword_info.search_volume,desc"],
             }]
         )
         fut_ai = ex.submit(post,
@@ -643,11 +643,14 @@ def fetch_dataforseo(domain: str, login: str, password: str) -> dict:
         comp_resp     = fut_comp.result()
 
     # ── Parse domain_rank_overview ──────────────────────────────────────────────
+    # API response: result[0] is metadata wrapper; domain data lives in result[0].items[0]
     domain_rank = 0
     traffic_value = 0
     ov_pos1 = ov_pos2_3 = ov_pos4_10 = ov_pos11_20 = ov_count = 0
     try:
-        ov = overview_resp["tasks"][0]["result"][0]
+        ov_result = overview_resp["tasks"][0]["result"][0]
+        ov_items  = ov_result.get("items", []) or []
+        ov        = ov_items[0] if ov_items else {}
         domain_rank = safe_int(ov.get("rank", 0))
         m = ov.get("metrics", {}).get("organic", {})
         ov_pos1     = safe_int(m.get("pos_1", 0))
@@ -696,21 +699,25 @@ def fetch_dataforseo(domain: str, login: str, password: str) -> dict:
     for item in kw_items:
         kd_obj = item.get("keyword_data", {}) or {}
         se_obj = (item.get("ranked_serp_element", {}) or {}).get("serp_item", {}) or {}
+        # Nested sub-objects within keyword_data
+        ki_obj = kd_obj.get("keyword_info", {}) or {}        # search_volume, cpc
+        kp_obj = kd_obj.get("keyword_properties", {}) or {}  # keyword_difficulty
+        si_obj = kd_obj.get("serp_info", {}) or {}           # serp_item_types
 
-        keyword  = kd_obj.get("keyword", "")
-        volume   = safe_int(kd_obj.get("search_volume", 0))
-        kw_diff  = kd_obj.get("keyword_difficulty", 0) or 0
+        keyword    = kd_obj.get("keyword", "")
+        volume     = safe_int(ki_obj.get("search_volume", 0))
+        kw_diff    = kp_obj.get("keyword_difficulty", 0) or 0
         try:
             kw_diff = float(kw_diff)
         except (TypeError, ValueError):
             kw_diff = 0.0
-        cpc      = kd_obj.get("cpc", 0) or 0
+        cpc        = ki_obj.get("cpc", 0) or 0
         try:
             cpc = float(cpc)
         except (TypeError, ValueError):
             cpc = 0.0
-        serp_types = kd_obj.get("serp_item_types", []) or []
-        position = safe_int(se_obj.get("rank_group", 100)) or 100
+        serp_types = si_obj.get("serp_item_types", []) or []
+        position   = safe_int(se_obj.get("rank_group", 100)) or 100
 
         # AI Overview presence: SERP includes an AI Overview block
         if "ai_overview" in serp_types:
@@ -1646,6 +1653,34 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
 
     # ── PHASE 1-ONLY EXIT ──────────────────────────────────────────────────────
     if phase1_only or dry_run:
+        # Write phase1_data.json now so Claude Code can generate SEO report + phase2_output.json
+        # Practice name / doctor name will be enriched when phase2_output.json is available
+        logo_url    = page_assets.get("logo_url", "")
+        favicon_url = page_assets.get("favicon_url", "")
+        booking_url = extract_booking_url(raw_scrape, website) if raw_scrape else website
+        p1_data = {
+            "run_id":       run_id,
+            "website":      website,
+            "context":      context,
+            "raw_scrape":   raw_scrape[:6000] if raw_scrape else "",
+            "semrush":      semrush,
+            "crawl":        crawl,
+            "brand_colors": brand_colors,
+            "name":         "",        # enriched from phase2_output.json app_config
+            "doctor_name":  "",        # enriched from phase2_output.json app_config
+            "booking_url":  booking_url,
+            "logo_url":     logo_url,
+            "images": {
+                "logo_url":    logo_url,
+                "favicon_url": favicon_url,
+                "hero_url":    "",
+                "headshot_url": "",
+            },
+        }
+        (run_dir / "phase1_data.json").write_text(
+            json.dumps(p1_data, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
+
         if phase1_only:
             print(f"\n⏸  Phase 1 complete. Data saved to: {run_dir}")
             print(f"   Next step: Claude Code SEO analysis skill → writes seo_report.md")
@@ -2109,7 +2144,7 @@ def main():
             writer.writerows(results)
         print(f"\n📊 Results written: {results_path}")
 
-    success = sum(1 for r in results if r.get("status") in ("completed", "submitted", "skipped_checkpoint"))
+    success = sum(1 for r in results if r.get("status") in ("completed", "submitted", "skipped_checkpoint", "phase1_complete", "dry_run"))
     print(f"\n{'='*60}")
     print(f"BATCH COMPLETE: {success}/{len(results)} succeeded")
     print(f"{'='*60}")
