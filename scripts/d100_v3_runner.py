@@ -11,12 +11,14 @@ Usage:
 CSV Format:
   website,context
   https://example.com,"Practice Name, City ST; Dr. Name MD; specialty; X practitioners; $XXXk MRR"
-  (booking_url auto-detected from scraped homepage; semrush fetched via API)
+  (booking_url auto-detected from scraped homepage; SEO data fetched via DataForSEO API)
 
 Environment (.env at project root):
   ANTHROPIC_API_KEY=sk-ant-...
   SLACK_WEBHOOK_URL=https://hooks.slack.com/...
-  SEMRUSH_API_KEY=...
+  DATAFORSEO_LOGIN=...       # Primary SEO data (~$0.04/domain, 15-20x cheaper than SEMrush)
+  DATAFORSEO_PASSWORD=...
+  SEMRUSH_API_KEY=...        # Fallback if DataForSEO unavailable (~$0.63/domain, ~630 units)
 
 Phase 3 deploys seo_report.html to GitHub Pages as a personalized deliverables page.
 Repo slug format: Plug-and-play-AI-SEO-and-Ad-Strategy-for-{Company-Name}
@@ -59,7 +61,8 @@ def load_env():
                 k, v = line.split("=", 1)
                 env[k.strip()] = v.strip()
     # Override with real environment (only if non-empty — Claude Code sets ANTHROPIC_API_KEY='' itself)
-    for k in ("ANTHROPIC_API_KEY", "SLACK_WEBHOOK_URL", "SEMRUSH_API_KEY", "VERCEL_TOKEN"):
+    for k in ("ANTHROPIC_API_KEY", "SLACK_WEBHOOK_URL", "SEMRUSH_API_KEY", "VERCEL_TOKEN",
+              "DATAFORSEO_LOGIN", "DATAFORSEO_PASSWORD", "GOOGLE_SHEETS_ID"):
         if os.environ.get(k):
             env[k] = os.environ[k]
     return env
@@ -561,6 +564,226 @@ def fetch_semrush_api(domain: str, api_key: str) -> dict:
     }
 
 
+# ── Phase 1: DataForSEO API fetch (primary, preferred over SEMrush) ────────────
+# Cost per run: ~$0.041/domain (4 calls)
+#   domain_rank_overview      ~$0.010  → domain rank, position distribution, traffic value
+#   ranked_keywords (organic) ~$0.010  → keyword details, AI Overview SERP presence
+#   ranked_keywords (ai_ref)  ~$0.010  → AI Overview citation count
+#   competitors_domain        ~$0.010  → top organic competitors
+def fetch_dataforseo(domain: str, login: str, password: str) -> dict:
+    """
+    Pull live SEO data from DataForSEO Labs API. ~$0.041 per domain.
+    Returns same dict shape as fetch_semrush_api() for drop-in compatibility.
+    """
+    import base64
+
+    clean_domain = re.sub(r"https?://", "", domain).rstrip("/").split("/")[0]
+    base_url = "https://api.dataforseo.com"
+    auth = base64.b64encode(f"{login}:{password}".encode()).decode()
+    headers = {"Authorization": f"Basic {auth}", "Content-Type": "application/json"}
+
+    def post(endpoint, payload):
+        data = json.dumps(payload).encode()
+        req = urllib.request.Request(
+            f"{base_url}{endpoint}",
+            data=data, headers=headers, method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            return json.loads(resp.read().decode())
+
+    def safe_int(v):
+        try:
+            return int(v) if v is not None else 0
+        except (TypeError, ValueError):
+            return 0
+
+    # CTR estimates by position (industry standard approximations)
+    CTR_MAP = {1: 0.31, 2: 0.15, 3: 0.10, 4: 0.07, 5: 0.06,
+               6: 0.05, 7: 0.04, 8: 0.04, 9: 0.03, 10: 0.03}
+
+    # Fire all 4 API calls in parallel — independent requests
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as ex:
+        fut_overview = ex.submit(post,
+            "/v3/dataforseo_labs/google/domain_rank_overview/live",
+            [{"target": clean_domain, "language_code": "en", "location_code": 2840}]
+        )
+        fut_kw = ex.submit(post,
+            "/v3/dataforseo_labs/google/ranked_keywords/live",
+            [{
+                "target": clean_domain,
+                "language_code": "en",
+                "location_code": 2840,
+                "item_types": ["organic"],
+                "limit": 1000,
+                "order_by": ["keyword_data.search_volume,desc"],
+            }]
+        )
+        fut_ai = ex.submit(post,
+            "/v3/dataforseo_labs/google/ranked_keywords/live",
+            [{
+                "target": clean_domain,
+                "language_code": "en",
+                "location_code": 2840,
+                "item_types": ["ai_overview_reference"],
+                "limit": 100,
+            }]
+        )
+        fut_comp = ex.submit(post,
+            "/v3/dataforseo_labs/google/competitors_domain/live",
+            [{
+                "target": clean_domain,
+                "language_code": "en",
+                "location_code": 2840,
+                "limit": 10,
+            }]
+        )
+        overview_resp = fut_overview.result()
+        kw_resp       = fut_kw.result()
+        ai_resp       = fut_ai.result()
+        comp_resp     = fut_comp.result()
+
+    # ── Parse domain_rank_overview ──────────────────────────────────────────────
+    domain_rank = 0
+    traffic_value = 0
+    ov_pos1 = ov_pos2_3 = ov_pos4_10 = ov_pos11_20 = ov_count = 0
+    try:
+        ov = overview_resp["tasks"][0]["result"][0]
+        domain_rank = safe_int(ov.get("rank", 0))
+        m = ov.get("metrics", {}).get("organic", {})
+        ov_pos1     = safe_int(m.get("pos_1", 0))
+        ov_pos2_3   = safe_int(m.get("pos_2_3", 0))
+        ov_pos4_10  = safe_int(m.get("pos_4_10", 0))
+        ov_pos11_20 = safe_int(m.get("pos_11_20", 0))
+        ov_count    = safe_int(m.get("count", 0))
+        traffic_value = safe_int(m.get("etv", 0))   # ETV = estimated traffic value (USD)
+    except (KeyError, IndexError, TypeError):
+        pass
+
+    # ── Parse ranked_keywords (organic) ────────────────────────────────────────
+    kw_items = []
+    kw_total = 0
+    kw_pos1 = kw_pos2_3 = kw_pos4_10 = kw_pos11_20 = 0
+    try:
+        kw_result = kw_resp["tasks"][0]["result"][0]
+        kw_total  = safe_int(kw_result.get("total_count", 0))
+        kw_items  = kw_result.get("items", []) or []
+        km = kw_result.get("metrics", {}).get("organic", {})
+        kw_pos1     = safe_int(km.get("pos_1", 0))
+        kw_pos2_3   = safe_int(km.get("pos_2_3", 0))
+        kw_pos4_10  = safe_int(km.get("pos_4_10", 0))
+        kw_pos11_20 = safe_int(km.get("pos_11_20", 0))
+        # Use ETV from ranked_keywords if overview ETV is 0
+        if not traffic_value:
+            traffic_value = safe_int(km.get("etv", 0))
+    except (KeyError, IndexError, TypeError):
+        pass
+
+    # Use domain_rank_overview position counts (full dataset) as primary source
+    # Fall back to ranked_keywords metrics if overview failed
+    pos1    = ov_pos1     or kw_pos1
+    pos2_3  = ov_pos2_3   or kw_pos2_3
+    pos4_10 = ov_pos4_10  or kw_pos4_10
+    pos11_20= ov_pos11_20 or kw_pos11_20
+    total_kws = (ov_count or kw_total)
+
+    # Build keyword detail lists from items
+    ai_overview_serp_count = 0
+    estimated_traffic = 0
+    quick_wins = []
+    top3_sample = []
+    all_kw_data = []
+
+    for item in kw_items:
+        kd_obj = item.get("keyword_data", {}) or {}
+        se_obj = (item.get("ranked_serp_element", {}) or {}).get("serp_item", {}) or {}
+
+        keyword  = kd_obj.get("keyword", "")
+        volume   = safe_int(kd_obj.get("search_volume", 0))
+        kw_diff  = kd_obj.get("keyword_difficulty", 0) or 0
+        try:
+            kw_diff = float(kw_diff)
+        except (TypeError, ValueError):
+            kw_diff = 0.0
+        cpc      = kd_obj.get("cpc", 0) or 0
+        try:
+            cpc = float(cpc)
+        except (TypeError, ValueError):
+            cpc = 0.0
+        serp_types = kd_obj.get("serp_item_types", []) or []
+        position = safe_int(se_obj.get("rank_group", 100)) or 100
+
+        # AI Overview presence: SERP includes an AI Overview block
+        if "ai_overview" in serp_types:
+            ai_overview_serp_count += 1
+
+        # Estimated traffic visits from CTR × volume
+        ctr = CTR_MAP.get(min(position, 10), 0.02)
+        estimated_traffic += int(volume * ctr)
+
+        entry = {"keyword": keyword, "position": position, "volume": volume,
+                 "kd": kw_diff, "cpc": cpc}
+        all_kw_data.append(entry)
+
+        # Quick wins: pos 4-10, KD < 40, volume > 50
+        if 4 <= position <= 10 and kw_diff < 40 and volume > 50:
+            quick_wins.append(entry)
+        # Top 3 sample: pos 1-3, decent volume
+        if position <= 3 and volume >= 50:
+            top3_sample.append(entry)
+
+    # Sort lists
+    quick_wins.sort(key=lambda x: x["volume"], reverse=True)
+    top_by_volume = sorted(all_kw_data, key=lambda x: x["volume"], reverse=True)[:20]
+
+    # ── Parse AI Overview citations ─────────────────────────────────────────────
+    ai_cited_count = 0
+    try:
+        ai_result = ai_resp["tasks"][0]["result"][0]
+        ai_cited_count = safe_int(ai_result.get("total_count", 0))
+        if not ai_cited_count:
+            ai_cited_count = len(ai_result.get("items", []) or [])
+    except (KeyError, IndexError, TypeError):
+        ai_cited_count = 0
+
+    # ── Parse competitors ───────────────────────────────────────────────────────
+    competitors = []
+    try:
+        comp_items = comp_resp["tasks"][0]["result"][0].get("items", []) or []
+        for ci in comp_items[:10]:
+            cm = (ci.get("metrics", {}) or {}).get("organic", {}) or {}
+            competitors.append({
+                "domain":        ci.get("domain", ""),
+                "relevance":     ci.get("relevance", 0),
+                "keywords":      safe_int(cm.get("count", ci.get("intersections", 0))),
+                "traffic":       safe_int(cm.get("etv", 0)),
+                "traffic_value": safe_int(cm.get("etv", 0)),  # DataForSEO ETV = value in USD
+            })
+    except (KeyError, IndexError, TypeError):
+        competitors = []
+
+    return {
+        "source":                  "dataforseo",
+        "domain_rank":             domain_rank,
+        "unique_keywords":         total_kws,
+        "estimated_traffic":       estimated_traffic,
+        "traffic_value":           traffic_value,
+        "serp_features_traffic":   0,   # DataForSEO doesn't have a direct SERP-features-traffic metric
+        "serp_features_value":     0,
+        "ai_overview_serp_count":  ai_overview_serp_count,
+        "ai_overview_cited_count": ai_cited_count,
+        "pos1_count":              pos1,
+        "pos2_3_count":            pos2_3,
+        "pos4_10_count":           pos4_10,
+        "pos11_20_count":          pos11_20,
+        "pos1_3_count":            pos1 + pos2_3,
+        "quick_wins_count":        len(quick_wins),
+        "top_quick_wins":          quick_wins[:15],
+        "top3_sample":             top3_sample[:10],
+        "top_by_volume":           top_by_volume,
+        "competitors":             competitors,
+    }
+
+
 # ── Phase 1: SEMrush CSV parse (fallback if no API key) ────────────────────────
 def parse_semrush(csv_path: str) -> dict:
     if not csv_path or not os.path.exists(csv_path):
@@ -693,7 +916,7 @@ def build_phase2_prompt(context: str, scrape: str, semrush: dict, crawl: dict,
                          brand_colors: dict, prebuilt_seo_report: str = "") -> str:
     color_summary = "\n".join([f"  - {k}: {v}" for k, v in brand_colors.items()])
 
-    # Build SEMrush context block — provides data for keyword/ads/email generation
+    # Build SEO data context block — provides data for keyword/ads/email generation
     qw_lines = "\n".join([
         f"  [pos {w['position']}] {w['keyword']} — {w['volume']:,}/mo  KD:{w.get('kd',0):.0f}"
         for w in semrush.get("top_quick_wins", [])[:10]
@@ -714,20 +937,21 @@ def build_phase2_prompt(context: str, scrape: str, semrush: dict, crawl: dict,
         f"  Pos #21+:    ~{max(0, semrush.get('unique_keywords',0) - semrush.get('pos4_10_count',0) - semrush.get('pos11_20_count',0) - semrush.get('pos1_3_count',0)):,} keywords"
     )
 
-    # AI Overview coverage (free Fk/Fp columns from domain_organic)
+    # AI Overview coverage
     ai_serp  = semrush.get("ai_overview_serp_count", "N/A")
     ai_cited = semrush.get("ai_overview_cited_count", "N/A")
     sf_traffic = semrush.get("serp_features_traffic", 0)
+    data_source = semrush.get("source", "unknown")
 
-    semrush_block = f"""SEMRUSH DATA (live API — 630 units):
+    semrush_block = f"""SEO DATA ({data_source}):
 Domain Snapshot:
   Global Rank:       #{semrush.get('domain_rank', 0):,}
   Keywords Ranked:   {semrush.get('unique_keywords', 0):,}
   Monthly Traffic:   ~{semrush.get('estimated_traffic', 0):,} visits
   Traffic Value:     ${semrush.get('traffic_value', 0):,}/mo
-  Data Source:       {semrush.get('source', 'unknown')}
+  Data Source:       {data_source}
 
-Position Distribution (pos 1-20 sample):
+Position Distribution:
 {pos_dist}
 
 AI Overview Coverage (Google AI search):
@@ -736,7 +960,7 @@ AI Overview Coverage (Google AI search):
   SERP Features Traffic:                  ~{sf_traffic:,} visits/mo
 
 Top Keywords by Volume:
-{top_vol_lines or '  (CSV mode — see quick wins)'}
+{top_vol_lines or '  (no data available)'}
 
 Page-1 Quick Wins (pos 4-10, vol ≥100):
 {qw_lines or '  (none identified)'}
@@ -869,9 +1093,10 @@ def build_seo_analysis_prompt(semrush: dict, scrape: str, crawl: dict) -> str:
         f"  {c['domain']}: {c['keywords']:,} KWs, {c['traffic']:,} traffic/mo, ${c['traffic_value']:,} value"
         for c in semrush.get("competitors", [])[:3]
     ])
+    data_src = semrush.get("source", "dataforseo")
     return f"""You are a senior healthcare SEO analyst reviewing a practice's digital footprint. Generate a Digital Health Report using ONLY the numbers provided below — never estimate or fabricate.
 
-SEMRUSH DATA:
+SEO DATA ({data_src}):
   Global Rank:           #{semrush.get('domain_rank', 0):,}
   Keywords Ranked:       {semrush.get('unique_keywords', 0):,}
   Monthly Traffic:       ~{semrush.get('estimated_traffic', 0):,} visits
@@ -1341,23 +1566,51 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         )
         print(f"  ✓ AI: {crawl['ai_status']} | llms.txt: {crawl['llms_txt']} | Sitemap: {crawl['sitemap_urls']} URLs")
 
-        semrush_key = env.get("SEMRUSH_API_KEY", "").strip()
+        dfs_login    = env.get("DATAFORSEO_LOGIN", "").strip()
+        dfs_password = env.get("DATAFORSEO_PASSWORD", "").strip()
+        semrush_key  = env.get("SEMRUSH_API_KEY", "").strip()
         domain = re.sub(r"https?://", "", website).rstrip("/")
-        if semrush_key:
-            print("  Fetching SEMrush API (~630 units)...")
+
+        if dfs_login and dfs_password:
+            print("  Fetching DataForSEO API (~$0.04/domain)...")
+            try:
+                semrush = fetch_dataforseo(domain, dfs_login, dfs_password)
+                ai_serp  = semrush.get("ai_overview_serp_count", "N/A")
+                ai_cited = semrush.get("ai_overview_cited_count", "N/A")
+                print(f"  ✓ DataForSEO: {semrush['unique_keywords']:,} KWs | "
+                      f"rank #{semrush['domain_rank']:,} | "
+                      f"{semrush['quick_wins_count']} quick wins | "
+                      f"${semrush['traffic_value']:,}/mo | "
+                      f"AI Overview SERPs: {ai_serp} (cited: {ai_cited})")
+            except Exception as e:
+                print(f"  ⚠️  DataForSEO failed ({e})")
+                if semrush_key:
+                    print("  Falling back to SEMrush API...")
+                    try:
+                        semrush = fetch_semrush_api(domain, semrush_key)
+                        print(f"  ✓ SEMrush (fallback): {semrush['unique_keywords']:,} KWs")
+                    except Exception as e2:
+                        print(f"  ⚠️  SEMrush fallback also failed ({e2}) — using empty data")
+                        semrush = parse_semrush("")
+                else:
+                    print("  ⚠️  No SEMrush fallback available — add SEMRUSH_API_KEY to .env")
+                    semrush = parse_semrush("")
+        elif semrush_key:
+            print("  Fetching SEMrush API (DataForSEO not configured — add DATAFORSEO_LOGIN/PASSWORD to .env)...")
             try:
                 semrush = fetch_semrush_api(domain, semrush_key)
                 ai_serp  = semrush.get("ai_overview_serp_count", "N/A")
                 ai_cited = semrush.get("ai_overview_cited_count", "N/A")
-                print(f"  ✓ API: {semrush['unique_keywords']:,} KWs | #{semrush['domain_rank']:,} rank | "
-                      f"{semrush['quick_wins_count']} quick wins | ${semrush['traffic_value']:,}/mo | "
+                print(f"  ✓ SEMrush: {semrush['unique_keywords']:,} KWs | "
+                      f"#{semrush['domain_rank']:,} rank | "
+                      f"{semrush['quick_wins_count']} quick wins | "
                       f"AI Overview SERPs: {ai_serp} (cited: {ai_cited})")
             except Exception as e:
-                print(f"  ⚠️  SEMrush API failed ({e}), falling back to CSV...")
-                semrush = parse_semrush(semrush_csv)
+                print(f"  ⚠️  SEMrush API failed ({e}) — using empty data")
+                semrush = parse_semrush("")
         else:
-            print("  Parsing SEMrush CSV (no API key — add SEMRUSH_API_KEY to .env for live data)...")
-            semrush = parse_semrush(semrush_csv)
+            print("  ⚠️  No SEO API configured — add DATAFORSEO_LOGIN/PASSWORD to .env for live data")
+            semrush = parse_semrush("")
         print(f"  ✓ {semrush['unique_keywords']:,} keywords | {semrush['quick_wins_count']} quick wins | ~{semrush['estimated_traffic']:,} traffic/mo")
 
         # Save SEMrush data for Claude Code SEO analysis step
@@ -1632,7 +1885,7 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
                 "App URL":          app_url or "",
                 "Preview URL":      f"{report_url}?preview=1",
                 "Loom Status":      "PENDING",
-                "SEMrush Traffic":  semrush.get("estimated_traffic", 0),
+                "Organic Traffic":  semrush.get("estimated_traffic", 0),
                 "Keywords":         semrush.get("unique_keywords", 0),
                 "Quick Wins":       semrush.get("quick_wins_count", 0),
                 "Outreach Status":  "NOT_SENT",
@@ -1739,8 +1992,10 @@ def main():
         sys.exit(1)
 
     env = load_env()
-    semrush_status = "✓ (API)" if env.get("SEMRUSH_API_KEY") else "✗ (CSV fallback)"
-    print(f"✓ Env loaded: SEMrush={semrush_status} | "
+    dfs_status = "✓ DataForSEO" if (env.get("DATAFORSEO_LOGIN") and env.get("DATAFORSEO_PASSWORD")) else ""
+    smr_status = "✓ SEMrush (fallback)" if env.get("SEMRUSH_API_KEY") else ""
+    seo_status = dfs_status or smr_status or "✗ no SEO API"
+    print(f"✓ Env loaded: SEO={seo_status} | "
           f"Slack={'✓' if env.get('SLACK_WEBHOOK_URL') else '✗'}")
     print(f"  Note: All LLM generation is Claude Code native (Claude Max — zero API cost)")
     vercel_tok = env.get("VERCEL_TOKEN", "")

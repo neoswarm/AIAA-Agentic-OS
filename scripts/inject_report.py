@@ -352,7 +352,7 @@ def build_replacements(p1: dict, p2: dict) -> dict:
         brand_primary = brand.get("primary") or "#036797"
         brand_accent  = brand.get("secondary") or brand.get("accent") or "#84bdbb"
 
-    # ── SEMrush numbers ──────────────────────────────────────────────────────
+    # ── SEO data numbers (DataForSEO primary / SEMrush fallback) ─────────────
     domain_rank      = fmt_domain_rank(semrush.get("domain_rank"))
     unique_keywords  = fmt_number(semrush.get("unique_keywords", 0))
     monthly_traffic  = fmt_number(semrush.get("estimated_traffic", 0))
