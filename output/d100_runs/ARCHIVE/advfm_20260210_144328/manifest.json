@@ -1,0 +1,58 @@
+{
+  "run_id": "advfm_20260210_144328",
+  "website_url": "https://advfunctionalmedicine.com",
+  "booking_url": "https://www.advfunctionalmedicine.com/schedule-a-no-fee-discovery-call/",
+  "timestamp": "2026-02-10T14:43:28Z",
+  "status": "completed",
+  "practice_name": "Advanced Functional Medicine",
+  "outputs": {
+    "scrape_data": {
+      "raw_markdown": "scrape_data/raw_scrape.md",
+      "description": "18-section comprehensive website scrape with 30+ source citations"
+    },
+    "seo_data": {
+      "semrush_summary": "seo_data/semrush_summary.md",
+      "description": "SEMrush metrics summary from screenshot data"
+    },
+    "health_app": {
+      "html_file": "app/health_assessment.html",
+      "file_size_kb": 45,
+      "description": "Single-file HTML health assessment with 15 questions, mobile-responsive, WCAG-compliant"
+    },
+    "google_ads": {
+      "campaign_file": "ads/google_ads_campaign.md",
+      "csv_imports": "ads/*.csv (7 files)",
+      "campaigns": 3,
+      "ad_groups": 17,
+      "keywords": 89,
+      "description": "Complete Google Ads campaign package with CSV imports ready for Google Ads Editor"
+    },
+    "email_sequence": {
+      "sequence_file": "emails/sequence.md",
+      "plain_text": "emails/plain_text.txt",
+      "html_preview": "emails/html_preview.html",
+      "esp_import": "emails/klaviyo_import.csv",
+      "emails": 3,
+      "description": "3-email Speed-to-Trust sequence (180-265 words each) with ESP integration"
+    }
+  },
+  "assets_generated": 5,
+  "total_files": 25,
+  "estimated_cost_usd": 0.45,
+  "execution_time_minutes": 12,
+  "key_differentiators": [
+    "96% diabetes reversal success rate",
+    "200+ biomarkers tested",
+    "Largest functional medicine clinic in California",
+    "12+ years experience",
+    "Team of 12+ specialists",
+    "Virtual care nationwide"
+  ],
+  "next_steps": [
+    "Deploy health assessment app to website",
+    "Import Google Ads campaigns to Ads Editor",
+    "Set up email automation in Klaviyo/ESP",
+    "Review all assets for brand alignment",
+    "Test health app on mobile devices"
+  ]
+}

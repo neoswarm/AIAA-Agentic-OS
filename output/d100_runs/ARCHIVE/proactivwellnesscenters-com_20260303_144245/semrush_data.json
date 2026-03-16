@@ -1,0 +1,232 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 1000186,
+  "unique_keywords": 1823,
+  "estimated_traffic": 1088,
+  "traffic_value": 1282,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 19,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 3,
+  "pos2_3_count": 1,
+  "pos4_10_count": 20,
+  "pos11_20_count": 26,
+  "pos1_3_count": 4,
+  "quick_wins_count": 10,
+  "top_quick_wins": [
+    {
+      "keyword": "obesity doctor near me",
+      "position": 8,
+      "volume": 880,
+      "kd": 4.0
+    },
+    {
+      "keyword": "true vitality medical center",
+      "position": 10,
+      "volume": 720,
+      "kd": 26.0
+    },
+    {
+      "keyword": "proactive login",
+      "position": 9,
+      "volume": 320,
+      "kd": 13.0
+    },
+    {
+      "keyword": "md maximum weight loss medical center",
+      "position": 10,
+      "volume": 260,
+      "kd": 31.0
+    },
+    {
+      "keyword": "medical weight loss clinic gaithersburg va",
+      "position": 7,
+      "volume": 260,
+      "kd": 3.0
+    },
+    {
+      "keyword": "mthfr therapy",
+      "position": 4,
+      "volume": 210,
+      "kd": 22.0
+    },
+    {
+      "keyword": "heart attack prevention in vienna virginia",
+      "position": 5,
+      "volume": 210,
+      "kd": 0.0
+    },
+    {
+      "keyword": "trt in vienna virginia",
+      "position": 10,
+      "volume": 210,
+      "kd": 0.0
+    },
+    {
+      "keyword": "low t treatment fairfax county",
+      "position": 6,
+      "volume": 170,
+      "kd": 23.0
+    },
+    {
+      "keyword": "heart attack prevention in vienna va",
+      "position": 7,
+      "volume": 170,
+      "kd": 0.0
+    }
+  ],
+  "top3_sample": [
+    {
+      "keyword": "proactive wellness center",
+      "position": 1,
+      "volume": 390
+    }
+  ],
+  "top_by_volume": [
+    {
+      "keyword": "mthfr gene mutation treatment",
+      "position": 19,
+      "volume": 1300,
+      "kd": 46.0
+    },
+    {
+      "keyword": "diet clinic near me",
+      "position": 17,
+      "volume": 1000,
+      "kd": 46.0
+    },
+    {
+      "keyword": "obesity doctor near me",
+      "position": 8,
+      "volume": 880,
+      "kd": 4.0
+    },
+    {
+      "keyword": "weight loss facilities near me",
+      "position": 11,
+      "volume": 880,
+      "kd": 25.0
+    },
+    {
+      "keyword": "true vitality medical center",
+      "position": 10,
+      "volume": 720,
+      "kd": 26.0
+    },
+    {
+      "keyword": "proactiv login",
+      "position": 16,
+      "volume": 480,
+      "kd": 24.0
+    },
+    {
+      "keyword": "proactive wellness",
+      "position": 15,
+      "volume": 480,
+      "kd": 27.0
+    },
+    {
+      "keyword": "proactive wellness",
+      "position": 8,
+      "volume": 480,
+      "kd": 27.0
+    },
+    {
+      "keyword": "proactive wellness",
+      "position": 5,
+      "volume": 480,
+      "kd": 27.0
+    },
+    {
+      "keyword": "proactive wellness",
+      "position": 1,
+      "volume": 480,
+      "kd": 27.0
+    },
+    {
+      "keyword": "proactive wellness center",
+      "position": 1,
+      "volume": 390,
+      "kd": 49.0
+    },
+    {
+      "keyword": "proactive health and wellness",
+      "position": 16,
+      "volume": 390,
+      "kd": 37.0
+    },
+    {
+      "keyword": "testosterone treatment for men near 17019",
+      "position": 15,
+      "volume": 390,
+      "kd": 3.0
+    },
+    {
+      "keyword": "testosterone treatment for men near 17019",
+      "position": 10,
+      "volume": 390,
+      "kd": 3.0
+    },
+    {
+      "keyword": "testosterone treatment for men near 17019",
+      "position": 4,
+      "volume": 390,
+      "kd": 3.0
+    },
+    {
+      "keyword": "proactive login",
+      "position": 9,
+      "volume": 320,
+      "kd": 13.0
+    },
+    {
+      "keyword": "gainswave near me",
+      "position": 15,
+      "volume": 320,
+      "kd": 37.0
+    },
+    {
+      "keyword": "mold and front loading washing machines",
+      "position": 13,
+      "volume": 320,
+      "kd": 31.0
+    },
+    {
+      "keyword": "md maximum weight loss medical center",
+      "position": 10,
+      "volume": 260,
+      "kd": 31.0
+    },
+    {
+      "keyword": "local weight loss clinics near me",
+      "position": 13,
+      "volume": 260,
+      "kd": 39.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "truevitalitymedical.com",
+      "relevance": "0.15",
+      "keywords": 372,
+      "traffic": 943,
+      "traffic_value": 2894
+    },
+    {
+      "domain": "weightlossandvitality.com",
+      "relevance": "0.10",
+      "keywords": 1961,
+      "traffic": 1360,
+      "traffic_value": 3480
+    },
+    {
+      "domain": "leesburgfunctionalmedicine.com",
+      "relevance": "0.09",
+      "keywords": 177,
+      "traffic": 14,
+      "traffic_value": 32
+    }
+  ]
+}

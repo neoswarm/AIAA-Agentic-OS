@@ -1,0 +1,6 @@
+website,status,error
+https://practice1.com/,failed,ANTHROPIC_API_KEY not found in .env
+https://practice2.com/,failed,ANTHROPIC_API_KEY not found in .env
+https://practice3.com/,failed,ANTHROPIC_API_KEY not found in .env
+https://practice4.com/,failed,ANTHROPIC_API_KEY not found in .env
+https://practice5.com/,failed,ANTHROPIC_API_KEY not found in .env

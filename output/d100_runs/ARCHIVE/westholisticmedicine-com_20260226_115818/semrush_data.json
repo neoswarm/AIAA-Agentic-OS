@@ -1,0 +1,268 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 342635,
+  "unique_keywords": 1355,
+  "estimated_traffic": 4568,
+  "traffic_value": 8136,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 19,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 4,
+  "pos2_3_count": 3,
+  "pos4_10_count": 13,
+  "pos11_20_count": 30,
+  "pos1_3_count": 7,
+  "quick_wins_count": 11,
+  "top_quick_wins": [
+    {
+      "keyword": "holistic doctor near me",
+      "position": 5,
+      "volume": 27100,
+      "kd": 53.0
+    },
+    {
+      "keyword": "holistic doctors near me",
+      "position": 10,
+      "volume": 12100,
+      "kd": 41.0
+    },
+    {
+      "keyword": "functional medicine austin",
+      "position": 4,
+      "volume": 880,
+      "kd": 40.0
+    },
+    {
+      "keyword": "biodynamic craniosacral therapy",
+      "position": 5,
+      "volume": 720,
+      "kd": 21.0
+    },
+    {
+      "keyword": "functional doctor austin",
+      "position": 5,
+      "volume": 390,
+      "kd": 39.0
+    },
+    {
+      "keyword": "biodynamic craniosacral",
+      "position": 6,
+      "volume": 320,
+      "kd": 17.0
+    },
+    {
+      "keyword": "austin holistic health",
+      "position": 10,
+      "volume": 320,
+      "kd": 28.0
+    },
+    {
+      "keyword": "natural medicine doctors near me",
+      "position": 9,
+      "volume": 260,
+      "kd": 44.0
+    },
+    {
+      "keyword": "functional medicine doctor austin",
+      "position": 8,
+      "volume": 210,
+      "kd": 38.0
+    },
+    {
+      "keyword": "craniosacral biodynamic",
+      "position": 5,
+      "volume": 140,
+      "kd": 7.0
+    },
+    {
+      "keyword": "integrative medicine austin",
+      "position": 10,
+      "volume": 140,
+      "kd": 34.0
+    }
+  ],
+  "top3_sample": [
+    {
+      "keyword": "west holistic medicine austin",
+      "position": 1,
+      "volume": 320
+    },
+    {
+      "keyword": "west holistic medicine",
+      "position": 1,
+      "volume": 320
+    },
+    {
+      "keyword": "austin functional medicine",
+      "position": 3,
+      "volume": 210
+    },
+    {
+      "keyword": "biodynamic cranial therapy",
+      "position": 3,
+      "volume": 210
+    },
+    {
+      "keyword": "natural doctor austin",
+      "position": 2,
+      "volume": 170
+    },
+    {
+      "keyword": "holistic doctor austin",
+      "position": 1,
+      "volume": 170
+    },
+    {
+      "keyword": "naturopath austin",
+      "position": 1,
+      "volume": 170
+    }
+  ],
+  "top_by_volume": [
+    {
+      "keyword": "holistic doctor near me",
+      "position": 5,
+      "volume": 27100,
+      "kd": 53.0
+    },
+    {
+      "keyword": "holistic doctors near me",
+      "position": 10,
+      "volume": 12100,
+      "kd": 41.0
+    },
+    {
+      "keyword": "homeopathic doctors near me",
+      "position": 11,
+      "volume": 4400,
+      "kd": 58.0
+    },
+    {
+      "keyword": "best functional medicine doctors near me",
+      "position": 17,
+      "volume": 1000,
+      "kd": 52.0
+    },
+    {
+      "keyword": "alternative medicine for perimenopause",
+      "position": 17,
+      "volume": 1000,
+      "kd": 40.0
+    },
+    {
+      "keyword": "functional medicine austin",
+      "position": 4,
+      "volume": 880,
+      "kd": 40.0
+    },
+    {
+      "keyword": "functional medicine drs near me",
+      "position": 19,
+      "volume": 720,
+      "kd": 38.0
+    },
+    {
+      "keyword": "holistic family medicine",
+      "position": 19,
+      "volume": 720,
+      "kd": 11.0
+    },
+    {
+      "keyword": "functional medical dr near me",
+      "position": 12,
+      "volume": 720,
+      "kd": 38.0
+    },
+    {
+      "keyword": "functional medical dr near me",
+      "position": 9,
+      "volume": 720,
+      "kd": 38.0
+    },
+    {
+      "keyword": "biodynamic craniosacral therapy",
+      "position": 5,
+      "volume": 720,
+      "kd": 21.0
+    },
+    {
+      "keyword": "herbs for perimenopause",
+      "position": 12,
+      "volume": 590,
+      "kd": 25.0
+    },
+    {
+      "keyword": "holistic flu remedies",
+      "position": 11,
+      "volume": 480,
+      "kd": 41.0
+    },
+    {
+      "keyword": "holistic care family medicine",
+      "position": 19,
+      "volume": 390,
+      "kd": 28.0
+    },
+    {
+      "keyword": "hollistic doctors near me",
+      "position": 12,
+      "volume": 390,
+      "kd": 38.0
+    },
+    {
+      "keyword": "herbal doctor near me",
+      "position": 15,
+      "volume": 390,
+      "kd": 54.0
+    },
+    {
+      "keyword": "best holistic doctors near me",
+      "position": 20,
+      "volume": 390,
+      "kd": 51.0
+    },
+    {
+      "keyword": "functional doctor austin",
+      "position": 5,
+      "volume": 390,
+      "kd": 39.0
+    },
+    {
+      "keyword": "wholistic doctors near me",
+      "position": 14,
+      "volume": 390,
+      "kd": 36.0
+    },
+    {
+      "keyword": "west holistic medicine austin",
+      "position": 1,
+      "volume": 320,
+      "kd": 0.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "wildfigfunctionalmedicine.com",
+      "relevance": "0.30",
+      "keywords": 195,
+      "traffic": 697,
+      "traffic_value": 1360
+    },
+    {
+      "domain": "drrobinmayfield.com",
+      "relevance": "0.28",
+      "keywords": 285,
+      "traffic": 312,
+      "traffic_value": 396
+    },
+    {
+      "domain": "drshellysethi.com",
+      "relevance": "0.27",
+      "keywords": 144,
+      "traffic": 224,
+      "traffic_value": 28
+    }
+  ]
+}

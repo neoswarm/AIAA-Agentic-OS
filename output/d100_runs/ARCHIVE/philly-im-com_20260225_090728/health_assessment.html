@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philadelphia Integrative Medicine - Root-Cause Medicine. Compassionate Care. Real Answers.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0C4599;
+            --background: #FFFFFF;
+            --accent: #E3BA45;
+            --secondary: #B39109;
+            --text-dark: #1a1a1a;
+            --text-mid: #4a4a4a;
+            --text-light: #6a6a6a;
+            --border: #e0e0e0;
+            --error: #d32f2f;
+            --success: #2e7d32;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--text-dark);
+            background: var(--background);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .small-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: var(--background);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .header-cta {
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .header-cta:hover {
+            background: #0a3a7a;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, #0a3a7a 100%);
+            color: white;
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero .tagline {
+            font-size: 22px;
+            margin-bottom: 16px;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        .hero .provider {
+            font-size: 16px;
+            margin-bottom: 32px;
+            opacity: 0.9;
+        }
+
+        .hero-cta {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--text-dark);
+            padding: 18px 40px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .hero-cta:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+        }
+
+        /* Stats Section */
+        .stats {
+            background: var(--background);
+            padding: 60px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .stat-item {
+            padding: 20px;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-mid);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Concerns Section */
+        .concerns-section {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 18px;
+            color: var(--text-mid);
+            margin-bottom: 48px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .concerns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .concern-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .concern-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(12, 69, 153, 0.1);
+        }
+
+        .concern-emoji {
+            font-size: 40px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .concern-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 80px 0;
+            background: var(--background);
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            margin-top: 48px;
+        }
+
+        .step {
+            text-align: center;
+            padding: 32px 24px;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 auto 20px;
+        }
+
+        .step h3 {
+            font-size: 22px;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .step p {
+            color: var(--text-mid);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Care Models */
+        .care-models {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+
+        .care-grid {
+            display: grid;
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .care-card {
+            background: white;
+            padding: 32px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .care-card h3 {
+            font-size: 22px;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .care-card p {
+            color: var(--text-mid);
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+
+        .care-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        /* Trust Section */
+        .trust-section {
+            padding: 80px 0;
+            background: var(--background);
+        }
+
+        .trust-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 48px;
+        }
+
+        .trust-item {
+            text-align: center;
+            padding: 24px;
+        }
+
+        .trust-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .trust-item h3 {
+            font-size: 20px;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .trust-item p {
+            color: var(--text-mid);
+            line-height: 1.6;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--primary) 0%, #0a3a7a 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            margin-bottom: 32px;
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--text-dark);
+            padding: 18px 48px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .cta-button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        /* Mobile Sticky CTA */
+        .mobile-sticky-cta {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--primary);
+            padding: 16px 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 99;
+            display: none;
+        }
+
+        .mobile-sticky-cta button {
+            width: 100%;
+            background: var(--accent);
+            color: var(--text-dark);
+            border: none;
+            padding: 16px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-sticky-cta {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero .tagline {
+                font-size: 18px;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+        }
+
+        /* Assessment Styles */
+        .assessment-container {
+            display: none;
+            min-height: 100vh;
+            background: #f8f9fa;
+            padding: 40px 0 100px;
+        }
+
+        .assessment-header {
+            background: white;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 40px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .assessment-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            min-width: 200px;
+            background: var(--border);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: var(--text-mid);
+            font-weight: 600;
+        }
+
+        .assessment-card {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+
+        .assessment-step {
+            display: none;
+        }
+
+        .assessment-step.active {
+            display: block;
+        }
+
+        .step-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .step-description {
+            font-size: 16px;
+            color: var(--text-mid);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 32px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .form-label.required::after {
+            content: " *";
+            color: var(--error);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-input.error {
+            border-color: var(--error);
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
+        textarea.form-input {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Multi-select chips */
+        .chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .chip {
+            background: white;
+            border: 2px solid var(--border);
+            padding: 12px 20px;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 15px;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chip:hover {
+            border-color: var(--primary);
+            background: #f0f5ff;
+        }
+
+        .chip.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .chip:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        .chip-emoji {
+            font-size: 20px;
+        }
+
+        /* Radio/Checkbox groups */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-item {
+            background: white;
+            border: 2px solid var(--border);
+            padding: 16px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option-item:hover {
+            border-color: var(--primary);
+            background: #f0f5ff;
+        }
+
+        .option-item.selected {
+            border-color: var(--primary);
+            background: #f0f5ff;
+        }
+
+        .option-item input[type="radio"],
+        .option-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .option-item label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Severity slider */
+        .slider-container {
+            padding: 20px 0;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--border);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: none;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--text-mid);
+        }
+
+        .slider-value {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 12px;
+        }
+
+        /* Checklist */
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: start;
+            gap: 12px;
+            padding: 8px;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+
+        .checklist-item label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #0a3a7a;
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: #f0f5ff;
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: var(--text-dark);
+        }
+
+        .btn-accent:hover {
+            background: var(--secondary);
+        }
+
+        /* Review Section */
+        .review-section {
+            margin-bottom: 32px;
+            padding: 24px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .review-section h3 {
+            font-size: 18px;
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .edit-link {
+            font-size: 14px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .edit-link:hover {
+            text-decoration: underline;
+        }
+
+        .review-content {
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .review-content p {
+            margin-bottom: 8px;
+        }
+
+        .review-content strong {
+            color: var(--text-dark);
+        }
+
+        /* Results Page */
+        .results-container {
+            display: none;
+            min-height: 100vh;
+            background: #f8f9fa;
+            padding: 40px 0;
+        }
+
+        .results-card {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+
+        .results-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .results-subtitle {
+            font-size: 18px;
+            color: var(--text-mid);
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .summary-box {
+            background: #f8f9fa;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            padding: 24px;
+            margin-bottom: 24px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .json-view {
+            background: #1a1a1a;
+            color: #00ff00;
+            border-radius: 6px;
+            padding: 24px;
+            margin-bottom: 24px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-x: auto;
+            display: none;
+        }
+
+        .json-view.visible {
+            display: block;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .disclaimer-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .disclaimer-box h3 {
+            font-size: 18px;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .disclaimer-box p {
+            color: var(--text-dark);
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .disclaimer-box strong {
+            font-weight: 700;
+        }
+
+        .emergency-box {
+            background: #ffebee;
+            border: 2px solid var(--error);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .emergency-box h3 {
+            font-size: 18px;
+            color: var(--error);
+            margin-bottom: 12px;
+        }
+
+        .emergency-box p {
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .recommendations {
+            margin-top: 32px;
+        }
+
+        .recommendation-item {
+            background: #f0f5ff;
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 4px;
+        }
+
+        .recommendation-item h4 {
+            font-size: 18px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .recommendation-item p {
+            color: var(--text-mid);
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--text-dark);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        footer p {
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        /* Utilities */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .assessment-card {
+                padding: 24px;
+            }
+
+            .step-title {
+                font-size: 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .results-card {
+                padding: 24px;
+            }
+
+            .results-title {
+                font-size: 24px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .mobile-sticky-cta,
+            .header-cta,
+            .action-buttons,
+            .btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Landing Page -->
+    <div id="landingPage">
+        <header>
+            <div class="container">
+                <div class="header-content">
+                    <a href="#" class="logo">Philadelphia Integrative Medicine</a>
+                    <a href="#" class="header-cta" id="headerCTA">Start Your Health Assessment</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div class="container">
+                <h1>Root-Cause Medicine. Compassionate Care. Real Answers.</h1>
+                <p class="tagline">Root-Cause Medicine. Compassionate Care. Real Answers.</p>
+                <p class="provider">Dr. Georgia Tetlow MD ABOIM ABPMR IFMCP — CEO & Founder</p>
+                <a href="#" class="hero-cta" id="heroCTA">Begin Your Health Assessment</a>
+            </div>
+        </section>
+
+        <section class="stats">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">15+</div>
+                        <div class="stat-label">Years of Trusted Care</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">100+</div>
+                        <div class="stat-label">Providers Trained</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">75+</div>
+                        <div class="stat-label">Years Combined Team Experience</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">5,000+</div>
+                        <div class="stat-label">Patients Served</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="concerns-section">
+            <div class="container">
+                <h2 class="section-title">Conditions We Address</h2>
+                <p class="section-subtitle">Our team specializes in uncovering root causes and providing comprehensive care for complex health concerns.</p>
+                <div class="concerns-grid">
+                    <div class="concern-card">
+                        <span class="concern-emoji">😴</span>
+                        <div class="concern-label">Chronic Fatigue</div>
+                    </div>
+                    <div class="concern-card">
+                        <span class="concern-emoji">🛡️</span>
+                        <div class="concern-label">Autoimmune Conditions</div>
+                    </div>
+                    <div class="concern-card">
+                        <span class="concern-emoji">⚖️</span>
+                        <div class="concern-label">Hormone Imbalance</div>
+                    </div>
+                    <div class="concern-card">
+                        <span class="concern-emoji">🌿</span>
+                        <div class="concern-label">Gut & Digestive Issues</div>
+                    </div>
+                    <div class="concern-card">
+                        <span class="concern-emoji">🧪</span>
+                        <div class="concern-label">Mold & Toxin Illness</div>
+                    </div>
+                    <div class="concern-card">
+                        <span class="concern-emoji">🔬</span>
+                        <div class="concern-label">Thyroid Dysfunction</div>
+                    </div>
+                    <div class="concern-card">
+                        <span class="concern-emoji">💙</span>```html
+                        <div class="concern-label">Chronic Pain</div>
+                    </div>
+                    <div class="concern-card">
+                        <span class="concern-emoji">🧠</span>
+                        <div class="concern-label">Brain Fog</div>
+                    </div>
+                    <div class="concern-card">
+                        <span class="concern-emoji">🌊</span>
+                        <div class="concern-label">Anxiety & Mood</div>
+                    </div>
+                    <div class="concern-card">
+                        <span class="concern-emoji">🔥</span>
+                        <div class="concern-label">Weight & Metabolism</div>
+                    </div>
+                    <div class="concern-card">
+                        <span class="concern-emoji">🌙</span>
+                        <div class="concern-label">Sleep Disorders</div>
+                    </div>
+                    <div class="concern-card">
+                        <span class="concern-emoji">🌲</span>
+                        <div class="concern-label">Lyme Disease</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="how-it-works">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">Your journey to root-cause healing begins with understanding your complete health story.</p>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Complete Your Assessment</h3>
+                        <p>Share your health history, symptoms, and goals through our comprehensive guided assessment. This helps us understand your unique situation.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Schedule Your Visit</h3>
+                        <p>Book your comprehensive new patient consultation with one of our fellowship-trained, IFM-certified providers.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Begin Your Healing</h3>
+                        <p>Receive a personalized integrative care plan based on your full health history, advanced testing recommendations, and root-cause analysis.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="care-models">
+            <div class="container">
+                <h2 class="section-title">Our Care Options</h2>
+                <p class="section-subtitle">Comprehensive, collaborative care tailored to your needs.</p>
+                <div class="care-grid">
+                    <div class="care-card">
+                        <h3>New Patient Comprehensive Visit</h3>
+                        <p>An in-depth first visit with a fellowship-trained, IFM-certified provider. Full health history review, specialty testing recommendations, and a personalized integrative care plan.</p>
+                        <div class="care-price">$675 – $995</div>
+                    </div>
+                    <div class="care-card">
+                        <h3>Follow-Up Consultation</h3>
+                        <p>Ongoing care visit to review lab results, refine your treatment plan, and address evolving health goals with your provider.</p>
+                        <div class="care-price">$325 – $900</div>
+                    </div>
+                    <div class="care-card">
+                        <h3>Follow-Up Package — 4 Visits with NP/PA</h3>
+                        <p>A bundled package of four follow-up appointments with our nurse practitioner or physician assistant. Ideal for ongoing chronic condition management and cost-effective continuity of care.</p>
+                        <div class="care-price">$1,100</div>
+                    </div>
+                    <div class="care-card">
+                        <h3>Osteopathic Manipulative Medicine (OMM)</h3>
+                        <p>Hands-on osteopathic treatment from a board-certified osteopathic physician. Addresses pain, structural imbalance, and nervous system dysregulation as part of a whole-body integrative plan.</p>
+                        <div class="care-price">Included in visit pricing</div>
+                    </div>
+                    <div class="care-card">
+                        <h3>Specialty Functional Lab Testing</h3>
+                        <p>Advanced diagnostic testing including microbiome analysis, heavy metal panels, genetic and nutrigenomic testing, environmental toxin screening, and comprehensive hormone panels.</p>
+                        <div class="care-price">Varies by panel</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="trust-section">
+            <div class="container">
+                <h2 class="section-title">Why Choose Philadelphia Integrative Medicine</h2>
+                <div class="trust-grid">
+                    <div class="trust-item">
+                        <div class="trust-icon">🏆</div>
+                        <h3>Award-Winning Care</h3>
+                        <p>Awarded best Integrative Medicine on the Mainline last 8 years in a row, since the award's inception.</p>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">👥</div>
+                        <h3>Team-Based Approach</h3>
+                        <p>Our experienced professionals collaborate daily to understand your full story — body, mind, and spirit.</p>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">🔬</div>
+                        <h3>Advanced Training</h3>
+                        <p>Fellowship-trained and Institute for Functional Medicine Certified providers using the leading edge of medical innovation.</p>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">💚</div>
+                        <h3>Compassionate Care</h3>
+                        <p>Every patient feels seen, supported, and empowered to heal through personalized, integrative care.</p>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">📋</div>
+                        <h3>Root-Cause Focus</h3>
+                        <p>We combine conventional medicine with functional and integrative approaches to uncover and address the root causes of your symptoms.</p>
+                    </div>
+                    <div class="trust-item">
+                        <div class="trust-icon">⏱️</div>
+                        <h3>Established Since 2009</h3>
+                        <p>Over 15 years of trusted care, empowering thousands of patients to take control of their health.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container">
+                <h2>Ready to Start Your Healing Journey?</h2>
+                <p>Complete your health assessment and take the first step toward comprehensive, root-cause care.</p>
+                <a href="#" class="cta-button" id="ctaButton">Begin Your Health Assessment</a>
+            </div>
+        </section>
+
+        <footer>
+            <div class="container">
+                <p>&copy; 2009-2024 Philadelphia Integrative Medicine</p>
+                <p>Est. 2009</p>
+            </div>
+        </footer>
+
+        <div class="mobile-sticky-cta">
+            <button id="mobileCTA">Start Your Health Assessment</button>
+        </div>
+    </div>
+
+    <!-- Assessment Flow -->
+    <div id="assessmentPage" class="assessment-container">
+        <div class="assessment-header">
+            <div class="small-container">
+                <div class="assessment-header-content">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Step 1 of 8</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="small-container">
+            <div class="assessment-card">
+                <!-- Step 1: Contact Information -->
+                <div class="assessment-step active" data-step="1">
+                    <h2 class="step-title">Let's Start With Your Contact Information</h2>
+                    <p class="step-description">We need your basic information to connect your assessment with your appointment.</p>
+
+                    <div class="form-group">
+                        <label for="name" class="form-label required">Full Name</label>
+                        <input type="text" id="name" name="name" class="form-input" required>
+                        <div class="error-message" id="nameError">Please enter your full name</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label required">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-input" required>
+                        <div class="error-message" id="emailError">Please enter a valid email address</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone" class="form-label required">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" class="form-input" required>
+                        <div class="error-message" id="phoneError">Please enter a valid phone number</div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-primary" id="step1Next">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Primary Concern -->
+                <div class="assessment-step" data-step="2">
+                    <h2 class="step-title">What Brings You to Philadelphia Integrative Medicine?</h2>
+                    <p class="step-description">Select your primary health concern. You can select multiple concerns if applicable.</p>
+
+                    <div class="form-group">
+                        <fieldset>
+                            <legend class="form-label">Primary Health Concerns (select all that apply)</legend>
+                            <div class="chips-container" id="concernsChips">
+                                <button type="button" class="chip" data-value="Chronic Fatigue" tabindex="0">
+                                    <span class="chip-emoji">😴</span>
+                                    <span>Chronic Fatigue</span>
+                                </button>
+                                <button type="button" class="chip" data-value="Autoimmune Conditions" tabindex="0">
+                                    <span class="chip-emoji">🛡️</span>
+                                    <span>Autoimmune Conditions</span>
+                                </button>
+                                <button type="button" class="chip" data-value="Hormone Imbalance" tabindex="0">
+                                    <span class="chip-emoji">⚖️</span>
+                                    <span>Hormone Imbalance</span>
+                                </button>
+                                <button type="button" class="chip" data-value="Gut & Digestive Issues" tabindex="0">
+                                    <span class="chip-emoji">🌿</span>
+                                    <span>Gut & Digestive Issues</span>
+                                </button>
+                                <button type="button" class="chip" data-value="Mold & Toxin Illness" tabindex="0">
+                                    <span class="chip-emoji">🧪</span>
+                                    <span>Mold & Toxin Illness</span>
+                                </button>
+                                <button type="button" class="chip" data-value="Thyroid Dysfunction" tabindex="0">
+                                    <span class="chip-emoji">🔬</span>
+                                    <span>Thyroid Dysfunction</span>
+                                </button>
+                                <button type="button" class="chip" data-value="Chronic Pain" tabindex="0">
+                                    <span class="chip-emoji">💙</span>
+                                    <span>Chronic Pain</span>
+                                </button>
+                                <button type="button" class="chip" data-value="Brain Fog" tabindex="0">
+                                    <span class="chip-emoji">🧠</span>
+                                    <span>Brain Fog</span>
+                                </button>
+                                <button type="button" class="chip" data-value="Anxiety & Mood" tabindex="0">
+                                    <span class="chip-emoji">🌊</span>
+                                    <span>Anxiety & Mood</span>
+                                </button>
+                                <button type="button" class="chip" data-value="Weight & Metabolism" tabindex="0">
+                                    <span class="chip-emoji">🔥</span>
+                                    <span>Weight & Metabolism</span>
+                                </button>
+                                <button type="button" class="chip" data-value="Sleep Disorders" tabindex="0">
+                                    <span class="chip-emoji">🌙</span>
+                                    <span>Sleep Disorders</span>
+                                </button>
+                                <button type="button" class="chip" data-value="Lyme Disease" tabindex="0">
+                                    <span class="chip-emoji">🌲</span>
+                                    <span>Lyme Disease</span>
+                                </button>
+                            </div>
+                        </fieldset>
+                        <div class="error-message" id="concernsError">Please select at least one concern</div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="step2Back">Back</button>
+                        <button type="button" class="btn btn-primary" id="step2Next">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Symptoms Checklist -->
+                <div class="assessment-step" data-step="3">
+                    <h2 class="step-title">Current Symptoms</h2>
+                    <p class="step-description">Select all symptoms you are currently experiencing. This helps us understand the full scope of your health picture.</p>
+
+                    <div class="form-group">
+                        <fieldset>
+                            <legend class="form-label">Select all that apply</legend>
+                            <div class="checklist" id="symptomsChecklist">
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom1" value="Persistent fatigue that does not improve with rest">
+                                    <label for="symptom1">Persistent fatigue that does not improve with rest</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom2" value="Brain fog or difficulty concentrating">
+                                    <label for="symptom2">Brain fog or difficulty concentrating</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom3" value="Unexplained weight gain or difficulty losing weight">
+                                    <label for="symptom3">Unexplained weight gain or difficulty losing weight</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom4" value="Digestive issues such as bloating, IBS, or SIBO">
+                                    <label for="symptom4">Digestive issues such as bloating, IBS, or SIBO</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom5" value="Joint or muscle pain without clear diagnosis">
+                                    <label for="symptom5">Joint or muscle pain without clear diagnosis</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom6" value="Hormonal imbalance or irregular cycles">
+                                    <label for="symptom6">Hormonal imbalance or irregular cycles</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom7" value="Anxiety, depression, or mood instability">
+                                    <label for="symptom7">Anxiety, depression, or mood instability</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom8" value="Frequent illness or slow recovery">
+                                    <label for="symptom8">Frequent illness or slow recovery</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom9" value="Sleep problems or non-restorative sleep">
+                                    <label for="symptom9">Sleep problems or non-restorative sleep</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom10" value="Skin conditions such as eczema or psoriasis">
+                                    <label for="symptom10">Skin conditions such as eczema or psoriasis</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom11" value="Chemical or environmental sensitivities">
+                                    <label for="symptom11">Chemical or environmental sensitivities</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom12" value="History of mold exposure or mold illness">
+                                    <label for="symptom12">History of mold exposure or mold illness</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom13" value="Thyroid symptoms despite normal labs">
+                                    <label for="symptom13">Thyroid symptoms despite normal labs</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom14" value="Adrenal fatigue or chronic stress response">
+                                    <label for="symptom14">Adrenal fatigue or chronic stress response</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom15" value="Food sensitivities or allergies">
+                                    <label for="symptom15">Food sensitivities or allergies</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom16" value="Numbness, tingling, or nerve-related symptoms">
+                                    <label for="symptom16">Numbness, tingling, or nerve-related symptoms</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom17" value="Heart palpitations or unexplained cardiovascular symptoms">
+                                    <label for="symptom17">Heart palpitations or unexplained cardiovascular symptoms</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom18" value="History of chronic Lyme disease">
+                                    <label for="symptom18">History of chronic Lyme disease</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom19" value="Autoimmune diagnosis seeking root-cause support">
+                                    <label for="symptom19">Autoimmune diagnosis seeking root-cause support</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom20" value="Headaches or migraines without clear cause">
+                                    <label for="symptom20">Headaches or migraines without clear cause</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom21" value="Low libido or sexual health concerns">
+                                    <label for="symptom21">Low libido or sexual health concerns</label>
+                                </div>
+                                <div class="checklist-item">
+                                    <input type="checkbox" id="symptom22" value="Recurrent infections or immune dysregulation">
+                                    <label for="symptom22">Recurrent infections or immune dysregulation</label>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div class="error-message" id="symptomsError">Please select at least one symptom</div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="step3Back">Back</button>
+                        <button type="button" class="btn btn-primary" id="step3Next">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Duration -->
+                <div class="assessment-step" data-step="4">
+                    <h2 class="step-title">How Long Have You Experienced These Symptoms?</h2>
+                    <p class="step-description">Understanding the timeline helps us assess the chronicity and urgency of your condition.</p>
+
+                    <div class="form-group">
+                        <fieldset>
+                            <legend class="form-label required">Symptom Duration</legend>
+                            <div class="options-group" id="durationOptions">
+                                <div class="option-item" data-value="Less than 3 months">
+                                    <input type="radio" id="duration1" name="duration" value="Less than 3 months">
+                                    <label for="duration1">Less than 3 months</label>
+                                </div>
+                                <div class="option-item" data-value="3-6 months">
+                                    <input type="radio" id="duration2" name="duration" value="3-6 months">
+                                    <label for="duration2">3-6 months</label>
+                                </div>
+                                <div class="option-item" data-value="6-12 months">
+                                    <input type="radio" id="duration3" name="duration" value="6-12 months">
+                                    <label for="duration3">6-12 months</label>
+                                </div>
+                                <div class="option-item" data-value="1-3 years">
+                                    <input type="radio" id="duration4" name="duration" value="1-3 years">
+                                    <label for="duration4">1-3 years</label>
+                                </div>
+                                <div class="option-item" data-value="More than 3 years">
+                                    <input type="radio" id="duration5" name="duration" value="More than 3 years">
+                                    <label for="duration5">More than 3 years</label>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div class="error-message" id="durationError">Please select a duration</div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="step4Back">Back</button>
+                        <button type="button" class="btn btn-primary" id="step4Next">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Step 5: Severity -->
+                <div class="assessment-step" data-step="5">
+                    <h2 class="step-title">How Severely Are Your Symptoms Impacting Your Daily Life?</h2>
+                    <p class="step-description">Rate the overall impact on your ability to work, socialize, and manage daily activities.</p>
+
+                    <div class="form-group">
+                        <label for="severity" class="form-label">Impact Level</label>
+                        <div class="slider-container">
+                            <input type="range" id="severity" name="severity" min="1" max="10" value="5" class="slider">
+                            <div class="slider-labels">
+                                <span>Minimal Impact</span>
+                                <span>Moderate Impact</span>
+                                <span>Severe Impact</span>
+                            </div>
+                            <div class="slider-value" id="severityValue">5 / 10</div>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="step5Back">Back</button>
+                        <button type="button" class="btn btn-primary" id="step5Next">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Step 6: Previous Treatment -->
+                <div class="assessment-step" data-step="6">
+                    <h2 class="step-title">Previous Medical Care</h2>
+                    <p class="step-description">Tell us about your previous healthcare experiences and what you've tried so far.</p>
+
+                    <div class="form-group">
+                        <label for="previousCare" class="form-label">Have you seen other healthcare providers for these concerns?</label>
+                        <fieldset>
+                            <legend class="sr-only">Previous healthcare providers</legend>
+                            <div class="options-group" id="previousCareOptions">
+                                <div class="option-item" data-value="Yes, conventional medicine only">
+                                    <input type="radio" id="prevCare1" name="previousCare" value="Yes, conventional medicine only">
+                                    <label for="prevCare1">Yes, conventional medicine only</label>
+                                </div>
+                                <div class="option-item" data-value="Yes, integrative/functional medicine">
+                                    <input type="radio" id="prevCare2" name="previousCare" value="Yes, integrative/functional medicine">
+                                    <label for="prevCare2">Yes, integrative/functional medicine</label>
+                                </div>
+                                <div class="option-item" data-value="Yes, both conventional and integrative">
+                                    <input type="radio" id="prevCare3" name="previousCare" value="Yes, both conventional and integrative">
+                                    <label for="prevCare3">Yes, both conventional and integrative</label>
+                                </div>
+                                <div class="option-item" data-value="No, this is my first time seeking help">
+                                    <input type="radio" id="prevCare4" name="previousCare" value="No, this is my first time seeking help">
+                                    <label for="prevCare4">No, this is my first time seeking help</label>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="treatmentHistory" class="form-label">What treatments or interventions have you tried? (Optional)</label>
+                        <textarea id="treatmentHistory" name="treatmentHistory" class="form-input" placeholder="List any medications, supplements, therapies, lifestyle changes, or other approaches you have tried..."></textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="step6Back">Back</button>
+                        <button type="button" class="btn btn-primary" id="step6Next">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Step 7: Health Goals -->
+                <div class="assessment-step" data-step="7">
+                    <h2 class="step-title">Your Health Goals</h2>
+                    <p class="step-description">What are you hoping to achieve through integrative care at Philadelphia Integrative Medicine?</p>
+
+                    <div class="form-group">
+                        <label for="healthGoals" class="form-label">Describe your primary health goals</label>
+                        <textarea id="healthGoals" name="healthGoals" class="form-input" placeholder="Example: I want to have more energy throughout the day, reduce my pain levels, understand the root cause of my symptoms, improve my sleep quality, etc."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="additionalInfo" class="form-label">Is there anything else you'd like us to know? (Optional)</label>
+                        <textarea id="additionalInfo" name="additionalInfo" class="form-input" placeholder="Share any additional context about your health journey, concerns, or questions you have for our team..."></textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="step7Back">Back</button>
+                        <button type="button" class="btn btn-primary" id="step7Next">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Step 8: Review -->
+                <div class="assessment-step" data-step="8">
+                    <h2 class="step-title">Review Your Information</h2>
+                    <p class="step-description">Please review your responses before submitting. You can go back to edit any section.</p>
+
+                    <div id="reviewContent"></div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="step8Back">Back</button>
+                        <button type="button" class="btn btn-primary" id="submitAssessment">Submit Assessment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Page -->
+    <div id="resultsPage" class="results-container">
+        <div class="small-container">
+            <div class="results-card">
+                <h1 class="results-title">Your Assessment is Complete</h1>
+                <p class="results-subtitle">Thank you for taking the time to share your health story with us.</p>
+
+                <div class="emergency-box">
+                    <h3>⚠️ Emergency Medical Attention</h3>
+                    <p><strong>If you are experiencing a medical emergency, call 911 immediately.</strong></p>
+                    <p>This assessment is not a substitute for emergency medical care. If you are experiencing chest pain, difficulty breathing, severe bleeding, loss of consciousness, or any other life-threatening symptoms, seek emergency help now.</p>
+                </div>
+
+                <div class="disclaimer-box">
+                    <h3>Important Medical Disclaimer</h3>
+                    <p><strong>This assessment does not constitute medical advice, diagnosis, or treatment.</strong></p>
+                    <p>The information you provided will be reviewed by our scheduling staff to help match you with the appropriate provider and prepare for your visit. Only a licensed healthcare provider can diagnose medical conditions or recommend treatment after a comprehensive evaluation.</p>
+                    <p>Your responses have been summarized below for scheduling purposes only.</p>
+                </div>
+
+                <h2 style="font-size: 24px; color: var(--primary); margin: 32px 0 16px;">Your Booking Summary</h2>
+                <p style="color: var(--text-mid); margin-bottom: 24px;">This summary will be copied to your clipboard and shared with our scheduling team.</p>
+
+                <div class="summary-box" id="summaryText"></div>
+
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-accent" id="copySummary">Copy Summary to Clipboard</button>
+                    <button type="button" class="btn btn-secondary" id="toggleJson">View Technical Format</button>
+                </div>
+
+                <div class="json-view```html
+" id="jsonView"></div>
+
+                <div class="recommendations">
+                    <h2 style="font-size: 24px; color: var(--primary); margin-bottom: 16px;">Next Steps</h2>
+                    
+                    <div class="recommendation-item">
+                        <h4>Schedule Your New Patient Consultation</h4>
+                        <p>Click the button below to schedule your comprehensive new patient visit. Our scheduling team will have access to your assessment summary to help prepare for your appointment.</p>
+                    </div>
+
+                    <div class="recommendation-item">
+                        <h4>Prepare for Your Visit</h4>
+                        <p>Consider gathering any relevant medical records, lab results, or medication lists to bring to your appointment. This will help our providers develop the most comprehensive care plan for you.</p>
+                    </div>
+
+                    <div class="recommendation-item">
+                        <h4>Questions Before Your Visit?</h4>
+                        <p>If you have questions about scheduling, insurance, or what to expect, our team is here to help guide you through the process.</p>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 40px;">
+                    <button type="button" class="btn btn-primary" id="proceedToBooking" style="font-size: 18px; padding: 18px 48px;">Schedule My Appointment</button>
+                </div>
+
+                <div style="margin-top: 32px; padding: 20px; background: #f8f9fa; border-radius: 6px; text-align: center;">
+                    <p style="color: var(--text-mid); margin-bottom: 8px;">Need assistance?</p>
+                    <p style="color: var(--text-dark); font-weight: 600;">Philadelphia Integrative Medicine</p>
+                    <p style="color: var(--text-mid);">Our team will contact you shortly to confirm your appointment.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        const assessmentData = {
+            name: '',
+            email: '',
+            phone: '',
+            primaryConcerns: [],
+            symptoms: [],
+            duration: '',
+            severity: 5,
+            previousCare: '',
+            treatmentHistory: '',
+            healthGoals: '',
+            additionalInfo: ''
+        };
+
+        let currentStep = 1;
+        const totalSteps = 8;
+
+        // Page navigation
+        function showLandingPage() {
+            document.getElementById('landingPage').style.display = 'block';
+            document.getElementById('assessmentPage').style.display = 'none';
+            document.getElementById('resultsPage').style.display = 'none';
+        }
+
+        function showAssessmentPage() {
+            document.getElementById('landingPage').style.display = 'none';
+            document.getElementById('assessmentPage').style.display = 'block';
+            document.getElementById('resultsPage').style.display = 'none';
+            updateProgress();
+        }
+
+        function showResultsPage() {
+            document.getElementById('landingPage').style.display = 'none';
+            document.getElementById('assessmentPage').style.display = 'none';
+            document.getElementById('resultsPage').style.display = 'block';
+            generateResults();
+        }
+
+        // Progress tracking
+        function updateProgress() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `Step ${currentStep} of ${totalSteps}`;
+        }
+
+        // Step navigation
+        function goToStep(stepNumber) {
+            document.querySelectorAll('.assessment-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            const targetStep = document.querySelector(`[data-step="${stepNumber}"]`);
+            if (targetStep) {
+                targetStep.classList.add('active');
+                currentStep = stepNumber;
+                updateProgress();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // Validation functions
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function validatePhone(phone) {
+            const cleaned = phone.replace(/\D/g, '');
+            return cleaned.length >= 10;
+        }
+
+        function validateStep1() {
+            let isValid = true;
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            if (!name) {
+                document.getElementById('name').classList.add('error');
+                document.getElementById('nameError').classList.add('visible');
+                isValid = false;
+            } else {
+                document.getElementById('name').classList.remove('error');
+                document.getElementById('nameError').classList.remove('visible');
+                assessmentData.name = name;
+            }
+
+            if (!email || !validateEmail(email)) {
+                document.getElementById('email').classList.add('error');
+                document.getElementById('emailError').classList.add('visible');
+                isValid = false;
+            } else {
+                document.getElementById('email').classList.remove('error');
+                document.getElementById('emailError').classList.remove('visible');
+                assessmentData.email = email;
+            }
+
+            if (!phone || !validatePhone(phone)) {
+                document.getElementById('phone').classList.add('error');
+                document.getElementById('phoneError').classList.add('visible');
+                isValid = false;
+            } else {
+                document.getElementById('phone').classList.remove('error');
+                document.getElementById('phoneError').classList.remove('visible');
+                assessmentData.phone = phone;
+            }
+
+            return isValid;
+        }
+
+        function validateStep2() {
+            const selectedConcerns = document.querySelectorAll('#concernsChips .chip.selected');
+            if (selectedConcerns.length === 0) {
+                document.getElementById('concernsError').classList.add('visible');
+                return false;
+            }
+            document.getElementById('concernsError').classList.remove('visible');
+            
+            assessmentData.primaryConcerns = Array.from(selectedConcerns).map(chip => chip.dataset.value);
+            return true;
+        }
+
+        function validateStep3() {
+            const selectedSymptoms = document.querySelectorAll('#symptomsChecklist input[type="checkbox"]:checked');
+            if (selectedSymptoms.length === 0) {
+                document.getElementById('symptomsError').classList.add('visible');
+                return false;
+            }
+            document.getElementById('symptomsError').classList.remove('visible');
+            
+            assessmentData.symptoms = Array.from(selectedSymptoms).map(checkbox => checkbox.value);
+            return true;
+        }
+
+        function validateStep4() {
+            const selectedDuration = document.querySelector('input[name="duration"]:checked');
+            if (!selectedDuration) {
+                document.getElementById('durationError').classList.add('visible');
+                return false;
+            }
+            document.getElementById('durationError').classList.remove('visible');
+            
+            assessmentData.duration = selectedDuration.value;
+            return true;
+        }
+
+        // Multi-select chips functionality
+        function setupChips() {
+            document.querySelectorAll('.chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    this.classList.toggle('selected');
+                });
+
+                chip.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.classList.toggle('selected');
+                    }
+                });
+            });
+        }
+
+        // Radio option styling
+        function setupOptionItems() {
+            document.querySelectorAll('.option-item').forEach(item => {
+                const radio = item.querySelector('input[type="radio"]');
+                
+                item.addEventListener('click', function() {
+                    const group = this.closest('.options-group');
+                    group.querySelectorAll('.option-item').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    radio.checked = true;
+                });
+
+                radio.addEventListener('change', function() {
+                    if (this.checked) {
+                        const group = this.closest('.options-group');
+                        group.querySelectorAll('.option-item').forEach(opt => {
+                            opt.classList.remove('selected');
+                        });
+                        item.classList.add('selected');
+                    }
+                });
+            });
+        }
+
+        // Severity slider
+        function setupSeveritySlider() {
+            const slider = document.getElementById('severity');
+            const valueDisplay = document.getElementById('severityValue');
+
+            slider.addEventListener('input', function() {
+                valueDisplay.textContent = this.value + ' / 10';
+                assessmentData.severity = parseInt(this.value);
+            });
+        }
+
+        // Generate review content
+        function generateReviewContent() {
+            const reviewContent = document.getElementById('reviewContent');
+            
+            let html = '';
+
+            // Contact Information
+            html += `
+                <div class="review-section">
+                    <h3>
+                        Contact Information
+                        <a href="#" class="edit-link" data-step="1">Edit</a>
+                    </h3>
+                    <div class="review-content">
+                        <p><strong>Name:</strong> ${assessmentData.name}</p>
+                        <p><strong>Email:</strong> ${assessmentData.email}</p>
+                        <p><strong>Phone:</strong> ${assessmentData.phone}</p>
+                    </div>
+                </div>
+            `;
+
+            // Primary Concerns
+            html += `
+                <div class="review-section">
+                    <h3>
+                        Primary Health Concerns
+                        <a href="#" class="edit-link" data-step="2">Edit</a>
+                    </h3>
+                    <div class="review-content">
+                        <p>${assessmentData.primaryConcerns.join(', ')}</p>
+                    </div>
+                </div>
+            `;
+
+            // Symptoms
+            html += `
+                <div class="review-section">
+                    <h3>
+                        Current Symptoms
+                        <a href="#" class="edit-link" data-step="3">Edit</a>
+                    </h3>
+                    <div class="review-content">
+                        <p>${assessmentData.symptoms.length} symptoms selected</p>
+                    </div>
+                </div>
+            `;
+
+            // Duration & Severity
+            html += `
+                <div class="review-section">
+                    <h3>
+                        Duration & Severity
+                        <a href="#" class="edit-link" data-step="4">Edit</a>
+                    </h3>
+                    <div class="review-content">
+                        <p><strong>Duration:</strong> ${assessmentData.duration}</p>
+                        <p><strong>Impact Level:</strong> ${assessmentData.severity} / 10</p>
+                    </div>
+                </div>
+            `;
+
+            // Previous Care
+            if (assessmentData.previousCare) {
+                html += `
+                    <div class="review-section">
+                        <h3>
+                            Previous Medical Care
+                            <a href="#" class="edit-link" data-step="6">Edit</a>
+                        </h3>
+                        <div class="review-content">
+                            <p><strong>Previous providers:</strong> ${assessmentData.previousCare}</p>
+                            ${assessmentData.treatmentHistory ? `<p><strong>Treatments tried:</strong> ${assessmentData.treatmentHistory}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Health Goals
+            if (assessmentData.healthGoals) {
+                html += `
+                    <div class="review-section">
+                        <h3>
+                            Health Goals
+                            <a href="#" class="edit-link" data-step="7">Edit</a>
+                        </h3>
+                        <div class="review-content">
+                            <p>${assessmentData.healthGoals}</p>
+                            ${assessmentData.additionalInfo ? `<p><strong>Additional information:</strong> ${assessmentData.additionalInfo}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            reviewContent.innerHTML = html;
+
+            // Setup edit links
+            document.querySelectorAll('.edit-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const step = parseInt(this.dataset.step);
+                    goToStep(step);
+                });
+            });
+        }
+
+        // Generate results summary
+        function generateResults() {
+            const summary = generateBookingSummary();
+            document.getElementById('summaryText').textContent = summary;
+            
+            const jsonData = {
+                name: assessmentData.name,
+                email: assessmentData.email,
+                phone: assessmentData.phone,
+                primary_concern: assessmentData.primaryConcerns.join(', '),
+                symptoms: assessmentData.symptoms,
+                duration: assessmentData.duration,
+                severity: assessmentData.severity,
+                timestamp: new Date().toISOString()
+            };
+            
+            document.getElementById('jsonView').textContent = JSON.stringify(jsonData, null, 2);
+        }
+
+        function generateBookingSummary() {
+            let summary = `NEW PATIENT ASSESSMENT SUMMARY\n`;
+            summary += `Philadelphia Integrative Medicine\n`;
+            summary += `${'='.repeat(50)}\n\n`;
+            
+            summary += `CONTACT INFORMATION:\n`;
+            summary += `Name: ${assessmentData.name}\n`;
+            summary += `Email: ${assessmentData.email}\n`;
+            summary += `Phone: ${assessmentData.phone}\n\n`;
+            
+            summary += `PRIMARY CONCERNS:\n`;
+            summary += `${assessmentData.primaryConcerns.join(', ')}\n\n`;
+            
+            summary += `SYMPTOM COUNT: ${assessmentData.symptoms.length} symptoms reported\n\n`;
+            
+            summary += `DURATION: ${assessmentData.duration}\n`;
+            summary += `IMPACT LEVEL: ${assessmentData.severity}/10\n\n`;
+            
+            if (assessmentData.previousCare) {
+                summary += `PREVIOUS CARE: ${assessmentData.previousCare}\n\n`;
+            }
+            
+            if (assessmentData.healthGoals) {
+                const goals = assessmentData.healthGoals.substring(0, 200);
+                summary += `PRIMARY GOALS: ${goals}${assessmentData.healthGoals.length > 200 ? '...' : ''}\n\n`;
+            }
+            
+            summary += `BOOKING OBJECTIVE: New patient consultation\n`;
+            summary += `Date Generated: ${new Date().toLocaleString()}\n`;
+            
+            // Character limit check
+            if (summary.length > 500) {
+                summary = summary.substring(0, 497) + '...';
+            }
+            
+            return summary;
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Summary copied to clipboard!');
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert('Summary copied to clipboard!');
+            } catch (err) {
+                alert('Unable to copy. Please manually copy the summary text.');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            setupChips();
+            setupOptionItems();
+            setupSeveritySlider();
+
+            // CTA buttons - start assessment
+            document.getElementById('headerCTA').addEventListener('click', function(e) {
+                e.preventDefault();
+                showAssessmentPage();
+            });
+
+            document.getElementById('heroCTA').addEventListener('click', function(e) {
+                e.preventDefault();
+                showAssessmentPage();
+            });
+
+            document.getElementById('ctaButton').addEventListener('click', function(e) {
+                e.preventDefault();
+                showAssessmentPage();
+            });
+
+            document.getElementById('mobileCTA').addEventListener('click', function() {
+                showAssessmentPage();
+            });
+
+            // Step 1 navigation
+            document.getElementById('step1Next').addEventListener('click', function() {
+                if (validateStep1()) {
+                    goToStep(2);
+                }
+            });
+
+            // Step 2 navigation
+            document.getElementById('step2Back').addEventListener('click', function() {
+                goToStep(1);
+            });
+
+            document.getElementById('step2Next').addEventListener('click', function() {
+                if (validateStep2()) {
+                    goToStep(3);
+                }
+            });
+
+            // Step 3 navigation
+            document.getElementById('step3Back').addEventListener('click', function() {
+                goToStep(2);
+            });
+
+            document.getElementById('step3Next').addEventListener('click', function() {
+                if (validateStep3()) {
+                    goToStep(4);
+                }
+            });
+
+            // Step 4 navigation
+            document.getElementById('step4Back').addEventListener('click', function() {
+                goToStep(3);
+            });
+
+            document.getElementById('step4Next').addEventListener('click', function() {
+                if (validateStep4()) {
+                    goToStep(5);
+                }
+            });
+
+            // Step 5 navigation
+            document.getElementById('step5Back').addEventListener('click', function() {
+                goToStep(4);
+            });
+
+            document.getElementById('step5Next').addEventListener('click', function() {
+                assessmentData.severity = parseInt(document.getElementById('severity').value);
+                goToStep(6);
+            });
+
+            // Step 6 navigation
+            document.getElementById('step6Back').addEventListener('click', function() {
+                goToStep(5);
+            });
+
+            document.getElementById('step6Next').addEventListener('click', function() {
+                const selectedCare = document.querySelector('input[name="previousCare"]:checked');
+                assessmentData.previousCare = selectedCare ? selectedCare.value : '';
+                assessmentData.treatmentHistory = document.getElementById('treatmentHistory').value.trim();
+                goToStep(7);
+            });
+
+            // Step 7 navigation
+            document.getElementById('step7Back').addEventListener('click', function() {
+                goToStep(6);
+            });
+
+            document.getElementById('step7Next').addEventListener('click', function() {
+                assessmentData.healthGoals = document.getElementById('healthGoals').value.trim();
+                assessmentData.additionalInfo = document.getElementById('additionalInfo').value.trim();
+                generateReviewContent();
+                goToStep(8);
+            });
+
+            // Step 8 navigation
+            document.getElementById('step8Back').addEventListener('click', function() {
+                goToStep(7);
+            });
+
+            document.getElementById('submitAssessment').addEventListener('click', function() {
+                showResultsPage();
+            });
+
+            // Results page actions
+            document.getElementById('copySummary').addEventListener('click', function() {
+                const summary = generateBookingSummary();
+                copyToClipboard(summary);
+            });
+
+            document.getElementById('toggleJson').addEventListener('click', function() {
+                const jsonView = document.getElementById('jsonView');
+                jsonView.classList.toggle('visible');
+                this.textContent = jsonView.classList.contains('visible') ? 'Hide Technical Format' : 'View Technical Format';
+            });
+
+            document.getElementById('proceedToBooking').addEventListener('click', function() {
+                const summary = generateBookingSummary();
+                copyToClipboard(summary);
+                
+                setTimeout(function() {
+                    window.location.href = 'https://philly-im.com/new-patients/';
+                }, 500);
+            });
+        });
+    </script>
+</body>
+</html>

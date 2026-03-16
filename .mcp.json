@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "googleworkspace": {
+      "command": "/Users/neo/.local/bin/gws",
+      "args": ["mcp", "--services", "all", "--helpers", "--workflows"],
+      "env": {}
+    }
+  }
+}

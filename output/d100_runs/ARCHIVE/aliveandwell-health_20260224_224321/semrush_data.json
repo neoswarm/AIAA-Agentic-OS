@@ -1,0 +1,267 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 188605,
+  "unique_keywords": 15375,
+  "estimated_traffic": 9314,
+  "traffic_value": 24224,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 27,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 3,
+  "pos2_3_count": 1,
+  "pos4_10_count": 17,
+  "pos11_20_count": 29,
+  "pos1_3_count": 4,
+  "quick_wins_count": 15,
+  "top_quick_wins": [
+    {
+      "keyword": "joymode",
+      "position": 8,
+      "volume": 3600,
+      "kd": 20.0
+    },
+    {
+      "keyword": "troscriptions",
+      "position": 7,
+      "volume": 2900,
+      "kd": 29.0
+    },
+    {
+      "keyword": "benefits of castor oil packs",
+      "position": 6,
+      "volume": 2900,
+      "kd": 50.0
+    },
+    {
+      "keyword": "what to expect after castor oil pack",
+      "position": 6,
+      "volume": 1900,
+      "kd": 40.0
+    },
+    {
+      "keyword": "healthgevity",
+      "position": 5,
+      "volume": 1900,
+      "kd": 15.0
+    },
+    {
+      "keyword": "chelation therapy near me",
+      "position": 9,
+      "volume": 1900,
+      "kd": 15.0
+    },
+    {
+      "keyword": "vibroacoustic therapy",
+      "position": 6,
+      "volume": 1600,
+      "kd": 16.0
+    },
+    {
+      "keyword": "young goose",
+      "position": 8,
+      "volume": 1600,
+      "kd": 23.0
+    },
+    {
+      "keyword": "professional health products",
+      "position": 6,
+      "volume": 1600,
+      "kd": 19.0
+    },
+    {
+      "keyword": "ebo2 therapy",
+      "position": 8,
+      "volume": 1300,
+      "kd": 13.0
+    },
+    {
+      "keyword": "lane medical 3a magnesia - 100 tablets",
+      "position": 7,
+      "volume": 1300,
+      "kd": 5.0
+    },
+    {
+      "keyword": "n101",
+      "position": 10,
+      "volume": 1300,
+      "kd": 15.0
+    },
+    {
+      "keyword": "ways to well austin",
+      "position": 6,
+      "volume": 1000,
+      "kd": 58.0
+    },
+    {
+      "keyword": "is functional medicine legit",
+      "position": 5,
+      "volume": 1000,
+      "kd": 29.0
+    },
+    {
+      "keyword": "joy mode",
+      "position": 8,
+      "volume": 1000,
+      "kd": 24.0
+    }
+  ],
+  "top3_sample": [
+    {
+      "keyword": "alive and well",
+      "position": 1,
+      "volume": 6600
+    },
+    {
+      "keyword": "alive and well austin",
+      "position": 1,
+      "volume": 1300
+    }
+  ],
+  "top_by_volume": [
+    {
+      "keyword": "alive and well",
+      "position": 1,
+      "volume": 6600,
+      "kd": 47.0
+    },
+    {
+      "keyword": "castor oil pack benefits",
+      "position": 11,
+      "volume": 5400,
+      "kd": 66.0
+    },
+    {
+      "keyword": "mould exposure treatment",
+      "position": 15,
+      "volume": 4400,
+      "kd": 55.0
+    },
+    {
+      "keyword": "joymode",
+      "position": 8,
+      "volume": 3600,
+      "kd": 20.0
+    },
+    {
+      "keyword": "treatment mold toxicity",
+      "position": 20,
+      "volume": 3600,
+      "kd": 41.0
+    },
+    {
+      "keyword": "ricin oil uses",
+      "position": 16,
+      "volume": 3600,
+      "kd": 55.0
+    },
+    {
+      "keyword": "what does castor oil do",
+      "position": 20,
+      "volume": 2900,
+      "kd": 63.0
+    },
+    {
+      "keyword": "what does castor oil do",
+      "position": 13,
+      "volume": 2900,
+      "kd": 63.0
+    },
+    {
+      "keyword": "troscriptions",
+      "position": 7,
+      "volume": 2900,
+      "kd": 29.0
+    },
+    {
+      "keyword": "benefits of castor oil packs",
+      "position": 6,
+      "volume": 2900,
+      "kd": 50.0
+    },
+    {
+      "keyword": "alive and well dallas",
+      "position": 16,
+      "volume": 2400,
+      "kd": 28.0
+    },
+    {
+      "keyword": "alive and well dallas",
+      "position": 11,
+      "volume": 2400,
+      "kd": 28.0
+    },
+    {
+      "keyword": "alive and well dallas",
+      "position": 6,
+      "volume": 2400,
+      "kd": 28.0
+    },
+    {
+      "keyword": "alive and well dallas",
+      "position": 2,
+      "volume": 2400,
+      "kd": 28.0
+    },
+    {
+      "keyword": "alive and well dallas",
+      "position": 1,
+      "volume": 2400,
+      "kd": 28.0
+    },
+    {
+      "keyword": "zbiotic",
+      "position": 19,
+      "volume": 2400,
+      "kd": 30.0
+    },
+    {
+      "keyword": "queen of thrones castor oil",
+      "position": 12,
+      "volume": 2400,
+      "kd": 22.0
+    },
+    {
+      "keyword": "how to use castor oil",
+      "position": 14,
+      "volume": 2400,
+      "kd": 60.0
+    },
+    {
+      "keyword": "what to expect after castor oil pack",
+      "position": 6,
+      "volume": 1900,
+      "kd": 40.0
+    },
+    {
+      "keyword": "healthgevity",
+      "position": 5,
+      "volume": 1900,
+      "kd": 15.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "doctormather.com",
+      "relevance": "0.20",
+      "keywords": 1158,
+      "traffic": 1059,
+      "traffic_value": 2579
+    },
+    {
+      "domain": "neupathmind.com",
+      "relevance": "0.19",
+      "keywords": 1413,
+      "traffic": 409,
+      "traffic_value": 725
+    },
+    {
+      "domain": "functionalhealthkc.com",
+      "relevance": "0.17",
+      "keywords": 1683,
+      "traffic": 1295,
+      "traffic_value": 3327
+    }
+  ]
+}

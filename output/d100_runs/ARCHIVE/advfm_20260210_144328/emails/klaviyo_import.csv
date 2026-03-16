@@ -1,0 +1,69 @@
+Email Name,Subject Line,Preview Text,Send Delay (hours),Template Body,Notes
+"ADVFM Nurture 1 - Value Drop","What your {{ person.primary_symptom|default:'symptoms' }} might be telling you, {{ person.first_name|default:'there' }}","Think of it like a check engine light. You wouldn't just put tape over the light...",0,"Hi {{ person.first_name|default:'there' }},
+
+Thanks for taking the time to complete your health assessment. I wanted to reach out personally because what you shared about {{ person.primary_symptom|default:'your health concerns' }} is something we see often—and it's rarely just about managing symptoms.
+
+Here's what most people don't realize: when your body sends signals like {{ person.primary_symptom|default:'these symptoms' }}, it's usually pointing to something deeper. Think of it like a check engine light. You wouldn't just put tape over the light—you'd look under the hood.
+
+That's the core difference in functional medicine. Instead of covering symptoms, we investigate the root biochemical imbalances causing them. For many of our patients, this shift in approach has been life-changing.
+
+I know you're probably tired of feeling this way. The good news? You've already taken the most important step by seeking answers.
+
+If you'd like to explore what might actually be driving {{ person.primary_symptom|default:'your symptoms' }}, we offer a free 10-minute discovery call. No pressure, just a conversation about whether our approach might be right for you.
+
+{% button ""Schedule Your Free Discovery Call"" ""https://www.advfunctionalmedicine.com/schedule-a-no-fee-discovery-call/"" %}
+
+To your health,
+
+Dr. Matthew Willis & Team
+Advanced Functional Medicine","Trigger: Health Assessment Completion. Word count: ~180"
+"ADVFM Nurture 2 - Mechanism Story","Why conventional labs miss what's really happening (diabetes example)","Most doctors run 12-15 markers. We test 200+. Here's why that matters...",48,"Hi {{ person.first_name|default:'there' }},
+
+Quick question: have you ever had your doctor say ""your labs look fine"" while you still feel terrible?
+
+Here's why that happens so often.
+
+Most conventional medicine runs maybe 12-15 basic markers. If you're not in the ""danger zone,"" you're told everything's normal. But here's the thing—your body doesn't go from perfect health to disease overnight.
+
+Think of it like a spectrum. On one end, you're thriving. On the other end, you have diabetes or thyroid disease. But there's a huge middle ground where dysfunction is building—and standard labs miss it completely.
+
+That's why we test 200+ biomarkers. We're looking at the full picture: inflammation markers, nutrient deficiencies, hormone pathways, gut health, metabolic function—all the upstream factors that eventually become symptoms.
+
+For example, with diabetes, most doctors only check fasting glucose and A1C. We're looking at insulin resistance markers, inflammatory cytokines, cortisol patterns, and micronutrient status. This is why we've helped reverse diabetes in 96% of committed patients—we're addressing causes, not just numbers.
+
+This isn't about running more tests for the sake of it. It's about finally understanding what's actually happening in your body.
+
+Curious if this approach might work for you? Let's talk.
+
+{% button ""Book Your Free Call"" ""https://www.advfunctionalmedicine.com/schedule-a-no-fee-discovery-call/"" %}
+
+Dr. Matthew Willis & Team","Send 48 hours after Email 1. Word count: ~235"
+"ADVFM Nurture 3 - Proof & Results","From A1C of 9.2 to completely reversed (Sarah's story)","8 years of diabetes. 3 medications. Then everything changed...",144,"Hi {{ person.first_name|default:'there' }},
+
+I want to share Sarah's story with you (with her permission).
+
+She came to us after 8 years of type 2 diabetes. Her A1C was 9.2. She was on three medications. Her doctor told her diabetes was ""progressive and irreversible.""
+
+She was exhausted, gaining weight despite eating less, and losing hope.
+
+Here's what changed: We ran comprehensive testing and found severe insulin resistance (expected), but also chronic inflammation from gut dysfunction, cortisol dysregulation from years of stress, and critical nutrient deficiencies affecting her metabolism.
+
+Her previous doctors never tested for any of this.
+
+We built a personalized protocol addressing all these root causes—not just her blood sugar. Within 6 months, her A1C was 5.4. She's off all diabetes medications. She has energy again.
+
+This is what's possible when you treat causes, not symptoms.
+
+*Important: Individual results vary. This is not a guarantee of specific outcomes, and we cannot diagnose or treat any condition without a proper medical evaluation.*
+
+But I share this because after 12+ years and hundreds of patients, we've seen this pattern repeat: when you address root causes with precision, your body can heal.
+
+If you're ready to investigate what's really driving your health concerns, let's start with a free 10-minute discovery call. No obligation—just a conversation about whether functional medicine is right for you.
+
+{% button ""Schedule Your Discovery Call Now"" ""https://www.advfunctionalmedicine.com/schedule-a-no-fee-discovery-call/"" %}
+
+We're here when you're ready.
+
+Dr. Matthew Willis & Team
+Advanced Functional Medicine
+California's Largest Functional Medicine Practice","Send 144 hours (Day 6) after Email 1. Word count: ~265. Includes disclaimer."

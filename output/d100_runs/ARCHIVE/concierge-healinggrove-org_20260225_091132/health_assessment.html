@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Healing Grove Concierge - Health Care. Soul Care. Culture Care.</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #216869;
+  --background: #FFFFFF;
+  --accent: #49A078;
+  --secondary: #32373C;
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-300: #D1D5DB;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --gray-900: #111827;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--secondary);
+  background: var(--background);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+header {
+  background: var(--primary);
+  color: white;
+  padding: 1.5rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.logo-section h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.logo-section p {
+  font-size: 0.875rem;
+  opacity: 0.95;
+}
+
+.phone-link {
+  color: white;
+  text-decoration: none;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border: 2px solid white;
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.phone-link:hover,
+.phone-link:focus {
+  background: white;
+  color: var(--primary);
+  outline: 3px solid rgba(255,255,255,0.5);
+}
+
+.hero {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  color: white;
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.hero h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.hero .tagline {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.95;
+}
+
+.hero .provider {
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.cta-primary {
+  display: inline-block;
+  background: white;
+  color: var(--primary);
+  padding: 1rem 2.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.cta-primary:hover,
+.cta-primary:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  outline: 3px solid rgba(255,255,255,0.5);
+}
+
+.section {
+  padding: 4rem 0;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: var(--primary);
+}
+
+.how-it-works {
+  background: var(--gray-50);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.step {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.step-number {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  width: 3rem;
+  height: 3rem;
+  line-height: 3rem;
+  text-align: center;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.step h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--primary);
+}
+
+.offerings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.offering-card {
+  background: white;
+  border: 2px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 2rem;
+  transition: all 0.3s;
+}
+
+.offering-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  transform: translateY(-4px);
+}
+
+.offering-card h3 {
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin-bottom: 0.75rem;
+}
+
+.offering-price {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+.offering-card p {
+  color: var(--gray-700);
+  line-height: 1.8;
+}
+
+.concerns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.concern-item {
+  background: var(--gray-50);
+  padding: 1.25rem;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1rem;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.concern-item:hover {
+  border-color: var(--accent);
+  background: white;
+}
+
+.concern-emoji {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.trust-section {
+  background: var(--primary);
+  color: white;
+  text-align: center;
+}
+
+.trust-section .section-title {
+  color: white;
+}
+
+.trust-content {
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: 1.125rem;
+  line-height: 1.8;
+}
+
+.trust-content strong {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.testimonial {
+  background: rgba(255,255,255,0.1);
+  padding: 2rem;
+  border-radius: 12px;
+  margin-top: 2rem;
+  font-style: italic;
+  border-left: 4px solid var(--accent);
+}
+
+.sticky-cta {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--primary);
+  padding: 1rem;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+  z-index: 90;
+  display: none;
+}
+
+.sticky-cta.visible {
+  display: block;
+}
+
+.sticky-cta button {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  display: block;
+}
+
+.assessment-container {
+  display: none;
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+.assessment-container.active {
+  display: block;
+}
+
+.progress-bar {
+  background: var(--gray-200);
+  height: 8px;
+  border-radius: 4px;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--gray-600);
+  font-size: 0.875rem;
+}
+
+.assessment-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.step-content {
+  display: none;
+}
+
+.step-content.active {
+  display: block;
+}
+
+.form-section {
+  margin-bottom: 2.5rem;
+}
+
+.form-section h3 {
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--secondary);
+}
+
+.required {
+  color: #DC2626;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+input[type="number"],
+textarea,
+select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--gray-300);
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(73, 160, 120, 0.1);
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.chip {
+  padding: 0.625rem 1.25rem;
+  border: 2px solid var(--gray-300);
+  border-radius: 24px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--secondary);
+}
+
+.chip:hover {
+  border-color: var(--accent);
+  background: var(--gray-50);
+}
+
+.chip:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.chip.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+
+.chip-emoji {
+  margin-right: 0.5rem;
+}
+
+.radio-group,
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.radio-option,
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid var(--gray-300);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.radio-option:hover,
+.checkbox-option:hover {
+  border-color: var(--accent);
+  background: var(--gray-50);
+}
+
+.radio-option input,
+.checkbox-option input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.75rem;
+  cursor: pointer;
+}
+
+.radio-option.selected,
+.checkbox-option.selected {
+  border-color: var(--accent);
+  background: rgba(73, 160, 120, 0.05);
+}
+
+.slider-container {
+  padding: 1rem 0;
+}
+
+.slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--gray-200);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.slider:focus::-webkit-slider-thumb {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--gray-600);
+}
+
+.slider-value {
+  text-align: center;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-top: 0.5rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background: var(--primary);
+  border-color: var(--primary);
+  outline: 3px solid rgba(33, 104, 105, 0.3);
+}
+
+.btn-secondary {
+  background: white;
+  border-color: var(--gray-300);
+  color: var(--secondary);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+  border-color: var(--accent);
+  background: var(--gray-50);
+  outline: 3px solid rgba(73, 160, 120, 0.2);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.help-text {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  margin-top: 0.5rem;
+}
+
+.disclaimer {
+  background: #FEF3C7;
+  border-left: 4px solid #F59E0B;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.emergency-notice {
+  background: #FEE2E2;
+  border-left: 4px solid #DC2626;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  font-weight: 600;
+}
+
+.review-section {
+  background: var(--gray-50);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.review-section h4 {
+  color: var(--primary);
+  margin-bottom: 0.75rem;
+  font-size: 1.125rem;
+}
+
+.review-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.review-item:last-child {
+  border-bottom: none;
+}
+
+.review-label {
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.review-value {
+  color: var(--secondary);
+  text-align: right;
+  max-width: 60%;
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0;
+  margin-top: 0.5rem;
+}
+
+.edit-btn:hover,
+.edit-btn:focus {
+  color: var(--primary);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.results-container {
+  display: none;
+  padding: 2rem 0;
+  min-height: 100vh;
+}
+
+.results-container.active {
+  display: block;
+}
+
+.summary-box {
+  background: white;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.summary-box h3 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.summary-content {
+  background: var(--gray-50);
+  padding: 1.5rem;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.recommendations {
+  background: var(--gray-50);
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.recommendations h3 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.recommendations ul {
+  list-style: none;
+  padding: 0;
+}
+
+.recommendations li {
+  padding: 0.75rem 0;
+  padding-left: 2rem;
+  position: relative;
+}
+
+.recommendations li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.copy-success {
+  display: none;
+  background: #D1FAE5;
+  color: #065F46;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-top: 1rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.copy-success.show {
+  display: block;
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+legend {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--secondary);
+  font-size: 1.125rem;
+}
+
+@media (max-width: 768px) {
+  .hero h2 {
+    font-size: 1.875rem;
+  }
+  
+  .hero .tagline {
+    font-size: 1.25rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .assessment-card {
+    padding: 1.5rem;
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  .sticky-cta {
+    display: block;
+  }
+}
+
+@media print {
+  .sticky-cta,
+  .button-group,
+  header {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="landingPage">
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo-section">
+          <h1>Healing Grove Concierge</h1>
+          <p>Health Care. Soul Care. Culture Care.</p>
+        </div>
+        <a href="tel:4080000000" class="phone-link" aria-label="Call Healing Grove Concierge">(408) 000-0000</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h2>Experience True Healing</h2>
+      <p class="tagline">Health Care. Soul Care. Culture Care.</p>
+      <p class="provider">Dr. Cheryl Ho CEO & CMO, Board-Certified Primary Care Physician</p>
+      <button class="cta-primary" onclick="startAssessment()" aria-label="Start your health assessment">Start Your Health Assessment</button>
+    </div>
+  </section>
+
+  <section class="section how-it-works">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Board-Certified Doctors</h3>
+          <p>We offer top-quality, evidence-based Western medicine provided by board-certified primary care physicians who are experts in their field. We manage 90% of the health problems that arise in our patients without the need for specialty care.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Relationship With Your Doctor</h3>
+          <p>On average, primary care doctors see a new patient every 12.5 minutes. At Healing Grove, we don't think this is enough time to build a relationship with your doctor. Our concierge care model allows your doctor to spend more time learning about you and focusing on your unique health needs.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>One Cost For The Year</h3>
+          <p>Your annual membership fee includes physicals, sick visits, preventative care, injuries - everything in primary care! You will only use your insurance or deductible for complicated workups, specialty referrals, or hospital care. No hidden costs. No co-pays. It's simple and easy.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">Membership Options</h2>
+      <div class="offerings">
+        <div class="offering-card">
+          <h3>Annual Membership</h3>
+          <div class="offering-price">$2,400/year</div>
+          <p>Unlimited primary care visits, 24/7 physician access, extended appointments, preventive care, sick visits, and physicals — all included. No copays, no hidden fees. Each full-pay member funds care for 2 low-income patients.</p>
+        </div>
+        <div class="offering-card">
+          <h3>Monthly Membership</h3>
+          <div class="offering-price">$200/month</div>
+          <p>Everything in the annual membership paid month to month. Unlimited visits, 24/7 access, extended visit times, and integrated care from our physician and psychiatric nurse practitioner team.</p>
+        </div>
+        <div class="offering-card">
+          <h3>Genetic Testing Add-On</h3>
+          <div class="offering-price">Contact for pricing</div>
+          <p>Optional pharmacogenomic and health-focused genetic testing to personalize your care plan. Understand how your unique biology affects medication response, nutrient processing, and long-term health risk.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="background: var(--gray-50);">
+    <div class="container">
+      <h2 class="section-title">We Address Your Health Concerns</h2>
+      <div class="concerns-grid">
+        <div class="concern-item">
+          <span class="concern-emoji">😴</span>
+          Fatigue
+        </div>
+        <div class="concern-item">
+          <span class="concern-emoji">🧠</span>
+          Anxiety
+        </div>
+        <div class="concern-item">
+          <span class="concern-emoji">💙</span>
+          Depression
+        </div>
+        <div class="concern-item">
+          <span class="concern-emoji">🩹</span>
+          Chronic Pain
+        </div>
+        <div class="concern-item">
+          <span class="concern-emoji">⚖️</span>
+          Weight Concerns
+        </div>
+        <div class="concern-item">
+          <span class="concern-emoji">🌙</span>
+          Sleep Issues
+        </div>
+        <div class="concern-item">
+          <span class="concern-emoji">🔬</span>
+          Hormonal Imbalance
+        </div>
+        <div class="concern-item">
+          <span class="concern-emoji">🫁</span>
+          Digestive Health
+        </div>
+        <div class="concern-item">
+          <span class="concern-emoji">❤️</span>
+          High Blood Pressure
+        </div>
+        <div class="concern-item">
+          <span class="concern-emoji">💊</span>
+          Diabetes Management
+        </div>
+        <div class="concern-item">
+          <span class="concern-emoji">🔥</span>
+          Stress and Burnout
+        </div>
+        <div class="concern-item">
+          <span class="concern-emoji">🌿</span>
+          Preventive Wellness
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section trust-section">
+    <div class="container">
+      <h2 class="section-title">Personalized Healing and Care</h2>
+      <div class="trust-content">
+        <p>The mission of Healing Grove Health Center is to share the love of Jesus through <strong>Health Care</strong>, <strong>Soul Care</strong>, and <strong>Culture Care</strong>, thus bringing "the healing of the nations" to our community.</p>
+        <p style="margin-top: 1.5rem;">We believe holistic care includes the soul. Our relationships with God, other people, and even the natural world around us affect our physical and mental health.</p>
+        <p style="margin-top: 1.5rem;">Culture is not a war, but a beautiful garden created by God to be cared for by us. We celebrate culture because it affects everything in life, from our food to our relationships - even our health.</p>
+        
+        <div class="testimonial">
+          <p>"First of all, I want to thank God for putting in the hearts of people like you the courage and willingness to do something as beautiful as Healing Grove. From the moment I arrived at your facilities, I felt an atmosphere of peace and reconciliation. I realized that what is done there is covered with the blessings of Christ our Lord."</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="background: var(--gray-50); text-align: center; padding: 3rem 0;">
+    <div class="container">
+      <h2 class="section-title" style="margin-bottom: 1.5rem;">Ready to Begin Your Healing Journey?</h2>
+      <button class="cta-primary" onclick="startAssessment()">Start Your Health Assessment</button>
+    </div>
+  </section>
+
+  <div class="sticky-cta" id="stickyCta">
+    <div class="container">
+      <button class="cta-primary" onclick="startAssessment()">Start Your Health Assessment</button>
+    </div>
+  </div>
+</div>
+
+<div id="assessmentContainer" class="assessment-container">
+  <div class="container">
+    <div class="progress-text">
+      <span id="progressText">Step 1 of 6</span> • <span id="timeEstimate">~8 minutes remaining</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width: 16.67%"></div>
+    </div>
+
+    <div class="assessment-card">
+      <div class="emergency-notice">
+        <strong>Emergency Notice:</strong> If you are experiencing a medical emergency, call 911 immediately. This assessment is not for urgent or emergency situations.
+      </div>
+
+      <div id="step1" class="step-content active">
+        <div class="form-section">
+          <h3>Contact Information</h3>
+          <p style="margin-bottom: 1.5rem; color: var(--gray-700);">Let's start with your basic contact information so we can reach you.</p>
+          
+          <div class="form-group">
+            <label for="fullName">Full Name <span class="required">*</span></label>
+            <input type="text" id="fullName" required aria-required="true" placeholder="First and Last Name">
+          </div>```html
+          <div class="form-group">
+            <label for="email">Email Address <span class="required">*</span></label>
+            <input type="email" id="email" required aria-required="true" placeholder="your.email@example.com">
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number <span class="required">*</span></label>
+            <input type="tel" id="phone" required aria-required="true" placeholder="(408) 555-0123">
+          </div>
+
+          <div class="form-group">
+            <label for="dateOfBirth">Date of Birth</label>
+            <input type="date" id="dateOfBirth">
+            <div class="help-text">Optional, but helps us provide age-appropriate care information.</div>
+          </div>
+        </div>
+
+        <div class="disclaimer">
+          <strong>Privacy Notice:</strong> Your information is collected solely for the purpose of scheduling your consultation. This assessment does not constitute medical advice, diagnosis, or treatment. All information will be handled in accordance with healthcare privacy standards.
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-primary" onclick="nextStep(2)">Continue</button>
+        </div>
+      </div>
+
+      <div id="step2" class="step-content">
+        <div class="form-section">
+          <h3>Primary Health Concerns</h3>
+          <p style="margin-bottom: 1.5rem; color: var(--gray-700);">What brings you to Healing Grove? Select all that apply.</p>
+          
+          <fieldset>
+            <legend class="visually-hidden">Select your primary health concerns</legend>
+            <div class="chip-group" role="group" aria-label="Health concerns">
+              <button type="button" class="chip" data-concern="Fatigue" onclick="toggleChip(this)" tabindex="0">
+                <span class="chip-emoji">😴</span> Fatigue
+              </button>
+              <button type="button" class="chip" data-concern="Anxiety" onclick="toggleChip(this)" tabindex="0">
+                <span class="chip-emoji">🧠</span> Anxiety
+              </button>
+              <button type="button" class="chip" data-concern="Depression" onclick="toggleChip(this)" tabindex="0">
+                <span class="chip-emoji">💙</span> Depression
+              </button>
+              <button type="button" class="chip" data-concern="Chronic Pain" onclick="toggleChip(this)" tabindex="0">
+                <span class="chip-emoji">🩹</span> Chronic Pain
+              </button>
+              <button type="button" class="chip" data-concern="Weight Concerns" onclick="toggleChip(this)" tabindex="0">
+                <span class="chip-emoji">⚖️</span> Weight Concerns
+              </button>
+              <button type="button" class="chip" data-concern="Sleep Issues" onclick="toggleChip(this)" tabindex="0">
+                <span class="chip-emoji">🌙</span> Sleep Issues
+              </button>
+              <button type="button" class="chip" data-concern="Hormonal Imbalance" onclick="toggleChip(this)" tabindex="0">
+                <span class="chip-emoji">🔬</span> Hormonal Imbalance
+              </button>
+              <button type="button" class="chip" data-concern="Digestive Health" onclick="toggleChip(this)" tabindex="0">
+                <span class="chip-emoji">🫁</span> Digestive Health
+              </button>
+              <button type="button" class="chip" data-concern="High Blood Pressure" onclick="toggleChip(this)" tabindex="0">
+                <span class="chip-emoji">❤️</span> High Blood Pressure
+              </button>
+              <button type="button" class="chip" data-concern="Diabetes Management" onclick="toggleChip(this)" tabindex="0">
+                <span class="chip-emoji">💊</span> Diabetes Management
+              </button>
+              <button type="button" class="chip" data-concern="Stress and Burnout" onclick="toggleChip(this)" tabindex="0">
+                <span class="chip-emoji">🔥</span> Stress and Burnout
+              </button>
+              <button type="button" class="chip" data-concern="Preventive Wellness" onclick="toggleChip(this)" tabindex="0">
+                <span class="chip-emoji">🌿</span> Preventive Wellness
+              </button>
+            </div>
+          </fieldset>
+
+          <div class="form-group" style="margin-top: 2rem;">
+            <label for="otherConcerns">Other concerns not listed above</label>
+            <textarea id="otherConcerns" placeholder="Describe any other health concerns..."></textarea>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" onclick="prevStep(1)">Back</button>
+          <button class="btn btn-primary" onclick="nextStep(3)">Continue</button>
+        </div>
+      </div>
+
+      <div id="step3" class="step-content">
+        <div class="form-section">
+          <h3>Current Symptoms</h3>
+          <p style="margin-bottom: 1.5rem; color: var(--gray-700);">Which of these symptoms are you currently experiencing? Select all that apply.</p>
+          
+          <fieldset>
+            <legend class="visually-hidden">Select your current symptoms</legend>
+            <div class="checkbox-group" role="group" aria-label="Current symptoms">
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Persistent fatigue or low energy" onchange="toggleCheckboxOption(this)">
+                <span>Persistent fatigue or low energy</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Difficulty sleeping or staying asleep" onchange="toggleCheckboxOption(this)">
+                <span>Difficulty sleeping or staying asleep</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Anxiety or frequent worry" onchange="toggleCheckboxOption(this)">
+                <span>Anxiety or frequent worry</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Low mood or depression" onchange="toggleCheckboxOption(this)">
+                <span>Low mood or depression</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Brain fog or difficulty concentrating" onchange="toggleCheckboxOption(this)">
+                <span>Brain fog or difficulty concentrating</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Unexplained weight gain" onchange="toggleCheckboxOption(this)">
+                <span>Unexplained weight gain</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Chronic headaches" onchange="toggleCheckboxOption(this)">
+                <span>Chronic headaches</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Digestive discomfort or bloating" onchange="toggleCheckboxOption(this)">
+                <span>Digestive discomfort or bloating</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Joint or muscle pain" onchange="toggleCheckboxOption(this)">
+                <span>Joint or muscle pain</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="High blood pressure" onchange="toggleCheckboxOption(this)">
+                <span>High blood pressure</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Blood sugar irregularities" onchange="toggleCheckboxOption(this)">
+                <span>Blood sugar irregularities</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Hormonal fluctuations" onchange="toggleCheckboxOption(this)">
+                <span>Hormonal fluctuations</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Frequent illness or low immunity" onchange="toggleCheckboxOption(this)">
+                <span>Frequent illness or low immunity</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Shortness of breath" onchange="toggleCheckboxOption(this)">
+                <span>Shortness of breath</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Skin rashes or inflammation" onchange="toggleCheckboxOption(this)">
+                <span>Skin rashes or inflammation</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Mood swings or irritability" onchange="toggleCheckboxOption(this)">
+                <span>Mood swings or irritability</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Heart palpitations" onchange="toggleCheckboxOption(this)">
+                <span>Heart palpitations</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Dizziness or lightheadedness" onchange="toggleCheckboxOption(this)">
+                <span>Dizziness or lightheadedness</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Chronic stress or burnout" onchange="toggleCheckboxOption(this)">
+                <span>Chronic stress or burnout</span>
+              </label>
+              <label class="checkbox-option" tabindex="0">
+                <input type="checkbox" value="Feeling rushed or dismissed by past doctors" onchange="toggleCheckboxOption(this)">
+                <span>Feeling rushed or dismissed by past doctors</span>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" onclick="prevStep(2)">Back</button>
+          <button class="btn btn-primary" onclick="nextStep(4)">Continue</button>
+        </div>
+      </div>
+
+      <div id="step4" class="step-content">
+        <div class="form-section">
+          <h3>Symptom Timeline and Severity</h3>
+          <p style="margin-bottom: 1.5rem; color: var(--gray-700);">Help us understand how long you've been experiencing these concerns and how they're affecting your daily life.</p>
+          
+          <div class="form-group">
+            <label for="duration">How long have you been experiencing your primary concern?</label>
+            <select id="duration">
+              <option value="">Select duration...</option>
+              <option value="Less than 1 month">Less than 1 month</option>
+              <option value="1-3 months">1-3 months</option>
+              <option value="3-6 months">3-6 months</option>
+              <option value="6-12 months">6-12 months</option>
+              <option value="1-2 years">1-2 years</option>
+              <option value="More than 2 years">More than 2 years</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="severity">How would you rate the severity of your symptoms?</label>
+            <div class="slider-container">
+              <input type="range" id="severity" class="slider" min="1" max="10" value="5" oninput="updateSliderValue('severity', this.value)">
+              <div class="slider-labels">
+                <span>1 - Mild</span>
+                <span>10 - Severe</span>
+              </div>
+              <div class="slider-value" id="severityValue">5 - Moderate</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>How much do these symptoms affect your daily life?</label>
+            <div class="radio-group">
+              <label class="radio-option" tabindex="0">
+                <input type="radio" name="dailyImpact" value="Minimal impact - I can do most activities normally" onchange="toggleRadioOption(this)">
+                <span>Minimal impact - I can do most activities normally</span>
+              </label>
+              <label class="radio-option" tabindex="0">
+                <input type="radio" name="dailyImpact" value="Moderate impact - Some activities are difficult" onchange="toggleRadioOption(this)">
+                <span>Moderate impact - Some activities are difficult</span>
+              </label>
+              <label class="radio-option" tabindex="0">
+                <input type="radio" name="dailyImpact" value="Significant impact - Many activities are affected" onchange="toggleRadioOption(this)">
+                <span>Significant impact - Many activities are affected</span>
+              </label>
+              <label class="radio-option" tabindex="0">
+                <input type="radio" name="dailyImpact" value="Severe impact - Most activities are very difficult" onchange="toggleRadioOption(this)">
+                <span>Severe impact - Most activities are very difficult</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="previousTreatment">Have you sought treatment for these concerns before?</label>
+            <select id="previousTreatment" onchange="togglePreviousDetails(this.value)">
+              <option value="">Select...</option>
+              <option value="No">No, this is my first time seeking care</option>
+              <option value="Yes">Yes, I have seen other providers</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="previousDetailsGroup" style="display: none;">
+            <label for="previousDetails">Please describe any previous treatments or providers</label>
+            <textarea id="previousDetails" placeholder="What have you tried? What worked or didn't work?"></textarea>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" onclick="prevStep(3)">Back</button>
+          <button class="btn btn-primary" onclick="nextStep(5)">Continue</button>
+        </div>
+      </div>
+
+      <div id="step5" class="step-content">
+        <div class="form-section">
+          <h3>Your Health Story</h3>
+          <p style="margin-bottom: 1.5rem; color: var(--gray-700);">We believe in taking time to understand your complete health picture. Share as much or as little as you're comfortable with.</p>
+          
+          <div class="form-group">
+            <label for="currentMedications">Current medications and supplements</label>
+            <textarea id="currentMedications" placeholder="List any medications, vitamins, or supplements you currently take..."></textarea>
+            <div class="help-text">Include dosages if known. This helps us understand your current care plan.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="allergies">Known allergies or adverse reactions</label>
+            <textarea id="allergies" placeholder="Medication allergies, food allergies, environmental allergies..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="medicalHistory">Past medical history</label>
+            <textarea id="medicalHistory" placeholder="Previous diagnoses, surgeries, hospitalizations, chronic conditions..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="familyHistory">Family medical history</label>
+            <textarea id="familyHistory" placeholder="Health conditions that run in your family (heart disease, diabetes, cancer, etc.)..."></textarea>
+            <div class="help-text">This helps us understand your risk factors and guide preventive care.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="lifestyle">Lifestyle and wellness</label>
+            <textarea id="lifestyle" placeholder="Sleep patterns, exercise habits, diet, stress levels, work environment..."></textarea>
+            <div class="help-text">We believe in holistic care that addresses all aspects of your life.</div>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" onclick="prevStep(4)">Back</button>
+          <button class="btn btn-primary" onclick="nextStep(6)">Continue</button>
+        </div>
+      </div>
+
+      <div id="step6" class="step-content">
+        <div class="form-section">
+          <h3>Your Goals and Expectations</h3>
+          <p style="margin-bottom: 1.5rem; color: var(--gray-700);">Finally, help us understand what you're hoping to achieve through your partnership with Healing Grove.</p>
+          
+          <div class="form-group">
+            <label for="healthGoals">What are your health goals?</label>
+            <textarea id="healthGoals" placeholder="What does feeling better look like to you? What do you hope to accomplish?"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="concerns">What concerns do you have about your health care?</label>
+            <textarea id="concerns" placeholder="Past experiences with doctors, specific worries, things you want to avoid..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="additionalInfo">Anything else you'd like us to know?</label>
+            <textarea id="additionalInfo" placeholder="Cultural considerations, spiritual needs, scheduling preferences, accessibility needs..."></textarea>
+            <div class="help-text">We celebrate culture and believe holistic care includes soul care.</div>
+          </div>
+
+          <div class="form-group">
+            <label>What interests you most about Healing Grove?</label>
+            <fieldset>
+              <legend class="visually-hidden">Select what interests you about Healing Grove</legend>
+              <div class="chip-group" role="group" aria-label="Interests">
+                <button type="button" class="chip" data-interest="Board-certified primary care" onclick="toggleChip(this)" tabindex="0">
+                  Board-certified primary care
+                </button>
+                <button type="button" class="chip" data-interest="Extended appointment times" onclick="toggleChip(this)" tabindex="0">
+                  Extended appointment times
+                </button>
+                <button type="button" class="chip" data-interest="24/7 physician access" onclick="toggleChip(this)" tabindex="0">
+                  24/7 physician access
+                </button>
+                <button type="button" class="chip" data-interest="Holistic approach (Health, Soul, Culture Care)" onclick="toggleChip(this)" tabindex="0">
+                  Holistic approach (Health, Soul, Culture Care)
+                </button>
+                <button type="button" class="chip" data-interest="No copays or hidden fees" onclick="toggleChip(this)" tabindex="0">
+                  No copays or hidden fees
+                </button>
+                <button type="button" class="chip" data-interest="Genetic testing options" onclick="toggleChip(this)" tabindex="0">
+                  Genetic testing options
+                </button>
+                <button type="button" class="chip" data-interest="Faith-based care" onclick="toggleChip(this)" tabindex="0">
+                  Faith-based care
+                </button>
+                <button type="button" class="chip" data-interest="Building a relationship with my doctor" onclick="toggleChip(this)" tabindex="0">
+                  Building a relationship with my doctor
+                </button>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="form-group">
+            <label>Preferred membership option</label>
+            <div class="radio-group">
+              <label class="radio-option" tabindex="0">
+                <input type="radio" name="membershipPreference" value="Annual Membership ($2,400/year)" onchange="toggleRadioOption(this)">
+                <span><strong>Annual Membership</strong> - $2,400/year</span>
+              </label>
+              <label class="radio-option" tabindex="0">
+                <input type="radio" name="membershipPreference" value="Monthly Membership ($200/month)" onchange="toggleRadioOption(this)">
+                <span><strong>Monthly Membership</strong> - $200/month</span>
+              </label>
+              <label class="radio-option" tabindex="0">
+                <input type="radio" name="membershipPreference" value="Not sure yet" onchange="toggleRadioOption(this)">
+                <span>Not sure yet - I'd like to discuss options</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="geneticTestingInterest">Are you interested in the Genetic Testing Add-On?</label>
+            <select id="geneticTestingInterest">
+              <option value="">Select...</option>
+              <option value="Yes, very interested">Yes, very interested</option>
+              <option value="Maybe, would like more information">Maybe, would like more information</option>
+              <option value="No, not at this time">No, not at this time</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="disclaimer">
+          <strong>Important:</strong> This assessment is for informational purposes only and does not constitute medical advice, diagnosis, or treatment. A healthcare provider will review your information during your consultation. By continuing, you acknowledge that you understand this is not emergency care and that you will seek appropriate emergency services if needed.
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" onclick="prevStep(5)">Back</button>
+          <button class="btn btn-primary" onclick="reviewAssessment()">Review My Assessment</button>
+        </div>
+      </div>
+
+      <div id="stepReview" class="step-content">
+        <div class="form-section">
+          <h3>Review Your Information</h3>
+          <p style="margin-bottom: 1.5rem; color: var(--gray-700);">Please review your responses below. You can edit any section before submitting.</p>
+          
+          <div class="review-section">
+            <h4>Contact Information</h4>
+            <div id="reviewContact"></div>
+            <button class="edit-btn" onclick="editStep(1)">Edit this section</button>
+          </div>
+
+          <div class="review-section">
+            <h4>Primary Health Concerns</h4>
+            <div id="reviewConcerns"></div>
+            <button class="edit-btn" onclick="editStep(2)">Edit this section</button>
+          </div>
+
+          <div class="review-section">
+            <h4>Current Symptoms</h4>
+            <div id="reviewSymptoms"></div>
+            <button class="edit-btn" onclick="editStep(3)">Edit this section</button>
+          </div>
+
+          <div class="review-section">
+            <h4>Timeline and Severity</h4>
+            <div id="reviewTimeline"></div>
+            <button class="edit-btn" onclick="editStep(4)">Edit this section</button>
+          </div>
+
+          <div class="review-section">
+            <h4>Health Story</h4>
+            <div id="reviewHistory"></div>
+            <button class="edit-btn" onclick="editStep(5)">Edit this section</button>
+          </div>
+
+          <div class="review-section">
+            <h4>Goals and Expectations</h4>
+            <div id="reviewGoals"></div>
+            <button class="edit-btn" onclick="editStep(6)">Edit this section</button>
+          </div>
+        </div>
+
+        <div class="disclaimer">
+          By submitting this assessment, you confirm that the information provided is accurate to the best of your knowledge. This information will be used to prepare for your consultation with Healing Grove Concierge.
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" onclick="prevStep(6)">Back to Assessment</button>
+          <button class="btn btn-primary" onclick="submitAssessment()">Submit Assessment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="resultsContainer" class="results-container">
+  <div class="container">
+    <div class="assessment-card">
+      <h2 style="color: var(--primary); margin-bottom: 2rem; text-align: center;">Thank You for Completing Your Assessment</h2>
+
+      <div class="recommendations">
+        <h3>Next Steps</h3>
+        <ul>
+          <li>Your health assessment summary has been prepared for our scheduling team</li>
+          <li>Dr. Cheryl Ho and our team will review your information before your consultation</li>
+          <li>You'll be redirected to our booking page to schedule your new patient consultation</li>
+          <li>During your consultation, we'll take time to discuss your concerns in detail</li>
+          <li>We look forward to partnering with you on your healing journey</li>
+        </ul>
+      </div>
+
+      <div class="summary-box">
+        <h3>Your Booking Summary</h3>
+        <p style="margin-bottom: 1rem; color: var(--gray-700);">The summary below will be copied for the scheduling team:</p>
+        <div class="summary-content" id="summaryContent"></div>
+        <div class="copy-success" id="copySuccess">✓ Summary copied to clipboard!</div>
+      </div>
+
+      <div class="emergency-notice">
+        <strong>Remember:</strong> If you are experiencing a medical emergency, do not wait for your appointment. Call 911 or go to the nearest emergency room immediately.
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn btn-primary" onclick="copySummaryAndRedirect()">Copy Summary & Schedule Appointment</button>
+        <button class="btn btn-secondary" onclick="copySummary()">Copy Summary Only</button>
+      </div>
+
+      <div style="margin-top: 2rem; padding: 1.5rem; background: var(--gray-50); border-radius: 8px;">
+        <h4 style="color: var(--primary); margin-bottom: 1rem;">Contact Information</h4>
+        <p><strong>Phone:</strong> <a href="tel:4080000000" style="color: var(--accent);">(408) 000-0000</a></p>
+        <p style="margin-top: 0.5rem;"><strong>Location:</strong> Single location</p>
+        <p style="margin-top: 1rem; color: var(--gray-700); font-size: 0.875rem;">Questions? Call us and we'll be happy to help you schedule your consultation.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 6;
+const assessmentData = {};
+const selectedConcerns = new Set();
+const selectedSymptoms = new Set();
+const selectedInterests = new Set();
+
+function startAssessment() {
+  document.getElementById('landingPage').style.display = 'none';
+  document.getElementById('assessmentContainer').classList.add('active');
+  window.scrollTo(0, 0);
+  updateProgress();
+}
+
+function nextStep(step) {
+  if (step === 2 && !validateStep1()) {
+    return;
+  }
+  
+  saveCurrentStep();
+  
+  document.getElementById('step' + currentStep).classList.remove('active');
+  currentStep = step;
+  document.getElementById('step' + currentStep).classList.add('active');
+  updateProgress();
+  window.scrollTo(0, 0);
+}
+
+function prevStep(step) {
+  saveCurrentStep();
+  
+  document.getElementById('step' + currentStep).classList.remove('active');
+  currentStep = step;
+  document.getElementById('step' + currentStep).classList.add('active');
+  updateProgress();
+  window.scrollTo(0, 0);
+}
+
+function editStep(step) {
+  document.getElementById('stepReview').classList.remove('active');
+  currentStep = step;
+  document.getElementById('step' + currentStep).classList.add('active');
+  updateProgress();
+  window.scrollTo(0, 0);
+}
+
+function updateProgress() {
+  const progress = (currentStep / totalSteps) * 100;
+  document.getElementById('progressFill').style.width = progress + '%';
+  document.getElementById('progressText').textContent = 'Step ' + currentStep + ' of ' + totalSteps;
+  
+  const timeEstimates = [8, 6, 5, 4, 3, 2];
+  document.getElementById('timeEstimate').textContent = '~' + timeEstimates[currentStep - 1] + ' minutes remaining';
+}
+
+function validateStep1() {
+  const name = document.getElementById('fullName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  
+  if (!name || !email || !phone) {
+    alert('Please fill in all required fields (Name, Email, and Phone).');
+    return false;
+  }
+  
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) {
+    alert('Please enter a valid email address.');
+    return false;
+  }
+  
+  return true;
+}
+
+function saveCurrentStep() {
+  if (currentStep === 1) {
+    assessmentData.name = document.getElementById('fullName').value.trim();
+    assessmentData.email = document.getElementById('email').value.trim();
+    assessmentData.phone = document.getElementById('phone').value.trim();
+    assessmentData.dateOfBirth = document.getElementById('dateOfBirth').value;
+  } else if (currentStep === 2) {
+    assessmentData.primaryConcerns = Array.from(selectedConcerns);
+    assessmentData.otherConcerns = document.getElementById('otherConcerns').value.trim();
+  } else if (currentStep === 3) {
+    assessmentData.symptoms = Array.from(selectedSymptoms);
+  } else if (currentStep === 4) {
+    assessmentData.duration = document.getElementById('duration').value;
+    assessmentData.severity = document.getElementById('severity').value;
+    assessmentData.dailyImpact = document.querySelector('input[name="dailyImpact"]:checked')?.value || '';
+    assessmentData.previousTreatment = document.getElementById('previousTreatment').value;
+    assessmentData.previousDetails = document.getElementById('previousDetails').value.trim();
+  } else if (currentStep === 5) {
+    assessmentData.currentMedications = document.getElementById('currentMedications').value.trim();
+    assessmentData.allergies = document.getElementById('allergies').value.trim();
+    assessmentData.medicalHistory = document.getElementById('medicalHistory').value.trim();
+    assessmentData.familyHistory = document```html
+.getElementById('familyHistory').value.trim();
+    assessmentData.lifestyle = document.getElementById('lifestyle').value.trim();
+  } else if (currentStep === 6) {
+    assessmentData.healthGoals = document.getElementById('healthGoals').value.trim();
+    assessmentData.concerns = document.getElementById('concerns').value.trim();
+    assessmentData.additionalInfo = document.getElementById('additionalInfo').value.trim();
+    assessmentData.interests = Array.from(selectedInterests);
+    assessmentData.membershipPreference = document.querySelector('input[name="membershipPreference"]:checked')?.value || '';
+    assessmentData.geneticTestingInterest = document.getElementById('geneticTestingInterest').value;
+  }
+}
+
+function toggleChip(element) {
+  element.classList.toggle('selected');
+  
+  if (element.hasAttribute('data-concern')) {
+    const concern = element.getAttribute('data-concern');
+    if (selectedConcerns.has(concern)) {
+      selectedConcerns.delete(concern);
+    } else {
+      selectedConcerns.add(concern);
+    }
+  } else if (element.hasAttribute('data-interest')) {
+    const interest = element.getAttribute('data-interest');
+    if (selectedInterests.has(interest)) {
+      selectedInterests.delete(interest);
+    } else {
+      selectedInterests.add(interest);
+    }
+  }
+}
+
+function toggleCheckboxOption(checkbox) {
+  const parent = checkbox.closest('.checkbox-option');
+  if (checkbox.checked) {
+    parent.classList.add('selected');
+    selectedSymptoms.add(checkbox.value);
+  } else {
+    parent.classList.remove('selected');
+    selectedSymptoms.delete(checkbox.value);
+  }
+}
+
+function toggleRadioOption(radio) {
+  const allOptions = document.querySelectorAll('input[name="' + radio.name + '"]');
+  allOptions.forEach(opt => {
+    opt.closest('.radio-option').classList.remove('selected');
+  });
+  radio.closest('.radio-option').classList.add('selected');
+}
+
+function updateSliderValue(id, value) {
+  const labels = {
+    1: '1 - Mild',
+    2: '2 - Mild',
+    3: '3 - Mild to Moderate',
+    4: '4 - Moderate',
+    5: '5 - Moderate',
+    6: '6 - Moderate',
+    7: '7 - Moderate to Severe',
+    8: '8 - Severe',
+    9: '9 - Severe',
+    10: '10 - Severe'
+  };
+  document.getElementById(id + 'Value').textContent = labels[value];
+}
+
+function togglePreviousDetails(value) {
+  const detailsGroup = document.getElementById('previousDetailsGroup');
+  if (value === 'Yes') {
+    detailsGroup.style.display = 'block';
+  } else {
+    detailsGroup.style.display = 'none';
+  }
+}
+
+function reviewAssessment() {
+  saveCurrentStep();
+  
+  populateReview('reviewContact', [
+    { label: 'Name', value: assessmentData.name },
+    { label: 'Email', value: assessmentData.email },
+    { label: 'Phone', value: assessmentData.phone },
+    { label: 'Date of Birth', value: assessmentData.dateOfBirth || 'Not provided' }
+  ]);
+  
+  populateReview('reviewConcerns', [
+    { label: 'Primary Concerns', value: assessmentData.primaryConcerns.length > 0 ? assessmentData.primaryConcerns.join(', ') : 'None selected' },
+    { label: 'Other Concerns', value: assessmentData.otherConcerns || 'None' }
+  ]);
+  
+  populateReview('reviewSymptoms', [
+    { label: 'Current Symptoms', value: assessmentData.symptoms.length > 0 ? assessmentData.symptoms.join(', ') : 'None selected' }
+  ]);
+  
+  const severityLabels = {
+    1: 'Mild', 2: 'Mild', 3: 'Mild to Moderate', 4: 'Moderate', 5: 'Moderate',
+    6: 'Moderate', 7: 'Moderate to Severe', 8: 'Severe', 9: 'Severe', 10: 'Severe'
+  };
+  
+  populateReview('reviewTimeline', [
+    { label: 'Duration', value: assessmentData.duration || 'Not specified' },
+    { label: 'Severity', value: severityLabels[assessmentData.severity] || 'Not rated' },
+    { label: 'Daily Impact', value: assessmentData.dailyImpact || 'Not specified' },
+    { label: 'Previous Treatment', value: assessmentData.previousTreatment || 'Not specified' },
+    { label: 'Previous Treatment Details', value: assessmentData.previousDetails || 'None provided' }
+  ]);
+  
+  populateReview('reviewHistory', [
+    { label: 'Current Medications', value: assessmentData.currentMedications || 'None listed' },
+    { label: 'Allergies', value: assessmentData.allergies || 'None listed' },
+    { label: 'Medical History', value: assessmentData.medicalHistory || 'None provided' },
+    { label: 'Family History', value: assessmentData.familyHistory || 'None provided' },
+    { label: 'Lifestyle', value: assessmentData.lifestyle || 'None provided' }
+  ]);
+  
+  populateReview('reviewGoals', [
+    { label: 'Health Goals', value: assessmentData.healthGoals || 'Not specified' },
+    { label: 'Concerns', value: assessmentData.concerns || 'None specified' },
+    { label: 'Additional Information', value: assessmentData.additionalInfo || 'None provided' },
+    { label: 'Interests', value: assessmentData.interests.length > 0 ? assessmentData.interests.join(', ') : 'None selected' },
+    { label: 'Membership Preference', value: assessmentData.membershipPreference || 'Not specified' },
+    { label: 'Genetic Testing Interest', value: assessmentData.geneticTestingInterest || 'Not specified' }
+  ]);
+  
+  document.getElementById('step' + currentStep).classList.remove('active');
+  document.getElementById('stepReview').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function populateReview(containerId, items) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  
+  items.forEach(item => {
+    const reviewItem = document.createElement('div');
+    reviewItem.className = 'review-item';
+    
+    const label = document.createElement('div');
+    label.className = 'review-label';
+    label.textContent = item.label + ':';
+    
+    const value = document.createElement('div');
+    value.className = 'review-value';
+    value.textContent = item.value;
+    
+    reviewItem.appendChild(label);
+    reviewItem.appendChild(value);
+    container.appendChild(reviewItem);
+  });
+}
+
+function submitAssessment() {
+  document.getElementById('assessmentContainer').classList.remove('active');
+  document.getElementById('resultsContainer').classList.add('active');
+  
+  generateSummary();
+  window.scrollTo(0, 0);
+}
+
+function generateSummary() {
+  let summary = 'NEW PATIENT CONSULTATION REQUEST\n';
+  summary += '═'.repeat(50) + '\n\n';
+  
+  summary += 'CONTACT:\n';
+  summary += assessmentData.name + ' | ' + assessmentData.email + ' | ' + assessmentData.phone + '\n\n';
+  
+  summary += 'PRIMARY CONCERN:\n';
+  const topConcerns = assessmentData.primaryConcerns.slice(0, 3);
+  summary += topConcerns.length > 0 ? topConcerns.join(', ') : 'Not specified';
+  summary += '\n\n';
+  
+  summary += 'KEY SYMPTOMS:\n';
+  const topSymptoms = assessmentData.symptoms.slice(0, 5);
+  summary += topSymptoms.length > 0 ? topSymptoms.join(', ') : 'Not specified';
+  summary += '\n\n';
+  
+  summary += 'DURATION: ' + (assessmentData.duration || 'Not specified') + '\n';
+  
+  const severityMap = {
+    1: 'Mild', 2: 'Mild', 3: 'Mild-Moderate', 4: 'Moderate', 5: 'Moderate',
+    6: 'Moderate', 7: 'Moderate-Severe', 8: 'Severe', 9: 'Severe', 10: 'Severe'
+  };
+  summary += 'SEVERITY: ' + (severityMap[assessmentData.severity] || 'Not rated') + '\n\n';
+  
+  summary += 'MEMBERSHIP: ' + (assessmentData.membershipPreference || 'To be discussed') + '\n\n';
+  
+  summary += '─'.repeat(50) + '\n';
+  summary += 'Complete assessment available for provider review.\n';
+  summary += 'Objective: New patient consultation';
+  
+  if (summary.length > 500) {
+    summary = summary.substring(0, 497) + '...';
+  }
+  
+  document.getElementById('summaryContent').textContent = summary;
+}
+
+function copySummary() {
+  const summaryText = document.getElementById('summaryContent').textContent;
+  
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(summaryText).then(() => {
+      showCopySuccess();
+    }).catch(() => {
+      fallbackCopy(summaryText);
+    });
+  } else {
+    fallbackCopy(summaryText);
+  }
+}
+
+function fallbackCopy(text) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  
+  try {
+    document.execCommand('copy');
+    showCopySuccess();
+  } catch (err) {
+    alert('Unable to copy automatically. Please copy the summary manually.');
+  }
+  
+  document.body.removeChild(textarea);
+}
+
+function showCopySuccess() {
+  const successMsg = document.getElementById('copySuccess');
+  successMsg.classList.add('show');
+  setTimeout(() => {
+    successMsg.classList.remove('show');
+  }, 3000);
+}
+
+function copySummaryAndRedirect() {
+  copySummary();
+  
+  setTimeout(() => {
+    window.location.href = 'https://concierge.healinggrove.org/new-patients/';
+  }, 1500);
+}
+
+window.addEventListener('scroll', () => {
+  const stickyCta = document.getElementById('stickyCta');
+  const landingPage = document.getElementById('landingPage');
+  
+  if (landingPage.style.display !== 'none' && window.scrollY > 800) {
+    stickyCta.classList.add('visible');
+  } else {
+    stickyCta.classList.remove('visible');
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.classList.contains('chip')) {
+    e.preventDefault();
+    e.target.click();
+  }
+  
+  if (e.key === 'Enter' && (e.target.classList.contains('checkbox-option') || e.target.classList.contains('radio-option'))) {
+    e.preventDefault();
+    const input = e.target.querySelector('input');
+    if (input) {
+      input.click();
+    }
+  }
+});
+</script>
+
+</body>
+</html>

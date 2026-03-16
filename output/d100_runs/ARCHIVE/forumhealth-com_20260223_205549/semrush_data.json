@@ -1,0 +1,208 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 109051,
+  "unique_keywords": 13415,
+  "estimated_traffic": 17283,
+  "traffic_value": 53419,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 24,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 2,
+  "pos2_3_count": 3,
+  "pos4_10_count": 11,
+  "pos11_20_count": 34,
+  "pos1_3_count": 5,
+  "quick_wins_count": 6,
+  "top_quick_wins": [
+    {
+      "keyword": "cleerly",
+      "position": 9,
+      "volume": 2900,
+      "kd": 20.0
+    },
+    {
+      "keyword": "power2patient",
+      "position": 4,
+      "volume": 2400,
+      "kd": 17.0
+    },
+    {
+      "keyword": "cleerly heart scan",
+      "position": 6,
+      "volume": 1600,
+      "kd": 11.0
+    },
+    {
+      "keyword": "hasimoto",
+      "position": 6,
+      "volume": 1300,
+      "kd": 73.0
+    },
+    {
+      "keyword": "reactivated epstein barr virus symptoms",
+      "position": 8,
+      "volume": 1000,
+      "kd": 32.0
+    },
+    {
+      "keyword": "functional medicine news",
+      "position": 4,
+      "volume": 880,
+      "kd": 0.0
+    }
+  ],
+  "top3_sample": [
+    {
+      "keyword": "forum health",
+      "position": 1,
+      "volume": 3600
+    }
+  ],
+  "top_by_volume": [
+    {
+      "keyword": "forum health",
+      "position": 1,
+      "volume": 3600,
+      "kd": 43.0
+    },
+    {
+      "keyword": "cirs symptoms",
+      "position": 16,
+      "volume": 3600,
+      "kd": 19.0
+    },
+    {
+      "keyword": "cleerly",
+      "position": 9,
+      "volume": 2900,
+      "kd": 20.0
+    },
+    {
+      "keyword": "chronic inflammatory response syndrome",
+      "position": 16,
+      "volume": 2900,
+      "kd": 19.0
+    },
+    {
+      "keyword": "hormones by design",
+      "position": 13,
+      "volume": 2400,
+      "kd": 33.0
+    },
+    {
+      "keyword": "hormones by design",
+      "position": 7,
+      "volume": 2400,
+      "kd": 33.0
+    },
+    {
+      "keyword": "best online semaglutide program",
+      "position": 16,
+      "volume": 2400,
+      "kd": 39.0
+    },
+    {
+      "keyword": "heather stone",
+      "position": 12,
+      "volume": 2400,
+      "kd": 29.0
+    },
+    {
+      "keyword": "cortisol lowering foods",
+      "position": 20,
+      "volume": 2400,
+      "kd": 36.0
+    },
+    {
+      "keyword": "power2patient",
+      "position": 4,
+      "volume": 2400,
+      "kd": 17.0
+    },
+    {
+      "keyword": "bhrt near me",
+      "position": 13,
+      "volume": 1900,
+      "kd": 25.0
+    },
+    {
+      "keyword": "dale bredesen",
+      "position": 11,
+      "volume": 1900,
+      "kd": 32.0
+    },
+    {
+      "keyword": "dutch testing",
+      "position": 19,
+      "volume": 1900,
+      "kd": 18.0
+    },
+    {
+      "keyword": "sot therapy",
+      "position": 18,
+      "volume": 1900,
+      "kd": 14.0
+    },
+    {
+      "keyword": "spors",
+      "position": 16,
+      "volume": 1900,
+      "kd": 31.0
+    },
+    {
+      "keyword": "best shots for weight loss",
+      "position": 14,
+      "volume": 1600,
+      "kd": 47.0
+    },
+    {
+      "keyword": "cortisol foods",
+      "position": 17,
+      "volume": 1600,
+      "kd": 45.0
+    },
+    {
+      "keyword": "glp-1 forum",
+      "position": 11,
+      "volume": 1600,
+      "kd": 13.0
+    },
+    {
+      "keyword": "glp-1 forum",
+      "position": 2,
+      "volume": 1600,
+      "kd": 13.0
+    },
+    {
+      "keyword": "what are early warning signs of thyroid problems",
+      "position": 20,
+      "volume": 1600,
+      "kd": 36.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "fullyfunctional.com",
+      "relevance": "0.07",
+      "keywords": 6957,
+      "traffic": 6310,
+      "traffic_value": 5673
+    },
+    {
+      "domain": "safamilyintegrativehealth.com",
+      "relevance": "0.06",
+      "keywords": 1004,
+      "traffic": 491,
+      "traffic_value": 578
+    },
+    {
+      "domain": "doctormather.com",
+      "relevance": "0.06",
+      "keywords": 1134,
+      "traffic": 1049,
+      "traffic_value": 2570
+    }
+  ]
+}

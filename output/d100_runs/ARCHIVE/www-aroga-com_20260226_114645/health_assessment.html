@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aroga Lifestyle Medicine | Love Your Life</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #065769;
+  --background: #FFFFFF;
+  --accent: #F9846B;
+  --secondary: #CFDADE;
+  --text-dark: #1a1a1a;
+  --text-light: #4a4a4a;
+  --border: #e0e0e0;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.6;
+  color: var(--text-dark);
+  background: var(--background);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.header {
+  background: var(--primary);
+  color: white;
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.hero {
+  background: linear-gradient(135deg, var(--primary) 0%, #087f9a 100%);
+  color: white;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.hero .tagline {
+  font-size: 20px;
+  margin-bottom: 40px;
+  opacity: 0.95;
+}
+
+.cta-button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 18px 40px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(249, 132, 107, 0.3);
+}
+
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(249, 132, 107, 0.4);
+}
+
+.cta-button:focus {
+  outline: 3px solid white;
+  outline-offset: 2px;
+}
+
+.section {
+  padding: 60px 20px;
+}
+
+.section-title {
+  font-size: 36px;
+  margin-bottom: 40px;
+  text-align: center;
+  color: var(--primary);
+}
+
+.concerns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.concern-card {
+  background: var(--secondary);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.concern-card:hover {
+  transform: translateY(-4px);
+}
+
+.concern-emoji {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.concern-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.how-it-works {
+  background: var(--secondary);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+}
+
+.step {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.step-number {
+  background: var(--accent);
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 auto 20px;
+}
+
+.step h3 {
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.programs-grid {
+  display: grid;
+  gap: 30px;
+}
+
+.program-card {
+  background: white;
+  border: 2px solid var(--secondary);
+  border-radius: 12px;
+  padding: 30px;
+  transition: all 0.3s ease;
+}
+
+.program-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.program-card h3 {
+  color: var(--primary);
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+.program-price {
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 15px;
+}
+
+.testimonial {
+  background: white;
+  padding: 30px;
+  border-left: 4px solid var(--accent);
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.testimonial-text {
+  font-style: italic;
+  margin-bottom: 15px;
+  line-height: 1.8;
+}
+
+.testimonial-author {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.trust-section {
+  background: var(--primary);
+  color: white;
+  text-align: center;
+}
+
+.trust-section h2 {
+  color: white;
+}
+
+.sticky-cta {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--primary);
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
+  z-index: 999;
+  display: none;
+}
+
+.sticky-cta.visible {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 32px;
+  }
+  
+  .hero .tagline {
+    font-size: 18px;
+  }
+  
+  .section-title {
+    font-size: 28px;
+  }
+}
+
+.assessment-container {
+  display: none;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.assessment-container.active {
+  display: block;
+}
+
+.progress-bar {
+  background: var(--secondary);
+  height: 8px;
+  border-radius: 4px;
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: var(--accent);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  text-align: center;
+  color: var(--text-light);
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.step-indicator {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.question-group {
+  background: white;
+  border: 2px solid var(--secondary);
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+.question-group h2 {
+  color: var(--primary);
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.question-group h3 {
+  color: var(--primary);
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.form-field {
+  margin-bottom: 25px;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--text-dark);
+}
+
+.required {
+  color: var(--error);
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.form-input:invalid:not(:placeholder-shown) {
+  border-color: var(--error);
+}
+
+.form-textarea {
+  min-height: 120px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  background: var(--secondary);
+  border: 2px solid var(--secondary);
+  padding: 10px 20px;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  user-select: none;
+}
+
+.chip:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.chip.selected {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.chip:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.symptoms-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: var(--secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.checkbox-item:hover {
+  background: #b8cbd1;
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+  cursor: pointer;
+}
+
+.checkbox-item.checked {
+  background: var(--primary);
+  color: white;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: var(--secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.radio-item:hover {
+  background: #b8cbd1;
+}
+
+.radio-item input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+  cursor: pointer;
+}
+
+.radio-item.checked {
+  background: var(--primary);
+  color: white;
+}
+
+.slider-container {
+  padding: 20px 0;
+}
+
+.slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--secondary);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+}
+
+.slider:focus::-webkit-slider-thumb {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+.slider-value {
+  text-align: center;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 10px;
+  font-size: 18px;
+}
+
+.button-group {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 14px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(249, 132, 107, 0.3);
+}
+
+.btn-primary:focus {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.btn-secondary {
+  background: var(--secondary);
+  color: var(--primary);
+}
+
+.btn-secondary:hover {
+  background: #b8cbd1;
+}
+
+.btn-secondary:focus {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.disclaimer {
+  background: #fff3cd;
+  border-left: 4px solid var(--warning);
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.emergency-notice {
+  background: #fee;
+  border-left: 4px solid var(--error);
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.review-section {
+  background: white;
+  border: 2px solid var(--secondary);
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 20px;
+}
+
+.review-section h3 {
+  color: var(--primary);
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+.edit-btn:hover {
+  color: var(--primary);
+}
+
+.review-item {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.review-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.review-label {
+  font-weight: 600;
+  color: var(--text-light);
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.review-value {
+  color: var(--text-dark);
+}
+
+.results-container {
+  display: none;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.results-container.active {
+  display: block;
+}
+
+.results-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.results-header h1 {
+  color: var(--primary);
+  margin-bottom: 15px;
+}
+
+.summary-box {
+  background: white;
+  border: 2px solid var(--secondary);
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+.summary-box h2 {
+  color: var(--primary);
+  margin-bottom: 20px;
+}
+
+.summary-content {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.json-toggle {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.json-view {
+  display: none;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 15px;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.json-view.active {
+  display: block;
+}
+
+.copy-feedback {
+  display: none;
+  background: var(--success);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.copy-feedback.active {
+  display: block;
+}
+
+.hidden {
+  display: none !important;
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+legend {
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: var(--primary);
+  font-size: 18px;
+}
+
+.help-text {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.error-message {
+  color: var(--error);
+  font-size: 14px;
+  margin-top: 5px;
+  display: none;
+}
+
+.error-message.active {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .button-group {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.multi-select-chips .chip {
+  position: relative;
+}
+
+.multi-select-chips .chip.selected::after {
+  content: '✓';
+  position: absolute;
+  right: 10px;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<header class="header" id="mainHeader">
+  <div class="container">
+    <div class="header-content">
+      <div class="logo">Aroga Lifestyle Medicine</div>
+    </div>
+  </div>
+</header>
+
+<div id="landingPage">
+  <section class="hero">
+    <div class="container">
+      <h1>Love Your Life.</h1>
+      <p class="tagline">Evidence-based lifestyle medicine for optimal health and joy.</p>
+      <button class="cta-button" onclick="startAssessment()">Take Your First Step</button>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">We Help With</h2>
+      <div class="concerns-grid">
+        <div class="concern-card">
+          <div class="concern-emoji">🩸</div>
+          <div class="concern-label">Type 2 Diabetes</div>
+        </div>
+        <div class="concern-card">
+          <div class="concern-emoji">⚖️</div>
+          <div class="concern-label">Weight Management</div>
+        </div>
+        <div class="concern-card">
+          <div class="concern-emoji">🔄</div>
+          <div class="concern-label">Hormone Imbalance</div>
+        </div>
+        <div class="concern-card">
+          <div class="concern-emoji">❤️</div>
+          <div class="concern-label">High Blood Pressure</div>
+        </div>
+        <div class="concern-card">
+          <div class="concern-emoji">😴</div>
+          <div class="concern-label">Fatigue & Low Energy</div>
+        </div>
+        <div class="concern-card">
+          <div class="concern-emoji">🌙</div>
+          <div class="concern-label">Poor Sleep</div>
+        </div>
+        <div class="concern-card">
+          <div class="concern-emoji">🌸</div>
+          <div class="concern-label">Women's Health</div>
+        </div>
+        <div class="concern-card">
+          <div class="concern-emoji">🧠</div>
+          <div class="concern-label">Stress & Anxiety</div>
+        </div>
+        <div class="concern-card">
+          <div class="concern-emoji">🔥</div>
+          <div class="concern-label">Chronic Inflammation</div>
+        </div>
+        <div class="concern-card">
+          <div class="concern-emoji">💓</div>
+          <div class="concern-label">Heart Health</div>
+        </div>
+        <div class="concern-card">
+          <div class="concern-emoji">🌿</div>
+          <div class="concern-label">Gut & Digestive Health</div>
+        </div>
+        <div class="concern-card">
+          <div class="concern-emoji">💊</div>
+          <div class="concern-label">Iron Deficiency</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section how-it-works">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Complete Assessment</h3>
+          <p>Share your health concerns and goals in a detailed assessment.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Book Consultation</h3>
+          <p>Schedule your first appointment with our care team.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Start Your Journey</h3>
+          <p>Begin your personalized lifestyle medicine program.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">Our Programs</h2>
+      <div class="programs-grid">
+        <div class="program-card">
+          <h3>Women's Health Program</h3>
+          <p>A 6-month personalized lifestyle medicine program for women addressing hormone balance, weight, energy, sleep, and chronic conditions using an evidence-based multi-specialty team approach.</p>
+          <p class="program-price">Starting at $1,999</p>
+        </div>
+        <div class="program-card">
+          <h3>Diabetes Reversal & Prevention Program</h3>
+          <p>A structured lifestyle medicine program designed to help patients achieve remission or prevent the progression of type 2 diabetes through nutrition, movement, sleep, and stress management.</p>
+          <p class="program-price">Contact for pricing</p>
+        </div>
+        <div class="program-card">
+          <h3>Optimize Program</h3>
+          <p>A comprehensive health optimization program for individuals who want to elevate their energy, performance, and long-term vitality through personalized lifestyle medicine strategies.</p>
+          <p class="program-price">Contact for pricing</p>
+        </div>
+        <div class="program-card">
+          <h3>Restorative Sleep Program</h3>
+          <p>A clinically guided program targeting the root causes of poor sleep including stress, nutrition, and circadian rhythm disruption — without relying on sleep medications.</p>
+          <p class="program-price">Contact for pricing</p>
+        </div>
+        <div class="program-card">
+          <h3>Ongoing Monthly Care</h3>
+          <p>Continuous lifestyle medicine support for patients who want sustained accountability, clinical guidance, and program maintenance beyond an initial structured program.</p>
+          <p class="program-price">Monthly membership</p>
+        </div>
+        <div class="program-card">
+          <h3>Executive Health Assessment</h3>
+          <p>A comprehensive health assessment designed for executives and business leaders seeking a proactive, whole-person evaluation of their current health status and longevity risks.</p>
+          <p class="program-price">Contact for pricing</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">What Patients Say</h2>
+      <div class="testimonial">
+        <p class="testimonial-text">"I reversed my type-2 diabetes, lowered my high blood pressure and got off Ramipril. My weight loss until now has been 52 pounds. I also came off my sleep apnea machine! I am increasing my endurance with the extra energy I have and the healthier I get."</p>
+        <p class="testimonial-author">— Tania J.</p>
+      </div>
+      <div class="testimonial">
+        <p class="testimonial-text">"Dr. Pewerchuk is passionate about helping you attain the best health for life. His energy is contagious and he is not shy about telling you what part YOU need to play in attaining perfect health."</p>
+        <p class="testimonial-author">— Cheryl Read</p>
+      </div>
+      <div class="testimonial">
+        <p class="testimonial-text">"This is the first time I'm wearing lipstick in 20 years, and wearing clothes that fit, and feeling good about it."</p>
+        <p class="testimonial-author">— Alice R.</p>
+      </div>
+      <div class="testimonial">
+        <p class="testimonial-text">"Everything has gone backwards on my blood tests, all the numbers have gone down, and I feel really good. When I wake up, I'm invigorated, I say my prayers, I'm excited about life."</p>
+        <p class="testimonial-author">— Andrew C.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section trust-section">
+    <div class="container">
+      <h2 class="section-title">Who We Are</h2>
+      <p style="max-width: 800px; margin: 0 auto; font-size: 18px; line-height: 1.8;">Aroga Lifestyle Medicine is a multi-specialty, collaborative lifestyle medicine healthcare organization created to inspire and empower patients to prevent, treat, and reverse many illnesses, and to ultimately increase their health, vitality, and joy.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container" style="text-align: center;">
+      <h2 class="section-title">Ready to Start?</h2>
+      <p style="font-size: 18px; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">Complete our health assessment to help us understand your needs and book your first consultation.</p>
+      <button class="cta-button" onclick="startAssessment()">Begin Health Assessment</button>
+    </div>
+  </section>
+</div>
+
+<div class="sticky-cta" id="stickyCta">
+  <button class="cta-button" onclick="startAssessment()">Start Your Health Assessment</button>
+</div>
+
+<div class="assessment-container" id="assessmentContainer">
+  <div class="progress-text" id="progressText">Step 1 of 8</div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width: 12.5%"></div>
+  </div>
+  
+  <div class="emergency-notice">
+    <strong>Emergency Notice:</strong> If you are experiencing a medical emergency, call 911 or go to your nearest emergency room immediately. This assessment is not for urgent medical care.
+  </div>
+
+  <form id="assessmentForm">
+    <div class="step-content" data-step="1">
+      <div class="question-group">
+        <h2>Contact Information</h2>
+        
+        <div class="form-field">
+          <label class="form-label" for="name">Full Name <span class="required">*</span></label>
+          <input type="text" id="name" name="name" class="form-input" required placeholder="Enter your full name">
+          <div class="error-message" id="nameError">Please enter your name</div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="email">Email Address <span class="required">*</span></label>
+          <input type="email" id="email" name="email" class="form-input" required placeholder="your@email.com">
+          <div class="error-message" id="emailError">Please enter a valid email</div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="phone">Phone Number <span class="required">*</span></label>
+          <input type="tel" id="phone" name="phone" class="form-input" required placeholder="(555) 555```html
+-5555">
+          <div class="error-message" id="phoneError">Please enter your phone number</div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="btn btn-primary" onclick="nextStep()">Next</button>
+      </div>
+    </div>
+
+    <div class="step-content hidden" data-step="2">
+      <div class="question-group">
+        <h2>Primary Health Concerns</h2>
+        <p style="margin-bottom: 20px;">What is your main health concern? <span class="required">*</span></p>
+        
+        <fieldset>
+          <legend class="sr-only">Select your primary concern</legend>
+          <div class="chip-group" id="primaryConcernGroup">
+            <div class="chip" tabindex="0" role="button" data-value="Type 2 Diabetes" onclick="selectPrimaryConcern(this)">🩸 Type 2 Diabetes</div>
+            <div class="chip" tabindex="0" role="button" data-value="Weight Management" onclick="selectPrimaryConcern(this)">⚖️ Weight Management</div>
+            <div class="chip" tabindex="0" role="button" data-value="Hormone Imbalance" onclick="selectPrimaryConcern(this)">🔄 Hormone Imbalance</div>
+            <div class="chip" tabindex="0" role="button" data-value="High Blood Pressure" onclick="selectPrimaryConcern(this)">❤️ High Blood Pressure</div>
+            <div class="chip" tabindex="0" role="button" data-value="Fatigue & Low Energy" onclick="selectPrimaryConcern(this)">😴 Fatigue & Low Energy</div>
+            <div class="chip" tabindex="0" role="button" data-value="Poor Sleep" onclick="selectPrimaryConcern(this)">🌙 Poor Sleep</div>
+            <div class="chip" tabindex="0" role="button" data-value="Women's Health" onclick="selectPrimaryConcern(this)">🌸 Women's Health</div>
+            <div class="chip" tabindex="0" role="button" data-value="Stress & Anxiety" onclick="selectPrimaryConcern(this)">🧠 Stress & Anxiety</div>
+            <div class="chip" tabindex="0" role="button" data-value="Chronic Inflammation" onclick="selectPrimaryConcern(this)">🔥 Chronic Inflammation</div>
+            <div class="chip" tabindex="0" role="button" data-value="Heart Health" onclick="selectPrimaryConcern(this)">💓 Heart Health</div>
+            <div class="chip" tabindex="0" role="button" data-value="Gut & Digestive Health" onclick="selectPrimaryConcern(this)">🌿 Gut & Digestive Health</div>
+            <div class="chip" tabindex="0" role="button" data-value="Iron Deficiency" onclick="selectPrimaryConcern(this)">💊 Iron Deficiency</div>
+          </div>
+        </fieldset>
+        <input type="hidden" id="primaryConcern" name="primaryConcern" required>
+        <div class="error-message" id="primaryConcernError">Please select your primary concern</div>
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+        <button type="button" class="btn btn-primary" onclick="nextStep()">Next</button>
+      </div>
+    </div>
+
+    <div class="step-content hidden" data-step="3">
+      <div class="question-group">
+        <h2>Symptoms You're Experiencing</h2>
+        <p style="margin-bottom: 20px;">Select all symptoms that apply to you (select as many as relevant):</p>
+        
+        <fieldset>
+          <legend class="sr-only">Select your symptoms</legend>
+          <div class="symptoms-grid multi-select-chips" id="symptomsGroup">
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Persistent fatigue or low energy" onclick="toggleSymptom(this)">Persistent fatigue or low energy</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Difficulty losing weight despite effort" onclick="toggleSymptom(this)">Difficulty losing weight despite effort</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Blood sugar that is hard to control" onclick="toggleSymptom(this)">Blood sugar that is hard to control</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="High blood pressure readings" onclick="toggleSymptom(this)">High blood pressure readings</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Poor or restless sleep" onclick="toggleSymptom(this)">Poor or restless sleep</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Brain fog or difficulty concentrating" onclick="toggleSymptom(this)">Brain fog or difficulty concentrating</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Hormone-related mood changes" onclick="toggleSymptom(this)">Hormone-related mood changes</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Irregular or painful menstrual cycles" onclick="toggleSymptom(this)">Irregular or painful menstrual cycles</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Hot flashes or night sweats" onclick="toggleSymptom(this)">Hot flashes or night sweats</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Chronic joint or muscle pain" onclick="toggleSymptom(this)">Chronic joint or muscle pain</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Digestive discomfort or bloating" onclick="toggleSymptom(this)">Digestive discomfort or bloating</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Frequent cravings for sugar or processed food" onclick="toggleSymptom(this)">Frequent cravings for sugar or processed food</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Low motivation or mild depression" onclick="toggleSymptom(this)">Low motivation or mild depression</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Shortness of breath with light activity" onclick="toggleSymptom(this)">Shortness of breath with light activity</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Elevated cholesterol or triglycerides" onclick="toggleSymptom(this)">Elevated cholesterol or triglycerides</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Iron deficiency or anemia symptoms" onclick="toggleSymptom(this)">Iron deficiency or anemia symptoms</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Stress that feels unmanageable" onclick="toggleSymptom(this)">Stress that feels unmanageable</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Reliance on medications you want to reduce" onclick="toggleSymptom(this)">Reliance on medications you want to reduce</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Feeling disconnected from your body" onclick="toggleSymptom(this)">Feeling disconnected from your body</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Difficulty maintaining healthy habits long-term" onclick="toggleSymptom(this)">Difficulty maintaining healthy habits long-term</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Unexplained weight gain" onclick="toggleSymptom(this)">Unexplained weight gain</div>
+            <div class="chip" tabindex="0" role="checkbox" aria-checked="false" data-value="Low libido or sexual health concerns" onclick="toggleSymptom(this)">Low libido or sexual health concerns</div>
+          </div>
+        </fieldset>
+        <input type="hidden" id="symptoms" name="symptoms">
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+        <button type="button" class="btn btn-primary" onclick="nextStep()">Next</button>
+      </div>
+    </div>
+
+    <div class="step-content hidden" data-step="4">
+      <div class="question-group">
+        <h2>Symptom Duration & Severity</h2>
+        
+        <div class="form-field">
+          <label class="form-label" for="duration">How long have you been experiencing these concerns? <span class="required">*</span></label>
+          <fieldset>
+            <legend class="sr-only">Duration of symptoms</legend>
+            <div class="radio-group" id="durationGroup">
+              <label class="radio-item">
+                <input type="radio" name="duration" value="Less than 3 months" required>
+                <span>Less than 3 months</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="duration" value="3-6 months">
+                <span>3-6 months</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="duration" value="6-12 months">
+                <span>6-12 months</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="duration" value="1-2 years">
+                <span>1-2 years</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="duration" value="More than 2 years">
+                <span>More than 2 years</span>
+              </label>
+            </div>
+          </fieldset>
+          <div class="error-message" id="durationError">Please select duration</div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="severity">How would you rate the impact on your daily life? <span class="required">*</span></label>
+          <div class="slider-container">
+            <input type="range" id="severity" name="severity" min="1" max="10" value="5" class="slider" oninput="updateSeverityValue(this.value)" required>
+            <div class="slider-labels">
+              <span>Minimal</span>
+              <span>Moderate</span>
+              <span>Severe</span>
+            </div>
+            <div class="slider-value" id="severityValue">5 / 10</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+        <button type="button" class="btn btn-primary" onclick="nextStep()">Next</button>
+      </div>
+    </div>
+
+    <div class="step-content hidden" data-step="5">
+      <div class="question-group">
+        <h2>Medical History</h2>
+        
+        <div class="form-field">
+          <label class="form-label" for="currentConditions">Do you have any diagnosed medical conditions?</label>
+          <textarea id="currentConditions" name="currentConditions" class="form-input form-textarea" placeholder="List any current diagnoses (e.g., Type 2 Diabetes, Hypertension, PCOS)"></textarea>
+          <div class="help-text">Please list conditions you have been formally diagnosed with</div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="medications">Are you currently taking any medications or supplements?</label>
+          <textarea id="medications" name="medications" class="form-input form-textarea" placeholder="List medications and supplements with dosage if known"></textarea>
+          <div class="help-text">Include prescription medications, over-the-counter drugs, and supplements</div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="allergies">Do you have any allergies or adverse reactions to medications?</label>
+          <textarea id="allergies" name="allergies" class="form-input form-textarea" placeholder="List any known allergies or reactions"></textarea>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+        <button type="button" class="btn btn-primary" onclick="nextStep()">Next</button>
+      </div>
+    </div>
+
+    <div class="step-content hidden" data-step="6">
+      <div class="question-group">
+        <h2>Lifestyle Factors</h2>
+        
+        <div class="form-field">
+          <label class="form-label" for="diet">How would you describe your current eating patterns?</label>
+          <textarea id="diet" name="diet" class="form-input form-textarea" placeholder="Describe what a typical day of eating looks like for you"></textarea>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="exercise">How would you describe your current physical activity level?</label>
+          <fieldset>
+            <legend class="sr-only">Physical activity level</legend>
+            <div class="radio-group">
+              <label class="radio-item">
+                <input type="radio" name="exercise" value="Sedentary - Little to no exercise">
+                <span>Sedentary - Little to no exercise</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="exercise" value="Lightly active - Light exercise 1-3 days/week">
+                <span>Lightly active - Light exercise 1-3 days/week</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="exercise" value="Moderately active - Moderate exercise 3-5 days/week">
+                <span>Moderately active - Moderate exercise 3-5 days/week</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="exercise" value="Very active - Intense exercise 6-7 days/week">
+                <span>Very active - Intense exercise 6-7 days/week</span>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="sleep">How many hours of sleep do you typically get per night?</label>
+          <input type="text" id="sleep" name="sleep" class="form-input" placeholder="e.g., 6-7 hours">
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="stress">How would you rate your current stress level?</label>
+          <div class="slider-container">
+            <input type="range" id="stress" name="stress" min="1" max="10" value="5" class="slider" oninput="updateStressValue(this.value)">
+            <div class="slider-labels">
+              <span>Low</span>
+              <span>Moderate</span>
+              <span>High</span>
+            </div>
+            <div class="slider-value" id="stressValue">5 / 10</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+        <button type="button" class="btn btn-primary" onclick="nextStep()">Next</button>
+      </div>
+    </div>
+
+    <div class="step-content hidden" data-step="7">
+      <div class="question-group">
+        <h2>Goals & Motivation</h2>
+        
+        <div class="form-field">
+          <label class="form-label" for="goals">What are your top health goals?</label>
+          <textarea id="goals" name="goals" class="form-input form-textarea" placeholder="What do you hope to achieve through lifestyle medicine?" required></textarea>
+          <div class="help-text">Be specific about what success would look like for you</div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="previousAttempts">Have you tried to address these concerns before? What has or hasn't worked?</label>
+          <textarea id="previousAttempts" name="previousAttempts" class="form-input form-textarea" placeholder="Share any previous programs, diets, or treatments you've tried"></textarea>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="barriers">What do you think are your biggest barriers to achieving better health?</label>
+          <textarea id="barriers" name="barriers" class="form-input form-textarea" placeholder="e.g., time constraints, motivation, knowledge, support"></textarea>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="readiness">How ready are you to make lifestyle changes?</label>
+          <div class="slider-container">
+            <input type="range" id="readiness" name="readiness" min="1" max="10" value="7" class="slider" oninput="updateReadinessValue(this.value)">
+            <div class="slider-labels">
+              <span>Not Ready</span>
+              <span>Somewhat Ready</span>
+              <span>Very Ready</span>
+            </div>
+            <div class="slider-value" id="readinessValue">7 / 10</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+        <button type="button" class="btn btn-primary" onclick="nextStep()">Next</button>
+      </div>
+    </div>
+
+    <div class="step-content hidden" data-step="8">
+      <div class="question-group">
+        <h2>Review Your Responses</h2>
+        <p style="margin-bottom: 20px;">Please review your information before submitting. You can edit any section by clicking the edit button.</p>
+        
+        <div class="review-section">
+          <h3>
+            Contact Information
+            <button type="button" class="edit-btn" onclick="editStep(1)">Edit</button>
+          </h3>
+          <div class="review-item">
+            <div class="review-label">Name</div>
+            <div class="review-value" id="reviewName"></div>
+          </div>
+          <div class="review-item">
+            <div class="review-label">Email</div>
+            <div class="review-value" id="reviewEmail"></div>
+          </div>
+          <div class="review-item">
+            <div class="review-label">Phone</div>
+            <div class="review-value" id="reviewPhone"></div>
+          </div>
+        </div>
+
+        <div class="review-section">
+          <h3>
+            Health Concerns
+            <button type="button" class="edit-btn" onclick="editStep(2)">Edit</button>
+          </h3>
+          <div class="review-item">
+            <div class="review-label">Primary Concern</div>
+            <div class="review-value" id="reviewPrimaryConcern"></div>
+          </div>
+        </div>
+
+        <div class="review-section">
+          <h3>
+            Symptoms
+            <button type="button" class="edit-btn" onclick="editStep(3)">Edit</button>
+          </h3>
+          <div class="review-item">
+            <div class="review-label">Selected Symptoms</div>
+            <div class="review-value" id="reviewSymptoms"></div>
+          </div>
+        </div>
+
+        <div class="review-section">
+          <h3>
+            Duration & Severity
+            <button type="button" class="edit-btn" onclick="editStep(4)">Edit</button>
+          </h3>
+          <div class="review-item">
+            <div class="review-label">Duration</div>
+            <div class="review-value" id="reviewDuration"></div>
+          </div>
+          <div class="review-item">
+            <div class="review-label">Impact Severity</div>
+            <div class="review-value" id="reviewSeverity"></div>
+          </div>
+        </div>
+
+        <div class="review-section">
+          <h3>
+            Goals
+            <button type="button" class="edit-btn" onclick="editStep(7)">Edit</button>
+          </h3>
+          <div class="review-item">
+            <div class="review-label">Health Goals</div>
+            <div class="review-value" id="reviewGoals"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        <strong>Important Disclaimer:</strong> This assessment does not constitute medical advice, diagnosis, or treatment. The information you provide will be reviewed by our care team to help prepare for your consultation. For medical emergencies, call 911 immediately.
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+        <button type="button" class="btn btn-primary" onclick="submitAssessment()">Submit Assessment</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="results-container" id="resultsContainer">
+  <div class="results-header">
+    <h1>Assessment Complete</h1>
+    <p>Thank you for completing your health assessment. Below is a summary of your responses.</p>
+  </div>
+
+  <div class="disclaimer">
+    <strong>Next Steps:</strong> Our care team will review your assessment before your consultation. Please use the button below to schedule your appointment. A copy of this summary will be available to you.
+  </div>
+
+  <div class="summary-box">
+    <h2>Your Health Assessment Summary</h2>
+    <div class="summary-content" id="summaryContent"></div>
+    <div class="action-buttons">
+      <button class="btn btn-primary" onclick="copySummary()">Copy Summary</button>
+      <button class="btn btn-secondary" onclick="printSummary()">Print Summary</button>
+    </div>
+    <div class="copy-feedback" id="copyFeedback">✓ Summary copied to clipboard</div>
+  </div>
+
+  <div class="summary-box">
+    <h2>Next Steps</h2>
+    <p style="margin-bottom: 20px;">Click the button below to book your new patient consultation. Your assessment summary will be shared with our scheduling team.</p>
+    <button class="btn btn-primary" onclick="redirectToBooking()" style="font-size: 18px; padding: 18px 40px;">Book Your Consultation</button>
+  </div>
+
+  <div class="json-toggle">
+    <button class="btn btn-secondary" onclick="toggleJSON()">View Technical Data (JSON)</button>
+    <div class="json-view" id="jsonView"></div>
+  </div>
+
+  <div class="emergency-notice">
+    <strong>Emergency Notice:</strong> If you are experiencing a medical emergency at any time, call 911 or go to your nearest emergency room immediately. This assessment is for informational purposes only and does not provide medical care.
+  </div>
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 8;
+let assessmentData = {};
+let selectedSymptoms = [];
+
+function startAssessment() {
+  document.getElementById('landingPage').classList.add('hidden');
+  document.getElementById('assessmentContainer').classList.add('active');
+  document.getElementById('stickyCta').classList.remove('visible');
+  window.scrollTo(0, 0);
+}
+
+function updateProgress() {
+  const percent = (currentStep / totalSteps) * 100;
+  document.getElementById('progressFill').style.width = percent + '%';
+  document.getElementById('progressText').textContent = `Step ${currentStep} of ${totalSteps}`;
+}
+
+function showStep(step) {
+  document.querySelectorAll('.step-content').forEach(el => {
+    el.classList.add('hidden');
+  });
+  document.querySelector(`[data-step="${step}"]`).classList.remove('hidden');
+  currentStep = step;
+  updateProgress();
+  window.scrollTo(0, 0);
+}
+
+function validateStep(step) {
+  if (step === 1) {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    
+    if (!name) {
+      document.getElementById('nameError').classList.add('active');
+      return false;
+    }
+    if (!email || !email.includes('@')) {
+      document.getElementById('emailError').classList.add('active');
+      return false;
+    }
+    if (!phone) {
+      document.getElementById('phoneError').classList.add('active');
+      return false;
+    }
+    
+    assessmentData.name = name;
+    assessmentData.email = email;
+    assessmentData.phone = phone;
+    return true;
+  }
+  
+  if (step === 2) {
+    const primaryConcern = document.getElementById('primaryConcern').value;
+    if (!primaryConcern) {
+      document.getElementById('primaryConcernError').classList.add('active');
+      return false;
+    }
+    assessmentData.primaryConcern = primaryConcern;
+    return true;
+  }
+  
+  if (step === 3) {
+    assessmentData.symptoms = selectedSymptoms.join(', ') || 'None selected';
+    return true;
+  }
+  
+  if (step === 4) {
+    const duration = document.querySelector('input[name="duration"]:checked');
+    if (!duration) {
+      document.getElementById('durationError').classList.add('active');
+      return false;
+    }
+    assessmentData.duration = duration.value;
+    assessmentData.severity = document.getElementById('severity').value;
+    return true;
+  }
+  
+  if (step === 5) {
+    assessmentData.currentConditions = document.getElementById('currentConditions').value || 'None reported';
+    assessmentData.medications = document.getElementById('medications').value || 'None reported';
+    assessmentData.allergies = document.getElementById('allergies').value || 'None reported';
+    return true;
+  }
+  
+  if (step === 6) {
+    assessmentData.diet = document.getElementById('diet').value || 'Not specified';
+    const exercise = document.querySelector('input[name="exercise"]:checked');
+    assessmentData.exercise = exercise ? exercise.value : 'Not specified';
+    assessmentData.sleep = document.getElementById('sleep').value || 'Not specified';
+    assessmentData.stress = document.getElementById('stress').value;
+    return true;
+  }
+  
+  if (step === 7) {
+    const goals = document.getElementById('goals').value.trim();
+    if (!goals) {
+      alert('Please describe your health goals before continuing.');
+      return false;
+    }
+    assessmentData.goals = goals;
+    assessmentData.previousAttempts = document.getElementById('previousAttempts').value || 'None reported';
+    assessmentData.barriers = document.getElementById('barriers').value || 'None reported';
+    assessmentData.readiness = document.getElementById('readiness').value;
+    return true;
+  }
+  
+  return true;
+}
+
+function nextStep() {
+  document.querySelectorAll('.error-message').forEach(el => el.classList.remove('active'));
+  
+  if (!validateStep(currentStep)) {
+    return;
+  }
+  
+  if (currentStep === 7) {
+    populateReview();
+  }
+  
+  if (currentStep < totalSteps) {
+    showStep(currentStep + 1);
+  }
+}
+
+function prevStep() {
+  if (currentStep > 1) {
+    showStep(currentStep - 1);
+  }
+}
+
+function editStep(step) {
+  showStep(step);
+}
+
+function selectPrimaryConcern(element) {
+  document.querySelectorAll('#primaryConcernGroup .chip').forEach(chip => {
+    chip.classList.remove('selected');
+    chip.setAttribute('aria-checked', 'false');
+  });
+  
+  element.classList.add('selected');
+  element.setAttribute('aria-checked', 'true');
+  document.getElementById('primaryConcern').value = element.dataset.value;
+  document.getElementById('primaryConcernError').classList.remove('active');
+}
+
+function toggleSymptom(element) {
+  const value = element.dataset.value;
+  
+  if (element.classList.contains('selected')) {
+    element.classList.remove('selected');
+    element.setAttribute('aria-checked', 'false');
+    selectedSymptoms = selectedSymptoms.filter(s => s !== value);
+  } else {
+    element.classList.add('selected');
+    element.setAttribute('aria-checked', 'true');
+    selectedSymptoms.push(value);
+  }
+  
+  document.getElementById('symptoms').value = selectedSymptoms.join(', ');
+}
+
+function updateSeverityValue(value) {
+  document.getElementById('severityValue').textContent = value + ' / 10';
+}
+
+function updateStressValue(value) {
+  document.getElementById('stressValue').textContent = value + ' / 10';
+}
+
+function updateReadinessValue(value) {
+  document.getElementById('readinessValue').textContent = value + ' / 10';
+}
+
+document.querySelectorAll('input[name="duration"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    document.querySelectorAll('#durationGroup .radio-item').forEach(item => {
+      item.classList.remove('checked');
+    });
+    if (this.checked) {
+      this.closest('.radio-item').classList.add('checked');
+    }
+  });
+});
+
+document.querySelectorAll('input[name="exercise"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    document.querySelectorAll('.radio-item').forEach(item => {
+      item.classList.remove('checked');
+    });
+    if (this.checked) {
+      this.closest('.radio-item').classList.add('checked');
+    }
+  });
+});
+
+function populateReview() {
+  document.getElementById('reviewName').textContent = assessment```html
+Data.name || '';
+  document.getElementById('reviewEmail').textContent = assessmentData.email || '';
+  document.getElementById('reviewPhone').textContent = assessmentData.phone || '';
+  document.getElementById('reviewPrimaryConcern').textContent = assessmentData.primaryConcern || '';
+  document.getElementById('reviewSymptoms').textContent = assessmentData.symptoms || 'None selected';
+  document.getElementById('reviewDuration').textContent = assessmentData.duration || '';
+  document.getElementById('reviewSeverity').textContent = assessmentData.severity + ' / 10' || '';
+  document.getElementById('reviewGoals').textContent = assessmentData.goals || '';
+}
+
+function submitAssessment() {
+  if (!validateStep(currentStep)) {
+    return;
+  }
+  
+  document.getElementById('assessmentContainer').classList.remove('active');
+  document.getElementById('resultsContainer').classList.add('active');
+  
+  generateSummary();
+  window.scrollTo(0, 0);
+}
+
+function generateSummary() {
+  const symptomsList = assessmentData.symptoms.split(', ').slice(0, 5).join(', ');
+  const truncatedSymptoms = assessmentData.symptoms.split(', ').length > 5 
+    ? symptomsList + ', and ' + (assessmentData.symptoms.split(', ').length - 5) + ' more'
+    : symptomsList;
+  
+  const goalsSummary = assessmentData.goals.substring(0, 150) + (assessmentData.goals.length > 150 ? '...' : '');
+  
+  const summary = `AROGA LIFESTYLE MEDICINE
+New Patient Health Assessment Summary
+
+Patient: ${assessmentData.name}
+Email: ${assessmentData.email}
+Phone: ${assessmentData.phone}
+
+PRIMARY CONCERN: ${assessmentData.primaryConcern}
+
+SYMPTOMS: ${truncatedSymptoms}
+
+DURATION: ${assessmentData.duration}
+IMPACT SEVERITY: ${assessmentData.severity}/10
+
+HEALTH GOALS: ${goalsSummary}
+
+READINESS FOR CHANGE: ${assessmentData.readiness}/10
+
+Assessment completed for: New patient consultation
+Date: ${new Date().toLocaleDateString()}
+
+Note: This is a preliminary assessment summary. Complete details will be reviewed by the care team.`;
+
+  document.getElementById('summaryContent').textContent = summary;
+  
+  const jsonData = {
+    patient: {
+      name: assessmentData.name,
+      email: assessmentData.email,
+      phone: assessmentData.phone
+    },
+    assessment: {
+      primaryConcern: assessmentData.primaryConcern,
+      symptoms: selectedSymptoms,
+      duration: assessmentData.duration,
+      severity: assessmentData.severity,
+      currentConditions: assessmentData.currentConditions,
+      medications: assessmentData.medications,
+      allergies: assessmentData.allergies,
+      lifestyle: {
+        diet: assessmentData.diet,
+        exercise: assessmentData.exercise,
+        sleep: assessmentData.sleep,
+        stress: assessmentData.stress
+      },
+      goals: assessmentData.goals,
+      previousAttempts: assessmentData.previousAttempts,
+      barriers: assessmentData.barriers,
+      readiness: assessmentData.readiness
+    },
+    meta: {
+      completedDate: new Date().toISOString(),
+      bookingObjective: "New patient consultation"
+    }
+  };
+  
+  document.getElementById('jsonView').textContent = JSON.stringify(jsonData, null, 2);
+}
+
+function copySummary() {
+  const summaryText = document.getElementById('summaryContent').textContent;
+  
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(summaryText).then(() => {
+      showCopyFeedback();
+    }).catch(() => {
+      fallbackCopy(summaryText);
+    });
+  } else {
+    fallbackCopy(summaryText);
+  }
+}
+
+function fallbackCopy(text) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    document.execCommand('copy');
+    showCopyFeedback();
+  } catch (err) {
+    alert('Unable to copy. Please manually select and copy the text.');
+  }
+  document.body.removeChild(textarea);
+}
+
+function showCopyFeedback() {
+  const feedback = document.getElementById('copyFeedback');
+  feedback.classList.add('active');
+  setTimeout(() => {
+    feedback.classList.remove('active');
+  }, 3000);
+}
+
+function printSummary() {
+  window.print();
+}
+
+function toggleJSON() {
+  const jsonView = document.getElementById('jsonView');
+  jsonView.classList.toggle('active');
+}
+
+function redirectToBooking() {
+  const bookingUrl = 'https://www.aroga.com/new-patients/';
+  
+  const summaryText = document.getElementById('summaryContent').textContent;
+  
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(summaryText).then(() => {
+      window.location.href = bookingUrl;
+    }).catch(() => {
+      window.location.href = bookingUrl;
+    });
+  } else {
+    window.location.href = bookingUrl;
+  }
+}
+
+window.addEventListener('scroll', function() {
+  const stickyCta = document.getElementById('stickyCta');
+  const landingPage = document.getElementById('landingPage');
+  
+  if (landingPage.classList.contains('hidden')) {
+    stickyCta.classList.remove('visible');
+    return;
+  }
+  
+  if (window.scrollY > 800) {
+    stickyCta.classList.add('visible');
+  } else {
+    stickyCta.classList.remove('visible');
+  }
+});
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this.click();
+    }
+  });
+});
+
+document.getElementById('name').addEventListener('input', function() {
+  document.getElementById('nameError').classList.remove('active');
+});
+
+document.getElementById('email').addEventListener('input', function() {
+  document.getElementById('emailError').classList.remove('active');
+});
+
+document.getElementById('phone').addEventListener('input', function() {
+  document.getElementById('phoneError').classList.remove('active');
+});
+</script>
+
+</body>
+</html>

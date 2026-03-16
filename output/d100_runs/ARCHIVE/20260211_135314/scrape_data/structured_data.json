@@ -1,0 +1,370 @@
+{
+  "run_metadata": {
+    "run_id": "8f9d2c1a-3b5e-4f8a-9d6c-1234567890ab",
+    "website_url": "https://ccfmed.com",
+    "started_at": "2024-01-19T12:00:00Z",
+    "finished_at": "2024-01-19T12:00:01Z",
+    "crawl_depth": 0,
+    "pages_visited": []
+  },
+  "practice": {
+    "legal_name": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "brand_name": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "tagline": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "specialty": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "practice_type": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "ownership": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    }
+  },
+  "locations": [
+    {
+      "type": "primary",
+      "address": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "phone": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "email": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "hours": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "accessibility": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    }
+  ],
+  "contact": {
+    "contact_form_url": {
+      "value": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "booking_url": {
+      "value": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "patient_portal_url": {
+      "value": null,
+      "sources": [],
+      "confidence": "low"
+    }
+  },
+  "providers": [],
+  "services": [],
+  "conditions": [],
+  "ideal_patient": {
+    "who_they_serve": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "demographics": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "situations": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "exclusions": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "referral_requirements": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    }
+  },
+  "clinical_approach": {
+    "differentiators": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "philosophy": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "diagnostic_methods": {
+      "value": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "technology": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "modalities": {
+      "value": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "claims": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    }
+  },
+  "patient_journey": {
+    "first_step_cta": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "new_patient_steps": {
+      "value": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "discovery_call": {
+      "offered": false,
+      "description": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "intake_forms": {
+      "available": false,
+      "links": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "consult_expectations": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "follow_up": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "memberships": {
+      "available": false,
+      "details": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    }
+  },
+  "pricing": {
+    "transparency": "NONE",
+    "prices": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "insurance_accepted": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "medicare_medicaid": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "self_pay": {
+      "available": false,
+      "details": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "superbills": {
+      "available": false,
+      "details": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "payment_plans": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "hsa_fsa": {
+      "available": false,
+      "details": {
+        "value": null,
+        "verbatim": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    }
+  },
+  "trust_signals": {
+    "testimonials": {
+      "present": false,
+      "location": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      },
+      "themes": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "case_studies": {
+      "present": false,
+      "urls": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "awards": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "associations": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "research_citations": {
+      "present": false,
+      "urls": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "disclaimers": {
+      "present": false,
+      "verbatim": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    }
+  },
+  "seo_intel": {
+    "primary_keywords": {
+      "value": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "location_modifiers": {
+      "value": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "conversion_ctas": {
+      "value": null,
+      "verbatim": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "lead_magnets": {
+      "present": false,
+      "urls": {
+        "value": null,
+        "sources": [],
+        "confidence": "low"
+      }
+    },
+    "forms": {
+      "value": null,
+      "sources": [],
+      "confidence": "low"
+    },
+    "tech_stack": {
+      "value": null,
+      "sources": [],
+      "confidence": "low"
+    }
+  },
+  "missing": [
+    {
+      "field": "all",
+      "reason": "No live site content accessible",
+      "impact": "critical"
+    }
+  ]
+}

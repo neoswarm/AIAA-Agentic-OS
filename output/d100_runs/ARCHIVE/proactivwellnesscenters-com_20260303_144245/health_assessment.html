@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Assessment — Proactive Wellness Centers | Vienna, VA</title>
+<style>
+  :root {
+    --primary: #918376;
+    --primary-dark: #6B5F54;
+    --primary-light: #B5A99E;
+    --primary-xlight: #F5F1EE;
+    --accent: #5EBACD;
+    --accent-light: #E8F7FA;
+    --bg: #FFFFFF;
+    --text: #1a1a1a;
+    --text-muted: #555;
+    --border: #e0d8d2;
+    --warn: #c0392b;
+    --success: #27ae60;
+    --radius: 10px;
+    --shadow: 0 2px 16px rgba(145,131,118,0.10);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f9f7f5; color: var(--text); line-height: 1.6; }
+
+  /* NAV */
+  nav { background: var(--primary-dark); padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 62px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
+  .nav-logo { color: #fff; font-weight: 700; font-size: 1.05rem; }
+  .nav-logo span { opacity: 0.68; font-weight: 400; font-size: 0.9rem; }
+  .nav-cta-btn { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 0.45rem 1.1rem; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: background 0.15s; font-family: inherit; }
+  .nav-cta-btn:hover { background: #4aa9bc; }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 55%, var(--primary-light) 100%); color: #fff; padding: 4.5rem 1.5rem 3.5rem; text-align: center; }
+  .hero-badge { display: inline-block; background: rgba(94,186,205,0.22); border: 1px solid rgba(94,186,205,0.4); border-radius: 20px; padding: 0.32rem 1rem; font-size: 0.8rem; margin-bottom: 1.3rem; letter-spacing: 0.06em; text-transform: uppercase; }
+  .hero h1 { font-size: clamp(1.65rem, 4vw, 2.7rem); font-weight: 800; line-height: 1.2; margin-bottom: 1rem; }
+  .hero h1 em { font-style: normal; color: #a8e8f3; }
+  .hero-sub { font-size: 1.05rem; opacity: 0.9; max-width: 580px; margin: 0 auto 2rem; }
+  .hero-stats { display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+  .hero-stat { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 0.8rem 1.2rem; text-align: center; min-width: 115px; }
+  .hero-stat strong { display: block; font-size: 1.3rem; font-weight: 800; }
+  .hero-stat small { font-size: 0.75rem; opacity: 0.8; line-height: 1.3; }
+  .btn-hero { display: inline-block; background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 1rem 2.4rem; font-weight: 700; font-size: 1rem; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 18px rgba(94,186,205,0.4); font-family: inherit; }
+  .btn-hero:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(94,186,205,0.5); }
+  .hero-note { font-size: 0.8rem; opacity: 0.7; margin-top: 0.9rem; }
+
+  /* SECTIONS */
+  .page-section { padding: 3.5rem 1.5rem; max-width: 960px; margin: 0 auto; }
+  .section-title { text-align: center; font-size: 1.55rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 0.45rem; }
+  .section-sub { text-align: center; color: var(--text-muted); margin-bottom: 2.5rem; font-size: 0.97rem; }
+  .divider { border: none; border-top: 1px solid var(--border); }
+
+  /* STEPS */
+  .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px,1fr)); gap: 1.5rem; }
+  .step-block { text-align: center; padding: 1.5rem 1rem; background: #fff; border-radius: var(--radius); border: 1.5px solid var(--border); }
+  .step-num { width: 46px; height: 46px; border-radius: 50%; background: var(--accent-light); color: #3a96a8; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.9rem; border: 2px solid var(--accent); }
+  .step-block h3 { font-size: 0.97rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 0.4rem; }
+  .step-block p { font-size: 0.86rem; color: var(--text-muted); }
+
+  /* CARDS */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap: 1.2rem; }
+  .svc-card { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.5rem 1.3rem; background: #fff; box-shadow: var(--shadow); transition: border-color 0.15s, transform 0.15s; }
+  .svc-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .svc-emoji { font-size: 2rem; margin-bottom: 0.7rem; }
+  .svc-card h3 { font-size: 1rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 0.4rem; }
+  .svc-card p { font-size: 0.86rem; color: var(--text-muted); line-height: 1.5; }
+
+  /* PROVIDER */
+  .provider-card { display: flex; gap: 1.5rem; align-items: flex-start; background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.8rem; box-shadow: var(--shadow); }
+  .provider-icon { width: 68px; height: 68px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-dark), var(--primary-light)); display: flex; align-items: center; justify-content: center; font-size: 1.9rem; flex-shrink: 0; }
+  .prov-title { color: var(--accent); font-size: 0.87rem; font-weight: 600; margin-bottom: 0.6rem; }
+  .provider-card h3 { font-weight: 700; color: var(--primary-dark); margin-bottom: 0.2rem; font-size: 1.08rem; }
+  .provider-card p { font-size: 0.87rem; color: var(--text-muted); line-height: 1.55; }
+
+  /* TRUST */
+  .trust-box { background: var(--primary-xlight); border-radius: 14px; padding: 2.5rem 2rem; text-align: center; }
+  .trust-box h2 { color: var(--primary-dark); font-size: 1.3rem; margin-bottom: 1.3rem; font-weight: 700; }
+  .trust-items { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+  .trust-item { display: flex; align-items: center; gap: 0.45rem; font-size: 0.88rem; font-weight: 600; color: var(--primary-dark); }
+  .trust-item::before { content: '✓'; background: var(--accent); color: #fff; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; }
+
+  /* ASSESSMENT */
+  #assessment-shell { display: none; background: #f9f7f5; min-height: 80vh; padding: 1.5rem 0 3rem; }
+  .assess-wrap { max-width: 660px; margin: 0 auto; padding: 0 1.2rem; }
+  .progress-track { background: var(--border); border-radius: 99px; height: 8px; }
+  .progress-fill { background: linear-gradient(90deg, var(--primary-dark), var(--accent)); border-radius: 99px; height: 8px; transition: width 0.4s ease; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted); margin-top: 0.4rem; margin-bottom: 1.5rem; }
+  .acard { background: #fff; border: 1.5px solid var(--border); border-radius: 14px; padding: 2rem 1.5rem; box-shadow: var(--shadow); display: none; }
+  .acard.active { display: block; }
+  .acard h2 { font-size: 1.2rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 0.35rem; }
+  .acard-desc { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+  .chip { display: inline-flex; align-items: center; padding: 0.48rem 1rem; border: 2px solid var(--border); border-radius: 99px; cursor: pointer; font-size: 0.87rem; font-weight: 500; color: var(--text); background: #fff; transition: all 0.15s; user-select: none; }
+  .chip:hover { border-color: var(--accent); background: var(--accent-light); color: var(--primary-dark); }
+  .chip.sel { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .chip input { display: none; }
+
+  .radio-col { display: flex; flex-direction: column; gap: 0.5rem; }
+  .r-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.65rem 1rem; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+  .r-item:hover { border-color: var(--accent); background: var(--accent-light); }
+  .r-item.sel { border-color: var(--accent); background: var(--accent-light); }
+  .r-item input[type=radio] { margin-top: 2px; accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; }
+  .r-item label { cursor: pointer; font-size: 0.91rem; line-height: 1.4; }
+
+  .slider-section { margin: 1.2rem 0; }
+  .slider-lbl { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.5rem; display: block; }
+  input[type=range] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+  .slider-disp { text-align: center; font-weight: 700; color: var(--accent); font-size: 1rem; margin-top: 0.4rem; }
+  .slider-ends { display: flex; justify-content: space-between; font-size: 0.76rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+  .fgroup { margin-bottom: 1.2rem; }
+  .fgroup label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.91rem; }
+  .req { color: var(--warn); }
+  .fgroup input, .fgroup select, .fgroup textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 0.7rem 0.9rem; font-size: 0.94rem; font-family: inherit; color: var(--text); background: #fff; transition: border-color 0.15s; }
+  .fgroup input:focus, .fgroup select:focus, .fgroup textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(94,186,205,0.14); }
+  .fgroup textarea { min-height: 95px; resize: vertical; }
+  .field-legend { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.7rem; display: block; color: var(--text); }
+
+  .snav { display: flex; gap: 1rem; margin-top: 2rem; justify-content: space-between; align-items: center; }
+  .btn-back { background: none; border: 1.5px solid var(--border); color: var(--text-muted); border-radius: 8px; padding: 0.7rem 1.4rem; font-size: 0.91rem; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-next { background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 0.75rem 2rem; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.15s; box-shadow: 0 2px 8px rgba(145,131,118,0.3); font-family: inherit; }
+  .btn-next:hover { background: var(--primary-dark); }
+
+  /* RESULTS */
+  #results-card { display: none; max-width: 680px; margin: 0 auto; padding: 1.5rem; }
+  .results-head { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: #fff; border-radius: 14px 14px 0 0; padding: 2rem 1.5rem 1.5rem; text-align: center; }
+  .results-head h2 { font-size: 1.4rem; margin-bottom: 0.4rem; }
+  .results-head p { opacity: 0.85; font-size: 0.91rem; }
+  .results-body { background: #fff; border: 1.5px solid var(--border); border-radius: 0 0 14px 14px; padding: 1.5rem; box-shadow: var(--shadow); }
+  .rsection { margin-bottom: 1.5rem; }
+  .rsection h3 { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); margin-bottom: 0.6rem; font-weight: 700; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .rtag { background: var(--primary-xlight); color: var(--primary-dark); border-radius: 99px; padding: 0.28rem 0.75rem; font-size: 0.82rem; font-weight: 600; }
+  .rtext { font-size: 0.9rem; color: var(--text); line-height: 1.55; }
+  .insight-box { background: var(--accent-light); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; margin: 1rem 0; }
+  .insight-box p { font-size: 0.9rem; color: #1a5760; line-height: 1.55; }
+  .disclaimer { font-size: 0.78rem; color: var(--text-muted); background: #fafafa; border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1rem; margin: 1.2rem 0; line-height: 1.55; }
+  .disclaimer strong { color: var(--warn); }
+  .ract { display: flex; flex-direction: column; gap: 0.8rem; }
+  .btn-book { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 1rem 2rem; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; transition: background 0.15s; box-shadow: 0 2px 8px rgba(94,186,205,0.35); font-family: inherit; width: 100%; }
+  .btn-book:hover { background: #4aa9bc; }
+  .btn-copy { background: #fff; color: var(--primary-dark); border: 2px solid var(--primary); border-radius: 8px; padding: 0.75rem 2rem; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; width: 100%; }
+  .btn-copy:hover { background: var(--primary-xlight); }
+  .copy-ok { display: none; color: var(--success); font-size: 0.88rem; text-align: center; font-weight: 600; }
+  .emerg-note { background: #fff5f5; border: 1px solid #f5c6c6; border-radius: 8px; padding: 0.9rem 1rem; font-size: 0.81rem; color: #7b0000; margin-top: 1rem; line-height: 1.5; }
+
+  .sticky-cta { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary-dark); padding: 0.9rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; z-index: 50; transform: translateY(100%); transition: transform 0.3s ease; box-shadow: 0 -2px 12px rgba(0,0,0,0.2); }
+  .sticky-cta.vis { transform: translateY(0); }
+  .sc-text { color: #fff; font-size: 0.87rem; opacity: 0.9; }
+  .sc-btn { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 0.58rem 1.3rem; font-weight: 700; font-size: 0.87rem; cursor: pointer; white-space: nowrap; font-family: inherit; }
+
+  footer { background: var(--primary-dark); color: rgba(255,255,255,0.68); text-align: center; padding: 2rem 1.5rem; font-size: 0.82rem; }
+  footer strong { color: #fff; }
+
+  @media (max-width: 600px) {
+    .provider-card { flex-direction: column; }
+    .snav { flex-direction: column-reverse; }
+    .btn-back, .btn-next { width: 100%; text-align: center; }
+    .hero-stats { gap: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Proactive Wellness Centers <span>| Vienna, VA</span></div>
+  <button class="nav-cta-btn" onclick="startAssessment()">Free Assessment</button>
+</nav>
+
+<div id="landing">
+
+  <section class="hero">
+    <div class="hero-badge">Vienna, Virginia &middot; Functional &amp; Preventive Medicine</div>
+    <h1>Your labs are <em>'normal'</em> —<br>but you still don't feel well.</h1>
+    <p class="hero-sub">Dr. Lynese Lawson, MD runs the tests most doctors never order — MTHFR, advanced cardiometabolic panels, hormone optimization, and metabolic root causes — to find what is actually driving your symptoms.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong>MD</strong><small>Board-Certified<br>Medical Director</small></div>
+      <div class="hero-stat"><strong>MTHFR</strong><small>Genetic Root<br>Cause Testing</small></div>
+      <div class="hero-stat"><strong>Heart</strong><small>Attack<br>Prevention</small></div>
+      <div class="hero-stat"><strong>Vienna VA</strong><small>Northern<br>Virginia</small></div>
+    </div>
+    <button class="btn-hero" onclick="startAssessment()">Take My Free Health Assessment</button>
+    <p class="hero-note">5-7 minutes &middot; No obligation &middot; Personalized summary for your consultation</p>
+  </section>
+
+  <hr class="divider">
+
+  <section class="page-section">
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-sub">A systematic path from unanswered symptoms to real diagnosis — built around your biology.</p>
+    <div class="steps-grid">
+      <div class="step-block"><div class="step-num">1</div><h3>Complete Assessment</h3><p>Answer questions about symptoms, history, and goals in about 5-7 minutes.</p></div>
+      <div class="step-block"><div class="step-num">2</div><h3>Get Your Summary</h3><p>Receive a personalized health overview to share with Dr. Lawson before your visit.</p></div>
+      <div class="step-block"><div class="step-num">3</div><h3>Book Consultation</h3><p>Schedule your new patient appointment at Proactive Wellness Centers, Vienna VA.</p></div>
+      <div class="step-block"><div class="step-num">4</div><h3>Real Answers</h3><p>Advanced testing, a precise diagnosis, and a personalized treatment protocol — not more "watch and wait."</p></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="page-section" style="padding-top:2.5rem;">
+    <h2 class="section-title">What We Treat</h2>
+    <p class="section-sub">Dr. Lawson addresses the full spectrum of metabolic, hormonal, and preventive health — with advanced testing conventional medicine rarely orders.</p>
+    <div class="cards-grid">
+      <div class="svc-card"><div class="svc-emoji">⚖️</div><h3>Medical Weight Loss</h3><p>Medically supervised weight management targeting the metabolic, hormonal, and genetic root causes of excess weight — not just calorie restriction or willpower.</p></div>
+      <div class="svc-card"><div class="svc-emoji">🧬</div><h3>MTHFR &amp; Genetic Health</h3><p>MTHFR gene mutation testing and personalized treatment — addressing elevated homocysteine, detox impairment, cardiovascular risk, and metabolic dysfunction.</p></div>
+      <div class="svc-card"><div class="svc-emoji">💪</div><h3>Testosterone &amp; TRT</h3><p>Comprehensive testosterone evaluation and replacement therapy for men. Low T, fatigue, body composition, libido — properly evaluated and addressed at the root.</p></div>
+      <div class="svc-card"><div class="svc-emoji">❤️</div><h3>Heart Attack Prevention</h3><p>Advanced cardiometabolic screening — Lp(a), inflammatory markers, insulin resistance, genetic cardiac risk — years before a crisis. Proactive by design.</p></div>
+      <div class="svc-card"><div class="svc-emoji">🔄</div><h3>Hormone Optimization</h3><p>Full hormone evaluation for men and women — DHEA, cortisol, estrogen, progesterone, thyroid — with bioidentical and evidence-based protocols.</p></div>
+      <div class="svc-card"><div class="svc-emoji">🦋</div><h3>Thyroid &amp; Adrenal</h3><p>Complete thyroid panel beyond just TSH — T3, T4, Reverse T3, antibodies, adrenal cortisol rhythm — to reveal what standard physicals routinely miss.</p></div>
+      <div class="svc-card"><div class="svc-emoji">🫁</div><h3>Gut Health</h3><p>Digestive dysfunction, leaky gut, food sensitivities, and microbiome imbalances — evaluated through functional testing and addressed with targeted protocols.</p></div>
+      <div class="svc-card"><div class="svc-emoji">🛡️</div><h3>Preventive &amp; Longevity</h3><p>Comprehensive preventive screening and proactive health management designed to keep you well — not just treat disease after it has already arrived.</p></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="page-section" style="padding-top:2.5rem;">
+    <h2 class="section-title">Meet Dr. Lynese Lawson, MD</h2>
+    <p class="section-sub">Founder &amp; Medical Director — Proactive Wellness Centers, Vienna, VA</p>
+    <div class="provider-card">
+      <div class="provider-icon">👩‍⚕️</div>
+      <div>
+        <h3>Dr. Lynese L. Lawson, MD</h3>
+        <div class="prov-title">Founder &amp; Medical Director — Proactive Wellness Centers, PLC</div>
+        <p>Dr. Lawson founded Proactive Wellness Centers on the premise that most health problems can be prevented or reversed when identified early and treated at the root cause. Based in Vienna, VA, she specializes in functional and preventive medicine — with deep expertise in MTHFR gene mutation, medical weight loss, testosterone replacement therapy, heart attack prevention, and comprehensive cardiometabolic screening. Dr. Lawson orders the tests most primary care physicians never consider, and interprets them in the full context of your hormones, metabolism, genetics, and cardiovascular risk simultaneously.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="page-section" style="padding-top:2.5rem; padding-bottom:2rem;">
+    <div class="trust-box">
+      <h2>Why Patients Choose Proactive Wellness Centers</h2>
+      <div class="trust-items">
+        <span class="trust-item">Board-Certified MD Functional Medicine</span>
+        <span class="trust-item">MTHFR and genetic testing on-site</span>
+        <span class="trust-item">Advanced cardiometabolic screening</span>
+        <span class="trust-item">Medically supervised weight loss</span>
+        <span class="trust-item">Testosterone and hormone optimization</span>
+        <span class="trust-item">Root cause — not symptom management</span>
+        <span class="trust-item">Serving Vienna, Fairfax and Northern VA</span>
+        <span class="trust-item">New patients welcome</span>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:2.5rem;">
+      <button class="btn-hero" onclick="startAssessment()">Start My Free Health Assessment</button>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-top:0.7rem;">No obligation &middot; 5-7 minutes &middot; Bring your personalized summary to your consultation</p>
+    </div>
+  </section>
+
+</div>
+
+<div id="assessment-shell">
+  <div class="assess-wrap">
+    <div style="margin-bottom:0.5rem;">
+      <div class="progress-track"><div class="progress-fill" id="pfill" style="width:0%"></div></div>
+      <div class="progress-meta"><span id="slabel">Step 1 of 9</span><span id="stime">~7 min remaining</span></div>
+    </div>
+
+    <div class="acard active" id="ac-1">
+      <h2>Let's start with your basics</h2>
+      <p class="acard-desc">Your information is used only to personalize your health summary and prepare Dr. Lawson's team for your consultation. It is never sold or shared with third parties.</p>
+      <div class="fgroup"><label for="fn">First Name <span class="req">*</span></label><input type="text" id="fn" placeholder="Your first name" autocomplete="given-name"></div>
+      <div class="fgroup"><label for="fe">Email Address <span class="req">*</span></label><input type="email" id="fe" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="fgroup"><label for="fp">Phone Number <span class="req">*</span></label><input type="tel" id="fp" placeholder="(703) 555-0000" autocomplete="tel"></div>
+      <div class="fgroup"><label for="fa">Age Range</label><select id="fa"><option value="">Select…</option><option>18-29</option><option>30-39</option><option>40-49</option><option>50-59</option><option>60-69</option><option>70+</option></select></div>
+      <div class="snav"><span></span><button class="btn-next" onclick="goNext(1)">Next &rarr;</button></div>
+    </div>
+
+    <div class="acard" id="ac-2">
+      <h2>What brings you to Proactive Wellness?</h2>
+      <p class="acard-desc">Select the primary area you most want addressed. You can add detail and secondary concerns throughout the assessment.</p>
+      <span class="field-legend">Primary concern (select one)</span>
+      <div class="radio-col" id="rg-concern">
+        <div class="r-item" onclick="pickRadio('rg-concern',this,'Weight Management and Obesity')"><input type="radio" name="concern"><label>⚖️ Weight Management and Obesity — stubborn weight, obesity, metabolic dysfunction</label></div>
+        <div class="r-item" onclick="pickRadio('rg-concern',this,'MTHFR and Genetic Health')"><input type="radio" name="concern"><label>🧬 MTHFR and Genetic Health — MTHFR gene mutation, elevated homocysteine, detox issues</label></div>
+        <div class="r-item" onclick="pickRadio('rg-concern',this,'Testosterone and Mens Health')"><input type="radio" name="concern"><label>💪 Testosterone and Men's Health — low T, TRT, libido, body composition, fatigue</label></div>
+        <div class="r-item" onclick="pickRadio('rg-concern',this,'Heart Attack Prevention')"><input type="radio" name="concern"><label>❤️ Heart Attack Prevention — cardiovascular risk, high blood pressure, cholesterol concerns</label></div>
+        <div class="r-item" onclick="pickRadio('rg-concern',this,'Hormone Imbalance')"><input type="radio" name="concern"><label>🔄 Hormone Imbalance — fatigue, mood changes, perimenopause, DHEA and cortisol</label></div>
+        <div class="r-item" onclick="pickRadio('rg-concern',this,'Thyroid and Adrenal')"><input type="radio" name="concern"><label>🦋 Thyroid and Adrenal — Hashimoto's, hypothyroidism, cortisol, adrenal fatigue</label></div>
+        <div class="r-item" onclick="pickRadio('rg-concern',this,'Fatigue and Low Energy')"><input type="radio" name="concern"><label>⚡ Fatigue and Low Energy — unexplained exhaustion, brain fog, poor recovery</label></div>
+        <div class="r-item" onclick="pickRadio('rg-concern',this,'Gut Health and Digestion')"><input type="radio" name="concern"><label>🫁 Gut Health and Digestion — bloating, IBS, food sensitivities, leaky gut</label></div>
+        <div class="r-item" onclick="pickRadio('rg-concern',this,'Preventive and Longevity Medicine')"><input type="radio" name="concern"><label>🛡️ Preventive and Longevity Medicine — optimizing health before disease develops</label></div>
+      </div>
+      <div class="snav"><button class="btn-back" onclick="goPrev(2)">&larr; Back</button><button class="btn-next" onclick="goNext(2)">Next &rarr;</button></div>
+    </div>
+
+    <div class="acard" id="ac-3">
+      <h2>Which symptoms are you currently experiencing?</h2>
+      <p class="acard-desc">Select all that apply. Even seemingly unrelated symptoms can reveal important patterns — Dr. Lawson looks at the complete picture together.</p>
+      <span class="field-legend">Current symptoms (select all that apply)</span>
+      <div class="chips" id="cg-symptoms">
+        <label class="chip"><input type="checkbox" value="Difficulty losing weight despite dieting">Difficulty losing weight</label>
+        <label class="chip"><input type="checkbox" value="Unexplained weight gain">Unexplained weight gain</label>
+        <label class="chip"><input type="checkbox" value="Fatigue not improved by sleep">Fatigue despite sleep</label>
+        <label class="chip"><input type="checkbox" value="Brain fog or poor concentration">Brain fog</label>
+        <label class="chip"><input type="checkbox" value="Low testosterone or low libido">Low libido or low T</label>
+        <label class="chip"><input type="checkbox" value="Hot flashes or night sweats">Hot flashes or night sweats</label>
+        <label class="chip"><input type="checkbox" value="Anxiety or mood instability">Anxiety or mood changes</label>
+        <label class="chip"><input type="checkbox" value="High blood pressure">High blood pressure</label>
+        <label class="chip"><input type="checkbox" value="Elevated cholesterol or triglycerides">High cholesterol or triglycerides</label>
+        <label class="chip"><input type="checkbox" value="Chest tightness or palpitations">Chest tightness or palpitations</label>
+        <label class="chip"><input type="checkbox" value="Chronic bloating or digestive issues">Chronic bloating</label>
+        <label class="chip"><input type="checkbox" value="Food sensitivities or reactions">Food sensitivities</label>
+        <label class="chip"><input type="checkbox" value="Joint pain or inflammation">Joint pain or inflammation</label>
+        <label class="chip"><input type="checkbox" value="Frequent illness or poor immune function">Frequent illness</label>
+        <label class="chip"><input type="checkbox" value="Hair loss or thinning">Hair loss or thinning</label>
+        <label class="chip"><input type="checkbox" value="Poor sleep or insomnia">Poor sleep or insomnia</label>
+        <label class="chip"><input type="checkbox" value="Elevated homocysteine (known)">Elevated homocysteine</label>
+        <label class="chip"><input type="checkbox" value="Irregular periods or severe PMS">Irregular periods or PMS</label>
+        <label class="chip"><input type="checkbox" value="Cold intolerance or dry skin">Cold intolerance or dry skin</label>
+        <label class="chip"><input type="checkbox" value="Sugar or carbohydrate cravings">Sugar or carb cravings</label>
+        <label class="chip"><input type="checkbox" value="Muscle weakness or decreased performance">Muscle weakness</label>
+        <label class="chip"><input type="checkbox" value="Headaches or migraines">Headaches or migraines</label>
+        <label class="chip"><input type="checkbox" value="Feeling overwhelmed or burned out">Burnout or overwhelm</label>
+        <label class="chip"><input type="checkbox" value="History of blood clots or cardiovascular events">Blood clots or cardiac history</label>
+      </div>
+      <div class="snav"><button class="btn-back" onclick="goPrev(3)">&larr; Back</button><button class="btn-next" onclick="goNext(3)">Next &rarr;</button></div>
+    </div>
+
+    <div class="acard" id="ac-4">
+      <h2>Duration and daily impact</h2>
+      <p class="acard-desc">How long you have had these symptoms and how much they affect your day helps Dr. Lawson distinguish acute from chronic patterns and prioritize the right testing approach.</p>
+      <span class="field-legend">How long have you had these symptoms? (select one)</span>
+      <div class="radio-col" id="rg-duration">
+        <div class="r-item" onclick="pickRadio('rg-duration',this,'Less than 3 months')"><input type="radio" name="duration"><label>Less than 3 months</label></div>
+        <div class="r-item" onclick="pickRadio('rg-duration',this,'3 to 12 months')"><input type="radio" name="duration"><label>3 to 12 months</label></div>
+        <div class="r-item" onclick="pickRadio('rg-duration',this,'1 to 3 years')"><input type="radio" name="duration"><label>1 to 3 years</label></div>
+        <div class="r-item" onclick="pickRadio('rg-duration',this,'More than 3 years')"><input type="radio" name="duration"><label>More than 3 years</label></div>
+        <div class="r-item" onclick="pickRadio('rg-duration',this,'Most of my life')"><input type="radio" name="duration"><label>Most of my life or as long as I can remember</label></div>
+      </div>
+      <div class="slider-section" style="margin-top:1.5rem;">
+        <span class="slider-lbl">How much do these symptoms limit your daily life?</span>
+        <input type="range" id="sl-severity" min="1" max="10" value="5" oninput="document.getElementById('sv-val').textContent=this.value">
+        <div class="slider-disp"><span id="sv-val">5</span>/10</div>
+        <div class="slider-ends"><span>1 — Barely noticeable</span><span>10 — Severely limiting</span></div>
+      </div>
+      <div class="snav"><button class="btn-back" onclick="goPrev(4)">&larr; Back</button><button class="btn-next" onclick="goNext(4)">Next &rarr;</button></div>
+    </div>
+
+    <div class="acard" id="ac-5">
+      <h2>Previous testing and diagnoses</h2>
+      <p class="acard-desc">Dr. Lawson specializes in running what others miss. Knowing what has already been checked helps identify the critical gaps in your workup.</p>
+      <span class="field-legend">Have you had any of the following? (select all that apply)</span>
+      <div class="chips" id="cg-testing">
+        <label class="chip"><input type="checkbox" value="Standard annual bloodwork (CBC, CMP, basic lipids)">Standard bloodwork</label>
+        <label class="chip"><input type="checkbox" value="TSH thyroid test only">TSH only (basic thyroid)</label>
+        <label class="chip"><input type="checkbox" value="Full thyroid panel (T3, T4, Reverse T3, antibodies)">Full thyroid panel</label>
+        <label class="chip"><input type="checkbox" value="MTHFR genetic testing">MTHFR genetic test</label>
+        <label class="chip"><input type="checkbox" value="Homocysteine blood test">Homocysteine test</label>
+        <label class="chip"><input type="checkbox" value="Advanced lipid panel (Lp(a), NMR, ApoB)">Advanced lipid panel (Lp(a), ApoB)</label>
+        <label class="chip"><input type="checkbox" value="Testosterone or full sex hormone panel">Testosterone or sex hormones</label>
+        <label class="chip"><input type="checkbox" value="Cortisol or adrenal testing">Cortisol or adrenal testing</label>
+        <label class="chip"><input type="checkbox" value="Insulin resistance or fasting insulin">Insulin resistance test</label>
+        <label class="chip"><input type="checkbox" value="C-reactive protein or inflammatory markers">CRP or inflammatory markers</label>
+        <label class="chip"><input type="checkbox" value="Gut or stool testing">Gut or stool testing</label>
+        <label class="chip"><input type="checkbox" value="No significant testing beyond standard annual labs">No significant testing done</label>
+      </div>
+      <div class="fgroup" style="margin-top:1.2rem;">
+        <label for="fd">Prior diagnoses relevant to your visit? (optional)</label>
+        <input type="text" id="fd" placeholder="e.g. MTHFR compound heterozygous, hypertension, hypothyroidism, prediabetes…">
+      </div>
+      <div class="snav"><button class="btn-back" onclick="goPrev(5)">&larr; Back</button><button class="btn-next" onclick="goNext(5)">Next &rarr;</button></div>
+    </div>
+
+    <div class="acard" id="ac-6">
+      <h2>Diet and daily habits</h2>
+      <p class="acard-desc">Lifestyle context shapes Dr. Lawson's protocol recommendations. There are no right or wrong answers — honesty produces the most useful plan.</p>
+      <span class="field-legend">How would you describe your current eating pattern? (select all that apply)</span>
+      <div class="chips" id="cg-diet">
+        <label class="chip"><input type="checkbox" value="Standard American diet">Standard American</label>
+        <label class="chip"><input type="checkbox" value="Low-carb or ketogenic">Low-carb or keto</label>
+        <label class="chip"><input type="checkbox" value="Paleo or whole foods">Paleo or whole foods</label>
+        <label class="chip"><input type="checkbox" value="Gluten-free">Gluten-free</label>
+        <label class="chip"><input type="checkbox" value="Dairy-free">Dairy-free</label>
+        <label class="chip"><input type="checkbox" value="Mediterranean-style">Mediterranean</label>
+        <label class="chip"><input type="checkbox" value="Plant-based or vegan">Plant-based or vegan</label>
+        <label class="chip"><input type="checkbox" value="Trying to improve but inconsistent">Trying but inconsistent</label>
+      </div>
+      <div style="margin-top:1.2rem;">
+        <span class="field-legend">How often do you exercise?</span>
+        <div class="radio-col" id="rg-exercise">
+          <div class="r-item" onclick="pickRadio('rg-exercise',this,'Sedentary — little to none')"><input type="radio" name="exercise"><label>Sedentary — little to no regular activity</label></div>
+          <div class="r-item" onclick="pickRadio('rg-exercise',this,'Light — 1 to 2 days per week')"><input type="radio" name="exercise"><label>Light — 1 to 2 days per week</label></div>
+          <div class="r-item" onclick="pickRadio('rg-exercise',this,'Moderate — 3 to 4 days per week')"><input type="radio" name="exercise"><label>Moderate — 3 to 4 days per week</label></div>
+          <div class="r-item" onclick="pickRadio('rg-exercise',this,'Active — 5 or more days per week')"><input type="radio" name="exercise"><label>Active — 5 or more days per week</label></div>
+        </div>
+      </div>
+      <div class="slider-section" style="margin-top:1.2rem;">
+        <span class="slider-lbl">Average nightly sleep (hours)</span>
+        <input type="range" id="sl-sleep" min="3" max="11" value="7" step="0.5" oninput="document.getElementById('sp-val').textContent=this.value">
+        <div class="slider-disp"><span id="sp-val">7</span> hours</div>
+        <div class="slider-ends"><span>3 hours</span><span>11 hours</span></div>
+      </div>
+      <div class="snav"><button class="btn-back" onclick="goPrev(6)">&larr; Back</button><button class="btn-next" onclick="goNext(6)">Next &rarr;</button></div>
+    </div>
+
+    <div class="acard" id="ac-7">
+      <h2>Current medications and supplements</h2>
+      <p class="acard-desc">A complete medication picture helps Dr. Lawson identify interactions, gaps in current management, and opportunities to potentially reduce pharmaceutical burden over time.</p>
+      <span class="field-legend">Currently taking any of the following? (select all that apply)</span>
+      <div class="chips" id="cg-meds">
+        <label class="chip"><input type="checkbox" value="Thyroid medication (Synthroid, levothyroxine, Armour, etc.)">Thyroid medication</label>
+        <label class="chip"><input type="checkbox" value="Testosterone replacement therapy (TRT)">TRT or testosterone</label>
+        <label class="chip"><input type="checkbox" value="Hormone therapy (HRT or BHRT)">HRT or BHRT</label>
+        <label class="chip"><input type="checkbox" value="Antidepressants or anti-anxiety medications">Antidepressants</label>
+        <label class="chip"><input type="checkbox" value="Metformin or GLP-1 (semaglutide, tirzepatide, etc.)">Metformin or GLP-1</label>
+        <label class="chip"><input type="checkbox" value="Statins or other cholesterol medications">Statins or cholesterol meds</label>
+        <label class="chip"><input type="checkbox" value="Blood pressure medications">Blood pressure meds</label>
+        <label class="chip"><input type="checkbox" value="Blood thinners or anticoagulants">Blood thinners</label>
+        <label class="chip"><input type="checkbox" value="Methylfolate or methyl B12 supplements">Methylfolate or methyl B12</label>
+        <label class="chip"><input type="checkbox" value="Vitamin D">Vitamin D</label>
+        <label class="chip"><input type="checkbox" value="Magnesium">Magnesium</label>
+        <label class="chip"><input type="checkbox" value="Omega-3 or fish oil">Omega-3 or fish oil</label>
+        <label class="chip"><input type="checkbox" value="Other supplements or herbs">Other supplements</label>
+        <label class="chip"><input type="checkbox" value="None currently">None currently</label>
+      </div>
+      <div class="fgroup" style="margin-top:1.2rem;">
+        <label for="fm">Any other medications or supplements worth noting? (optional)</label>
+        <input type="text" id="fm" placeholder="e.g. semaglutide 0.5mg weekly, liothyronine 25mcg, DHEA 25mg…">
+      </div>
+      <div class="snav"><button class="btn-back" onclick="goPrev(7)">&larr; Back</button><button class="btn-next" onclick="goNext(7)">Next &rarr;</button></div>
+    </div>
+
+    <div class="acard" id="ac-8">
+      <h2>What does success look like for you?</h2>
+      <p class="acard-desc">Your goals shape Dr. Lawson's approach. Knowing what matters most ensures your first consultation covers the right ground from the start.</p>
+      <span class="field-legend">My top health priorities are (select all that apply):</span>
+      <div class="chips" id="cg-goals">
+        <label class="chip"><input type="checkbox" value="Find the root cause of my symptoms">Find root cause</label>
+        <label class="chip"><input type="checkbox" value="Lose weight and improve metabolism">Lose weight or metabolism</label>
+        <label class="chip"><input type="checkbox" value="Understand and address my MTHFR gene mutation">Address MTHFR mutation</label>
+        <label class="chip"><input type="checkbox" value="Optimize testosterone and hormones">Optimize testosterone or hormones</label>
+        <label class="chip"><input type="checkbox" value="Prevent heart attack or stroke">Prevent heart attack or stroke</label>
+        <label class="chip"><input type="checkbox" value="Increase energy and mental sharpness">Increase energy and clarity</label>
+        <label class="chip"><input type="checkbox" value="Reduce or eliminate prescription medications">Reduce medications</label>
+        <label class="chip"><input type="checkbox" value="Improve gut health and digestion">Improve gut health</label>
+        <label class="chip"><input type="checkbox" value="Optimize thyroid function">Optimize thyroid function</label>
+        <label class="chip"><input type="checkbox" value="Achieve lasting weight management">Lasting weight management</label>
+        <label class="chip"><input type="checkbox" value="Optimize long-term health and longevity">Long-term health and longevity</label>
+        <label class="chip"><input type="checkbox" value="Improve sexual health and performance">Sexual health and performance</label>
+      </div>
+      <div class="slider-section" style="margin-top:1.5rem;">
+        <span class="slider-lbl">How ready are you to implement lifestyle changes as part of your treatment plan?</span>
+        <input type="range" id="sl-readiness" min="1" max="10" value="7" oninput="document.getElementById('rd-val').textContent=this.value">
+        <div class="slider-disp"><span id="rd-val">7</span>/10</div>
+        <div class="slider-ends"><span>1 — Just exploring</span><span>10 — Fully committed</span></div>
+      </div>
+      <div class="snav"><button class="btn-back" onclick="goPrev(8)">&larr; Back</button><button class="btn-next" onclick="goNext(8)">Next &rarr;</button></div>
+    </div>
+
+    <div class="acard" id="ac-9">
+      <h2>Anything else you would like Dr. Lawson to know?</h2>
+      <p class="acard-desc">Share your story in your own words — your history, what you have tried, what doctors have told you, what frustrates you most, or what you most hope to find here. Dr. Lawson reads these personally to prepare for your visit.</p>
+      <div class="fgroup">
+        <label for="fnarr">Your health journey (optional)</label>
+        <textarea id="fnarr" placeholder="Share anything: how long this has been going on, what treatments you have tried, what results you have seen or not seen, what diagnosis (if any) you have received, and what you most want answered at Proactive Wellness Centers…" style="min-height:120px;"></textarea>
+      </div>
+      <div class="fgroup">
+        <label for="fref">How did you hear about Proactive Wellness Centers?</label>
+        <select id="fref"><option value="">Select one…</option><option>Google search</option><option>Social media</option><option>Friend or family referral</option><option>Doctor or specialist referral</option><option>Online review site</option><option>Insurance directory</option><option>Other</option></select>
+      </div>
+      <div class="snav">
+        <button class="btn-back" onclick="goPrev(9)">&larr; Back</button>
+        <button class="btn-next" style="background:var(--success);" onclick="showResults()">See My Results ✓</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="results-card">
+  <div class="results-head">
+    <h2>Your Health Assessment Summary</h2>
+    <p>Prepared for <strong id="r-name">you</strong> &bull; Proactive Wellness Centers &bull; Vienna, VA</p>
+  </div>
+  <div class="results-body">
+    <div class="rsection"><h3>Primary Concern</h3><div class="tag-row"><span class="rtag" id="r-concern">—</span></div></div>
+    <div class="rsection"><h3>Symptoms Reported</h3><div class="tag-row" id="r-symptoms"></div></div>
+    <div class="rsection"><h3>Duration and Daily Impact</h3><p class="rtext" id="r-duration"></p></div>
+    <div class="rsection"><h3>Health Goals</h3><div class="tag-row" id="r-goals"></div></div>
+    <div class="insight-box"><p id="r-insight"></p></div>
+    <div class="rsection"><h3>Recommended Starting Point at PWC</h3><p class="rtext" id="r-recommendation"></p></div>
+    <div class="disclaimer"><strong>Important notice:</strong> This assessment is for informational and scheduling preparation purposes only. It does not constitute medical advice, diagnosis, or treatment. Your responses help Dr. Lawson's team prepare for your consultation — they are not a clinical evaluation. For medical emergencies, call 911 or visit your nearest emergency room. Individual results vary.</div>
+    <div class="ract">
+      <button class="btn-book" onclick="goBook()">Book My Consultation — Proactive Wellness Centers</button>
+      <button class="btn-copy" onclick="copySummary()">Copy My Health Summary</button>
+      <p class="copy-ok" id="copy-ok">Summary copied to clipboard!</p>
+    </div>
+    <div class="emerg-note"><strong>Emergency guidance:</strong> If you are experiencing chest pain, sudden shortness of breath, signs of stroke (face drooping, arm weakness, speech difficulty), or any other life-threatening emergency, call <strong>911</strong> immediately or go to your nearest emergency room. This tool does not replace emergency medical services.</div>
+  </div>
+  <div style="text-align:center;padding:2rem 1.5rem;">
+    <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:0.6rem;">Ready to book or have questions?</p>
+    <p style="font-size:1rem;font-weight:700;color:var(--primary-dark);">proactivwellnesscenters.com</p>
+    <p style="font-size:0.82rem;color:var(--text-muted);margin-top:0.3rem;">Proactive Wellness Centers — Vienna, Virginia</p>
+  </div>
+</div>
+
+<div class="sticky-cta" id="sticky-cta">
+  <div class="sc-text">Ready to find your root cause?</div>
+  <button class="sc-btn" onclick="startAssessment()">Free Assessment &rarr;</button>
+</div>
+
+<footer>
+  <strong>Proactive Wellness Centers, PLC</strong> &bull; Vienna, Virginia &bull; Dr. Lynese L. Lawson, MD<br>
+  <span>This website is for informational purposes only and does not constitute medical advice or create a provider-patient relationship.</span>
+</footer>
+
+<script>
+const S={step:0,total:9,name:'',email:'',phone:'',age:'',concern:'',symptoms:[],duration:'',severity:5,testing:[],diagnoses:'',diet:[],exercise:'',sleep:7,meds:[],otherMeds:'',goals:[],readiness:7,narrative:'',referral:''};
+
+window.addEventListener('scroll',()=>{
+  const inA=document.getElementById('assessment-shell').style.display!=='none';
+  const sc=document.getElementById('sticky-cta');
+  if(inA){sc.classList.remove('vis');return;}
+  sc.classList.toggle('vis',window.scrollY>380);
+});
+
+function startAssessment(){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('results-card').style.display='none';
+  document.getElementById('assessment-shell').style.display='block';
+  document.getElementById('sticky-cta').classList.remove('vis');
+  S.step=1; renderStep(1); window.scrollTo(0,0);
+}
+
+function renderStep(n){
+  document.querySelectorAll('.acard').forEach(c=>c.classList.remove('active'));
+  const c=document.getElementById('ac-'+n);
+  if(c)c.classList.add('active');
+  const pct=Math.round(((n-1)/S.total)*100);
+  document.getElementById('pfill').style.width=pct+'%';
+  document.getElementById('slabel').textContent='Step '+n+' of '+S.total;
+  document.getElementById('stime').textContent='~'+Math.max(1,S.total-n+1)+' min remaining';
+  window.scrollTo(0,0);
+}
+
+function goNext(from){
+  if(from===1){
+    const n=document.getElementById('fn').value.trim();
+    const e=document.getElementById('fe').value.trim();
+    const p=document.getElementById('fp').value.trim();
+    if(!n||!e||!p){alert('Please enter your name, email, and phone to continue.');return;}
+    S.name=n;S.email=e;S.phone=p;S.age=document.getElementById('fa').value;
+  }
+  if(from===4)S.severity=document.getElementById('sl-severity').value;
+  if(from===6)S.sleep=document.getElementById('sl-sleep').value;
+  if(from===8)S.readiness=document.getElementById('sl-readiness').value;
+  S.step=from+1;renderStep(S.step);
+}
+
+function goPrev(from){S.step=from-1;renderStep(S.step);}
+
+function pickRadio(gid,el,val){
+  document.getElementById(gid).querySelectorAll('.r-item').forEach(r=>r.classList.remove('sel'));
+  el.classList.add('sel');el.querySelector('input[type=radio]').checked=true;
+  if(gid==='rg-concern')S.concern=val;
+  if(gid==='rg-duration')S.duration=val;
+  if(gid==='rg-exercise')S.exercise=val;
+}
+
+document.addEventListener('click',e=>{
+  const chip=e.target.closest('.chip');if(!chip)return;
+  const inp=chip.querySelector('input[type=checkbox]');if(!inp)return;
+  inp.checked=!inp.checked;chip.classList.toggle('sel',inp.checked);
+  const par=chip.closest('[id]');if(par)collectGroup(par.id);
+});
+
+function collectGroup(cid){
+  if(!cid)return;const el=document.getElementById(cid);if(!el)return;
+  const vals=Array.from(el.querySelectorAll('input[type=checkbox]:checked')).map(x=>x.value);
+  if(cid==='cg-symptoms')S.symptoms=vals;
+  if(cid==='cg-testing')S.testing=vals;
+  if(cid==='cg-diet')S.diet=vals;
+  if(cid==='cg-meds')S.meds=vals;
+  if(cid==='cg-goals')S.goals=vals;
+}
+
+function showResults(){
+  S.narrative=document.getElementById('fnarr').value.trim();
+  S.referral=document.getElementById('fref').value;
+  S.diagnoses=document.getElementById('fd').value.trim();
+  S.otherMeds=document.getElementById('fm').value.trim();
+  ['cg-symptoms','cg-testing','cg-diet','cg-meds','cg-goals'].forEach(collectGroup);
+
+  document.getElementById('r-name').textContent=S.name||'you';
+  document.getElementById('r-concern').textContent=S.concern||'General wellness';
+
+  const sr=document.getElementById('r-symptoms');sr.innerHTML='';
+  (S.symptoms.length?S.symptoms:['Not specified']).forEach(s=>{
+    const t=document.createElement('span');t.className='rtag';t.textContent=s;sr.appendChild(t);
+  });
+
+  document.getElementById('r-duration').textContent=(S.duration||'Not specified')+' — Daily impact: '+S.severity+'/10.';
+
+  const gr=document.getElementById('r-goals');gr.innerHTML='';
+  (S.goals.length?S.goals:['General health improvement']).forEach(g=>{
+    const t=document.createElement('span');t.className='rtag';t.textContent=g;gr.appendChild(t);
+  });
+
+  const insights={
+    'Weight Management and Obesity':'Stubborn weight resistant to diet and exercise is almost never a willpower failure — it has biological drivers. Dr. Lawson specifically investigates insulin resistance, subclinical hypothyroidism, MTHFR-driven metabolic dysfunction, sex hormone imbalances, and cortisol dysregulation. Standard annual labs consistently miss the markers that matter for weight. The right panel changes the conversation entirely.',
+    'MTHFR and Genetic Health':'MTHFR gene mutation affects an estimated 40% of the population and is routinely ignored by conventional medicine. Its consequences — elevated homocysteine, impaired methylation, poor detoxification, cardiovascular risk, mood dysregulation, and difficulty losing weight — only become visible with targeted testing. Dr. Lawson interprets MTHFR status in the full context of your cardiometabolic and hormone picture.',
+    'Testosterone and Mens Health':'Standard testosterone ranges are population averages — not individual optimal levels. Many men with technically normal total testosterone still have low free testosterone, SHBG problems, or downstream hormonal imbalances driving fatigue, body composition changes, and low libido. Dr. Lawson evaluates the full picture: free and total T, SHBG, LH, FSH, estradiol, and related metabolic markers.',
+    'Heart Attack Prevention':'Standard lipid panels miss the most predictive cardiac risk markers. Lp(a) — a genetically elevated lipoprotein that dramatically increases heart attack risk — is almost never tested in standard care. Dr. Lawson also evaluates ApoB, hs-CRP, homocysteine, MTHFR-driven inflammation, and metabolic syndrome markers. Prevention starts with knowing what you are actually dealing with.',
+    'Hormone Imbalance':'Hormone symptoms in both men and women are rarely caused by a single deficiency. Cortisol, DHEA, sex hormones, thyroid, and insulin interact in complex feedback loops — which is why treating one hormone in isolation rarely produces lasting results. Dr. Lawson evaluates the entire hormonal ecosystem, including often-overlooked adrenal and thyroid conversion issues.',
+    'Thyroid and Adrenal':'TSH alone misses subclinical hypothyroidism, T4-to-T3 conversion problems, and Hashimoto autoimmune activity. Adrenal cortisol rhythm also profoundly affects thyroid function, energy, and weight. Dr. Lawson evaluates the full thyroid axis — TSH, Free T3, Free T4, Reverse T3, TPO and TG antibodies — alongside adrenal and metabolic context.',
+    'default':'Based on your responses, the symptom pattern you describe suggests multiple interconnected biological drivers that standard medicine is unlikely to have fully investigated. Dr. Lawson specializes in running the comprehensive panels — MTHFR, advanced cardiometabolic, full hormonal, and metabolic — that conventional care consistently skips, and interpreting results in the context of your complete picture.'
+  };
+  document.getElementById('r-insight').textContent=insights[S.concern]||insights['default'];
+
+  const recs={
+    'Weight Management and Obesity':'New patient consultation with Dr. Lawson — including comprehensive metabolic evaluation: fasting insulin, insulin resistance markers, full thyroid panel, sex hormone profile, MTHFR testing if not done, and inflammatory markers. Medical weight management protocol built around your specific biological drivers.',
+    'MTHFR and Genetic Health':'New patient consultation with MTHFR genotyping (if not previously done), homocysteine level, methylation markers, and full cardiometabolic panel. Dr. Lawson interprets MTHFR status in the context of hormones, cardiovascular risk, and metabolic function — not in isolation.',
+    'Testosterone and Mens Health':'New patient consultation with comprehensive male hormone panel: total and free testosterone, SHBG, LH, FSH, estradiol, DHEA-S, and PSA. Plus metabolic markers including insulin resistance and thyroid function. TRT evaluation and protocol design if clinically indicated.',
+    'Heart Attack Prevention':'Comprehensive cardiovascular prevention consultation — including advanced lipid fractionation (Lp(a), ApoB, NMR), hs-CRP, homocysteine, MTHFR status, fasting insulin, and full metabolic evaluation. Dr. Lawson builds personalized prevention protocols years before conventional medicine would intervene.',
+    'default':'New patient consultation with Dr. Lawson — comprehensive intake, targeted testing order based on your specific symptom pattern and concerns, and a personalized treatment plan. Dr. Lawson specializes in advanced diagnostics that go significantly beyond standard annual labs.'
+  };
+  document.getElementById('r-recommendation').textContent=recs[S.concern]||recs['default'];
+
+  document.getElementById('assessment-shell').style.display='none';
+  document.getElementById('results-card').style.display='block';
+  window.scrollTo(0,0);
+}
+
+function copySummary(){
+  const lines=['HEALTH ASSESSMENT SUMMARY','Proactive Wellness Centers, PLC — Vienna, VA','Dr. Lynese L. Lawson, MD','='.repeat(50),'Name: '+(S.name||'—'),'Email: '+(S.email||'—'),'Phone: '+(S.phone||'—'),'Age: '+(S.age||'—'),'','PRIMARY CONCERN: '+(S.concern||'—'),'','SYMPTOMS:',S.symptoms.length?S.symptoms.join(', '):'None specified','','DURATION: '+(S.duration||'—'),'DAILY IMPACT: '+S.severity+'/10','','PRIOR TESTING: '+(S.testing.length?S.testing.join(', '):'None noted'),'PRIOR DIAGNOSES: '+(S.diagnoses||'None listed'),'','CURRENT DIET: '+(S.diet.length?S.diet.join(', '):'—'),'EXERCISE: '+(S.exercise||'—'),'SLEEP: '+S.sleep+' hours/night','','MEDICATIONS/SUPPLEMENTS: '+(S.meds.length?S.meds.join(', '):'None'),S.otherMeds?'Other: '+S.otherMeds:'','','HEALTH GOALS: '+(S.goals.length?S.goals.join(', '):'—'),'READINESS: '+S.readiness+'/10','',S.narrative?('PATIENT NOTES:\n'+S.narrative):'','','REFERRAL SOURCE: '+(S.referral||'—'),'','-- For scheduling preparation only. Not medical advice. --'].filter(l=>l!==undefined).join('\n');
+  navigator.clipboard.writeText(lines).then(()=>{
+    const ok=document.getElementById('copy-ok');ok.style.display='block';setTimeout(()=>ok.style.display='none',3000);
+  }).catch(()=>{const ta=document.createElement('textarea');ta.value=lines;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Summary copied!');});
+}
+
+function goBook(){
+  const params=new URLSearchParams({name:S.name,email:S.email,phone:S.phone,concern:S.concern,symptoms:S.symptoms.slice(0,5).join('; '),duration:S.duration,severity:S.severity});
+  const base='https://proactivwellnesscenters.com/new-patients/';
+  try{window.open(base+'?'+params.toString(),'_blank');}catch(e){window.open(base,'_blank');}
+}
+</script>
+</body>
+</html>

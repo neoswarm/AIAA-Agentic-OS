@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Health Assessment — Integrated Health of Indiana, Inc.</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#036797;
+  --accent:#0b6088;
+  --bg:#06080f;
+  --s1:#0b1120;
+  --s2:#101828;
+  --s3:#1a2540;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.13);
+  --text:#eef2ff;
+  --muted:#7a92b8;
+  --muted2:#9db4cc;
+  --r:14px;
+  --r2:20px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+img{display:block;max-width:100%;}
+a{color:inherit;text-decoration:none;}
+button,input,select,textarea{font-family:'Inter',sans-serif;}
+
+/* ── Top progress bar ── */
+#top-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--brand),var(--accent));z-index:1000;transition:width .5s ease;pointer-events:none;width:0%;}
+
+/* ── Nav ── */
+nav{position:sticky;top:0;z-index:200;background:rgba(6,8,15,.93);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border);}
+.nav-in{max-width:860px;margin:0 auto;height:60px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;}
+.nav-logo-wrap{display:flex;align-items:center;gap:11px;min-width:0;max-width:65%;}
+.nav-logo-wrap img{height:34px;width:auto;object-fit:contain;max-width:200px;}
+.nav-logo-text{font-size:.97rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none;}
+.nav-book{background:var(--brand);color:#fff;font-weight:700;font-size:.88rem;padding:9px 18px;border-radius:50px;border:none;flex-shrink:0;transition:filter .15s;}
+.nav-book:hover{filter:brightness(1.18);}
+
+/* ── Hero ── */
+.hero{padding:64px 22px 52px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(3,100,160,.12) 0%,transparent 65%);pointer-events:none;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid var(--border2);border-radius:50px;padding:6px 16px;font-size:.83rem;font-weight:600;color:var(--muted);margin-bottom:22px;}
+.pulse{width:7px;height:7px;background:var(--accent);border-radius:50%;animation:pulse 2.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.8);}}
+.hero h1{font-size:clamp(1.85rem,5.5vw,2.9rem);font-weight:900;line-height:1.1;margin-bottom:18px;letter-spacing:-.025em;color:#fff;}
+.hero h1 mark{background:linear-gradient(135deg,var(--brand),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:normal;background-attachment:fixed;}
+.hero-sub{font-size:clamp(.98rem,2.2vw,1.17rem);color:var(--muted2);max-width:540px;margin:0 auto 32px;line-height:1.82;}
+.hero-cta{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff;font-size:1.1rem;font-weight:800;padding:17px 40px;border-radius:50px;border:none;box-shadow:0 0 48px rgba(3,103,151,.35),0 8px 28px rgba(0,0,0,.45);transition:transform .15s,box-shadow .15s;cursor:pointer;}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 0 64px rgba(3,103,151,.55),0 12px 36px rgba(0,0,0,.5);}
+.proof-strip{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:20px;}
+.proof-item{font-size:.88rem;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.proof-item::before{content:'✓';color:var(--accent);font-weight:800;}
+
+/* ── Empathy callout ── */
+.empathy{background:linear-gradient(135deg,rgba(3,103,151,.1),rgba(11,96,136,.05));border:1px solid rgba(3,103,151,.22);border-radius:var(--r2);padding:32px 28px;max-width:680px;margin:0 auto 0;text-align:center;}
+.empathy p{font-size:1.05rem;color:var(--muted2);line-height:1.82;}
+.empathy strong{color:var(--text);font-weight:700;}
+
+/* ── Trust strip ── */
+.trust{background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:22px 20px;}
+.trust-in{max-width:860px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.trust-item{text-align:center;}
+.trust-num{font-size:1.5rem;font-weight:900;color:#fff;}
+.trust-lbl{font-size:.78rem;color:var(--muted);margin-top:2px;line-height:1.4;}
+@media(max-width:480px){.trust-in{grid-template-columns:repeat(2,1fr);}}
+
+/* ── Conditions section ── */
+.section{padding:56px 22px;}
+.section-in{max-width:860px;margin:0 auto;}
+.sec-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);font-weight:700;margin-bottom:8px;}
+.sec-title{font-size:clamp(1.5rem,3.5vw,2rem);font-weight:900;line-height:1.2;margin-bottom:10px;}
+.sec-sub{color:var(--muted2);font-size:1rem;max-width:560px;line-height:1.75;margin-bottom:32px;}
+.cond-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:11px;}
+.cond-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px 14px;display:flex;align-items:center;gap:13px;transition:border-color .2s,transform .2s;}
+.cond-card:hover{border-color:var(--brand);transform:translateY(-2px);}
+.cond-ic{width:38px;height:38px;min-width:38px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--accent));display:flex;align-items:center;justify-content:center;font-size:1.15rem;}
+.cond-name{font-size:.9rem;font-weight:700;color:#fff;line-height:1.3;}
+
+/* ── Assessment section ── */
+#assessment{padding:52px 22px 72px;background:linear-gradient(180deg,var(--bg) 0%,var(--s1) 100%);}
+.assess-wrap{max-width:640px;margin:0 auto;}
+.assess-hdr{text-align:center;margin-bottom:26px;}
+.assess-card{background:var(--s2);border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.4);}
+
+/* ── Step header ── */
+.step-hdr{padding:22px 28px 0;}
+.prog-wrap{height:5px;background:rgba(255,255,255,.06);border-radius:3px;margin-bottom:16px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--brand),var(--accent));border-radius:3px;transition:width .45s cubic-bezier(.4,0,.2,1);}
+.step-meta{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:14px;}
+.step-num{font-size:.8rem;font-weight:700;color:var(--muted);background:rgba(255,255,255,.06);padding:3px 10px;border-radius:50px;}
+.step-label{font-size:.8rem;color:var(--muted);}
+
+/* ── Step body ── */
+.step-body{padding:26px 28px 32px;}
+
+/* Entrance animation */
+.step-body{animation:fadeSlide .25s ease;}
+@keyframes fadeSlide{from{opacity:0;transform:translateX(12px);}to{opacity:1;transform:translateX(0);}}
+
+.step-q{font-size:clamp(1.2rem,3vw,1.55rem);font-weight:800;color:#fff;line-height:1.22;margin-bottom:7px;}
+.step-hint{font-size:.93rem;color:var(--muted2);line-height:1.68;margin-bottom:20px;}
+.step-highlight{color:var(--accent);font-weight:700;}
+
+/* ── Option buttons ── */
+.opt-btn{width:100%;display:flex;align-items:center;gap:14px;background:var(--s1);border:2px solid var(--border);border-radius:var(--r);padding:14px 17px;margin-bottom:9px;cursor:pointer;color:var(--text);font-size:.97rem;font-weight:600;text-align:left;transition:border-color .15s,background .15s,transform .1s;}
+.opt-btn:hover{border-color:var(--brand);background:rgba(3,103,151,.07);transform:translateX(2px);}
+.opt-btn.sel{border-color:var(--accent);background:rgba(3,103,151,.12);}
+.opt-btn.sel .opt-check{opacity:1;}
+.opt-ic{font-size:1.2rem;width:26px;text-align:center;flex-shrink:0;}
+.opt-check{width:20px;height:20px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#000;font-weight:800;flex-shrink:0;margin-left:auto;opacity:0;transition:opacity .15s;}
+
+/* ── Chip grid (symptoms) ── */
+.chip-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{background:var(--s1);border:2px solid var(--border);border-radius:50px;padding:8px 15px;font-size:.87rem;font-weight:600;color:var(--muted2);cursor:pointer;transition:all .15s;line-height:1.3;user-select:none;}
+.chip:hover{border-color:var(--brand);color:#fff;}
+.chip.sel{border-color:var(--accent);background:rgba(3,103,151,.14);color:#fff;}
+.chip-hint{font-size:.78rem;color:var(--muted);margin-top:12px;line-height:1.5;}
+
+/* ── Form fields ── */
+.field{margin-bottom:13px;}
+.field label{display:block;font-size:.85rem;font-weight:600;color:var(--muted);margin-bottom:6px;}
+.field .sub{font-size:.78rem;color:var(--muted);font-weight:400;}
+.field input,.field select,.field textarea{width:100%;background:var(--s1);border:2px solid var(--border);border-radius:var(--r);padding:12px 14px;font-size:.95rem;color:#fff;outline:none;transition:border-color .15s;-webkit-appearance:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand);}
+.field input::placeholder,.field textarea::placeholder{color:var(--muted);}
+.field select option{background:#0b1120;}
+
+/* ── Nav buttons ── */
+.nav-btns{display:flex;gap:10px;margin-top:24px;}
+.btn-back{flex:0 0 88px;background:var(--s1);border:1px solid var(--border);color:var(--muted);border-radius:var(--r);padding:13px;font-size:.92rem;font-weight:600;transition:border-color .15s,color .15s;}
+.btn-back:hover{border-color:var(--brand);color:#fff;}
+.btn-next{flex:1;background:linear-gradient(135deg,var(--brand),var(--accent));border:none;color:#fff;border-radius:var(--r);padding:14px;font-size:1rem;font-weight:800;box-shadow:0 4px 20px rgba(3,103,151,.3);transition:filter .15s,box-shadow .15s;}
+.btn-next:hover:not(:disabled){filter:brightness(1.1);box-shadow:0 6px 28px rgba(3,103,151,.45);}
+.btn-next:disabled{opacity:.38;cursor:not-allowed;filter:none;}
+.btn-full{width:100%;background:linear-gradient(135deg,var(--brand),var(--accent));border:none;color:#fff;border-radius:var(--r);padding:15px;font-size:1.05rem;font-weight:800;box-shadow:0 4px 20px rgba(3,103,151,.3);transition:filter .15s;cursor:pointer;}
+.btn-full:hover{filter:brightness(1.1);}
+
+/* ── Empathy snack bar (shows after concern selected) ── */
+.empathy-snack{background:linear-gradient(135deg,rgba(3,103,151,.12),rgba(11,144,152,.08));border:1px solid rgba(3,103,151,.25);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;font-size:.9rem;color:var(--muted2);line-height:1.65;display:none;}
+.empathy-snack.show{display:block;}
+.empathy-snack strong{color:var(--accent);}
+
+/* ── Impact checkboxes ── */
+.impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+@media(max-width:380px){.impact-grid{grid-template-columns:1fr;}}
+.impact-card{background:var(--s1);border:2px solid var(--border);border-radius:var(--r);padding:14px 13px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:center;gap:11px;}
+.impact-card:hover{border-color:var(--brand);}
+.impact-card.sel{border-color:var(--accent);background:rgba(3,103,151,.1);}
+.impact-ic{font-size:1.3rem;flex-shrink:0;}
+.impact-label{font-size:.88rem;font-weight:700;color:#fff;line-height:1.3;}
+.impact-sub{font-size:.76rem;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* ── Slider ── */
+.slider-wrap{margin:6px 0 20px;}
+.slider-track{position:relative;height:8px;background:rgba(255,255,255,.07);border-radius:4px;margin:18px 0 6px;}
+input[type=range]{-webkit-appearance:none;width:100%;background:transparent;cursor:pointer;position:absolute;top:50%;transform:translateY(-50%);height:8px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.4);border:3px solid var(--s2);}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.4);border:3px solid var(--s2);}
+.slider-labels{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);}
+.slider-val{text-align:center;font-size:1.1rem;font-weight:800;color:var(--accent);margin-top:8px;}
+
+/* ── Goals grid ── */
+.goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.goal-card{background:var(--s1);border:2px solid var(--border);border-radius:var(--r);padding:13px;cursor:pointer;transition:border-color .15s,background .15s;text-align:center;}
+.goal-card:hover{border-color:var(--brand);}
+.goal-card.sel{border-color:var(--accent);background:rgba(3,103,151,.1);}
+.goal-ic{font-size:1.4rem;margin-bottom:4px;}
+.goal-lbl{font-size:.85rem;font-weight:700;color:#fff;line-height:1.3;}
+
+/* ── Assessment footer disclaimer ── */
+.assess-foot{font-size:.75rem;color:var(--muted);text-align:center;padding:13px 20px 16px;line-height:1.6;border-top:1px solid var(--border);}
+
+/* ── RESULTS ── */
+.result-wrap{padding:28px 28px 32px;}
+.score-ring-wrap{text-align:center;margin-bottom:22px;}
+.score-ring{width:112px;height:112px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;position:relative;}
+.ring-inner{position:absolute;inset:13px;background:var(--s2);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-score{font-size:1.6rem;font-weight:900;color:#fff;line-height:1;}
+.ring-unit{font-size:.6rem;color:var(--muted);font-weight:600;margin-top:1px;}
+.result-label{font-size:1.35rem;font-weight:800;color:#fff;margin-bottom:3px;}
+.result-sub{font-size:.88rem;color:var(--muted2);}
+
+/* Summary box */
+.result-summary{background:linear-gradient(135deg,rgba(3,103,151,.1),rgba(11,144,152,.06));border:1px solid rgba(3,103,151,.22);border-radius:var(--r);padding:18px;margin-bottom:16px;line-height:1.8;font-size:.94rem;}
+.result-summary strong{color:var(--accent);}
+
+/* Treatment match */
+.treatment-cards{margin-bottom:18px;}
+.treat-title{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:10px;}
+.treat-card{display:flex;align-items:flex-start;gap:12px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:8px;}
+.treat-ic{font-size:1.2rem;flex-shrink:0;margin-top:1px;}
+.treat-name{font-size:.9rem;font-weight:700;color:#fff;margin-bottom:2px;}
+.treat-desc{font-size:.82rem;color:var(--muted2);line-height:1.55;}
+
+/* Symptom tags */
+.sym-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+.sym-tag{background:rgba(3,103,151,.12);border:1px solid rgba(3,103,151,.25);border-radius:50px;padding:4px 12px;font-size:.82rem;color:#c8dff0;}
+
+/* Booking CTA */
+.book-cta{display:block;width:100%;background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff;border:none;border-radius:var(--r);padding:18px;font-size:1.05rem;font-weight:800;text-align:center;box-shadow:0 6px 28px rgba(3,103,151,.4);transition:filter .15s,transform .15s;margin-bottom:12px;cursor:pointer;}
+.book-cta:hover{filter:brightness(1.1);transform:translateY(-1px);}
+
+/* Next steps timeline */
+.next-steps{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px;}
+.next-step{display:flex;align-items:flex-start;gap:13px;padding:10px 0;}
+.next-step:not(:last-child){border-bottom:1px solid var(--border);}
+.step-num-badge{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--accent));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#fff;flex-shrink:0;margin-top:1px;}
+.step-desc strong{font-size:.9rem;color:#fff;display:block;margin-bottom:2px;}
+.step-desc span{font-size:.82rem;color:var(--muted2);}
+
+/* Copy box */
+.copy-box{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:13px 13px 13px 15px;margin-bottom:12px;position:relative;}
+.copy-box pre{font-size:.8rem;color:var(--muted2);white-space:pre-wrap;line-height:1.6;font-family:'Inter',sans-serif;padding-right:56px;}
+.copy-btn{position:absolute;top:9px;right:9px;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:.78rem;color:var(--muted);cursor:pointer;transition:all .15s;}
+.copy-btn:hover{color:#fff;background:rgba(255,255,255,.12);}
+
+/* ── About section ── */
+.about-sec{background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:52px 22px;}
+.about-in{max-width:860px;margin:0 auto;display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:start;}
+.about-left{min-width:0;}
+.about-avatar{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--accent));display:flex;align-items:center;justify-content:center;font-size:1.9rem;margin-bottom:14px;}
+.about-name{font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:2px;}
+.about-role{font-size:.83rem;color:var(--accent);font-weight:600;margin-bottom:12px;line-height:1.4;}
+.about-bio{font-size:.9rem;color:var(--muted2);line-height:1.78;}
+.feats{display:flex;flex-direction:column;gap:10px;}
+.feat{display:flex;align-items:flex-start;gap:12px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:15px;}
+.feat .fi{font-size:1.15rem;flex-shrink:0;}
+.feat h4{font-size:.88rem;font-weight:700;color:#fff;margin-bottom:2px;}
+.feat p{font-size:.8rem;color:var(--muted2);line-height:1.55;}
+@media(max-width:600px){
+  .about-in{grid-template-columns:1fr;}
+  .hero{padding:46px 18px 38px;}
+  .step-hdr,.step-body{padding-left:18px;padding-right:18px;}
+  .result-wrap{padding:22px 18px 26px;}
+  .nav-btns{margin-top:20px;}
+  .goal-grid,.impact-grid{grid-template-columns:1fr;}
+}
+
+/* ── Float book (mobile) ── */
+.float-book{position:fixed;bottom:16px;right:16px;z-index:300;background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff;font-weight:800;font-size:.85rem;padding:12px 20px;border-radius:50px;border:none;box-shadow:0 4px 20px rgba(3,103,151,.5);display:none;cursor:pointer;}
+@media(max-width:600px){.float-book{display:block;}}
+
+/* ── Footer ── */
+footer{padding:26px 22px;text-align:center;border-top:1px solid var(--border);}
+footer p{font-size:.82rem;color:var(--muted);line-height:1.7;}
+
+/* ── Confetti ── */
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:0;}}
+</style>
+</head>
+<body>
+
+<div id="top-bar"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-in">
+    <div class="nav-logo-wrap">
+      <img src="https://cdn.prod.website-files.com/62b084560eca255967494e5d/62cd039bdfafc034c7b9afed_Main%20Nav%20Logo%201100x238_IHI%20Logo.png" alt="Integrated Health of Indiana, Inc."
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="nav-logo-text">Integrated Health of Indiana, Inc.</span>
+    </div>
+    <a href="https://integratedhealthofindiana.com" target="_blank" rel="noopener" class="nav-book">📅 Book a Call</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"><span class="pulse"></span>Free Assessment · Integrated Health of Indiana, Inc.</div>
+  <h1>You've been living with this<br><mark>long enough.</mark></h1>
+  <p class="hero-sub">If you've tried everything and still don't have answers — you're in the right place. Take 4 minutes to tell us what's going on, and we'll show you exactly how we'd approach your case.</p>
+  <button class="hero-cta" onclick="scrollToAssess()">
+    🩺 Start My Free Assessment
+  </button>
+  <div class="proof-strip">
+    <span class="proof-item">4 minutes</span>
+    <span class="proof-item">100% private</span>
+    <span class="proof-item">Personalised results</span>
+    <span class="proof-item">No obligation</span>
+  </div>
+</section>
+
+<!-- TRUST STRIP -->
+<div class="trust">
+  <div class="trust-in">
+    <div class="trust-item"><div class="trust-num">Root</div><div class="trust-lbl">Cause approach</div></div>
+    <div class="trust-item"><div class="trust-num">Lab</div><div class="trust-lbl">Based diagnostics</div></div>
+    <div class="trust-item"><div class="trust-num">Free</div><div class="trust-lbl">Initial assessment</div></div>
+    <div class="trust-item"><div class="trust-num">🔒</div><div class="trust-lbl">Fully private</div></div>
+  </div>
+</div>
+
+<!-- CONDITIONS SECTION -->
+<section class="section">
+  <div class="section-in">
+    <div class="sec-label">What we help with</div>
+    <h2 class="sec-title">Conditions we regularly see</h2>
+    <p class="sec-sub">We use a root-cause approach to uncover what's really driving your symptoms — not just manage them.</p>
+    <div class="cond-grid" id="cond-grid"><!-- Rendered by JS --></div>
+  </div>
+</section>
+
+<!-- ASSESSMENT -->
+<section id="assessment">
+  <div class="assess-wrap">
+    <div class="assess-hdr">
+      <div class="sec-label" style="margin-bottom:6px;">Your Personalised Health Assessment</div>
+      <h2 class="sec-title">Tell us exactly what's going on</h2>
+      <p class="sec-sub" style="max-width:480px;margin:8px auto 0;">The more honest you are, the better we can match you to the right approach. Everything you share is confidential.</p>
+    </div>
+
+    <div class="assess-card">
+      <div class="step-hdr">
+        <div class="prog-wrap"><div class="prog-fill" id="prog-fill"></div></div>
+        <div class="step-meta">
+          <div class="step-num" id="step-num">Step 1 of 6</div>
+          <div class="step-label" id="step-lbl">Getting started</div>
+        </div>
+      </div>
+      <div id="step-body" class="step-body"><!-- Rendered by JS --></div>
+      <div class="assess-foot">
+        🔒 Shared only with Integrated Health of Indiana, Inc.'s clinical team · Never sold or shared publicly ·
+        Not a substitute for professional medical advice
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about-sec">
+  <div class="about-in">
+    <div class="about-left">
+      <div class="about-avatar">👨‍⚕️</div>
+      <div class="about-name">Dr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP</div>
+      <div class="about-role">Integrated Health of Indiana, Inc.</div>
+      <p class="about-bio">We use a root-cause, lab-driven approach to health — combining functional medicine, natural therapies, and personalised care plans. You're not a set of symptoms. You're a whole person, and we'll treat you like one.</p>
+    </div>
+    <div class="feats">
+      <div class="feat"><div class="fi">🔬</div><div><h4>Advanced Lab Testing</h4><p>We dig far deeper than standard blood panels — finding the real picture behind your symptoms.</p></div></div>
+      <div class="feat"><div class="fi">🎯</div><div><h4>Root Cause Medicine</h4><p>We don't guess or mask. We find what's driving your symptoms and build a plan to resolve it.</p></div></div>
+      <div class="feat"><div class="fi">🤝</div><div><h4>You're in the Room</h4><p>Every decision is made with you, not for you. We explain everything in plain language.</p></div></div>
+      <div class="feat"><div class="fi">⏱️</div><div><h4>Ongoing Support</h4><p>Our team stays accessible throughout your care — not just at booked appointments.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FLOAT BOOK -->
+<a href="https://integratedhealthofindiana.com" target="_blank" rel="noopener" class="float-book">📅 Book a Call</a>
+
+<!-- FOOTER -->
+<footer>
+  <p>
+    <strong>Integrated Health of Indiana, Inc.</strong><br>
+    <a href="https://integratedhealthofindiana.com" target="_blank" style="color:var(--accent);">Book a Consultation →</a><br>
+    <span style="font-size:.72rem;margin-top:6px;display:block;">Built exclusively for Integrated Health of Indiana, Inc. · Not publicly indexed · Not medical advice.</span>
+  </p>
+</footer>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const C = {
+  practice: "Integrated Health of Indiana, Inc.",
+  doctor:   "Dr. Trevor Miller, D.C., IFMCP, L.Ac, CFMP",
+  logo:     "https://cdn.prod.website-files.com/62b084560eca255967494e5d/62cd039bdfafc034c7b9afed_Main%20Nav%20Logo%201100x238_IHI%20Logo.png",
+  booking:  "https://integratedhealthofindiana.com",
+  primary:  "#036797",
+  accent:   "#0b6088",
+  slug:     "integrated-health-of-indiana-inc",
+};
+
+// Brand colors
+document.documentElement.style.setProperty('--brand',  C.primary || '#1a6bff');
+document.documentElement.style.setProperty('--accent', C.accent  || '#00c2ff');
+
+// Concerns + symptoms from phase2
+const CONCERNS = (function(){try{return ["Headaches & Migraines", "Back & Spine Pain", "Gut & Digestive Health", "Hormone Imbalance", "Fatigue & Low Energy", "Functional Medicine"];}catch(e){return [];}})();
+const SYMPTOMS = (function(){try{return {"Headaches & Migraines": ["Frequent headaches", "Migraines with aura", "Tension headaches", "Light or sound sensitivity", "Neck tension with headache", "Morning headaches", "Headaches after screens"], "Back & Spine Pain": ["Lower back pain", "Upper back pain", "Sciatica or leg pain", "Stiffness in the morning", "Pain after sitting", "Disc or nerve pain", "Posture problems"], "Gut & Digestive Health": ["Bloating after meals", "Constipation or diarrhea", "IBS symptoms", "Abdominal cramping", "Gas or discomfort", "Food sensitivities", "Acid reflux or heartburn"], "Hormone Imbalance": ["Unexplained fatigue", "Weight gain or difficulty losing weight", "Mood swings or anxiety", "Irregular periods", "Hot flashes", "Low libido", "Sleep problems"], "Fatigue & Low Energy": ["Tired even after sleep", "Brain fog or poor concentration", "Afternoon energy crashes", "Low motivation", "Feeling burned out", "Reliance on caffeine", "Waking unrefreshed"], "Functional Medicine": ["Chronic symptoms without clear diagnosis", "Multiple medications without relief", "Autoimmune condition", "Thyroid issues", "Lab results in range but still sick", "Want root cause (not just symptom treatment)", "Interest in nutrition-based healing"]};}catch(e){return {};}})();
+
+const DEFAULT_CONCERNS = [
+  "Fatigue & Low Energy","Gut & Digestive Health","Hormone Imbalance",
+  "Headaches & Migraines","Back & Spine Pain","Chronic Pain & Inflammation"
+];
+const ACTIVE_CONCERNS = (CONCERNS && CONCERNS.length) ? CONCERNS : DEFAULT_CONCERNS;
+
+// ─── CONCERN → TREATMENT MAP ──────────────────────────────────────────────────
+// Maps each concern keyword to: empathy copy, typical services, lab clues
+const TREAT_MAP = [
+  {
+    keys:['headache','migraine'],
+    empathy:"Many patients with chronic headaches come to us frustrated — they've tried pain meds, seen neurologists, and still don't have a real answer. <strong>You're not imagining it. Something is driving this.</strong>",
+    services:[
+      {ic:'🔬',name:'Functional Lab Review',desc:'We test inflammatory markers, thyroid, hormones, and nutrient levels that standard doctors often skip — common drivers of chronic headaches.'},
+      {ic:'🦴',name:'Chiropractic Assessment',desc:'Cervical misalignment and muscle tension in the neck are often direct triggers. We assess and correct structural contributors.'},
+      {ic:'💉',name:'Nutritional IV Therapy',desc:'IV magnesium, B vitamins, and anti-inflammatory nutrients can break chronic headache cycles where oral supplements fail.'},
+    ],
+    next:"We'll start with a thorough intake, order specific labs, and identify structural contributors in your first visit."
+  },
+  {
+    keys:['back','spine','chiro','sciatica'],
+    empathy:"Back pain that doesn't fully resolve with rest, physio, or standard treatment often has an underlying structural or inflammatory cause that's being missed. <strong>There's usually a reason it keeps coming back.</strong>",
+    services:[
+      {ic:'🦴',name:'Chiropractic Care',desc:'We identify and correct spinal misalignments, disc issues, and postural contributors using advanced adjustment techniques.'},
+      {ic:'⚡',name:'Shockwave Therapy',desc:'High-energy shockwave therapy breaks down scar tissue and stimulates healing in chronic soft tissue and disc conditions — often where nothing else has worked.'},
+      {ic:'🔬',name:'Functional Medicine',desc:'Chronic inflammation and nutrient deficiencies (like vitamin D) dramatically affect recovery. We address both the structure and the biology.'},
+    ],
+    next:"Your first visit includes a structural assessment, postural analysis, and a customised care plan."
+  },
+  {
+    keys:['gut','ibs','digest','bowel','bloat'],
+    empathy:"IBS and gut issues are among the most misunderstood conditions in medicine. \"Eat more fibre\" and \"manage stress\" aren't answers. <strong>Your gut is trying to tell you something specific — we help translate it.</strong>",
+    services:[
+      {ic:'🔬',name:'Advanced GI Functional Testing',desc:'We test for SIBO, dysbiosis, leaky gut, parasites, and inflammatory markers — the real picture of what\'s happening in your digestive system.'},
+      {ic:'🥗',name:'Personalised Nutrition Protocol',desc:'Food as medicine. We build a specific elimination and reintroduction plan based on your test results, not generic advice.'},
+      {ic:'💊',name:'Functional Medicine',desc:'We address the root cause — whether it\'s an overgrowth, food sensitivity, motility issue, or autoimmune trigger.'},
+    ],
+    next:"We'll do a comprehensive gut assessment, order targeted stool and breath testing, and build a clear protocol."
+  },
+  {
+    keys:['hormone','thyroid','period','menopause','pms','libido'],
+    empathy:"Hormone imbalances are incredibly common and chronically undertreated. Standard labs often say \"normal\" — but <strong>there's a big difference between \"in range\" and \"optimal.\"</strong>",
+    services:[
+      {ic:'⚖️',name:'Comprehensive Hormone Panel',desc:'We go far beyond basic TSH — testing free T3/T4, cortisol, estrogen, progesterone, testosterone, DHEA, and more.'},
+      {ic:'🔬',name:'Functional Medicine Protocol',desc:'We create personalised hormone support plans using bioidentical hormones, targeted supplementation, and lifestyle modifications.'},
+      {ic:'🥗',name:'Nutritional Support',desc:'Specific nutrients dramatically affect hormone synthesis and clearance. We identify and fill the gaps your body needs.'},
+    ],
+    next:"Your intake includes a full hormone + thyroid panel. We review results with you in detail and build a customised plan."
+  },
+  {
+    keys:['fatigue','energy','tired','exhausted','adrenal','burnout'],
+    empathy:"Exhaustion that rest doesn't fix isn't laziness — it's a signal. <strong>Fatigue is one of the most complex presentations in functional medicine</strong>, and it almost always has multiple contributing layers.",
+    services:[
+      {ic:'⚡',name:'Energy & Mitochondrial Panel',desc:'We test cortisol patterns, thyroid, iron, B12, vitamin D, blood sugar regulation, and mitochondrial function — the usual suspects behind chronic fatigue.'},
+      {ic:'💉',name:'Nutritional IV Therapy',desc:'Direct IV delivery of energy nutrients (B vitamins, glutathione, magnesium) bypasses absorption issues and can restore cellular energy rapidly.'},
+      {ic:'🔬',name:'Root Cause Protocol',desc:'Whether it\'s adrenal dysfunction, thyroid issues, chronic infection, or nutrient deficiency — we find it and fix it.'},
+    ],
+    next:"We start with a thorough history and comprehensive lab panel to build a clear picture of why your energy is depleted."
+  },
+  {
+    keys:['functional','lab','root','autoimmune','inflammation','chronic'],
+    empathy:"If you've been told your labs are \"normal\" but you still don't feel well — that's one of the most common reasons people come to us. <strong>Standard testing misses a lot. Functional testing doesn't.</strong>",
+    services:[
+      {ic:'🔬',name:'Functional Lab Analysis',desc:'We use advanced reference ranges and a deeper panel than standard medicine — identifying patterns before they become diagnoses.'},
+      {ic:'🛡️',name:'Autoimmune & Inflammation Assessment',desc:'We identify inflammatory triggers, immune dysregulation, and early autoimmune patterns that standard care often misses entirely.'},
+      {ic:'🎯',name:'Personalised Care Plan',desc:'Every plan is built from your specific lab results, health history, and goals — not a generic protocol.'},
+    ],
+    next:"We'll do a deep dive into your history, order targeted labs, and give you a comprehensive picture of what's driving your symptoms."
+  },
+];
+
+function getTreatment(concern) {
+  if (!concern) return TREAT_MAP[TREAT_MAP.length-1];
+  const c = concern.toLowerCase();
+  return TREAT_MAP.find(t => t.keys.some(k => c.includes(k))) || TREAT_MAP[TREAT_MAP.length-1];
+}
+
+// ─── ICON MAP ─────────────────────────────────────────────────────────────────
+const ICON_MAP = {
+  headache:'🧠',migraine:'🧠',back:'🦴',spine:'🦴',chiro:'🦴',gut:'🫁',
+  digest:'🫁',ibs:'🫁',bowel:'🫁',hormone:'⚖️',thyroid:'⚖️',period:'⚖️',
+  fatigue:'⚡',energy:'⚡',tired:'⚡',weight:'🏃',metabolism:'🏃',brain:'🧬',
+  cognitive:'🧬',fog:'🧬',pain:'💊',functional:'🔬',immune:'🛡️',autoimmune:'🛡️',
+  anxiety:'🫀',stress:'🫀',sleep:'😴',insomnia:'😴',pediatric:'👶',child:'👶',
+  shockwave:'⚡',iv:'💉',nutrition:'🥗',inflammation:'🔥',chronic:'🔁',
+};
+function getIcon(name){
+  const n=(name||'').toLowerCase();
+  for(const[k,v] of Object.entries(ICON_MAP)){if(n.includes(k))return v;}
+  return '💙';
+}
+
+// ─── CONDITIONS GRID ──────────────────────────────────────────────────────────
+(function(){
+  const g=document.getElementById('cond-grid');
+  if(!g) return;
+  g.innerHTML=ACTIVE_CONCERNS.map(c=>`
+    <div class="cond-card">
+      <div class="cond-ic">${getIcon(c)}</div>
+      <div class="cond-name">${esc(c)}</div>
+    </div>
+  `).join('');
+})();
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const SK='hbl_app_'+(C.slug||'x');
+let S={};
+try{S=JSON.parse(localStorage.getItem(SK)||'{}');}catch(e){S={};}
+S.step=S.step||1;
+
+function save(){try{localStorage.setItem(SK,JSON.stringify(S));}catch(e){}}
+function scrollToAssess(){document.getElementById('assessment').scrollIntoView({behavior:'smooth',block:'start'});}
+
+// ─── PROGRESS ─────────────────────────────────────────────────────────────────
+const TOTAL=6;
+const STEP_NAMES=['','About you','What\'s wrong','Symptoms','Impact','History','Goals'];
+
+function updateProg(){
+  const pct=Math.min(((S.step-1)/TOTAL)*100,100);
+  const f=document.getElementById('prog-fill');
+  const n=document.getElementById('step-num');
+  const l=document.getElementById('step-lbl');
+  if(f) f.style.width=pct+'%';
+  if(n) n.textContent=S.step>TOTAL?'Complete ✓':'Step '+S.step+' of '+TOTAL;
+  if(l) l.textContent=STEP_NAMES[Math.min(S.step,STEP_NAMES.length-1)]||'';
+  // top scroll progress
+  const bar=document.getElementById('top-bar');
+  if(bar) bar.style.width=pct+'%';
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render(){
+  updateProg();
+  const el=document.getElementById('step-body');
+  if(!el) return;
+  el.style.animation='none';
+  el.offsetHeight; // force reflow
+  el.style.animation='';
+
+  if(S.step===1) renderStep1(el);
+  else if(S.step===2) renderStep2(el);
+  else if(S.step===3) renderStep3(el);
+  else if(S.step===4) renderStep4(el);
+  else if(S.step===5) renderStep5(el);
+  else if(S.step===6) renderStep6(el);
+  else renderResults(el);
+}
+
+// ── Step 1: Who you are ──────────────────────────────────────────────────────
+function renderStep1(el){
+  el.innerHTML=`
+    <h2 class="step-q">Let's start with your name</h2>
+    <p class="step-hint">This helps us personalise your results and make your first conversation with ${esc(C.practice)} as efficient as possible.</p>
+    <div class="field"><label>First name <span class="sub">(required)</span></label>
+      <input id="f-name" type="text" placeholder="e.g. Sarah" value="${esc(S.name||'')}" autocomplete="given-name">
+    </div>
+    <div class="field"><label>Email address <span class="sub">(optional — we'll send your results)</span></label>
+      <input id="f-email" type="email" placeholder="you@example.com" value="${esc(S.email||'')}" autocomplete="email">
+    </div>
+    <div class="field"><label>Phone number <span class="sub">(optional — if you'd prefer a call)</span></label>
+      <input id="f-phone" type="tel" placeholder="+1 (555) 000-0000" value="${esc(S.phone||'')}" autocomplete="tel">
+    </div>
+    <div class="field"><label>Best way to reach you</label>
+      <select id="f-contact">
+        <option value="" ${!S.contact?'selected':''}>Choose one…</option>
+        <option value="email" ${S.contact==='email'?'selected':''}>Email</option>
+        <option value="phone" ${S.contact==='phone'?'selected':''}>Phone call</option>
+        <option value="text"  ${S.contact==='text'?'selected':''}>Text message</option>
+      </select>
+    </div>
+    <button class="btn-full" onclick="goStep1()">Continue — tell us what's going on →</button>
+  `;
+}
+function goStep1(){
+  const n=document.getElementById('f-name').value.trim();
+  if(!n){alert('Please enter your first name to continue.');return;}
+  S.name=n;
+  S.email=document.getElementById('f-email').value.trim();
+  S.phone=document.getElementById('f-phone').value.trim();
+  S.contact=document.getElementById('f-contact').value;
+  S.step=2;save();render();
+}
+
+// ── Step 2: Primary concern ──────────────────────────────────────────────────
+function renderStep2(el){
+  const sel=S.concern||'';
+  el.innerHTML=`
+    <h2 class="step-q">Hi ${esc(S.name||'there')} — what's your biggest health concern right now?</h2>
+    <p class="step-hint">Choose the one that's affecting your daily life the most. We'll get specific in the next step.</p>
+    <div id="concern-list">
+      ${ACTIVE_CONCERNS.map(c=>`
+        <button class="opt-btn ${sel===c?'sel':''}" onclick="selConcern(this,'${escJ(c)}')" data-v="${escJ(c)}">
+          <span class="opt-ic">${getIcon(c)}</span>
+          <span style="flex:1;">${esc(c)}</span>
+          <span class="opt-check">✓</span>
+        </button>
+      `).join('')}
+    </div>
+    <div id="empathy-box" class="empathy-snack ${sel?'show':''}">
+      ${sel ? buildEmpathy(sel) : ''}
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="S.step=1;save();render();">← Back</button>
+      <button class="btn-next" id="n2" ${!sel?'disabled':''} onclick="if(!S.concern){alert('Please select a concern.');return;}S.symptom_idxs=[];S.step=3;save();render();">Next →</button>
+    </div>
+  `;
+}
+function buildEmpathy(concern){
+  const t=getTreatment(concern);
+  return t ? t.empathy : '';
+}
+function selConcern(btn,val){
+  document.querySelectorAll('.opt-btn').forEach(b=>{b.classList.remove('sel');});
+  btn.classList.add('sel');
+  S.concern=val;save();
+  const nb=document.getElementById('n2'); if(nb) nb.disabled=false;
+  const box=document.getElementById('empathy-box');
+  if(box){box.innerHTML=buildEmpathy(val);box.classList.add('show');}
+}
+
+// ── Step 3: Symptoms ─────────────────────────────────────────────────────────
+function renderStep3(el){
+  const syms = getSymptomsFor(S.concern);
+  const selIs = S.symptom_idxs||[];
+  S._syms=syms;save();
+  el.innerHTML=`
+    <h2 class="step-q">Which of these apply to you?</h2>
+    <p class="step-hint">Concern: <span class="step-highlight">${esc(S.concern)}</span></p>
+    <p class="step-hint" style="margin-top:-12px;">Select everything that sounds familiar — even symptoms you've had for years and stopped mentioning to doctors.</p>
+    <div class="chip-grid">
+      ${syms.map((s,i)=>`<div class="chip ${selIs.includes(i)?'sel':''}" onclick="toggleChip(this,${i})">${esc(s)}</div>`).join('')}
+    </div>
+    <p class="chip-hint">👆 Select as many as apply — the more you share, the more accurate your results.</p>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="S.step=2;save();render();">← Back</button>
+      <button class="btn-next" onclick="S.step=4;save();render();">Next →</button>
+    </div>
+  `;
+}
+
+function getSymptomsFor(concern){
+  // First use phase2 data if available
+  if(SYMPTOMS[concern]&&SYMPTOMS[concern].length>0) return SYMPTOMS[concern];
+  // Fallback per-keyword detailed lists
+  const c=(concern||'').toLowerCase();
+  if(c.includes('headache')||c.includes('migraine')) return [
+    'Daily or near-daily headaches','Migraines lasting 4+ hours','Aura before headache (vision changes, tingling)',
+    'Light sensitivity during headache','Sound or smell sensitivity','Nausea or vomiting with headache',
+    'Neck tension or stiffness accompanying headaches','Headaches triggered by food or hormones',
+    'Headaches after screen time','Morning headaches on waking','Medication not working anymore',
+    'Headaches affecting work or sleep','Weather-triggered headaches','Headaches getting more frequent over time'
+  ];
+  if(c.includes('back')||c.includes('spine')||c.includes('chiro')) return [
+    'Lower back pain (constant or recurring)','Upper back or shoulder pain','Pain radiating down the leg (sciatica)',
+    'Neck pain or stiffness','Numbness or tingling in arms or legs','Disc-related pain or diagnosis',
+    'Morning stiffness that takes time to loosen','Pain worsens with sitting for long periods',
+    'Can\'t stand for extended periods','Pain disrupting sleep','Posture issues or forward head tilt',
+    'Previous injury that never fully healed','Pain after exercise or activity','Limited range of motion'
+  ];
+  if(c.includes('gut')||c.includes('ibs')||c.includes('digest')) return [
+    'Bloating after eating (even small meals)','Alternating constipation and diarrhoea','Urgent bowel movements',
+    'Abdominal cramping or pain','Excessive gas or trapped wind','Food sensitivities or intolerances',
+    'Acid reflux or heartburn','Nausea after eating','Feeling full very quickly',
+    'Mucus in stool','Undigested food in stool','Worsens with stress',
+    'Had stomach bug that never fully resolved','Symptoms better on holiday (travel change)',
+    'Already tried dietary changes without lasting relief'
+  ];
+  if(c.includes('hormone')||c.includes('thyroid')) return [
+    'Unexplained fatigue despite enough sleep','Difficulty losing weight despite diet and exercise',
+    'Gaining weight without obvious cause','Irregular periods or heavy bleeding','Painful periods (cramping)',
+    'PMS that affects daily life (mood, pain, cravings)','Hot flushes or night sweats',
+    'Low libido or no interest in sex','Mood swings, irritability, or anxiety',
+    'Hair thinning or excessive loss','Dry skin or brittle nails','Cold all the time (poor temperature regulation)',
+    'Brain fog or memory issues','Depression that doesn\'t respond fully to treatment',
+    'Labs say \'normal\' but you still don\'t feel well'
+  ];
+  if(c.includes('fatigue')||c.includes('energy')) return [
+    'Tired even after a full night\'s sleep','Waking up unrefreshed or exhausted',
+    'Afternoon energy crash (especially 2–4pm)','Need coffee or caffeine just to function',
+    'Low motivation — things feel harder than they should','Brain fog: difficulty concentrating or word-finding',
+    'Memory worse than before','Feeling burned out or emotionally flat',
+    'Exercise makes you feel worse (post-exertional malaise)','Recovery from activity takes much longer',
+    'Getting sick frequently (low immune resilience)','Feeling overwhelmed by normal workload',
+    'Social withdrawal due to low energy','Anxiety or depression alongside fatigue',
+    'Labs keep coming back \'normal\' despite how you feel'
+  ];
+  return [
+    'Symptoms affecting daily life significantly','Not feeling like myself for an extended period',
+    'Tried conventional treatments without lasting results','Multiple symptoms happening together',
+    'Symptoms worsening over time','Lab results that are \'normal\' but you still feel unwell',
+    'Fatigue or low energy','Digestive discomfort','Mood or cognitive changes',
+    'Pain or physical symptoms','Sleep disturbances','Unexplained weight changes'
+  ];
+}
+
+// ── Step 4: Life impact ──────────────────────────────────────────────────────
+function renderStep4(el){
+  const selImpact=S.impact_areas||[];
+  const areas=[
+    {v:'sleep',ic:'😴',lbl:'Sleep',sub:'Disrupted or unrefreshing sleep'},
+    {v:'work',ic:'💼',lbl:'Work / Focus',sub:'Affecting productivity or concentration'},
+    {v:'relationships',ic:'❤️',lbl:'Relationships',sub:'Tension, withdrawal, or less connection'},
+    {v:'movement',ic:'🏃',lbl:'Movement',sub:'Pain or fatigue limiting activity'},
+    {v:'mood',ic:'🧠',lbl:'Mood / Mental',sub:'Anxiety, depression, or emotional strain'},
+    {v:'social',ic:'👥',lbl:'Social life',sub:'Cancelling plans or avoiding gatherings'},
+    {v:'diet',ic:'🍽️',lbl:'Diet',sub:'Food restrictions or digestive discomfort'},
+    {v:'confidence',ic:'🪞',lbl:'Self-image',sub:'How you feel about yourself physically'},
+  ];
+  el.innerHTML=`
+    <h2 class="step-q">How is this affecting your daily life?</h2>
+    <p class="step-hint">Select every area that's been impacted. <span class="step-highlight">This matters</span> — it helps us understand the full picture, not just the physical symptoms.</p>
+    <div class="impact-grid">
+      ${areas.map(a=>`
+        <div class="impact-card ${selImpact.includes(a.v)?'sel':''}" onclick="toggleImpact(this,'${a.v}')">
+          <div class="impact-ic">${a.ic}</div>
+          <div>
+            <div class="impact-label">${a.lbl}</div>
+            <div class="impact-sub">${a.sub}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="margin-top:20px;">
+      <label style="font-size:.85rem;font-weight:700;color:var(--muted);display:block;margin-bottom:8px;">On a scale of 1–10, how much is this affecting your quality of life?</label>
+      <div class="slider-wrap">
+        <div class="slider-track">
+          <input type="range" id="severity-slider" min="1" max="10" value="${S.severity||5}"
+            oninput="S.severity=parseInt(this.value);save();document.getElementById('sev-val').textContent=this.value+'/10';">
+        </div>
+        <div class="slider-labels"><span>Mild impact</span><span>Life-limiting</span></div>
+        <div class="slider-val" id="sev-val">${S.severity||5}/10</div>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="S.step=3;save();render();">← Back</button>
+      <button class="btn-next" onclick="S.step=5;save();render();">Next →</button>
+    </div>
+  `;
+}
+function toggleImpact(el,v){
+  if(!S.impact_areas) S.impact_areas=[];
+  const i=S.impact_areas.indexOf(v);
+  if(i===-1) S.impact_areas.push(v); else S.impact_areas.splice(i,1);
+  el.classList.toggle('sel',S.impact_areas.includes(v));
+  save();
+}
+
+// ── Step 5: History ──────────────────────────────────────────────────────────
+function renderStep5(el){
+  const durOpts=[
+    {v:'under-3m',i:'📅',l:'Under 3 months',s:'A recent development'},
+    {v:'3m-1y',i:'🗓️',l:'3 months – 1 year',s:'Building for a while'},
+    {v:'1y-3y',i:'⏳',l:'1 – 3 years',s:'A longer pattern'},
+    {v:'3y+',i:'🔁',l:'More than 3 years',s:'Chronic and ongoing'},
+  ];
+  const careOpts=[
+    {v:'none',l:"I haven't seen anyone yet — this is my first step"},
+    {v:'gp',l:"Yes — I've seen a GP or conventional specialist"},
+    {v:'natural',l:"Yes — I've tried natural or alternative practitioners"},
+    {v:'multiple',l:"Yes — I've seen multiple providers without lasting relief"},
+    {v:'functional',l:"Yes — I've tried functional or integrative medicine"},
+  ];
+  const dur=S.duration||'';
+  const care=S.prior_care||'';
+  el.innerHTML=`
+    <h2 class="step-q">A little background on your journey</h2>
+    <p class="step-hint">Understanding what you've already tried helps ${esc(C.practice)} pick up exactly where you left off — and avoid repeating steps that haven't worked.</p>
+    <div style="margin-bottom:20px;">
+      <div style="font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:10px;">How long have you been dealing with this?</div>
+      ${durOpts.map(o=>`
+        <button class="opt-btn ${dur===o.v?'sel':''}" onclick="selDur(this,'${o.v}')" data-v="${o.v}">
+          <span class="opt-ic">${o.i}</span>
+          <span style="flex:1;"><strong>${o.l}</strong> <span style="color:var(--muted);font-weight:400;">— ${o.s}</span></span>
+          <span class="opt-check">✓</span>
+        </button>
+      `).join('')}
+    </div>
+    <div>
+      <div style="font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:10px;">Have you already sought help for this?</div>
+      ${careOpts.map(o=>`
+        <button class="opt-btn ${care===o.v?'sel':''}" onclick="selCare(this,'${o.v}')" data-v="${o.v}">
+          <span style="flex:1;">${esc(o.l)}</span>
+          <span class="opt-check">✓</span>
+        </button>
+      `).join('')}
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="S.step=4;save();render();">← Back</button>
+      <button class="btn-next" id="n5" ${(!dur&&!care)?'disabled':''} onclick="S.step=6;save();render();">Next →</button>
+    </div>
+  `;
+}
+function selDur(btn,v){
+  document.querySelectorAll('[data-v]').forEach(b=>{if(['under-3m','3m-1y','1y-3y','3y+'].includes(b.dataset.v)){b.classList.remove('sel');}});
+  btn.classList.add('sel');S.duration=v;save();
+  const n=document.getElementById('n5');if(n) n.disabled=false;
+}
+function selCare(btn,v){
+  document.querySelectorAll('[data-v]').forEach(b=>{if(['none','gp','natural','multiple','functional'].includes(b.dataset.v)){b.classList.remove('sel');}});
+  btn.classList.add('sel');S.prior_care=v;save();
+  const n=document.getElementById('n5');if(n) n.disabled=false;
+}
+
+// ── Step 6: Goals ────────────────────────────────────────────────────────────
+function renderStep6(el){
+  const goals=[
+    {v:'energy',ic:'⚡',l:'Get my energy back'},
+    {v:'pain-free',ic:'💊',l:'Live without pain'},
+    {v:'answers',ic:'🔬',l:'Finally get a real diagnosis'},
+    {v:'weight',ic:'⚖️',l:'Reach a healthy weight'},
+    {v:'sleep',ic:'😴',l:'Sleep properly again'},
+    {v:'gut',ic:'🫁',l:'Fix my gut for good'},
+    {v:'hormones',ic:'⚖️',l:'Balance my hormones'},
+    {v:'mental',ic:'🧠',l:'Clear the brain fog'},
+    {v:'active',ic:'🏃',l:'Be active again'},
+    {v:'longevity',ic:'🌱',l:'Long-term health optimisation'},
+  ];
+  const selGoals=S.goals||[];
+  el.innerHTML=`
+    <h2 class="step-q">What does "better" look like for you, ${esc(S.name||'you')}?</h2>
+    <p class="step-hint">This is the most important step. Choose everything that resonates — your goals shape how we prioritise your care.</p>
+    <div class="goal-grid">
+      ${goals.map(g=>`
+        <div class="goal-card ${selGoals.includes(g.v)?'sel':''}" onclick="toggleGoal(this,'${g.v}')">
+          <div class="goal-ic">${g.ic}</div>
+          <div class="goal-lbl">${g.l}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="field" style="margin-top:18px;">
+      <label>Anything else you'd like us to know? <span class="sub">(optional)</span></label>
+      <textarea id="f-notes" rows="3" placeholder="Symptoms, previous diagnoses, medications, or questions for the team…" style="resize:vertical;">${esc(S.notes||'')}</textarea>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="S.step=5;save();render();">← Back</button>
+      <button class="btn-next" onclick="S.goals=(S.goals||[]);S.notes=document.getElementById('f-notes').value;S.step=7;save();render();">See My Results →</button>
+    </div>
+  `;
+}
+function toggleGoal(el,v){
+  if(!S.goals) S.goals=[];
+  const i=S.goals.indexOf(v);
+  if(i===-1) S.goals.push(v); else S.goals.splice(i,1);
+  el.classList.toggle('sel',S.goals.includes(v));
+  save();
+}
+
+// ── RESULTS ──────────────────────────────────────────────────────────────────
+function renderResults(el){
+  el.closest('.assess-card').querySelector('.step-hdr').innerHTML=`
+    <div style="padding:20px 28px 14px;border-bottom:1px solid var(--border);">
+      <div style="font-size:.8rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;">Assessment Complete ✓</div>
+    </div>
+  `;
+
+  const syms    = (S.symptom_idxs||[]).map(i=>(S._syms||[])[i]).filter(Boolean);
+  const n       = syms.length;
+  const impact  = (S.impact_areas||[]).length;
+  const score   = Math.min(100, 50 + (n*4) + (impact*2) + (S.severity>7?10:S.severity>4?5:0));
+  const scoreN  = Math.min(score, 96); // cap at 96 — always leave room
+  const label   = scoreN>=85?'Strong Match':scoreN>=70?'Good Match':'Potential Match';
+  const ringCol = scoreN>=85?'#22c55e':scoreN>=70?'#f59e0b':'#60a5fa';
+  const pctDeg  = Math.round(scoreN/100*360);
+  const treat   = getTreatment(S.concern);
+
+  const durLabels = {'under-3m':'under 3 months','3m-1y':'3 months to a year','1y-3y':'1 to 3 years','3y+':'more than 3 years'};
+  const careLabels = {'none':"starting fresh",'gp':"after seeing a GP/specialist",'natural':"after trying natural practitioners",'multiple':"after seeing multiple providers without lasting relief",'functional':"after trying functional medicine"};
+  const durStr = S.duration ? durLabels[S.duration]||S.duration : '';
+  const careStr = S.prior_care ? careLabels[S.prior_care]||'' : '';
+
+  const resultWrap = document.createElement('div');
+  resultWrap.className = 'result-wrap';
+  resultWrap.innerHTML = `
+    <!-- SCORE -->
+    <div class="score-ring-wrap">
+      <div class="score-ring" style="background:conic-gradient(${ringCol} ${pctDeg}deg,rgba(255,255,255,.05) 0deg);">
+        <div class="ring-inner">
+          <div class="ring-score">${scoreN}</div>
+          <div class="ring-unit">/100</div>
+        </div>
+      </div>
+      <div class="result-label">${label}</div>
+      <div class="result-sub">for ${esc(C.practice)}'s approach</div>
+    </div>
+
+    <!-- PERSONALISED SUMMARY -->
+    <div class="result-summary">
+      <p>Hi ${esc(S.name||'there')} — based on your responses, you've been dealing with
+      <strong>${esc(S.concern||'your primary concern')}</strong>${durStr?' for '+durStr:''}${careStr?', '+careStr:''}.
+      You're reporting <strong>${n} symptom${n!==1?'s':''}</strong> and
+      ${impact>0?`<strong>${impact} area${impact!==1?'s':''} of daily life</strong> affected`:'significant quality-of-life impact'}.
+      <br><br>
+      ${treat ? treat.empathy.replace(/<strong>/g,'<strong style="color:var(--accent);">') :
+        `This is exactly the kind of case where a functional, root-cause approach makes the difference. <strong style="color:var(--accent);">There's almost always a reason — and we find it.</strong>`}
+      </p>
+    </div>
+
+    <!-- SYMPTOMS REPORTED -->
+    ${syms.length>0?`
+    <div style="margin-bottom:18px;">
+      <div class="treat-title">Symptoms you reported</div>
+      <div class="sym-tags">${syms.map(s=>`<div class="sym-tag">${esc(s)}</div>`).join('')}</div>
+    </div>`:''}
+
+    <!-- TREATMENT MATCH -->
+    ${treat?`
+    <div class="treatment-cards">
+      <div class="treat-title">How ${esc(C.practice)} would approach your case</div>
+      ${treat.services.map(svc=>`
+        <div class="treat-card">
+          <div class="treat-ic">${svc.ic}</div>
+          <div>
+            <div class="treat-name">${esc(svc.name)}</div>
+            <div class="treat-desc">${esc(svc.desc)}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>`:''}
+
+    <!-- BOOKING CTA -->
+    <a href="${esc(C.booking)}" target="_blank" rel="noopener" class="book-cta">
+      📅 Book Your Free Consultation Call →
+    </a>
+
+    <!-- WHAT HAPPENS NEXT -->
+    <div class="next-steps">
+      <div class="treat-title" style="padding:0 0 4px;">What happens next</div>
+      <div class="next-step">
+        <div class="step-num-badge">1</div>
+        <div class="step-desc"><strong>Book a free 15-min call</strong><span>Chat with the team, ask questions, and confirm we're the right fit for you.</span></div>
+      </div>
+      <div class="next-step">
+        <div class="step-num-badge">2</div>
+        <div class="step-desc"><strong>Comprehensive intake</strong><span>We review your full history and order targeted labs before your first appointment.</span></div>
+      </div>
+      <div class="next-step">
+        <div class="step-num-badge">3</div>
+        <div class="step-desc"><strong>Your personalised care plan</strong><span>${esc(C.doctor)} reviews your results and builds a plan specifically for your case — no generic protocols.</span></div>
+      </div>
+    </div>
+
+    <!-- COPY YOUR RESULTS -->
+    <div class="treat-title">Save your results</div>
+    <div class="copy-box">
+      <pre id="copy-text">${esc(buildCopyText(syms))}</pre>
+      <button class="copy-btn" onclick="doCopy()">📋 Copy</button>
+    </div>
+    <div style="text-align:center;margin-bottom:6px;">
+      <a href="mailto:?subject=${encodeURIComponent('My Assessment — '+C.practice)}&body=${encodeURIComponent(buildCopyText(syms))}" style="color:var(--accent);font-size:.83rem;">📧 Email these results to yourself</a>
+    </div>
+
+    <button onclick="S={step:1};save();render();" style="width:100%;background:none;border:none;color:var(--muted);padding:14px;font-size:.85rem;margin-top:6px;cursor:pointer;">↩ Start over</button>
+  `;
+
+  el.innerHTML='';
+  el.appendChild(resultWrap);
+
+  // Update progress to 100%
+  const pf=document.getElementById('prog-fill');
+  if(pf) pf.style.width='100%';
+  const sn=document.getElementById('step-num');
+  if(sn) sn.textContent='Complete ✓';
+  const sl=document.getElementById('step-lbl');
+  if(sl) sl.textContent='Your personalised results';
+
+  // Confetti
+  confetti();
+}
+
+function buildCopyText(syms){
+  const durLabels={'under-3m':'Under 3 months','3m-1y':'3 months to 1 year','1y-3y':'1–3 years','3y+':'More than 3 years'};
+  return [
+    `Health Assessment — ${C.practice}`,
+    `Name: ${S.name||'—'}`,
+    `Email: ${S.email||'—'}`,
+    `Phone: ${S.phone||'—'}`,
+    `Primary concern: ${S.concern||'—'}`,
+    `Duration: ${S.duration?durLabels[S.duration]||S.duration:'—'}`,
+    `Severity (1–10): ${S.severity||'—'}`,
+    `Prior care: ${S.prior_care||'—'}`,
+    `Life areas affected: ${(S.impact_areas||[]).join(', ')||'—'}`,
+    syms.length?`Symptoms:\n${syms.map(s=>'  • '+s).join('\n')}`:'',
+    `Goals: ${(S.goals||[]).join(', ')||'—'}`,
+    S.notes?`Notes: ${S.notes}`:'',
+    ``,
+    `Book a consultation: ${C.booking}`,
+  ].filter(Boolean).join('\n');
+}
+
+function doCopy(){
+  const t=document.getElementById('copy-text');
+  if(!t) return;
+  navigator.clipboard.writeText(t.innerText).then(()=>{
+    const b=t.nextElementSibling;
+    if(b){b.textContent='✓ Copied!';setTimeout(()=>b.textContent='📋 Copy',2000);}
+  }).catch(()=>{
+    const r=document.createRange();r.selectNode(t);
+    window.getSelection().removeAllRanges();window.getSelection().addRange(r);
+  });
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escJ(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+
+function toggleChip(el,idx){
+  if(!S.symptom_idxs) S.symptom_idxs=[];
+  const i=S.symptom_idxs.indexOf(idx);
+  if(i===-1) S.symptom_idxs.push(idx); else S.symptom_idxs.splice(i,1);
+  el.classList.toggle('sel',S.symptom_idxs.includes(idx));
+  save();
+}
+
+function confetti(){
+  const cols=['#22c55e','#0b8fc0','#f59e0b','#60a5fa','#a78bfa'];
+  for(let i=0;i<22;i++){
+    const d=document.createElement('div');
+    const sz=Math.random()*7+4;
+    Object.assign(d.style,{
+      position:'fixed',top:'-10px',left:Math.random()*100+'vw',zIndex:'9999',
+      pointerEvents:'none',width:sz+'px',height:sz+'px',borderRadius:'50%',
+      background:cols[i%cols.length],opacity:'.9',
+      animation:`fall ${1.6+Math.random()*.8}s ease-in forwards`,
+      animationDelay:Math.random()*.6+'s',
+    });
+    document.body.appendChild(d);
+    setTimeout(()=>d.remove(),2800);
+  }
+}
+
+// ─── SCROLL PROGRESS (top bar) ────────────────────────────────────────────────
+window.addEventListener('scroll',function(){
+  const d=document.documentElement;
+  const pct=(d.scrollTop/(d.scrollHeight-d.clientHeight))*100;
+  const bar=document.getElementById('top-bar');
+  if(bar) bar.style.width=Math.min(pct,100)+'%';
+},{passive:true});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>

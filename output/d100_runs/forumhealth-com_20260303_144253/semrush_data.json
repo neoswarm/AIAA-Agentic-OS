@@ -1,0 +1,208 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 108036,
+  "unique_keywords": 13487,
+  "estimated_traffic": 17332,
+  "traffic_value": 51123,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 18,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 2,
+  "pos2_3_count": 5,
+  "pos4_10_count": 16,
+  "pos11_20_count": 27,
+  "pos1_3_count": 7,
+  "quick_wins_count": 7,
+  "top_quick_wins": [
+    {
+      "keyword": "cirs symptoms",
+      "position": 6,
+      "volume": 3600,
+      "kd": 13.0
+    },
+    {
+      "keyword": "epstein-barr virus symptoms",
+      "position": 10,
+      "volume": 2900,
+      "kd": 62.0
+    },
+    {
+      "keyword": "heather stone",
+      "position": 4,
+      "volume": 2400,
+      "kd": 38.0
+    },
+    {
+      "keyword": "power2patient",
+      "position": 8,
+      "volume": 2400,
+      "kd": 17.0
+    },
+    {
+      "keyword": "cleerly heart scan",
+      "position": 6,
+      "volume": 1600,
+      "kd": 11.0
+    },
+    {
+      "keyword": "reactivated epstein barr virus symptoms",
+      "position": 8,
+      "volume": 1000,
+      "kd": 32.0
+    },
+    {
+      "keyword": "functional medicine news",
+      "position": 4,
+      "volume": 880,
+      "kd": 0.0
+    }
+  ],
+  "top3_sample": [],
+  "top_by_volume": [
+    {
+      "keyword": "karen fields",
+      "position": 16,
+      "volume": 4400,
+      "kd": 22.0
+    },
+    {
+      "keyword": "dutch test hormones",
+      "position": 11,
+      "volume": 3600,
+      "kd": 26.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 19,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 16,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 15,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 10,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 9,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 8,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 6,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 5,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 3,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 2,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "forum health",
+      "position": 1,
+      "volume": 3600,
+      "kd": 35.0
+    },
+    {
+      "keyword": "cirs symptoms",
+      "position": 6,
+      "volume": 3600,
+      "kd": 13.0
+    },
+    {
+      "keyword": "epstein-barr virus symptoms",
+      "position": 10,
+      "volume": 2900,
+      "kd": 62.0
+    },
+    {
+      "keyword": "hormones by design",
+      "position": 13,
+      "volume": 2400,
+      "kd": 29.0
+    },
+    {
+      "keyword": "hormones by design",
+      "position": 3,
+      "volume": 2400,
+      "kd": 29.0
+    },
+    {
+      "keyword": "best online semaglutide program",
+      "position": 18,
+      "volume": 2400,
+      "kd": 41.0
+    },
+    {
+      "keyword": "heather stone",
+      "position": 4,
+      "volume": 2400,
+      "kd": 38.0
+    },
+    {
+      "keyword": "power2patient",
+      "position": 8,
+      "volume": 2400,
+      "kd": 17.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "fullyfunctional.com",
+      "relevance": "0.08",
+      "keywords": 7039,
+      "traffic": 5346,
+      "traffic_value": 4625
+    },
+    {
+      "domain": "safamilyintegrativehealth.com",
+      "relevance": "0.07",
+      "keywords": 1126,
+      "traffic": 314,
+      "traffic_value": 456
+    },
+    {
+      "domain": "drdanlukaczer.com",
+      "relevance": "0.07",
+      "keywords": 729,
+      "traffic": 132,
+      "traffic_value": 234
+    }
+  ]
+}

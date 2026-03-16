@@ -1,0 +1,80 @@
+Length: 49530
+
+First 2000 chars:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RESTORE Center for Integrative Medicine</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--primary:#667eea;--secondary:#764ba2;--accent:#f093fb;
+--text:#1a202c;--bg:#ffffff;--gray-50:#f7fafc;--gray-100:#edf2f7;
+--gray-200:#e2e8f0;--gray-300:#cbd5e0;--gray-400:#a0aec0;
+--gray-500:#718096;--gray-600:#4a5568;--gray-700:#2d3748;
+--gradient:linear-gradient(135deg,var(--primary),var(--secondary));
+--gradient-accent:linear-gradient(135deg,var(--secondary),var(--accent));
+--radius:12px;--radius-sm:8px;--shadow:0 4px 24px rgba(102,126,234,0.13);
+--shadow-lg:0 8px 40px rgba(102,126,234,0.18);
+--transition:0.25s cubic-bezier(.4,0,.2,1);
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--primary);text-decoration:none}
+img{max-width:100%;display:block}
+button{cursor:pointer;font-family:inherit}
+h1,h2,h3,h4{line-height:1.25}
+
+/* UTILITY */
+.container{max-width:960px;margin:0 auto;padding:0 20px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+.text-center{text-align:center}
+.mt-1{margin-top:8px}.mt-2{margin-top:16px}.mt-3{margin-top:24px}.mt-4{margin-top:32px}
+.mb-1{margin-bottom:8px}.mb-2{margin-bottom:16px}.mb-3{margin-bottom:24px}.mb-4{margin-bottom:32px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 32px;border:none;border-radius:50px;font-size:1rem;font-weight:600;transition:var(--transition);text-align:center;line-height:1.4}
+.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn-primary{background:var(--gradient);color:#fff;box-shadow:0 4px 16px rgba(102,126
+
+Last 1000 chars:
+ Object.keys(map).forEach(id => {
+    const el = document.getElementById(id);
+    const valEl = document.getElementById(map[id][1]);
+    if(el && valEl){
+      el.addEventListener('input', function(){
+        D[map[id][0]] = parseInt(this.value);
+        valEl.textContent = this.value + ' / 10';
+      });
+    }
+  });
+}
+
+// ===== CONSENT CHECKBOX =====
+function bindConsentCheckbox(){
+  const cb = document.getElementById('f_consent');
+  if(cb){
+    cb.addEventListener('change', function(){
+      D.consent = this.checked;
+      const lbl = document.getElementById('consentLabel');
+      if(lbl){
+        if(this.checked) lbl.classList.add('selected');
+        else lbl.classList.remove('selected');
+      }
+    });
+  }
+}
+
+// ===== SAVE CURRENT STEP DATA =====
+function saveStep(){
+  const s = STEPS[currentStep].id;
+  switch(s){
+    case 'contact':
+      D.name = gv('f_name');
+      D.email = gv('f_email');
+      D.phone = gv('f_phone');
+      break;
+    case 'demographics':
+      D.dob = gv('f

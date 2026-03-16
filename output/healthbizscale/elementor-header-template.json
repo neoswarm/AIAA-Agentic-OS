@@ -1,0 +1,99 @@
+{
+  "version": "0.4",
+  "title": "Health Biz Scale — Header",
+  "type": "section",
+  "page_settings": {
+    "custom_css": ":root{--hbs-deep:#08170e;--hbs-forest:#12261B;--hbs-mint:#9AE6B4;--hbs-cyan:#B7FFE4;--hbs-text:rgba(255,255,255,.86);}\n.elementor-section-wrap > #hbs-site-header{position:sticky;top:0;z-index:100;backdrop-filter:blur(16px);background:rgba(8,23,14,.9)!important;border-bottom:1px solid rgba(154,230,180,.08);}\n#hbs-site-header .elementor-nav-menu--main .elementor-item{font-family:Oswald,sans-serif;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--hbs-text);padding:0 .9rem;}\n#hbs-site-header .elementor-nav-menu--main .elementor-item:hover,#hbs-site-header .elementor-nav-menu--main .elementor-item.elementor-item-active{color:var(--hbs-mint);}\n#hbs-site-header .hbs-header-cta a{display:inline-flex;align-items:center;justify-content:center;padding:.95rem 1.4rem;border-radius:999px;background:linear-gradient(135deg,var(--hbs-mint) 0%,var(--hbs-cyan) 100%);color:var(--hbs-forest);font-family:Oswald,sans-serif;font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;}\n@media(max-width:1024px){#hbs-site-header .elementor-nav-menu--dropdown a{font-family:Oswald,sans-serif;letter-spacing:.08em;text-transform:uppercase;}}"
+  },
+  "content": [
+    {
+      "id": "hbs-site-header",
+      "elType": "section",
+      "isInner": false,
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "size": 1180,
+          "unit": "px"
+        },
+        "padding": {
+          "unit": "px",
+          "top": "18",
+          "right": "0",
+          "bottom": "18",
+          "left": "0",
+          "isLinked": false
+        },
+        "background_background": "classic",
+        "background_color": "#08170e"
+      },
+      "elements": [
+        {
+          "id": "hbs-site-header-logo",
+          "elType": "column",
+          "settings": {
+            "_column_size": 24,
+            "content_position": "middle"
+          },
+          "elements": [
+            {
+              "id": "hbs-logo-widget",
+              "elType": "widget",
+              "widgetType": "html",
+              "settings": {
+                "html": "<a href=\"/\" style=\"display:inline-flex;align-items:center;gap:.8rem;text-decoration:none;\"><span style=\"width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#9AE6B4,#B7FFE4);display:inline-flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-size:.9rem;font-weight:700;color:#12261B;\">HBS</span><span style=\"display:flex;flex-direction:column;\"><span style=\"font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;line-height:1;color:#fff;\">Health Biz Scale</span><span style=\"font-family:Oswald,sans-serif;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(154,230,180,.7);margin-top:.2rem;\">AI Growth Systems</span></span></a>"
+              },
+              "elements": []
+            }
+          ]
+        },
+        {
+          "id": "hbs-site-header-menu",
+          "elType": "column",
+          "settings": {
+            "_column_size": 52,
+            "content_position": "middle"
+          },
+          "elements": [
+            {
+              "id": "hbs-nav-menu-widget",
+              "elType": "widget",
+              "widgetType": "nav-menu",
+              "settings": {
+                "layout": "horizontal",
+                "align": "center",
+                "pointer": "none",
+                "menu": "",
+                "submenu_icon": {
+                  "value": "fas fa-angle-down",
+                  "library": "fa-solid"
+                }
+              },
+              "elements": []
+            }
+          ]
+        },
+        {
+          "id": "hbs-site-header-cta",
+          "elType": "column",
+          "settings": {
+            "_column_size": 24,
+            "content_position": "middle"
+          },
+          "elements": [
+            {
+              "id": "hbs-header-cta-widget",
+              "elType": "widget",
+              "widgetType": "html",
+              "settings": {
+                "_css_classes": "hbs-header-cta",
+                "html": "<div style=\"text-align:right;\"><a href=\"/contact\">Book a Strategy Call</a></div>"
+              },
+              "elements": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

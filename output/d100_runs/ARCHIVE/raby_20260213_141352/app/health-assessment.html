@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raby Institute — Integrative Medicine | Health Assessment</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--primary:#667eea;--secondary:#764ba2;--accent:#f093fb;
+--text:#1a202c;--bg:#ffffff;--gray-50:#f7fafc;--gray-100:#edf2f7;
+--gray-200:#e2e8f0;--gray-300:#cbd5e0;--gray-400:#a0aec0;
+--gray-500:#718096;--gray-600:#4a5568;--gray-700:#2d3748;
+--gradient:linear-gradient(135deg,var(--primary),var(--secondary));
+--gradient-accent:linear-gradient(135deg,var(--secondary),var(--accent));
+--radius:12px;--radius-sm:8px;--shadow:0 4px 24px rgba(102,126,234,.12);
+--shadow-lg:0 12px 48px rgba(102,126,234,.18);
+--transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:var(--text);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--primary);text-decoration:none}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+img{max-width:100%;display:block}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+
+/* ─── LANDING PAGE ─── */
+.lp-hero{background:var(--gradient);color:#fff;padding:5rem 1.5rem 4rem;text-align:center;position:relative;overflow:hidden}
+.lp-hero::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:80px;background:var(--bg);clip-path:ellipse(55% 100% at 50% 100%)}
+.lp-hero h1{font-size:clamp(1.75rem,5vw,3rem);font-weight:800;letter-spacing:-.02em;margin-bottom:.75rem;line-height:1.15}
+.lp-hero .subtitle{font-size:clamp(1rem,2.5vw,1.25rem);opacity:.92;max-width:640px;margin:0 auto 2rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.875rem 2rem;border-radius:50px;font-weight:700;font-size:1rem;border:none;cursor:pointer;transition:var(--transition);text-align:center}
+.btn-white{background:#fff;color:var(--secondary)}
+.btn-white:hover{background:var(--gray-100);transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.btn-primary{background:var(--gradient);color:#fff}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);opacity:.95}
+.btn-outline{background:transparent;color:var(--primary);border:2px solid var(--primary)}
+.btn-outline:hover{background:var(--primary);color:#fff}
+
+.section{padding:4rem 1.5rem;max-width:1080px;margin:0 auto}
+.section-title{font-size:clamp(1.35rem,3.5vw,2rem);font-weight:800;text-align:center;margin-bottom:.5rem;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.section-sub{text-align:center;color:var(--gray-500);max-width:600px;margin:0 auto 2.5rem;font-size:1.05rem}
+
+/* How It Works */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;counter-reset:step}
+.step{text-align:center;position:relative;padding:2rem 1.25rem;background:var(--gray-50);border-radius:var(--radius);transition:var(--transition)}
+.step:hover{box-shadow:var(--shadow);transform:translateY(-4px)}
+.step::before{counter-increment:step;content:counter(step);display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:var(--gradient);color:#fff;font-weight:800;font-size:1.15rem;margin:0 auto 1rem}
+.step h3{font-size:1.05rem;font-weight:700;margin-bottom:.4rem}
+.step p{font-size:.9rem;color:var(--gray-600)}
+
+/* Offerings */
+.offerings{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.75rem}
+.offering-card{border:1px solid var(--gray-200);border-radius:var(--radius);padding:2rem 1.5rem;transition:var(--transition);position:relative;overflow:hidden}
+.offering-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--gradient)}
+.offering-card:hover{box-shadow:var(--shadow);transform:translateY(-4px);border-color:var(--primary)}
+.offering-card .icon{width:52px;height:52px;border-radius:var(--radius-sm);background:linear-gradient(135deg,rgba(102,126,234,.12),rgba(118,75,162,.12));display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}
+.offering-card h3{font-size:1.1rem;font-weight:700;margin-bottom:.5rem}
+.offering-card p{font-size:.92rem;color:var(--gray-600);margin-bottom:1rem}
+.offering-card .tag{display:inline-block;font-size:.75rem;font-weight:600;padding:.25rem .75rem;border-radius:50px;background:linear-gradient(135deg,rgba(102,126,234,.1),rgba(240,147,251,.1));color:var(--secondary)}
+
+/* Conditions */
+.conditions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.25rem}
+.condition-item{display:flex;align-items:flex-start;gap:.75rem;padding:1.25rem;border-radius:var(--radius-sm);background:var(--gray-50);transition:var(--transition)}
+.condition-item:hover{background:linear-gradient(135deg,rgba(102,126,234,.06),rgba(240,147,251,.06))}
+.condition-item .dot{width:10px;height:10px;border-radius:50%;background:var(--gradient);flex-shrink:0;margin-top:6px}
+.condition-item h4{font-size:.95rem;font-weight:700;margin-bottom:.2rem}
+.condition-item p{font-size:.85rem;color:var(--gray-500)}
+
+/* Trust */
+.trust-section{background:var(--gray-50);border-radius:var(--radius);padding:2.5rem 2rem;text-align:center}
+.trust-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:1.5rem;margin-top:1.5rem}
+.trust-badge{display:flex;align-items:center;gap:.5rem;padding:.75rem 1.25rem;background:#fff;border-radius:50px;font-size:.88rem;font-weight:600;color:var(--gray-700);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.trust-badge .badge-icon{width:28px;height:28px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;font-weight:800}
+
+/* Provider */
+.provider-card{display:flex;align-items:center;gap:1.5rem;padding:2rem;background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius);max-width:500px;margin:2rem auto 0}
+.provider-avatar{width:72px;height:72px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:800;flex-shrink:0}
+.provider-info h4{font-size:1.05rem;font-weight:700}
+.provider-info p{font-size:.88rem;color:var(--gray-500)}
+
+/* CTA Banner */
+.cta-banner{background:var(--gradient);border-radius:var(--radius);padding:3rem 2rem;text-align:center;color:#fff;margin:3rem auto;max-width:800px}
+.cta-banner h2{font-size:clamp(1.3rem,3vw,1.75rem);font-weight:800;margin-bottom:.75rem}
+.cta-banner p{opacity:.9;margin-bottom:1.5rem;max-width:500px;margin-left:auto;margin-right:auto}
+
+/* Sticky Mobile CTA */
+.sticky-cta{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);padding:.75rem 1.5rem;box-shadow:0 -4px 24px rgba(0,0,0,.1);z-index:100;display:none;align-items:center;justify-content:center;gap:.75rem}
+.sticky-cta .btn{width:100%;max-width:400px;padding:.8rem 1.5rem}
+@media(max-width:768px){.sticky-cta.visible{display:flex}}
+
+/* Disclaimer */
+.disclaimer{font-size:.78rem;color:var(--gray-400);text-align:center;max-width:700px;margin:2rem auto 0;line-height:1.5;padding:0 1rem}
+.disclaimer-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:1rem 1.25rem;font-size:.82rem;color:var(--gray-500);margin-top:1.5rem;line-height:1.55}
+
+/* Footer */
+.lp-footer{text-align:center;padding:2rem 1.5rem;border-top:1px solid var(--gray-100);font-size:.82rem;color:var(--gray-400)}
+
+/* ─── ASSESSMENT ─── */
+.assessment-overlay{position:fixed;inset:0;background:var(--bg);z-index:1000;overflow-y:auto;display:none}
+.assessment-overlay.active{display:block}
+.assessment-container{max-width:680px;margin:0 auto;padding:1.5rem 1.5rem 6rem}
+.assessment-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;position:sticky;top:0;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);padding:1rem 0;z-index:10}
+.assessment-header .logo-sm{font-weight:800;font-size:1.1rem;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.close-assessment{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--gray-400);padding:.25rem;line-height:1}
+.close-assessment:hover{color:var(--text)}
+
+/* Progress */
+.progress-wrap{margin-bottom:2rem}
+.progress-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;font-size:.82rem;color:var(--gray-500)}
+.progress-meta strong{color:var(--text)}
+.progress-bar{height:6px;background:var(--gray-100);border-radius:50px;overflow:hidden}
+.progress-fill{height:100%;background:var(--gradient);border-radius:50px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+/* Steps */
+.assess-step{display:none}
+.assess-step.active{display:block;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.step-title{font-size:1.35rem;font-weight:800;margin-bottom:.25rem}
+.step-desc{font-size:.92rem;color:var(--gray-500);margin-bottom:1.75rem}
+
+/* Form Elements */
+fieldset{border:none;margin-bottom:1.5rem}
+legend{font-size:.95rem;font-weight:700;margin-bottom:.75rem;color:var(--text)}
+label.field-label{display:block;font-size:.88rem;font-weight:600;margin-bottom:.4rem;color:var(--gray-700)}
+.field-hint{font-size:.78rem;color:var(--gray-400);margin-bottom:.5rem}
+input[type="text"],input[type="email"],input[type="tel"],input[type="date"],input[type="number"],textarea,select{width:100%;padding:.75rem 1rem;border:2px solid var(--gray-200);border-radius:var(--radius-sm);font-size:.95rem;font-family:inherit;color:var(--text);background:#fff;transition:var(--transition)}
+input:focus,textarea:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(102,126,234,.15)}
+textarea{resize:vertical;min-height:100px}
+.input-group{margin-bottom:1.25rem}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:500px){.input-row{grid-template-columns:1fr}}
+
+/* Chips (multi-select) */
+.chips{display:flex;flex-wrap:wrap;gap:.5rem}
+.chip{display:inline-flex;align-items:center;gap:.35rem;padding:.55rem 1.1rem;border:2px solid var(--gray-200);border-radius:50px;font-size:.88rem;font-weight:500;cursor:pointer;transition:var(--transition);background:#fff;color:var(--gray-700);user-select:none;position:relative}
+.chip:hover{border-color:var(--primary);background:rgba(102,126,234,.04)}
+.chip[aria-pressed="true"],.chip.selected{border-color:var(--primary);background:linear-gradient(135deg,rgba(102,126,234,.12),rgba(118,75,162,.08));color:var(--primary);font-weight:700;box-shadow:0 0 0 2px rgba(102,126,234,.2)}
+.chip[aria-pressed="true"]::before,.chip.selected::before{content:'✓';font-size:.75rem;font-weight:800}
+.chip:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* Radio Cards */
+.radio-cards{display:grid;gap:.75rem}
+.radio-card{display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border:2px solid var(--gray-200);border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition);background:#fff}
+.radio-card:hover{border-color:var(--primary);background:rgba(102,126,234,.02)}
+.radio-card.selected{border-color:var(--primary);background:linear-gradient(135deg,rgba(102,126,234,.08),rgba(118,75,162,.05));box-shadow:0 0 0 2px rgba(102,126,234,.18)}
+.radio-card:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.radio-dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--gray-300);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+.radio-card.selected .radio-dot{border-color:var(--primary);background:var(--primary)}
+.radio-card.selected .radio-dot::after{content:'';width:8px;height:8px;border-radius:50%;background:#fff}
+.radio-card-content h4{font-size:.92rem;font-weight:600}
+.radio-card-content p{font-size:.8rem;color:var(--gray-500);margin-top:.15rem}
+
+/* Slider */
+.slider-wrap{padding:.5rem 0}
+.slider-labels{display:flex;justify-content:space-between;font-size:.78rem;color:var(--gray-400);margin-bottom:.35rem}
+input[type="range"]{-webkit-appearance:none;width:100%;height:8px;border-radius:50px;background:var(--gray-200);outline:none;border:none;padding:0}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--gradient);cursor:pointer;box-shadow:0 2px 8px rgba(102,126,234,.3)}
+input[type="range"]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:var(--gradient);cursor:pointer;border:none}
+.slider-value{text-align:center;font-size:1.5rem;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-top:.5rem}
+
+/* Checklist */
+.checklist{display:grid;gap:.5rem}
+.check-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border:2px solid var(--gray-200);border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition);background:#fff}
+.check-item:hover{border-color:var(--primary);background:rgba(102,126,234,.02)}
+.check-item[aria-checked="true"],.check-item.selected{border-color:var(--primary);background:linear-gradient(135deg,rgba(102,126,234,.08),rgba(118,75,162,.05));box-shadow:0 0 0 2px rgba(102,126,234,.18)}
+.check-item:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.check-box{width:22px;height:22px;border-radius:6px;border:2px solid var(--gray-300);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:var(--transition);font-size:.7rem;color:#fff}
+.check-item.selected .check-box{border-color:var(--primary);background:var(--primary)}
+.check-item.selected .check-box::after{content:'✓';font-weight:800}
+.check-label{font-size:.9rem;font-weight:500}
+
+/* Nav Buttons */
+.assess-nav{display:flex;gap:1rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--gray-100)}
+.assess-nav .btn{flex:1;padding:.8rem 1.5rem}
+.btn-back{background:var(--gray-100);color:var(--gray-600)}
+.btn-back:hover{background:var(--gray-200)}
+.btn-disabled{opacity:.5;pointer-events:none}
+
+/* Validation */
+.field-error{border-color:#e53e3e !important;box-shadow:0 0 0 3px rgba(229,62,62,.15) !important}
+.error-msg{font-size:.78rem;color:#e53e3e;margin-top:.3rem;display:none}
+.error-msg.visible{display:block}
+
+/* Review */
+.review-section{margin-bottom:1.5rem;padding:1.25rem;background:var(--gray-50);border-radius:var(--radius-sm)}
+.review-section h4{font-size:.88rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between}
+.review-section h4 button{font-size:.78rem;color:var(--primary);background:none;border:none;cursor:pointer;font-weight:600}
+.review-section h4 button:hover{text-decoration:underline}
+.review-item{display:flex;justify-content:space-between;align-items:flex-start;padding:.4rem 0;font-size:.9rem}
+.review-item .rlabel{color:var(--gray-500);flex-shrink:0;margin-right:1rem}
+.review-item .rvalue{font-weight:600;text-align:right;word-break:break-word}
+
+/* Results */
+.results-card{background:var(--gray-50);border-radius:var(--radius);padding:2rem;margin-bottom:1.5rem}
+.results-card h3{font-size:1.1rem;font-weight:700;margin-bottom:1rem}
+.summary-text{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:1rem;font-size:.88rem;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:300px;overflow-y:auto;font-family:inherit}
+.json-toggle{margin-top:1rem}
+.json-view{display:none;margin-top:.75rem;background:var(--gray-700);color:#a0f0a0;border-radius:var(--radius-sm);padding:1rem;font-size:.78rem;font-family:'SF Mono',Monaco,Consolas,monospace;overflow-x:auto;white-space:pre-wrap;max-height:300px;overflow-y:auto}
+.json-view.visible{display:block}
+.action-buttons{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.5rem}
+.action-buttons .btn{flex:1;min-width:180px}
+.copy-feedback{font-size:.82rem;color:var(--primary);font-weight:600;margin-top:.5rem;min-height:1.2em}
+
+/* Emergency */
+.emergency-box{background:#fff5f5;border:1px solid #fed7d7;border-radius:var(--radius-sm);padding:1rem 1.25rem;margin-top:1.5rem}
+.emergency-box h4{color:#c53030;font-size:.9rem;font-weight:700;margin-bottom:.35rem}
+.emergency-box p{font-size:.82rem;color:#9b2c2c;line-height:1.5}
+
+/* Print */
+@media print{
+.assessment-overlay{position:static;overflow:visible}
+.assess-nav,.assessment-header,.progress-wrap,.sticky-cta,.close-assessment,.action-buttons{display:none !important}
+.assess-step{display:block !important}
+.results-card{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- LANDING PAGE                                -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="landingPage">
+
+<!-- Hero -->
+<header class="lp-hero" role="banner">
+<h1>Raby Institute</h1>
+<p class="subtitle">Integrative Medicine — Root Cause Focus, Evidence-Based Integration, Personalized Protocols</p>
+<button class="btn btn-white" onclick="openAssessment()" aria-label="Begin your health assessment">Begin Your Health Assessment</button>
+</header>
+
+<!-- How It Works -->
+<section class="section" aria-labelledby="howTitle">
+<h2 class="section-title" id="howTitle">How It Works</h2>
+<p class="section-sub">Your path from first contact to ongoing support — a team-based care approach.</p>
+<div class="steps" role="list">
+<div class="step" role="listitem">
+<h3>Initial Consultation</h3>
+<p>60–120 minutes with your care team to understand your full health picture.</p>
+</div>
+<div class="step" role="listitem">
+<h3>Detailed Health History</h3>
+<p>A comprehensive assessment to identify patterns and root causes.</p>
+</div>
+<div class="step" role="listitem">
+<h3>Personalized Treatment Plan</h3>
+<p>An individualized protocol developed through evidence-based integration.</p>
+</div>
+<div class="step" role="listitem">
+<h3>Regular Follow-Ups</h3>
+<p>Ongoing monitoring and adjustments to your personalized plan.</p>
+</div>
+<div class="step" role="listitem">
+<h3>Ongoing Support</h3>
+<p>Continued partnership with your care team for long-term well-being.</p>
+</div>
+</div>
+</section>
+
+<!-- Offerings -->
+<section class="section" aria-labelledby="offTitle">
+<h2 class="section-title" id="offTitle">Our Services</h2>
+<p class="section-sub">Integrative approaches tailored to your individual needs.</p>
+<div class="offerings">
+<div class="offering-card">
+<div class="icon" aria-hidden="true">🌿</div>
+<h3>Naturopathic Medicine</h3>
+<p>A whole-person approach that works alongside conventional care, focusing on the body's inherent ability to heal through personalized protocols.</p>
+<span class="tag">Root Cause Focus</span>
+</div>
+<div class="offering-card">
+<div class="icon" aria-hidden="true">🔬</div>
+<h3>Integrative Oncology</h3>
+<p>Team-based care that integrates evidence-based complementary approaches to support cancer patients throughout their journey.</p>
+<span class="tag">Evidence-Based Integration</span>
+</div>
+<div class="offering-card">
+<div class="icon" aria-hidden="true">📍</div>
+<h3>Acupuncture</h3>
+<p>An established therapeutic modality used as part of personalized treatment plans within our integrative care framework.</p>
+<span class="tag">Personalized Protocols</span>
+</div>
+</div>
+</section>
+
+<!-- Conditions -->
+<section class="section" aria-labelledby="condTitle">
+<h2 class="section-title" id="condTitle">Areas of Focus</h2>
+<p class="section-sub">Our team-based care model addresses complex and chronic health concerns.</p>
+<div class="conditions-grid">
+<div class="condition-item">
+<div class="dot" aria-hidden="true"></div>
+<div>
+<h4>Chronic Fatigue Syndrome</h4>
+<p>Comprehensive evaluation to explore contributing factors and develop supportive care strategies.</p>
+</div>
+</div>
+<div class="condition-item">
+<div class="dot" aria-hidden="true"></div>
+<div>
+<h4>Autoimmune Conditions</h4>
+<p>An integrative approach that considers the whole person while working alongside your existing care team.</p>
+</div>
+</div>
+<div class="condition-item">
+<div class="dot" aria-hidden="true"></div>
+<div>
+<h4>Digestive Disorders</h4>
+<p>Root cause–focused assessment to understand digestive health within the context of your overall well-being.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Trust -->
+<section class="section" aria-labelledby="trustTitle">
+<div class="trust-section">
+<h2 class="section-title" id="trustTitle">Why Raby Institute</h2>
+<p class="section-sub" style="margin-bottom:1.5rem">A large established practice with a Northwestern affiliation, dedicated to team-based, root cause–focused care.</p>
+<div class="trust-badges" role="list">
+<div class="trust-badge" role="listitem"><div class="badge-icon" aria-hidden="true">⚕</div>Team-Based Care</div>
+<div class="trust-badge" role="listitem"><div class="badge-icon" aria-hidden="true">🔍</div>Root Cause Focus</div>
+<div class="trust-badge" role="listitem"><div class="badge-icon" aria-hidden="true">📋</div>Evidence-Based Integration</div>
+<div class="trust-badge" role="listitem"><div class="badge-icon" aria-hidden="true">🏥</div>Northwestern Affiliation</div>
+<div class="trust-badge" role="listitem"><div class="badge-icon" aria-hidden="true">👤</div>Personalized Protocols</div>
+</div>
+
+<!-- Provider -->
+<div class="provider-card">
+<div class="provider-avatar" aria-hidden="true">TR</div>
+<div class="provider-info">
+<h4>Theri Griego Raby, MD</h4>
+<p>Integrative Medicine</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- CTA Banner -->
+<section class="section">
+<div class="cta-banner">
+<h2>Ready to Explore Integrative Care?</h2>
+<p>Complete a brief health assessment so our team can better understand your needs before your new patient consultation.</p>
+<button class="btn btn-white" onclick="openAssessment()">Start Health Assessment</button>
+</div>
+<p class="disclaimer">This website and health assessment are for informational purposes only and do not constitute medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider regarding any medical condition. If you are experiencing a medical emergency, call 911 immediately.</p>
+</section>
+
+<footer class="lp-footer">
+<p>&copy; Raby Institute. All rights reserved. This site does not provide medical advice.</p>
+</footer>
+</div>
+
+<!-- Sticky Mobile CTA -->
+<div class="sticky-cta" id="stickyCta" role="complementary" aria-label="Quick action">
+<button class="btn btn-primary" onclick="openAssessment()">Start Health Assessment</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- HEALTH ASSESSMENT OVERLAY                   -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="assessment-overlay" id="assessmentOverlay" role="dialog" aria-modal="true" aria-label="Health Assessment">
+<div class="assessment-container">
+
+<!-- Header -->
+<div class="assessment-header">
+<div class="logo-sm">Raby Institute</div>
+<button class="close-assessment" onclick="closeAssessment()" aria-label="Close assessment">&times;</button>
+</div>
+
+<!-- Progress -->
+<div class="progress-wrap" aria-live="polite">
+<div class="progress-meta">
+<span>Step <strong id="stepCurrent">1</strong> of <strong id="stepTotal">9</strong></span>
+<span id="timeEstimate">~10 min remaining</span>
+</div>
+<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="progressBar">
+<div class="progress-fill" id="progressFill" style="width:0%"></div>
+</div>
+</div>
+
+<!-- ─── STEP 1: Contact Information ─── -->
+<div class="assess-step active" data-step="1" id="step1">
+<h2 class="step-title">Let's Start With Your Information</h2>
+<p class="step-desc">Required fields help our scheduling team prepare for your new patient consultation.</p>
+
+<div class="input-group">
+<label class="field-label" for="fullName">Full Name <span aria-hidden="true" style="color:#e53e3e">*</span></label>
+<input type="text" id="fullName" name="fullName" required autocomplete="name" placeholder="First and Last Name" aria-required="true">
+<div class="error-msg" id="fullNameError">Please enter your full name.</div>
+</div>
+
+<div class="input-row">
+<div class="input-group">
+<label class="field-label" for="email">Email <span aria-hidden="true" style="color:#e53e3e">*</span></label>
+<input type="email" id="email" name="email" required autocomplete="email" placeholder="you@email.com" aria-required="true">
+<div class="error-msg" id="emailError">Please enter a valid email address.</div>
+</div>
+<div class="input-group">
+<label class="field-label" for="phone">Phone <span aria-hidden="true" style="color:#e53e3e">*</span></label>
+<input type="tel" id="phone" name="phone" required autocomplete="tel" placeholder="(555) 555-5555" aria-required="true">
+<div class="error-msg" id="phoneError">Please enter a valid phone number.</div>
+</div>
+</div>
+
+<div class="input-row">
+<div class="input-group">
+<label class="field-label" for="dob">Date of Birth</label>
+<input type="date" id="dob" name="dob" autocomplete="bday">
+</div>
+<div class="input-group">
+<label class="field-label" for="preferredContact">Preferred Contact Method</label>
+<select id="preferredContact" name="preferredContact">
+<option value="">Select…</option>
+<option value="Email">Email</option>
+<option value="Phone">Phone</option>
+<option value="Either">Either</option>
+</select>
+</div>
+</div>
+
+<div class="assess-nav">
+<div style="flex:1"></div>
+<button class="btn btn-primary" onclick="nextStep(1)">Continue →</button>
+</div>
+</div>
+
+<!-- ─── STEP 2: Primary Concern ─── -->
+<div class="assess-step" data-step="2" id="step2">
+<h2 class="step-title">What Brings You In?</h2>
+<p class="step-desc">Select all that apply. This helps our team understand your primary areas of concern.</p>
+
+<fieldset>
+<legend>Primary Health Concerns <span class="field-hint">(Select all that apply — click to select or deselect)</span></legend>
+<div class="chips" id="primaryConcerns" role="group" aria-label="Primary health concerns">
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Chronic Fatigue">Chronic Fatigue</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Autoimmune Condition">Autoimmune Condition</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Digestive Issues">Digestive Issues</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Cancer Support">Cancer Support</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Pain Management">Pain Management</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Stress / Burnout">Stress / Burnout</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Hormonal Concerns">Hormonal Concerns</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Prevention / Optimization">Prevention / Optimization</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Sleep Difficulties">Sleep Difficulties</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Other">Other</button>
+</div>
+</fieldset>
+
+<div class="input-group" id="otherConcernWrap" style="display:none">
+<label class="field-label" for="otherConcern">Please describe your other concern(s)</label>
+<input type="text" id="otherConcern" placeholder="Briefly describe…">
+</div>
+
+<div class="assess-nav">
+<button class="btn btn-back" onclick="prevStep(2)">← Back</button>
+<button class="btn btn-primary" onclick="nextStep(2)">Continue →</button>
+</div>
+</div>
+
+<!-- ─── STEP 3: Symptom Duration & Severity ─── -->
+<div class="assess-step" data-step="3" id="step3">
+<h2 class="step-title">Duration &amp; Impact</h2>
+<p class="step-desc">Help us understand how long you've been experiencing these concerns and how they affect your daily life.</p>
+
+<fieldset>
+<legend>How long have you been experiencing your primary concern(s)?</legend>
+<div class="radio-cards" id="symptomDuration" role="radiogroup" aria-label="Symptom duration">
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="Less than 1 month">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>Less than 1 month</h4></div>
+</div>
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="1–6 months">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>1–6 months</h4></div>
+</div>
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="6–12 months">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>6–12 months</h4></div>
+</div>
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="1–3 years">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>1–3 years</h4></div>
+</div>
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="More than 3 years">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>More than 3 years</h4></div>
+</div>
+</div>
+</fieldset>
+
+<fieldset style="margin-top:1.5rem">
+<legend>How would you rate the overall impact on your daily life?</legend>
+<div class="slider-wrap">
+<div class="slider-labels"><span>Minimal impact</span><span>Significant impact</span></div>
+<input type="range" id="impactSlider" min="1" max="10" value="5" aria-label="Impact level from 1 minimal to 10 significant">
+<div class="slider-value" id="impactValue" aria-live="polite">5 / 10</div>
+</div>
+</fieldset>
+
+<div class="assess-nav">
+<button class="btn btn-back" onclick="prevStep(3)">← Back</button>
+<button class="btn btn-primary" onclick="nextStep(3)">Continue →</button>
+</div>
+</div>
+
+<!-- ─── STEP 4: Services of Interest ─── -->
+<div class="assess-step" data-step="4" id="step4">
+<h2 class="step-title">Services of Interest</h2>
+<p class="step-desc">Which of our services are you most interested in exploring? Select all that apply.</p>
+
+<fieldset>
+<legend>Services <span class="field-hint">(Select all that apply)</span></legend>
+<div class="chips" id="servicesInterest" role="group" aria-label="Services of interest">
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Naturopathic Medicine">🌿 Naturopathic Medicine</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Integrative Oncology">🔬 Integrative Oncology</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Acupuncture">📍 Acupuncture</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Not sure yet">🤔 Not sure yet</button>
+</div>
+</fieldset>
+
+<div class="assess-nav">
+<button class="btn btn-back" onclick="prevStep(4)">← Back</button>
+<button class="btn btn-primary" onclick="nextStep(4)">Continue →</button>
+</div>
+</div>
+
+<!-- ─── STEP 5: Medical History ─── -->
+<div class="assess-step" data-step="5" id="step5">
+<h2 class="step-title">Medical History Overview</h2>
+<p class="step-desc">A brief overview helps our team prepare for your initial consultation. This is not a substitute for a full medical history.</p>
+
+<fieldset>
+<legend>Do you have any diagnosed conditions? <span class="field-hint">(Select all that apply)</span></legend>
+<div class="checklist" id="diagnosedConditions" role="group" aria-label="Diagnosed conditions">
+<div class="check-item" role="checkbox" aria-checked="false" tabindex="0" data-value="Autoimmune condition(s)">
+<div class="check-box"></div><span class="check-label">Autoimmune condition(s)</span>
+</div>
+<div class="check-item" role="checkbox" aria-checked="false" tabindex="0" data-value="Chronic fatigue / fibromyalgia">
+<div class="check-box"></div><span class="check-label">Chronic fatigue / fibromyalgia</span>
+</div>
+<div class="check-item" role="checkbox" aria-checked="false" tabindex="0" data-value="Digestive disorder (IBS, IBD, SIBO, etc.)">
+<div class="check-box"></div><span class="check-label">Digestive disorder (IBS, IBD, SIBO, etc.)</span>
+</div>
+<div class="check-item" role="checkbox" aria-checked="false" tabindex="0" data-value="Cancer (current or history)">
+<div class="check-box"></div><span class="check-label">Cancer (current or history)</span>
+</div>
+<div class="check-item" role="checkbox" aria-checked="false" tabindex="0" data-value="Thyroid disorder">
+<div class="check-box"></div><span class="check-label">Thyroid disorder</span>
+</div>
+<div class="check-item" role="checkbox" aria-checked="false" tabindex="0" data-value="Cardiovascular condition">
+<div class="check-box"></div><span class="check-label">Cardiovascular condition</span>
+</div>
+<div class="check-item" role="checkbox" aria-checked="false" tabindex="0" data-value="Diabetes / metabolic condition">
+<div class="check-box"></div><span class="check-label">Diabetes / metabolic condition</span>
+</div>
+<div class="check-item" role="checkbox" aria-checked="false" tabindex="0" data-value="Mental health condition">
+<div class="check-box"></div><span class="check-label">Mental health condition</span>
+</div>
+<div class="check-item" role="checkbox" aria-checked="false" tabindex="0" data-value="None of the above">
+<div class="check-box"></div><span class="check-label">None of the above</span>
+</div>
+</div>
+</fieldset>
+
+<div class="input-group" style="margin-top:1.25rem">
+<label class="field-label" for="otherDiagnoses">Other diagnosed conditions (optional)</label>
+<input type="text" id="otherDiagnoses" placeholder="List any other conditions…">
+</div>
+
+<div class="assess-nav">
+<button class="btn btn-back" onclick="prevStep(5)">← Back</button>
+<button class="btn btn-primary" onclick="nextStep(5)">Continue →</button>
+</div>
+</div>
+
+<!-- ─── STEP 6: Current Treatments & Medications ─── -->
+<div class="assess-step" data-step="6" id="step6">
+<h2 class="step-title">Current Treatments &amp; Medications</h2>
+<p class="step-desc">Understanding what you're currently doing helps our team coordinate your care.</p>
+
+<fieldset>
+<legend>Are you currently under the care of other healthcare providers?</legend>
+<div class="radio-cards" id="otherProviders" role="radiogroup" aria-label="Other providers">
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="Yes">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>Yes</h4></div>
+</div>
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="No">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>No</h4></div>
+</div>
+</div>
+</fieldset>
+
+<div class="input-group" style="margin-top:1.25rem">
+<label class="field-label" for="currentMeds">Current medications and/or supplements (optional)</label>
+<p class="field-hint">List names and dosages if known. This information will be reviewed by your care team.</p>
+<textarea id="currentMeds" rows="3" placeholder="e.g., Levothyroxine 50mcg, Vitamin D 2000 IU…"></textarea>
+</div>
+
+<fieldset style="margin-top:1.25rem">
+<legend>Have you tried any of the following approaches? <span class="field-hint">(Select all that apply)</span></legend>
+<div class="chips" id="priorApproaches" role="group" aria-label="Prior approaches tried">
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Conventional medicine only">Conventional medicine only</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Naturopathic / functional medicine">Naturopathic / functional medicine</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Acupuncture">Acupuncture</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Dietary changes">Dietary changes</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Mind-body practices">Mind-body practices</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="None">None</button>
+</div>
+</fieldset>
+
+<div class="assess-nav">
+<button class="btn btn-back" onclick="prevStep(6)">← Back</button>
+<button class="btn btn-primary" onclick="nextStep(6)">Continue →</button>
+</div>
+</div>
+
+<!-- ─── STEP 7: Lifestyle & Wellness ─── -->
+<div class="assess-step" data-step="7" id="step7">
+<h2 class="step-title">Lifestyle &amp; Wellness Snapshot</h2>
+<p class="step-desc">These factors help our team take a whole-person view during your consultation.</p>
+
+<fieldset>
+<legend>How would you rate your current stress level?</legend>
+<div class="slider-wrap">
+<div class="slider-labels"><span>Low stress</span><span>High stress</span></div>
+<input type="range" id="stressSlider" min="1" max="10" value="5" aria-label="Stress level from 1 low to 10 high">
+<div class="slider-value" id="stressValue" aria-live="polite">5 / 10</div>
+</div>
+</fieldset>
+
+<fieldset style="margin-top:1.5rem">
+<legend>How would you rate your sleep quality?</legend>
+<div class="slider-wrap">
+<div class="slider-labels"><span>Poor</span><span>Excellent</span></div>
+<input type="range" id="sleepSlider" min="1" max="10" value="5" aria-label="Sleep quality from 1 poor to 10 excellent">
+<div class="slider-value" id="sleepValue" aria-live="polite">5 / 10</div>
+</div>
+</fieldset>
+
+<fieldset style="margin-top:1.5rem">
+<legend>How would you rate your energy level most days?</legend>
+<div class="slider-wrap">
+<div class="slider-labels"><span>Very low</span><span>Very high</span></div>
+<input type="range" id="energySlider" min="1" max="10" value="5" aria-label="Energy level from 1 very low to 10 very high">
+<div class="slider-value" id="energyValue" aria-live="polite">5 / 10</div>
+</div>
+</fieldset>
+
+<fieldset style="margin-top:1.5rem">
+<legend>Exercise frequency</legend>
+<div class="radio-cards" id="exerciseFreq" role="radiogroup" aria-label="Exercise frequency">
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="Rarely / never">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>Rarely / never</h4></div>
+</div>
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="1–2 times per week">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>1–2 times per week</h4></div>
+</div>
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="3–4 times per week">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>3–4 times per week</h4></div>
+</div>
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="5+ times per week">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>5+ times per week</h4></div>
+</div>
+</div>
+</fieldset>
+
+<div class="assess-nav">
+<button class="btn btn-back" onclick="prevStep(7)">← Back</button>
+<button class="btn btn-primary" onclick="nextStep(7)">Continue →</button>
+</div>
+</div>
+
+<!-- ─── STEP 8: Goals & Additional Details ─── -->
+<div class="assess-step" data-step="8" id="step8">
+<h2 class="step-title">Your Goals &amp; Anything Else</h2>
+<p class="step-desc">What are you hoping to achieve? The more context you share, the better prepared our team will be.</p>
+
+<fieldset>
+<legend>What are your primary goals for seeking integrative care? <span class="field-hint">(Select all that apply)</span></legend>
+<div class="chips" id="healthGoals" role="group" aria-label="Health goals">
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Identify root cause(s)">Identify root cause(s)</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Reduce symptoms">Reduce symptoms</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Reduce medications">Reduce medications</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Preventive care / optimization">Preventive care / optimization</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Complementary cancer support">Complementary cancer support</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Improve energy / vitality">Improve energy / vitality</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Better understand my health">Better understand my health</button>
+<button type="button" class="chip" role="button" aria-pressed="false" tabindex="0" data-value="Second opinion">Second opinion</button>
+</div>
+</fieldset>
+
+<div class="input-group" style="margin-top:1.5rem">
+<label class="field-label" for="additionalNotes">Is there anything else you'd like our team to know before your consultation?</label>
+<p class="field-hint">Feel free to share any additional context, questions, or preferences.</p>
+<textarea id="additionalNotes" rows="4" placeholder="Share anything that might help us prepare for your visit…"></textarea>
+</div>
+
+<fieldset style="margin-top:1.25rem">
+<legend>How did you hear about Raby Institute?</legend>
+<div class="radio-cards" id="referralSource" role="radiogroup" aria-label="Referral source">
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="Healthcare provider referral">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>Healthcare provider referral</h4></div>
+</div>
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="Online search">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>Online search</h4></div>
+</div>
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="Friend or family">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>Friend or family</h4></div>
+</div>
+<div class="radio-card" role="radio" aria-checked="false" tabindex="0" data-value="Other">
+<div class="radio-dot"></div>
+<div class="radio-card-content"><h4>Other</h4></div>
+</div>
+</div>
+</fieldset>
+
+<div class="assess-nav">
+<button class="btn btn-back" onclick="prevStep(8)">← Back</button>
+<button class="btn btn-primary" onclick="nextStep(8)">Review Your Responses →</button>
+</div>
+</div>
+
+<!-- ─── STEP 9: Review ─── -->
+<div class="assess-step" data-step="9" id="step9">
+<h2 class="step-title">Review Your Responses</h2>
+<p class="step-desc">Please review the information below. You can go back to edit any section before submitting.</p>
+
+<div id="reviewContent"></div>
+
+<div class="disclaimer-box">
+<strong>Important:</strong> This health assessment is for informational and scheduling purposes only. It does not constitute medical advice, diagnosis, or treatment. The information you provide will be used to help our scheduling team prepare for your new patient consultation. A complete medical history will be taken during your visit with your care team.
+</div>
+
+<div class="assess-nav">
+<button class="btn btn-back" onclick="prevStep(9)">← Edit Responses</button>
+<button class="btn btn-primary" onclick="submitAssessment()">Submit &amp; Book Consultation →</button>
+</div>
+</div>
+
+<!-- ─── STEP 10: Results & Booking ─── -->
+<div class="assess-step" data-step="10" id="step10">
+<h2 class="step-title">Your Assessment Summary</h2>
+<p class="step-desc">Your responses have been compiled. Copy the summary below and proceed to schedule your new patient consultation.</p>
+
+<div class="results-card">
+<h3>Booking Summary</h3>
+<div class="summary-text" id="summaryText" aria-label="Booking summary text"></div>
+<div class="copy-feedback" id="copyFeedback" aria-live="polite"></div>
+</div>
+
+<div class="results-card json-toggle">
+<button class="btn btn-outline" onclick="toggleJson()" style="width:100%" aria-expanded="false" id="jsonToggleBtn">Show JSON View</button>
+<div class="json-view" id="jsonView" role="region" aria-label="JSON data view"></div>
+</div>
+
+<div class="action-buttons">
+<button class="btn btn-outline" onclick="copySummary()">📋 Copy Summary</button>
+<button class="btn btn-primary" onclick="printSummary()">🖨 Print Summary</button>
+<button class="btn btn-primary" onclick="redirectToBooking()" style="background:var(--gradient-accent)">📅 Book Your Consultation →</button>
+</div>
+
+<div class="emergency-box" role="alert">
+<h4>⚠ Emergency Notice</h4>
+<p>If you are experiencing a medical emergency, please call <strong>911</strong> or go to your nearest emergency room immediately. This assessment is not a substitute for emergency medical care.</p>
+</div>
+
+<div class="disclaimer-box" style="margin-top:1rem">
+<strong>Disclaimer:</strong> This health assessment does not constitute medical advice, diagnosis, or treatment. No guarantees are made regarding outcomes. The information provided is used solely to assist scheduling staff in preparing for your new patient consultation at Raby Institute. A qualified healthcare provider will conduct a thorough evaluation during your visit.
+</div>
+</div>
+
+</div><!-- /assessment-container -->
+</div><!-- /assessment-overlay -->
+
+<script>
+/* ═══════════════════════════════════════════ */
+/* STATE                                       */
+/* ═══════════════════════════════════════════ */
+let currentStep = 1;
+const totalSteps = 10;
+const BOOKING_URL = 'https://rabyintegrativemedicine.com/appointment';
+const PAYLOAD_LIMIT = 500;
+
+const data = {
+  fullName:'',email:'',phone:'',dob:'',preferredContact:'',
+  primaryConcerns:[],otherConcern:'',
+  symptomDuration:'',impactLevel:5,
+  servicesInterest:[],
+  diagnosedConditions:[],otherDiagnoses:'',
+  otherProviders:'',currentMeds:'',priorApproaches:[],
+  stressLevel:5,sleepQuality:5,energyLevel:5,exerciseFreq:'',
+  healthGoals:[],additionalNotes:'',referralSource:''
+};
+
+/* ═══════════════════════════════════════════ */
+/* STICKY CTA                                  */
+/* ═══════════════════════════════════════════ */
+(function(){
+  const s=document.getElementById('stickyCta');
+  let shown=false;
+  window.addEventListener('scroll',function(){
+    if(window.scrollY>400&&!shown){s.classList.add('visible');shown=true}
+    else if(window.scrollY<=400&&shown){s.classList.remove('visible');shown=false}
+  },{passive:true});
+})();
+
+/* ═══════════════════════════════════════════ */
+/* OPEN / CLOSE ASSESSMENT                     */
+/* ═══════════════════════════════════════════ */
+function openAssessment(){
+  document.getElementById('assessmentOverlay').classList.add('active');
+  document.body.style.overflow='hidden';
+  document.getElementById('stickyCta').style.display='none';
+  goToStep(1);
+}
+function closeAssessment(){
+  if(currentStep<10&&!confirm('Are you sure you want to close? Your responses will not be saved.'))return;
+  document.getElementById('assessmentOverlay').classList.remove('active');
+  document.body.style.overflow='';
+  document.getElementById('stickyCta').style.display='';
+}
+
+/* ═══════════════════════════════════════════ */
+/* NAVIGATION                                  */
+/* ═══════════════════════════════════════════ */
+function goToStep(n){
+  document.querySelectorAll('.assess-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step'+n).classList.add('active');
+  currentStep=n;
+  updateProgress();
+  document.querySelector('.assessment-container').scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateProgress(){
+  const displayStep = Math.min(currentStep, 9);
+  document.getElementById('stepCurrent').textContent=displayStep;
+  document.getElementById('stepTotal').textContent=9;
+  const pct=currentStep>=10?100:Math.round(((currentStep-1)/9)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  const pb=document.getElementById('progressBar');
+  pb.setAttribute('aria-valuenow',pct);
+  const remaining=Math.max(1,Math.round((9-currentStep+1)*1.1));
+  document.getElementById('timeEstimate').textContent=currentStep>=10?'Complete':'~'+remaining+' min remaining';
+}
+
+function nextStep(from){
+  if(!validateStep(from))return;
+  collectStepData(from);
+  if(from===8)buildReview();
+  goToStep(from+1);
+}
+function prevStep(from){
+  collectStepData(from);
+  goToStep(from-1);
+}
+
+/* ═══════════════════════════════════════════ */
+/* VALIDATION                                  */
+/* ═══════════════════════════════════════════ */
+function validateStep(step){
+  clearErrors();
+  if(step===1){
+    let valid=true;
+    const name=document.getElementById('fullName').value.trim();
+    const email=document.getElementById('email').value.trim();
+    const phone=document.getElementById('phone').value.trim();
+    if(!name){showError('fullName','fullNameError');valid=false}
+    if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showError('email','emailError');valid=false}
+    if(!phone||phone.replace(/\D/g,'').length<7){showError('phone','phoneError');valid=false}
+    return valid;
+  }
+  return true;
+}
+function showError(inputId,errorId){
+  document.getElementById(inputId).classList.add('field-error');
+  document.getElementById(errorId).classList.add('visible');
+}
+function clearErrors(){
+  document.querySelectorAll('.field-error').forEach(e=>e.classList.remove('field-error'));
+  document.querySelectorAll('.error-msg').forEach(e=>e.classList.remove('visible'));
+}
+
+/* ═══════════════════════════════════════════ */
+/* DATA COLLECTION                             */
+/* ═══════════════════════════════════════════ */
+function collectStepData(step){
+  switch(step){
+    case 1:
+      data.fullName=document.getElementById('fullName').value.trim();
+      data.email=document.getElementById('email').value.trim();
+      data.phone=document.getElementById('phone').value.trim();
+      data.dob=document.getElementById('dob').value;
+      data.preferredContact=document.getElementById('preferredContact').value;
+      break;
+    case 2:
+      data.primaryConcerns=getChipValues('primaryConcerns');
+      data.otherConcern=document.getElementById('otherConcern').value.trim();
+      break;
+    case 3:
+      data.symptomDuration=getRadioValue('symptomDuration');
+      data.impactLevel=parseInt(document.getElementById('impactSlider').value);
+      break;
+    case 4:
+      data.servicesInterest=getChipValues('servicesInterest');
+      break;
+    case 5:
+      data.diagnosedConditions=getChecklistValues('diagnosedConditions');
+      data.otherDiagnoses=document.getElementById('otherDiagnoses').value.trim();
+      break;
+    case 6:
+      data.otherProviders=getRadioValue('otherProviders');
+      data.currentMeds=document.getElementById('currentMeds').value.trim();
+      data.priorApproaches=getChipValues('priorApproaches');
+      break;
+    case 7:
+      data.stressLevel=parseInt(document.getElementById('stressSlider').value);
+      data.sleepQuality=parseInt(document.getElementById('sleepSlider').value);
+      data.energyLevel=parseInt(document.getElementById('energySlider').value);
+      data.exerciseFreq=getRadioValue('exerciseFreq');
+      break;
+    case 8:
+      data.healthGoals=getChipValues('healthGoals');
+      data.additionalNotes=document.getElementById('additionalNotes').value.trim();
+      data.referralSource=getRadioValue('referralSource');
+      break;
+  }
+}
+
+function getChipValues(containerId){
+  const vals=[];
+  document.querySelectorAll('#'+containerId+' .chip[aria-pressed="true"]').forEach(c=>{
+    vals.push(c.getAttribute('data-value'));
+  });
+  return vals;
+}
+function getRadioValue(containerId){
+  const sel=document.querySelector('#'+containerId+' .radio-card.selected');
+  return sel?sel.getAttribute('data-value'):'';
+}
+function getChecklistValues(containerId){
+  const vals=[];
+  document.querySelectorAll('#'+containerId+' .check-item.selected').forEach(c=>{
+    vals.push(c.getAttribute('data-value'));
+  });
+  return vals;
+}
+
+/* ═══════════════════════════════════════════ */
+/* CHIP / RADIO / CHECK INTERACTIONS           */
+/* ═══════════════════════════════════════════ */
+document.addEventListener('click',function(e){
+  // Chips (multi-select toggle)
+  const chip=e.target.closest('.chip');
+  if(chip){
+    const pressed=chip.getAttribute('aria-pressed')==='true';
+    chip.setAttribute('aria-pressed',pressed?'false':'true');
+    chip.classList.toggle('selected');
+    // Show/hide "Other" field for primary concerns
+    if(chip.closest('#primaryConcerns')&&chip.getAttribute('data-value')==='Other'){
+      document.getElementById('otherConcernWrap').style.display=pressed?'none':'block';
+    }
+    return;
+  }
+  // Radio cards (single select)
+  const rc=e.target.closest('.radio-card');
+  if(rc){
+    const group=rc.parentElement;
+    group.querySelectorAll('.radio-card').forEach(r=>{
+      r.classList.remove('selected');
+      r.setAttribute('aria-checked','false');
+    });
+    rc.classList.add('selected');
+    rc.setAttribute('aria-checked','true');
+    return;
+  }
+  // Checklist (multi-select toggle)
+  const ci=e.target.closest('.check-item');
+  if(ci){
+    const checked=ci.classList.contains('selected');
+    ci.classList.toggle('selected');
+    ci.setAttribute('aria-checked',checked?'false':'true');
+    return;
+  }
+});
+
+// Keyboard support
+document.addEventListener('keydown',function(e){
+  if(e.key===' '||e.key==='Enter'){
+    const t=e.target;
+    if(t.classList.contains('chip')||t.classList.contains('radio-card')||t.classList.contains('check-item')){
+      e.preventDefault();
+      t.click();
+    }
+  }
+});
+
+/* Sliders live update */
+document.getElementById('impactSlider').addEventListener('input',function(){
+  document.getElementById('impactValue').textContent=this.value+' / 10';
+});
+document.getElementById('stressSlider').addEventListener('input',function(){
+  document.getElementById('stressValue').textContent=this.value+' / 10';
+});
+document.getElementById('sleepSlider').addEventListener('input',function(){
+  document.getElementById('sleepValue').textContent=this.value+' / 10';
+});
+document.getElementById('energySlider').addEventListener('input',function(){
+  document.getElementById('energyValue').textContent=this.value+' / 10';
+});
+
+/* ═══════════════════════════════════════════ */
+/* REVIEW                                      */
+/* ═══════════════════════════════════════════ */
+function buildReview(){
+  const rc=document.getElementById('reviewContent');
+  let html='';
+
+  html+=reviewSection('Contact Information',1,[
+    ['Name',data.fullName],
+    ['Email',data.email],
+    ['Phone',data.phone],
+    ['Date of Birth',data.dob||'Not provided'],
+    ['Preferred Contact',data.preferredContact||'Not specified']
+  ]);
+
+  const concerns=data.primaryConcerns.join(', ')||(data.otherConcern?'':'None selected');
+  const concernDisplay=data.otherConcern?concerns+(concerns?', ':'')+data.otherConcern:concerns;
+  html+=reviewSection('Primary Concerns',2,[
+    ['Concerns',concernDisplay||'None selected']
+  ]);
+
+  html+=reviewSection('Duration & Impact',3,[
+    ['Duration',data.symptomDuration||'Not specified'],
+    ['Daily Life Impact',data.impactLevel+' / 10']
+  ]);
+
+  html+=reviewSection('Services of Interest',4,[
+    ['Services',data.servicesInterest.join(', ')||'None selected']
+  ]);
+
+  const conditions=data.diagnosedConditions.join(', ');
+  const condDisplay=data.otherDiagnoses?(conditions?conditions+', ':'')+data.otherDiagnoses:conditions;
+  html+=reviewSection('Medical History',5,[
+    ['Diagnosed Conditions',condDisplay||'None selected']
+  ]);
+
+  html+=reviewSection('Current Treatments',6,[
+    ['Other Providers',data.otherProviders||'Not specified'],
+    ['Medications/Supplements',data.currentMeds||'None listed'],
+    ['Prior Approaches',data.priorApproaches.join(', ')||'None selected']
+  ]);
+
+  html+=reviewSection('Lifestyle',7,[
+    ['Stress Level',data.stressLevel+' / 10'],
+    ['Sleep Quality',data.sleepQuality+' / 10'],
+    ['Energy Level',data.energyLevel+' / 10'],
+    ['Exercise Frequency',data.exerciseFreq||'Not specified']
+  ]);
+
+  html+=reviewSection('Goals & Additional',8,[
+    ['Goals',data.healthGoals.join(', ')||'None selected'],
+    ['Additional Notes',data.additionalNotes||'None'],
+    ['Referral Source',data.referralSource||'Not specified']
+  ]);
+
+  rc.innerHTML=html;
+}
+
+function reviewSection(title,stepNum,items){
+  let html='<div class="review-section"><h4>'+title+'<button onclick="goToStep('+stepNum+')" aria-label="Edit '+title+'">Edit</button></h4>';
+  items.forEach(function(item){
+    html+='<div class="review-item"><span class="rlabel">'+item[0]+'</span><span class="rvalue">'+escHtml(item[1])+'</span></div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+function escHtml(s){
+  const d=document.createElement('div');
+  d.textContent=s;
+  return d.innerHTML;
+}
+
+/* ═══════════════════════════════════════════ */
+/* SUBMIT & RESULTS                            */
+/* ═══════════════════════════════════════════ */
+function submitAssessment(){
+  goToStep(10);
+  buildSummary();
+}
+
+function buildSummary(){
+  const concerns=data.primaryConcerns.slice();
+  if(data.otherConcern)concerns.push(data.otherConcern);
+
+  let summary='NEW PATIENT CONSULTATION — RABY INSTITUTE\n';
+  summary+='Name: '+data.fullName+'\n';
+  summary+='Email: '+data.email+'\n';
+  summary+='Phone: '+data.phone+'\n';
+  if(data.dob)summary+='DOB: '+data.dob+'\n';
+  if(data.preferredContact)summary+='Contact Pref: '+data.preferredContact+'\n';
+  summary+='Primary Concern(s): '+(concerns.join(', ')||'Not specified')+'\n';
+  if(data.symptomDuration)summary+='Duration: '+data.symptomDuration+'\n';
+  summary+='Impact: '+data.impactLevel+'/10\n';
+  if(data.servicesInterest.length)summary+='Services: '+data.servicesInterest.join(', ')+'\n';
+  const allCond=data.diagnosedConditions.slice();
+  if(data.otherDiagnoses)allCond.push(data.otherDiagnoses);
+  if(allCond.length)summary+='Conditions: '+allCond.join(', ')+'\n';
+  if(data.otherProviders)summary+='Other Providers: '+data.otherProviders+'\n';
+  if(data.currentMeds)summary+='Meds/Supps: '+data.currentMeds+'\n';
+  if(data.priorApproaches.length)summary+='Prior Approaches: '+data.priorApproaches.join(', ')+'\n';
+  summary+='Stress: '+data.stressLevel+'/10 | Sleep: '+data.sleepQuality+'/10 | Energy: '+data.energyLevel+'/10\n';
+  if(data.exerciseFreq)summary+='Exercise: '+data.exerciseFreq+'\n';
+  if(data.healthGoals.length)summary+='Goals: '+data.healthGoals.join(', ')+'\n';
+  if(data.additionalNotes)summary+='Notes: '+data.additionalNotes+'\n';
+  if(data.referralSource)summary+='Referral: '+data.referralSource+'\n';
+
+  // Enforce payload limit
+  if(summary.length>PAYLOAD_LIMIT){
+    summary=summary.substring(0,PAYLOAD_LIMIT-3)+'...';
+  }
+
+  document.getElementById('summaryText').textContent=summary;
+
+  // JSON
+  const payload={
+    name:data.fullName,
+    email:data.email,
+    phone:data.phone,
+    primary_concern:concerns.join(', ')||'Not specified'
+  };
+  document.getElementById('jsonView').textContent=JSON.stringify(payload,null,2);
+}
+
+function copySummary(){
+  const text=document.getElementById('summaryText').textContent;
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      showCopyFeedback('✓ Summary copied to clipboard');
+    }).catch(function(){
+      fallbackCopy(text);
+    });
+  }else{
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text){
+  const ta=document.createElement('textarea');
+  ta.value=text;
+  ta.style.position='fixed';
+  ta.style.left='-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try{document.execCommand('copy');showCopyFeedback('✓ Summary copied to clipboard')}
+  catch(e){showCopyFeedback('Unable to copy — please select and copy manually')}
+  document.body.removeChild(ta);
+}
+
+function showCopyFeedback(msg){
+  const fb=document.getElementById('copyFeedback');
+  fb.textContent=msg;
+  setTimeout(function(){fb.textContent=''},4000);
+}
+
+function toggleJson(){
+  const jv=document.getElementById('jsonView');
+  const btn=document.getElementById('jsonToggleBtn');
+  const visible=jv.classList.contains('visible');
+  jv.classList.toggle('visible');
+  btn.setAttribute('aria-expanded',visible?'false':'true');
+  btn.textContent=visible?'Show JSON View':'Hide JSON View';
+}
+
+function printSummary(){
+  window.print();
+}
+
+function redirectToBooking(){
+  // Copy to clipboard first, then redirect
+  const text=document.getElementById('summaryText').textContent;
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      window.open(BOOKING_URL,'_blank');
+    }).catch(function(){
+      fallbackCopy(text);
+      window.open(BOOKING_URL,'_blank');
+    });
+  }else{
+    fallbackCopy(text);
+    window.open(BOOKING_URL,'_blank');
+  }
+}
+</script>
+</body>
+</html>

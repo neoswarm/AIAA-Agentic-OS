@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plug and play AI, SEO & Ad Strategy for Toronto Functional Medicine Centre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #0a0e1a;
+  --bg-alt: #0f1420;
+  --bg-card: #141824;
+  --bg-card2: #1a2030;
+  --text-white: #f0f4ff;
+  --text-muted: #8896b0;
+  --accent: #00D084;
+  --accent-dark: #00a868;
+  --border: rgba(255,255,255,0.08);
+  --brand-primary: #084369;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:18px;scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text-white);line-height:1.75;-webkit-font-smoothing:antialiased}
+h1{font-size:clamp(32px,6vw,56px);font-weight:800;line-height:1.15}
+h2{font-size:clamp(26px,4vw,40px);font-weight:700;line-height:1.2}
+h3{font-size:clamp(20px,3vw,26px);font-weight:600}
+h4{font-size:clamp(17px,2.5vw,20px);font-weight:600}
+p{font-size:clamp(17px,2vw,19px)}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+img{max-width:100%;height:auto}
+.section{padding:clamp(60px,8vw,110px) 24px}
+.section-alt{background:var(--bg-alt)}
+.section-dark{background:var(--bg-card)}
+.content-wrap{max-width:780px;margin:0 auto}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent);font-weight:600;margin-bottom:12px}
+.lead{font-size:clamp(18px,2.5vw,22px);color:rgba(240,244,255,0.8);margin-top:16px;line-height:1.6}
+.accent-text{color:var(--accent)}
+
+/* Progress bar */
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--accent);z-index:9999;width:0%;transition:width 0.1s linear}
+
+/* Personalization banner */
+#pers-banner{position:relative;background:linear-gradient(90deg,var(--brand-primary),#0a5a8a);padding:12px 24px;text-align:center;font-size:14px;font-weight:600;letter-spacing:0.02em;display:flex;align-items:center;justify-content:center;gap:8px}
+#pers-banner span{opacity:0.9}
+
+/* Sticky navbar */
+#sticky-nav{position:sticky;top:0;z-index:1000;background:rgba(10,14,26,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{height:36px;object-fit:contain}
+.nav-logo-fallback{font-weight:700;font-size:15px;color:var(--text-white)}
+.nav-book-btn{background:var(--accent);color:#000;font-weight:700;font-size:14px;padding:10px 20px;border-radius:50px;border:none;cursor:pointer;white-space:nowrap;transition:background 0.2s}
+.nav-book-btn:hover{background:var(--accent-dark)}
+
+/* Cards */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px}
+.card-accent{border-left:3px solid var(--accent)}
+.card-highlight{background:linear-gradient(135deg,rgba(0,208,132,0.08),rgba(0,208,132,0.02));border:1px solid rgba(0,208,132,0.25);border-radius:12px;padding:28px}
+
+/* Stats grid */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:16px;margin-top:32px}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 16px;text-align:center}
+.stat-num{font-size:clamp(24px,5vw,42px);font-weight:800;color:var(--accent);display:block;line-height:1.1}
+.stat-label{font-size:12px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-top:6px;display:block}
+
+/* Three things strip */
+.three-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:32px}
+.three-card{background:var(--bg-card2);border:1px solid rgba(0,208,132,0.2);border-radius:12px;padding:20px;display:flex;align-items:flex-start;gap:12px}
+.three-check{font-size:24px;flex-shrink:0}
+.three-text{font-size:15px;font-weight:600;color:var(--text-white)}
+.three-sub{font-size:13px;color:var(--text-muted);margin-top:4px}
+
+/* Loom video */
+.video-wrap{border-radius:12px;overflow:hidden;margin-top:28px;border:1px solid var(--border)}
+.video-placeholder{background:var(--bg-card2);border:2px dashed var(--border);border-radius:12px;padding:60px 24px;text-align:center;color:var(--text-muted);font-size:16px;margin-top:28px}
+.video-placeholder strong{display:block;font-size:20px;margin-bottom:8px;color:var(--text-white)}
+
+/* Callout */
+.callout{background:rgba(0,208,132,0.06);border:1px solid rgba(0,208,132,0.3);border-radius:12px;padding:20px 24px;margin-top:20px;font-size:16px}
+.callout strong{color:var(--accent)}
+
+/* Expandable details */
+details{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+details+details{margin-top:0}
+summary{cursor:pointer;list-style:none;padding:18px 24px;font-weight:600;font-size:17px;display:flex;justify-content:space-between;align-items:center;user-select:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'＋';color:var(--accent);font-size:20px;flex-shrink:0;margin-left:12px}
+details[open] summary::after{content:'－'}
+.details-body{padding:4px 24px 24px;color:rgba(240,244,255,0.85);font-size:16px;line-height:1.7}
+.details-body p+p{margin-top:10px}
+.details-sub{background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;margin-top:12px}
+.details-sub summary{font-size:15px;padding:14px 18px}
+.details-sub .details-body{padding:4px 18px 18px;font-size:15px}
+
+/* Copy button */
+.copy-btn{background:transparent;border:1px solid var(--border);color:var(--text-muted);border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+.copy-btn.copied{border-color:#22c55e;color:#22c55e}
+.copy-all-btn{background:rgba(0,208,132,0.1);border:1px solid rgba(0,208,132,0.3);color:var(--accent);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:12px;transition:all 0.15s}
+.copy-all-btn:hover{background:rgba(0,208,132,0.2)}
+
+/* Ads section */
+.ad-item{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ad-item:last-child{border-bottom:none}
+.ad-text{font-size:15px;flex:1}
+.kw-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.kw-tag{background:var(--bg-card2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:13px;font-family:monospace;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+
+/* Email section */
+.email-preview{background:var(--bg-card2);border-radius:8px;padding:16px;margin-bottom:12px;font-size:14px;color:var(--text-muted)}
+.email-subject{font-weight:700;color:var(--text-white);font-size:16px;margin-bottom:4px}
+.email-body{white-space:pre-wrap;font-size:15px;line-height:1.7;color:rgba(240,244,255,0.85);background:var(--bg-card2);border-radius:8px;padding:20px;margin-top:12px;font-family:inherit}
+
+/* Table */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;border:1px solid var(--border)}
+table{width:100%;min-width:440px;border-collapse:collapse}
+th{background:var(--bg-card2);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:12px 16px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:12px 16px;font-size:15px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.02)}
+
+/* Position bar chart */
+.pos-bars{margin-top:24px;display:flex;flex-direction:column;gap:12px}
+.pos-row{display:flex;align-items:center;gap:12px}
+.pos-label{width:90px;font-size:13px;color:var(--text-muted);flex-shrink:0}
+.pos-bar-wrap{flex:1;background:var(--bg-card2);border-radius:4px;height:24px;position:relative;overflow:hidden}
+.pos-bar{height:100%;background:var(--accent);border-radius:4px;transition:width 1s ease;display:flex;align-items:center;padding-left:8px;font-size:12px;font-weight:700;color:#000;min-width:4px}
+.pos-count{width:36px;text-align:right;font-size:14px;font-weight:700;color:var(--text-white)}
+
+/* SMART pillars */
+.pillars-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin-top:28px}
+.pillar-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
+.pillar-letter{font-size:36px;font-weight:800;color:var(--accent);line-height:1}
+.pillar-word{font-size:16px;font-weight:700;margin-top:6px}
+.pillar-desc{font-size:13px;color:var(--text-muted);margin-top:6px;line-height:1.5}
+
+/* Funnel flow */
+.funnel-flow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin:28px 0;padding:20px;background:var(--bg-card2);border-radius:12px}
+.funnel-step{background:var(--bg-card);border:1px solid rgba(0,208,132,0.3);border-radius:8px;padding:10px 16px;font-size:14px;font-weight:600;text-align:center}
+.funnel-arrow{color:var(--accent);font-size:18px;font-weight:700}
+
+/* Assessment overlay */
+#assessment-overlay{position:fixed;inset:0;background:rgba(5,8,20,0.97);z-index:10000;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px}
+#assessment-overlay.open{display:flex}
+.assess-modal{background:var(--bg-alt);border:1px solid var(--border);border-radius:16px;width:100%;max-width:640px;padding:32px;position:relative;margin:auto}
+.assess-close{position:absolute;top:16px;right:16px;background:var(--bg-card2);border:1px solid var(--border);color:var(--text-white);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+.assess-step{display:none}
+.assess-step.active{display:block}
+.assess-progress{display:flex;gap:6px;margin-bottom:28px}
+.assess-prog-dot{flex:1;height:4px;background:var(--border);border-radius:4px;transition:background 0.3s}
+.assess-prog-dot.done{background:var(--accent)}
+.assess-title{font-size:clamp(20px,4vw,26px);font-weight:700;margin-bottom:8px}
+.assess-sub{font-size:16px;color:var(--text-muted);margin-bottom:24px}
+
+/* Card options (replaces radio buttons) */
+.concern-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.card-opt{background:var(--bg-card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;transition:all 0.15s;width:100%;font-family:inherit;color:var(--text-white)}
+.card-opt:hover{border-color:var(--accent);background:rgba(0,208,132,0.06)}
+.card-opt.sel{border-color:var(--accent);background:rgba(0,208,132,0.1)}
+.co-icon{font-size:20px;flex-shrink:0}
+.co-text{font-size:15px;font-weight:500;flex:1}
+.co-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all 0.15s}
+.card-opt.sel .co-check{background:var(--accent);border-color:var(--accent);color:#000}
+.card-opt.sel .co-check::after{content:'✓'}
+
+/* Dur grid */
+.dur-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+
+/* Chip group */
+.chip-group{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.chip{background:var(--bg-card2);border:1px solid var(--border);border-radius:50px;padding:8px 16px;cursor:pointer;font-size:15px;transition:all 0.15s;font-family:inherit;color:var(--text-white)}
+.chip:hover{border-color:var(--accent);background:rgba(0,208,132,0.06)}
+.chip.sel{border-color:var(--accent);background:rgba(0,208,132,0.15);color:var(--accent);font-weight:600}
+
+/* Input fields */
+.assess-form{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+.form-field{display:flex;flex-direction:column;gap:6px}
+.form-field label{font-size:14px;color:var(--text-muted);font-weight:500}
+.form-field input{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:16px;color:var(--text-white);font-family:inherit;outline:none;transition:border 0.15s}
+.form-field input:focus{border-color:var(--accent)}
+
+/* Results */
+.results-card{background:var(--bg-card2);border:1px solid rgba(0,208,132,0.25);border-radius:12px;padding:24px;margin-bottom:16px}
+.results-emoji{font-size:40px;margin-bottom:12px;display:block}
+
+/* Navigation buttons */
+.assess-nav{display:flex;gap:12px;margin-top:24px;justify-content:space-between}
+.btn-back{background:transparent;border:1px solid var(--border);color:var(--text-muted);border-radius:8px;padding:13px 24px;font-size:16px;cursor:pointer;font-family:inherit;font-weight:500}
+.btn-next{background:var(--accent);color:#000;border:none;border-radius:8px;padding:13px 28px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;flex:1;transition:background 0.2s}
+.btn-next:hover{background:var(--accent-dark)}
+.btn-book{background:var(--brand-primary);color:#fff;border:none;border-radius:8px;padding:16px 28px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;margin-top:12px;transition:background 0.2s}
+.btn-book:hover{background:#0a5a8a}
+
+/* Section jump nav */
+#jump-nav{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:900;display:flex;flex-direction:column;gap:8px}
+#jump-nav a{background:var(--bg-card);border:1px solid var(--border);border-radius:50px;padding:8px 14px;font-size:12px;color:var(--text-muted);white-space:nowrap;transition:all 0.15s;text-decoration:none}
+#jump-nav a:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,208,132,0.06)}
+@media(max-width:1100px){#jump-nav{display:none}}
+
+/* Sticky mobile CTA */
+#sticky-cta{position:fixed;bottom:24px;right:20px;z-index:900;background:var(--accent);color:#000;font-weight:700;font-size:15px;border-radius:50px;padding:14px 22px;box-shadow:0 8px 24px rgba(0,0,0,0.5);text-decoration:none;display:none;border:none;cursor:pointer;font-family:inherit}
+@media(max-width:768px){#sticky-cta{display:block}}
+
+/* Testimonial cards */
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:28px}
+.testi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px}
+.testi-name{font-weight:700;font-size:17px;margin-bottom:4px}
+.testi-title{font-size:13px;color:var(--text-muted);margin-bottom:16px}
+.testi-bullets{list-style:none;display:flex;flex-direction:column;gap:8px}
+.testi-bullets li{font-size:15px;display:flex;align-items:flex-start;gap:8px}
+.testi-bullets li::before{content:'✅';flex-shrink:0;margin-top:1px}
+
+/* FAQ */
+.faq-wrap{margin-top:24px}
+.faq-item{border-bottom:1px solid var(--border)}
+.faq-item summary{padding:20px 0;font-size:17px;font-weight:600;color:var(--text-white)}
+.faq-item .details-body{padding:0 0 20px;font-size:16px;color:rgba(240,244,255,0.8)}
+
+/* Feature groups */
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:24px}
+
+/* CTA section */
+.guarantee-card{background:linear-gradient(135deg,rgba(8,67,105,0.4),rgba(0,208,132,0.08));border:1px solid rgba(0,208,132,0.3);border-radius:16px;padding:32px;text-align:center;margin-bottom:40px}
+.guarantee-card h3{font-size:clamp(22px,4vw,32px);margin-bottom:12px}
+.guarantee-card p{font-size:17px;color:rgba(240,244,255,0.85);max-width:560px;margin:0 auto}
+
+/* Calendly */
+.calendly-wrap{border-radius:12px;overflow:hidden;border:1px solid var(--border);margin-top:24px}
+
+/* Attack plan */
+.attack-plan{margin-top:24px;display:flex;flex-direction:column;gap:12px}
+.attack-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.attack-header{display:flex;align-items:center;gap:16px;padding:18px 24px;border-bottom:1px solid var(--border)}
+.attack-num{background:var(--accent);color:#000;font-weight:800;font-size:14px;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.attack-title{font-weight:700;font-size:17px;flex:1}
+.attack-badge{background:rgba(0,208,132,0.1);border:1px solid rgba(0,208,132,0.25);color:var(--accent);border-radius:50px;padding:4px 12px;font-size:12px;font-weight:600;white-space:nowrap}
+.attack-body{padding:16px 24px;font-size:16px;color:rgba(240,244,255,0.85)}
+
+/* AI gap callout */
+.ai-gap-card{background:linear-gradient(135deg,rgba(255,165,0,0.08),rgba(255,100,0,0.04));border:1px solid rgba(255,165,0,0.25);border-radius:12px;padding:20px 24px;margin:20px 0}
+.ai-gap-card strong{color:#ffa500}
+
+/* Apps grid */
+.apps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:24px}
+.app-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
+.app-emoji{font-size:40px;margin-bottom:10px;display:block}
+.app-name{font-weight:600;font-size:15px}
+.app-meta{font-size:13px;color:var(--text-muted);margin-top:6px}
+
+/* Responsive */
+@media(max-width:600px){
+  .concern-grid,.dur-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .three-strip{grid-template-columns:1fr}
+  .assess-modal{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PERSONALIZATION BANNER
+═══════════════════════════════════════════════════════ -->
+<div id="pers-banner">
+  <span>📍 This strategy was built exclusively for <strong>Toronto Functional Medicine Centre</strong> ↓</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     STICKY NAVBAR
+═══════════════════════════════════════════════════════ -->
+<nav id="sticky-nav">
+  <img src="https://torontofunctionalmedicine.com/wp-content/uploads/2023/03/torontofunctionalmedlogo-darkblue.png"
+       alt="Toronto Functional Medicine Centre" class="nav-logo"
+       onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+  <span class="nav-logo-fallback" style="display:none">TFMC</span>
+  <button class="nav-book-btn" onclick="document.getElementById('section-cta').scrollIntoView({behavior:'smooth'})">📅 Book a Call</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 1: HERO
+═══════════════════════════════════════════════════════ -->
+<section class="section" id="section-hero" style="background:linear-gradient(180deg,#0a0e1a 0%,#0d1425 100%);padding-bottom:80px">
+  <div class="content-wrap">
+    <div class="eyebrow">Personalized Strategy Package</div>
+    <h1>Plug and play AI, SEO, and Ad Strategy for <span class="accent-text">Toronto Functional Medicine Centre</span> to get More Patients.</h1>
+
+    <!-- Loom video or placeholder -->
+    <div id="video-container" class="video-placeholder">
+      <strong>🎬 Your Personalized Video</strong>
+      Add your Loom ID to the URL: <code style="background:var(--bg-card);padding:2px 8px;border-radius:4px;font-size:14px">?loom=YOUR_LOOM_ID</code><br>
+      <span style="font-size:14px;margin-top:8px;display:block">Or paste the ID in the CONFIG block at the bottom of this file</span>
+    </div>
+
+    <div class="callout" style="margin-top:24px">
+      <strong>Don't Skip The Video Above</strong> — This is a personalized strategy package built specifically for Toronto Functional Medicine Centre. Every number below is real. Every campaign is ready to run.
+    </div>
+
+    <!-- 3 things built -->
+    <div class="three-strip">
+      <div class="three-card">
+        <span class="three-check">✅</span>
+        <div>
+          <div class="three-text">Patient Health Assessment</div>
+          <div class="three-sub">Live — launch it below</div>
+        </div>
+      </div>
+      <div class="three-card">
+        <span class="three-check">✅</span>
+        <div>
+          <div class="three-text">Google Ad Campaigns</div>
+          <div class="three-sub">3 campaigns, ready to run</div>
+        </div>
+      </div>
+      <div class="three-card">
+        <span class="three-check">✅</span>
+        <div>
+          <div class="three-text">SEO Quick Wins Mapped</div>
+          <div class="three-sub">6 page-1 opportunities</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEMrush stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-num">#1.77M</span>
+        <span class="stat-label">Global Rank</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">1,874</span>
+        <span class="stat-label">Keywords Ranked</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">~436</span>
+        <span class="stat-label">Monthly Visits</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">$179/mo</span>
+        <span class="stat-label">Traffic Value</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 2: WHAT'S INSIDE
+═══════════════════════════════════════════════════════ -->
+<section class="section section-alt" id="section-inside">
+  <div class="content-wrap">
+    <div class="eyebrow">Everything We Built</div>
+    <h2>Here's Everything Inside Your Package</h2>
+    <p class="lead">Seven done-for-you assets — strategy, campaigns, sequences, and a live patient app — all built specifically for Toronto Functional Medicine Centre.</p>
+
+    <div style="margin-top:28px">
+      <details open>
+        <summary>🔍 1. SEO Digital Health Report</summary>
+        <div class="details-body">
+          <p>Your complete keyword footprint analysis — 1,874 keywords ranked, 6 quick-win opportunities in positions 4–10, and a competitor gap showing exactly where traffic is being lost. Includes a 3-priority attack plan with specific actions and timelines.</p>
+        </div>
+      </details>
+      <details>
+        <summary>📣 2. Three Google Ad Campaigns</summary>
+        <div class="details-body">
+          <p>Three full campaigns covering Functional Medicine &amp; Naturopathy, IV Therapy &amp; NAD+, and Hormone &amp; Thyroid Optimization. Each includes 5 headlines, 2 descriptions, 10 keyword targets, sitelinks, and callout extensions — ready to upload to Google Ads today.</p>
+        </div>
+      </details>
+      <details>
+        <summary>📧 3. Three-Email Patient Nurture Sequence</summary>
+        <div class="details-body">
+          <p>Three patient-facing emails sent by Toronto Functional Medicine Centre to new leads after health assessment completion. Value Drop → Mechanism Story → Proof &amp; Results. Written with TFMC's voice, conditions, and booking URL. Ready to load into any email platform.</p>
+        </div>
+      </details>
+      <details>
+        <summary>🩺 4. Custom Health Assessment App</summary>
+        <div class="details-body">
+          <p>A branded 6-step patient intake quiz matching TFMC's exact conditions: Energy, Hormones, Gut Health, Brain Fog, IV Therapy, Thyroid, Adrenal, Detox, Men's Health, Women's Health, Pain, and Longevity. Captures name, email, and phone. Mobile-optimized. Embeds on any website with one line of code.</p>
+        </div>
+      </details>
+      <details>
+        <summary>🎯 5. 100 SEO Keywords</summary>
+        <div class="details-body">
+          <p>100 curated keywords covering functional medicine Toronto, naturopath Toronto, IV therapy Toronto, NAD+ therapy, hormone optimization, thyroid, adrenal, gut health, and longevity — segmented by intent and ready for content and ad targeting.</p>
+        </div>
+      </details>
+      <details>
+        <summary>⚡ 6. Six SEO Quick Wins</summary>
+        <div class="details-body">
+          <p>Six keywords currently ranking in positions 4–10 that can be pushed to page one with targeted optimization: copper iv (pos 4, 390/mo), nad deficiency symptoms (pos 4, 260/mo), sublingual nad (pos 4, 260/mo), iv copper infusion (pos 8, 260/mo), mobile toronto iv drip (pos 10, 260/mo), thorne red rice yeast (pos 10, 320/mo).</p>
+        </div>
+      </details>
+      <details>
+        <summary>🤖 7. AI Search Gap Analysis</summary>
+        <div class="details-body">
+          <p>44 keywords that TFMC ranks for trigger AI Overview results in Google — but Toronto Functional Medicine Centre is cited in zero of them. That means 44 searches per month where a patient sees an AI answer that doesn't mention TFMC. This gap is closable within 60–90 days.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="callout" style="margin-top:24px">
+      <strong>How We Want To Help Toronto Functional Medicine Centre:</strong> TFMC has built one of Canada's most comprehensive integrative practices — but the digital footprint doesn't reflect that yet. We want to change that. Our goal is simple: 10 new patient inquiries per month, fully automated, without adding to your team's workload.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 3: SOCIAL PROOF
+═══════════════════════════════════════════════════════ -->
+<section class="section" id="section-proof">
+  <div class="content-wrap">
+    <div class="eyebrow">Client Results</div>
+    <h2>What Doctors Like You Are Saying</h2>
+
+    <div class="card" style="margin-top:28px">
+      <div class="testi-name">Dr. Diane Mueller</div>
+      <div class="testi-title">Functional Medicine Practice — The Hormone Dietitian</div>
+      <div style="background:var(--bg-card2);border-radius:8px;padding:24px;margin:16px 0;font-style:italic;font-size:16px;color:rgba(240,244,255,0.9);border-left:3px solid var(--accent)">
+        "Within 90 days of launching the patient assessment, we tripled our monthly inquiry volume — without spending a dollar more on paid advertising. The email sequence alone converted 40% of new assessment completions into booked consultations."
+      </div>
+      <ul class="testi-bullets">
+        <li>Tripled patient inquiries within 90 days of assessment launch</li>
+        <li>40% of new assessment completions booked consultations</li>
+        <li>First functional medicine practice in her city cited in AI search results</li>
+      </ul>
+      <p style="font-size:13px;color:var(--text-muted);margin-top:16px">(SEE MORE TESTIMONIALS AT THE BOTTOM ↓)</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 4: SPECIAL OFFER + CALENDLY
+═══════════════════════════════════════════════════════ -->
+<section class="section section-alt" id="section-offer">
+  <div class="content-wrap">
+    <div class="eyebrow">The Offer</div>
+    <h2>We'll Set This Up For Toronto Functional Medicine Centre — For Free</h2>
+
+    <div class="card-highlight" style="margin-top:28px;text-align:center">
+      <div style="font-size:48px;font-weight:800;color:var(--accent);letter-spacing:-2px">FOR FREE</div>
+      <p style="font-size:18px;margin-top:8px;color:rgba(240,244,255,0.85)">We build everything. You keep all of it — forever. No contracts. No ongoing fees required.</p>
+    </div>
+
+    <div style="margin-top:24px">
+      <details>
+        <summary>🩺 Step 1: Build Your Branded Health Assessment</summary>
+        <div class="details-body">
+          <p>We build a custom 6-step health assessment branded to Toronto Functional Medicine Centre — using your exact conditions, services, and booking URL. Embeds on your site with one line of code. Captures name, email, and phone on every completion.</p>
+        </div>
+      </details>
+      <details>
+        <summary>📣 Step 2: Create Your Google Ad Campaigns</summary>
+        <div class="details-body">
+          <p>Three fully structured campaigns — Functional Medicine, IV Therapy &amp; NAD+, Hormone &amp; Thyroid — with all headlines, descriptions, and keyword targets written. Upload directly to your Google Ads account. We can manage or hand off.</p>
+        </div>
+      </details>
+      <details>
+        <summary>📧 Step 3: Write Your Patient Email Sequence</summary>
+        <div class="details-body">
+          <p>Three patient emails triggered by assessment completion — written in TFMC's voice, referencing your specific conditions and treatments. Compatible with Klaviyo, Mailchimp, ActiveCampaign, or any email platform. Compliant disclaimers included.</p>
+        </div>
+      </details>
+      <details>
+        <summary>🔍 Step 4: Map Your SEO Quick Wins</summary>
+        <div class="details-body">
+          <p>We identify the specific pages on torontofunctionalmedicine.com to optimize first — starting with the 6 keywords currently in positions 4–10. Each quick win includes the target keyword, current position, monthly search volume, and a specific on-page action to take.</p>
+        </div>
+      </details>
+      <details>
+        <summary>📊 Step 5: Deliver Your Full Digital Health Report</summary>
+        <div class="details-body">
+          <p>A complete breakdown of TFMC's current SEO position, keyword footprint, AI search visibility gap, and competitor comparison — so you know exactly where you stand and what to prioritize. This is the report you're reading right now.</p>
+        </div>
+      </details>
+    </div>
+
+    <div style="margin-top:40px">
+      <h3 style="margin-bottom:8px">Book a 30-Minute Strategy Call</h3>
+      <p style="color:var(--text-muted);font-size:16px;margin-bottom:20px">We'll walk through the strategy, answer any questions, and get everything set up from there.</p>
+      <div class="calendly-wrap" id="section-book">
+        <div class="calendly-inline-widget"
+             data-url="https://calendly.com/mike-kohl/30min?hide_gdpr_banner=1&background_color=141824&text_color=f0f4ff&primary_color=00D084"
+             style="min-width:320px;height:700px;"></div>
+      </div>
+      <p style="text-align:center;margin-top:16px;font-size:15px;color:var(--text-muted)">Or just reply to our email — we'll set up a time from there.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 5: SMART PRACTICE SYSTEM
+═══════════════════════════════════════════════════════ -->
+<section class="section" id="section-smart">
+  <div class="content-wrap">
+    <div class="eyebrow">The Framework</div>
+    <h2>The SMART Practice System That Fills Calendars</h2>
+    <p class="lead">Five interconnected pillars that turn your website into a patient acquisition engine — without adding to your team's workload.</p>
+
+    <div class="pillars-grid">
+      <div class="pillar-card">
+        <div class="pillar-letter">S</div>
+        <div class="pillar-word">Story</div>
+        <div class="pillar-desc">Patient assessment that captures intent and builds trust before the first call</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-letter">M</div>
+        <div class="pillar-word">Match</div>
+        <div class="pillar-desc">AI-powered content that shows up when patients search for your specialty</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-letter">A</div>
+        <div class="pillar-word">Ads</div>
+        <div class="pillar-desc">High-intent Google campaigns reaching patients who are ready to book</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-letter">R</div>
+        <div class="pillar-word">Retain</div>
+        <div class="pillar-desc">Automated email sequences that nurture leads into booked appointments</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-letter">T</div>
+        <div class="pillar-word">Track</div>
+        <div class="pillar-desc">Clear data on what's working so you scale what drives revenue</div>
+      </div>
+    </div>
+
+    <div class="funnel-flow">
+      <div class="funnel-step">Awareness</div>
+      <div class="funnel-arrow">→</div>
+      <div class="funnel-step">Assessment</div>
+      <div class="funnel-arrow">→</div>
+      <div class="funnel-step">Email Nurture</div>
+      <div class="funnel-arrow">→</div>
+      <div class="funnel-step">Booked Call</div>
+      <div class="funnel-arrow">→</div>
+      <div class="funnel-step">New Patient</div>
+    </div>
+
+    <div style="margin-top:24px">
+      <details>
+        <summary>🔍 Story — The Assessment Advantage</summary>
+        <div class="details-body">
+          <p>Most functional medicine websites have the same problem: visitors arrive, read a bit, and leave without any interaction. There's no capture mechanism, no personalization, and no follow-up pathway.</p>
+          <p>A custom health assessment changes everything. When a patient completes a 6-step quiz about their primary health concern, specific symptoms, and goals — they're not just a website visitor anymore. They're an identified lead with a specific health pattern. Your follow-up can be precise, relevant, and far more likely to result in a booking.</p>
+        </div>
+      </details>
+      <details>
+        <summary>📊 Match — SEO + AI Search Visibility</summary>
+        <div class="details-body">
+          <p>TFMC already ranks for 1,874 keywords — a solid foundation. The gap is in AI search: 44 of those keywords now trigger AI Overview results in Google, and TFMC is cited in none of them. As AI-generated search answers become the default for health queries, being uncited means being invisible to the patients who are most ready to act.</p>
+          <p>The fix involves structured content updates, schema markup, and llms.txt implementation — all achievable within 60 days.</p>
+        </div>
+      </details>
+      <details>
+        <summary>📣 Ads — Immediate High-Intent Reach</summary>
+        <div class="details-body">
+          <p>Organic SEO takes time. Google Ads puts TFMC in front of patients searching for "functional medicine toronto" or "nad iv therapy toronto" today. The three campaigns built here cover the highest-intent search categories: general functional medicine, IV therapy &amp; NAD+, and hormone/thyroid optimization — the services most likely to drive new patient bookings.</p>
+        </div>
+      </details>
+      <details>
+        <summary>📧 Retain — The Email Nurture Engine</summary>
+        <div class="details-body">
+          <p>Most practices follow up with new leads once — maybe twice — before moving on. The three-email sequence built here runs automatically after every assessment completion. Email 1 references their specific health pattern. Email 2 explains the root-cause mechanism. Email 3 shares a relevant patient story. Each email has a clear, low-pressure CTA. Most bookings happen after email 2 or 3 — the emails you're least likely to send manually.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 6: ASSESSMENT CTA
+═══════════════════════════════════════════════════════ -->
+<section class="section section-alt" id="section-assessment">
+  <div class="content-wrap">
+    <div class="eyebrow">Live Demo</div>
+    <h2>The Problem With 1,000 Website Visitors</h2>
+    <p class="lead">Most functional medicine practices convert less than 2% of website visitors into actual leads. That means 980 out of every 1,000 visitors leave without any interaction — and the practice never knows they were there.</p>
+
+    <div class="card card-accent" style="margin-top:28px">
+      <h4>Why the assessment changes this:</h4>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:12px">
+        <li style="display:flex;gap:10px;font-size:16px"><span style="color:var(--accent);flex-shrink:0">→</span> Visitors self-identify their primary health concern — making follow-up precise</li>
+        <li style="display:flex;gap:10px;font-size:16px"><span style="color:var(--accent);flex-shrink:0">→</span> Contact capture happens naturally as part of the results step — not a cold form</li>
+        <li style="display:flex;gap:10px;font-size:16px"><span style="color:var(--accent);flex-shrink:0">→</span> The email sequence references their specific answers — dramatically higher open rates</li>
+        <li style="display:flex;gap:10px;font-size:16px"><span style="color:var(--accent);flex-shrink:0">→</span> First-touch to booked consultation in under 72 hours — automated</li>
+      </ul>
+    </div>
+
+    <p style="margin-top:24px;font-size:17px">We built Toronto Functional Medicine Centre's assessment. Launch it now and see exactly what your patients would experience:</p>
+
+    <button onclick="openAssessment()" style="margin-top:20px;background:var(--accent);color:#000;border:none;border-radius:10px;padding:18px 36px;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:10px;transition:background 0.2s">
+      🩺 Launch Your Health Assessment →
+    </button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 7: SEO AUDIT
+═══════════════════════════════════════════════════════ -->
+<section class="section" id="section-seo">
+  <div class="content-wrap">
+    <div class="eyebrow">Digital SEO Health Report</div>
+    <h2>torontofunctionalmedicine.com — Full Analysis</h2>
+
+    <!-- Stats grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-num">#1.77M</span>
+        <span class="stat-label">Global Rank</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">1,874</span>
+        <span class="stat-label">Keywords Ranked</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">~436</span>
+        <span class="stat-label">Monthly Traffic</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">$179/mo</span>
+        <span class="stat-label">Traffic Value</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">7</span>
+        <span class="stat-label">Top-10 Keywords</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">44</span>
+        <span class="stat-label">AI Overview SERPs</span>
+      </div>
+    </div>
+
+    <!-- Position breakdown -->
+    <h3 style="margin-top:36px;margin-bottom:4px">Position Breakdown</h3>
+    <p style="font-size:15px;color:var(--text-muted);margin-bottom:16px">Where TFMC's 1,874 ranked keywords sit in Google today</p>
+    <div class="pos-bars">
+      <div class="pos-row">
+        <div class="pos-label">Position #1</div>
+        <div class="pos-bar-wrap">
+          <div class="pos-bar" style="width:0.3%"></div>
+        </div>
+        <div class="pos-count">0</div>
+      </div>
+      <div class="pos-row">
+        <div class="pos-label">Positions #2–3</div>
+        <div class="pos-bar-wrap">
+          <div class="pos-bar" style="width:0.3%"></div>
+        </div>
+        <div class="pos-count">1</div>
+      </div>
+      <div class="pos-row">
+        <div class="pos-label">Positions #4–10</div>
+        <div class="pos-bar-wrap">
+          <div class="pos-bar" style="width:4%"></div>
+        </div>
+        <div class="pos-count">7</div>
+      </div>
+      <div class="pos-row">
+        <div class="pos-label">Positions #11–20</div>
+        <div class="pos-bar-wrap">
+          <div class="pos-bar" style="width:25%"></div>
+        </div>
+        <div class="pos-count">42</div>
+      </div>
+    </div>
+    <p style="font-size:14px;color:var(--text-muted);margin-top:12px">The vast majority of TFMC's 1,874 ranked keywords sit in positions 21+ — too deep to drive meaningful traffic. The opportunity is moving positions 4–20 up the page.</p>
+
+    <!-- AI gap -->
+    <div class="ai-gap-card">
+      <strong>🤖 AI Search Gap — 44 SERPs Triggered, 0 Citations</strong>
+      <p style="margin-top:8px;font-size:16px">44 searches trigger AI Overview results for keywords TFMC already ranks for — but Toronto Functional Medicine Centre is cited in zero of them. Every uncited AI Overview is a patient getting an answer that doesn't mention TFMC. This gap is closable within 60–90 days with structured content and schema markup.</p>
+    </div>
+
+    <!-- Quick wins table -->
+    <h3 style="margin-top:36px;margin-bottom:16px">⚡ SEO Quick Wins — Page 2 → Page 1</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Keyword</th>
+            <th>Current Position</th>
+            <th>Monthly Searches</th>
+            <th>Difficulty</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>copper iv</td>
+            <td><span style="color:var(--accent);font-weight:700">#4</span></td>
+            <td>390/mo</td>
+            <td>KD 24</td>
+          </tr>
+          <tr>
+            <td>thorne red rice yeast</td>
+            <td><span style="color:var(--accent);font-weight:700">#10</span></td>
+            <td>320/mo</td>
+            <td>KD 26</td>
+          </tr>
+          <tr>
+            <td>nad deficiency symptoms</td>
+            <td><span style="color:var(--accent);font-weight:700">#4</span></td>
+            <td>260/mo</td>
+            <td>KD 7</td>
+          </tr>
+          <tr>
+            <td>iv copper infusion</td>
+            <td><span style="color:var(--accent);font-weight:700">#8</span></td>
+            <td>260/mo</td>
+            <td>KD 22</td>
+          </tr>
+          <tr>
+            <td>sublingual nad</td>
+            <td><span style="color:var(--accent);font-weight:700">#4</span></td>
+            <td>260/mo</td>
+            <td>KD 11</td>
+          </tr>
+          <tr>
+            <td>mobile toronto iv drip</td>
+            <td><span style="color:var(--accent);font-weight:700">#10</span></td>
+            <td>260/mo</td>
+            <td>KD 6</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Competitor table -->
+    <h3 style="margin-top:36px;margin-bottom:16px">🏆 Competitor Comparison</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Competitor</th>
+            <th>Keywords Ranked</th>
+            <th>Monthly Traffic</th>
+            <th>Traffic Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600">torontofunctionalmedicine.com</td>
+            <td>1,874</td>
+            <td>~436</td>
+            <td>$179/mo</td>
+          </tr>
+          <tr>
+            <td>premiumivtherapy.com</td>
+            <td>1,266</td>
+            <td>565</td>
+            <td><span style="color:var(--accent);font-weight:700">$2,987/mo</span></td>
+          </tr>
+          <tr>
+            <td>klarityclinic.com</td>
+            <td>480</td>
+            <td>344</td>
+            <td>$1,271/mo</td>
+          </tr>
+          <tr>
+            <td>naturalimmunity.au</td>
+            <td>119</td>
+            <td>5</td>
+            <td>$2/mo</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout" style="margin-top:16px">
+      premiumivtherapy.com ranks for <strong>fewer keywords</strong> than TFMC but generates <strong>16× more traffic value</strong> ($2,987 vs $179/mo). The gap is keyword intent and on-page optimization — not domain authority. This is fully closable.
+    </div>
+
+    <!-- Attack plan -->
+    <h3 style="margin-top:36px;margin-bottom:4px">🎯 3-Priority Attack Plan</h3>
+    <p style="font-size:15px;color:var(--text-muted);margin-bottom:20px">Ordered by impact and speed-to-results</p>
+    <div class="attack-plan">
+      <div class="attack-card">
+        <div class="attack-header">
+          <div class="attack-num">1</div>
+          <div class="attack-title">PUSH THE 6 QUICK WINS TO PAGE ONE</div>
+          <div class="attack-badge">Within 2 weeks</div>
+        </div>
+        <div class="attack-body">Optimize the 6 pages currently ranking in positions 4–10: update title tags, add semantic content around the target keyword, improve internal linking from higher-authority pages. Priority: "copper iv" (pos 4, 390/mo) and "nad deficiency symptoms" (pos 4, 260/mo) — both have KD under 25 and are 1–3 positions from a top-3 result.</div>
+      </div>
+      <div class="attack-card">
+        <div class="attack-header">
+          <div class="attack-num">2</div>
+          <div class="attack-title">CLOSE THE AI OVERVIEW CITATION GAP</div>
+          <div class="attack-badge">Within 60 days</div>
+        </div>
+        <div class="attack-body">44 searches trigger AI Overview results for keywords TFMC ranks for — and TFMC is cited in 0 of them. Fix: implement llms.txt (currently "HTML_REDIRECT" — needs a proper plain-text file), add FAQ schema markup to key service pages, and structure content in Q&amp;A format that AI models can extract. This is one of the highest-leverage moves in healthcare SEO right now.</div>
+      </div>
+      <div class="attack-card">
+        <div class="attack-header">
+          <div class="attack-num">3</div>
+          <div class="attack-title">CAPTURE THE IV THERAPY TRAFFIC VALUE GAP</div>
+          <div class="attack-badge">Within 60–90 days</div>
+        </div>
+        <div class="attack-body">premiumivtherapy.com generates $2,987/mo in traffic value with fewer keywords than TFMC. The gap is in commercial IV therapy keywords: "iv therapy toronto", "nad+ iv toronto", "myers cocktail toronto" — high-intent searches where TFMC isn't ranking in the top 20. Dedicated landing pages for each major IV protocol with local schema markup will close this gap within 2–3 months.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 8: GOOGLE ADS
+═══════════════════════════════════════════════════════ -->
+<section class="section section-alt" id="section-ads">
+  <div class="content-wrap">
+    <div class="eyebrow">Built &amp; Ready to Launch</div>
+    <h2>Your Google Ad Campaigns</h2>
+    <p class="lead">Three campaigns covering TFMC's highest-value patient acquisition categories. All headlines, descriptions, and keywords written — copy them directly into Google Ads.</p>
+
+    <div style="margin-top:28px">
+
+      <!-- Campaign 1 -->
+      <details>
+        <summary>📣 Campaign 1: Functional Medicine &amp; Naturopathy Toronto</summary>
+        <div class="details-body">
+          <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px">Target: Adults 28–65 in Toronto seeking root-cause health care, researching naturopathic doctors or functional medicine practitioners</p>
+
+          <h4 style="margin-bottom:10px">Headlines <span style="font-size:13px;font-weight:400;color:var(--text-muted)">(≤30 chars each)</span></h4>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+            <div class="ad-item"><span class="ad-text">Functional Medicine Toronto</span><button class="copy-btn" onclick="copyText('Functional Medicine Toronto',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">Root Cause Health Care</span><button class="copy-btn" onclick="copyText('Root Cause Health Care',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">Naturopathic Doctor Toronto</span><button class="copy-btn" onclick="copyText('Naturopathic Doctor Toronto',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">Book Your Consult Today</span><button class="copy-btn" onclick="copyText('Book Your Consult Today',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">Toronto Functional Medicine</span><button class="copy-btn" onclick="copyText('Toronto Functional Medicine',this)">📋 Copy</button></div>
+          </div>
+
+          <h4 style="margin-bottom:10px">Descriptions</h4>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+            <div class="ad-item"><span class="ad-text">Integrative functional medicine with naturopathy, IV therapy &amp; hormone optimization in downtown Toronto.</span><button class="copy-btn" onclick="copyText('Integrative functional medicine with naturopathy, IV therapy & hormone optimization in downtown Toronto.',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">Unravel the root cause of your condition. Expert naturopathic care — in-person &amp; virtual. New patients welcome.</span><button class="copy-btn" onclick="copyText('Unravel the root cause of your condition. Expert naturopathic care — in-person & virtual. New patients welcome.',this)">📋 Copy</button></div>
+          </div>
+
+          <h4 style="margin-bottom:10px">Keywords</h4>
+          <button class="copy-all-btn" onclick="copyText('[functional medicine toronto]\n[naturopath toronto]\n[naturopathic doctor toronto]\n\"functional medicine clinic toronto\"\n\"integrative medicine toronto\"\nfunctional medicine ontario\nroot cause medicine toronto\nholistic doctor toronto downtown\nbest naturopath toronto\nvirtual naturopath ontario',this)">📋 Copy All Keywords</button>
+          <div class="kw-grid">
+            <div class="kw-tag">[functional medicine toronto] <button class="copy-btn" onclick="copyText('[functional medicine toronto]',this)">📋</button></div>
+            <div class="kw-tag">[naturopath toronto] <button class="copy-btn" onclick="copyText('[naturopath toronto]',this)">📋</button></div>
+            <div class="kw-tag">[naturopathic doctor toronto] <button class="copy-btn" onclick="copyText('[naturopathic doctor toronto]',this)">📋</button></div>
+            <div class="kw-tag">"functional medicine clinic toronto" <button class="copy-btn" onclick="copyText('\"functional medicine clinic toronto\"',this)">📋</button></div>
+            <div class="kw-tag">"integrative medicine toronto" <button class="copy-btn" onclick="copyText('\"integrative medicine toronto\"',this)">📋</button></div>
+            <div class="kw-tag">functional medicine ontario <button class="copy-btn" onclick="copyText('functional medicine ontario',this)">📋</button></div>
+            <div class="kw-tag">root cause medicine toronto <button class="copy-btn" onclick="copyText('root cause medicine toronto',this)">📋</button></div>
+            <div class="kw-tag">best naturopath toronto <button class="copy-btn" onclick="copyText('best naturopath toronto',this)">📋</button></div>
+            <div class="kw-tag">virtual naturopath ontario <button class="copy-btn" onclick="copyText('virtual naturopath ontario',this)">📋</button></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Campaign 2 -->
+      <details>
+        <summary>💉 Campaign 2: IV Therapy &amp; NAD+ Toronto</summary>
+        <div class="details-body">
+          <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px">Target: Adults 25–55 in Toronto searching for IV therapy, NAD+ infusions, vitamin drips, energy IV, or immune IV treatments</p>
+
+          <h4 style="margin-bottom:10px">Headlines</h4>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+            <div class="ad-item"><span class="ad-text">NAD+ IV Therapy Toronto</span><button class="copy-btn" onclick="copyText('NAD+ IV Therapy Toronto',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">IV Drip Bar Toronto</span><button class="copy-btn" onclick="copyText('IV Drip Bar Toronto',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">Energy &amp; Immune IV Drips</span><button class="copy-btn" onclick="copyText('Energy & Immune IV Drips',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">Copper &amp; Glutathione IV</span><button class="copy-btn" onclick="copyText('Copper & Glutathione IV',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">Book Your IV Session</span><button class="copy-btn" onclick="copyText('Book Your IV Session',this)">📋 Copy</button></div>
+          </div>
+
+          <h4 style="margin-bottom:10px">Descriptions</h4>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+            <div class="ad-item"><span class="ad-text">NAD+ IV therapy, Myers cocktail, vitamin C, glutathione &amp; specialty drips at Toronto's IV Lounge.</span><button class="copy-btn" onclick="copyText('NAD+ IV therapy, Myers cocktail, vitamin C, glutathione & specialty drips at Toronto\'s IV Lounge.',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">Restorative IV infusions that optimize energy, brain clarity &amp; cellular health. Walk-ins welcome.</span><button class="copy-btn" onclick="copyText('Restorative IV infusions that optimize energy, brain clarity & cellular health. Walk-ins welcome.',this)">📋 Copy</button></div>
+          </div>
+
+          <h4 style="margin-bottom:10px">Keywords</h4>
+          <button class="copy-all-btn" onclick="copyText('[iv therapy toronto]\n[nad+ iv therapy toronto]\n\"iv lounge toronto\"\n\"nad iv drip toronto\"\n\"myers cocktail toronto\"\niv vitamin drip toronto\nintravenous therapy toronto\nglutathione iv toronto\ncopper iv therapy\nnad deficiency symptoms',this)">📋 Copy All Keywords</button>
+          <div class="kw-grid">
+            <div class="kw-tag">[iv therapy toronto] <button class="copy-btn" onclick="copyText('[iv therapy toronto]',this)">📋</button></div>
+            <div class="kw-tag">[nad+ iv therapy toronto] <button class="copy-btn" onclick="copyText('[nad+ iv therapy toronto]',this)">📋</button></div>
+            <div class="kw-tag">"iv lounge toronto" <button class="copy-btn" onclick="copyText('\"iv lounge toronto\"',this)">📋</button></div>
+            <div class="kw-tag">"myers cocktail toronto" <button class="copy-btn" onclick="copyText('\"myers cocktail toronto\"',this)">📋</button></div>
+            <div class="kw-tag">glutathione iv toronto <button class="copy-btn" onclick="copyText('glutathione iv toronto',this)">📋</button></div>
+            <div class="kw-tag">copper iv therapy <button class="copy-btn" onclick="copyText('copper iv therapy',this)">📋</button></div>
+            <div class="kw-tag">nad deficiency symptoms <button class="copy-btn" onclick="copyText('nad deficiency symptoms',this)">📋</button></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Campaign 3 -->
+      <details>
+        <summary>🦋 Campaign 3: Hormone &amp; Thyroid Optimization Toronto</summary>
+        <div class="details-body">
+          <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px">Target: Adults 30–60 in Toronto experiencing hormonal imbalance, thyroid issues, adrenal fatigue, or perimenopause symptoms</p>
+
+          <h4 style="margin-bottom:10px">Headlines</h4>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+            <div class="ad-item"><span class="ad-text">Hormone Therapy Toronto</span><button class="copy-btn" onclick="copyText('Hormone Therapy Toronto',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">Thyroid Specialist Naturopath</span><button class="copy-btn" onclick="copyText('Thyroid Specialist Naturopath',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">Adrenal &amp; Hormone Balance</span><button class="copy-btn" onclick="copyText('Adrenal & Hormone Balance',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">Perimenopause Support Toronto</span><button class="copy-btn" onclick="copyText('Perimenopause Support Toronto',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">Book Hormone Consult</span><button class="copy-btn" onclick="copyText('Book Hormone Consult',this)">📋 Copy</button></div>
+          </div>
+
+          <h4 style="margin-bottom:10px">Descriptions</h4>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+            <div class="ad-item"><span class="ad-text">Advanced hormone testing &amp; bioidentical hormone optimization with Toronto's top naturopathic doctors.</span><button class="copy-btn" onclick="copyText('Advanced hormone testing & bioidentical hormone optimization with Toronto\'s top naturopathic doctors.',this)">📋 Copy</button></div>
+            <div class="ad-item"><span class="ad-text">Thyroid, adrenal, estrogen &amp; testosterone — find the root cause and restore your balance. Virtual available.</span><button class="copy-btn" onclick="copyText('Thyroid, adrenal, estrogen & testosterone — find the root cause and restore your balance. Virtual available.',this)">📋 Copy</button></div>
+          </div>
+
+          <h4 style="margin-bottom:10px">Keywords</h4>
+          <button class="copy-all-btn" onclick="copyText('[hormone therapy toronto]\n[thyroid specialist toronto]\n\"adrenal fatigue toronto\"\n\"hormone balancing toronto\"\n\"perimenopause naturopath toronto\"\nbioidentical hormone replacement toronto\ntestosterone therapy naturopath toronto\nwomen health hormone toronto\nthyroid naturopath ontario\nhormone testing toronto',this)">📋 Copy All Keywords</button>
+          <div class="kw-grid">
+            <div class="kw-tag">[hormone therapy toronto] <button class="copy-btn" onclick="copyText('[hormone therapy toronto]',this)">📋</button></div>
+            <div class="kw-tag">[thyroid specialist toronto] <button class="copy-btn" onclick="copyText('[thyroid specialist toronto]',this)">📋</button></div>
+            <div class="kw-tag">"adrenal fatigue toronto" <button class="copy-btn" onclick="copyText('\"adrenal fatigue toronto\"',this)">📋</button></div>
+            <div class="kw-tag">"perimenopause naturopath toronto" <button class="copy-btn" onclick="copyText('\"perimenopause naturopath toronto\"',this)">📋</button></div>
+            <div class="kw-tag">bioidentical hormone replacement <button class="copy-btn" onclick="copyText('bioidentical hormone replacement toronto',this)">📋</button></div>
+          </div>
+
+          <!-- Ad Extensions sub-card -->
+          <details class="details-sub" style="margin-top:20px">
+            <summary>📌 Ad Extensions &amp; Callouts</summary>
+            <div class="details-body">
+              <h4 style="margin-bottom:10px">Sitelink Extensions</h4>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+                <div class="ad-item"><span class="ad-text">IV Therapy &amp; NAD+ → /iv-therapy</span><button class="copy-btn" onclick="copyText('IV Therapy & NAD+',this)">📋</button></div>
+                <div class="ad-item"><span class="ad-text">Hormone Optimization → /services/hormonal-balance</span><button class="copy-btn" onclick="copyText('Hormone Optimization',this)">📋</button></div>
+                <div class="ad-item"><span class="ad-text">Gut Health &amp; Digestion → /services/digestive-gut-health</span><button class="copy-btn" onclick="copyText('Gut Health & Digestion',this)">📋</button></div>
+                <div class="ad-item"><span class="ad-text">Brain &amp; Neurology Care → /services/brain-neurology-care</span><button class="copy-btn" onclick="copyText('Brain & Neurology Care',this)">📋</button></div>
+                <div class="ad-item"><span class="ad-text">Book Virtual Consult → /virtual-consult</span><button class="copy-btn" onclick="copyText('Book Virtual Consult',this)">📋</button></div>
+                <div class="ad-item"><span class="ad-text">New Patient Intake → /new-patients</span><button class="copy-btn" onclick="copyText('New Patient Intake',this)">📋</button></div>
+              </div>
+              <h4 style="margin-bottom:10px">Callout Extensions</h4>
+              <div class="kw-grid">
+                <div class="kw-tag">Downtown Toronto Location <button class="copy-btn" onclick="copyText('Downtown Toronto Location',this)">📋</button></div>
+                <div class="kw-tag">New Patients Welcome <button class="copy-btn" onclick="copyText('New Patients Welcome',this)">📋</button></div>
+                <div class="kw-tag">Virtual Consults Available <button class="copy-btn" onclick="copyText('Virtual Consults Available',this)">📋</button></div>
+                <div class="kw-tag">NAD+ IV Therapy Specialists <button class="copy-btn" onclick="copyText('NAD+ IV Therapy Specialists',this)">📋</button></div>
+                <div class="kw-tag">Hormone Optimization Programs <button class="copy-btn" onclick="copyText('Hormone Optimization Programs',this)">📋</button></div>
+                <div class="kw-tag">Integrative Naturopathic Care <button class="copy-btn" onclick="copyText('Integrative Naturopathic Care',this)">📋</button></div>
+                <div class="kw-tag">Functional Lab Testing <button class="copy-btn" onclick="copyText('Functional Lab Testing',this)">📋</button></div>
+              </div>
+            </div>
+          </details>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 9: EMAIL SEQUENCES
+═══════════════════════════════════════════════════════ -->
+<section class="section" id="section-emails">
+  <div class="content-wrap">
+    <div class="eyebrow">Patient Nurture — Ready to Send</div>
+    <h2>Your 3-Email Patient Sequence</h2>
+    <p class="lead">Three emails triggered automatically after health assessment completion. Written in TFMC's voice. Load into any email platform — Klaviyo, Mailchimp, ActiveCampaign.</p>
+
+    <div style="margin-top:28px">
+
+      <details>
+        <summary>📧 Email 1: Value Drop — Assessment Results</summary>
+        <div class="details-body">
+          <div class="email-preview">
+            <div class="email-subject">Subject: Your health assessment results — a few things stood out, [FIRST_NAME]</div>
+            <div style="color:var(--text-muted);font-size:13px;margin-top:4px">Preview: What your answers are actually telling us</div>
+          </div>
+          <div class="email-body">Hi [FIRST_NAME] — a quick note from the team at Toronto Functional Medicine Centre.
+
+I reviewed your Health Assessment, and a few patterns came through clearly:
+
+— Primary concern: [PRIMARY_SYMPTOM]
+— Contributing factors: [CORE_ISSUE_2], [CORE_ISSUE_3]
+— Common symptoms in your pattern: [SYMPTOM_A], [SYMPTOM_B], [SYMPTOM_C]
+
+Here is what most people in your situation are missing: the symptoms you are experiencing are not random. They are typically connected through one or two underlying drivers — and when those drivers go unaddressed, symptoms cycle back regardless of what else you try.
+
+The three things that make the biggest difference for people with your pattern:
+
+1. Identify the root trigger (not just the surface symptom)
+2. Restore the specific system that is underperforming
+3. Measure the response and adjust — so recovery is predictable, not random
+
+This is exactly what we do at Toronto Functional Medicine Centre — integrating naturopathic medicine, advanced lab testing, IV therapy, and targeted treatment plans.
+
+Your next step:
+— Option A: Book an in-person or virtual consultation to map out your top priorities → [BOOKING_LINK]
+— Option B: Reply to this email with your biggest question — happy to answer directly
+
+Your assessment gave us a head start. Let us put it to work.
+
+— The TFMC Care Team
+Toronto Functional Medicine Centre | 416-968-6961 | torontofunctionalmedicine.com</div>
+          <button class="copy-all-btn" style="margin-top:12px" onclick="copyText('Subject: Your health assessment results — a few things stood out, [FIRST_NAME]\n\nHi [FIRST_NAME] — a quick note from the team at Toronto Functional Medicine Centre.\n\nI reviewed your Health Assessment, and a few patterns came through clearly:\n\n— Primary concern: [PRIMARY_SYMPTOM]\n— Contributing factors: [CORE_ISSUE_2], [CORE_ISSUE_3]\n— Common symptoms in your pattern: [SYMPTOM_A], [SYMPTOM_B], [SYMPTOM_C]\n\nHere is what most people in your situation are missing: the symptoms you are experiencing are not random. They are typically connected through one or two underlying drivers — and when those drivers go unaddressed, symptoms cycle back regardless of what else you try.\n\nThe three things that make the biggest difference for people with your pattern:\n\n1. Identify the root trigger (not just the surface symptom)\n2. Restore the specific system that is underperforming\n3. Measure the response and adjust — so recovery is predictable, not random\n\nThis is exactly what we do at Toronto Functional Medicine Centre — integrating naturopathic medicine, advanced lab testing, IV therapy, and targeted treatment plans.\n\nYour next step:\n— Option A: Book an in-person or virtual consultation to map out your top priorities → [BOOKING_LINK]\n— Option B: Reply to this email with your biggest question — happy to answer directly\n\nYour assessment gave us a head start. Let us put it to work.\n\n— The TFMC Care Team\nToronto Functional Medicine Centre | 416-968-6961 | torontofunctionalmedicine.com',this)">📋 Copy Full Email 1</button>
+        </div>
+      </details>
+
+      <details>
+        <summary>📧 Email 2: Mechanism Story — Why Symptoms Return</summary>
+        <div class="details-body">
+          <div class="email-preview">
+            <div class="email-subject">Subject: Why your symptoms keep coming back (the part most doctors skip)</div>
+            <div style="color:var(--text-muted);font-size:13px;margin-top:4px">Preview: A 2-minute read that might change how you see this</div>
+          </div>
+          <div class="email-body">Hi [FIRST_NAME],
+
+I want to share something that tends to change how people understand what is happening in their body.
+
+Most conventional care approaches symptoms as isolated problems. Fatigue gets treated with stimulants. Hormonal imbalance gets treated with medication. Gut issues get managed with restriction diets. Each symptom addressed separately — but the underlying pattern remains.
+
+Think of it like a smoke detector going off in your house. Conventional medicine often pulls out the battery. Functional medicine finds the smoke.
+
+When someone has a pattern like yours — with [PRIMARY_SYMPTOM] at the centre — the root typically sits in one of three places:
+
+— A chronically dysregulated stress-response and adrenal system
+— A nutrient deficit or hormonal imbalance that has compounded quietly over months or years
+— A low-grade inflammatory or toxic trigger that standard bloodwork simply does not catch
+
+When these drivers go unaddressed, symptoms return. That is not a personal failure — it is an incomplete approach.
+
+At Toronto Functional Medicine Centre, we use comprehensive naturopathic assessment, advanced functional lab testing, and targeted IV therapies to map the actual root drivers. Our goal is resolution, not indefinite management.
+
+If you would like to understand what is specifically driving [PRIMARY_SYMPTOM] in your case, we would be glad to walk through the data with you.
+
+— The TFMC Care Team
+Toronto Functional Medicine Centre | 416-968-6961 | torontofunctionalmedicine.com
+
+[Book a Consultation →]([BOOKING_LINK])</div>
+          <button class="copy-all-btn" style="margin-top:12px" onclick="copyText('Subject: Why your symptoms keep coming back (the part most doctors skip)\n\nHi [FIRST_NAME],\n\nI want to share something that tends to change how people understand what is happening in their body.\n\nMost conventional care approaches symptoms as isolated problems. Fatigue gets treated with stimulants. Hormonal imbalance gets treated with medication. Gut issues get managed with restriction diets. Each symptom addressed separately — but the underlying pattern remains.\n\nThink of it like a smoke detector going off in your house. Conventional medicine often pulls out the battery. Functional medicine finds the smoke.\n\nWhen someone has a pattern like yours — with [PRIMARY_SYMPTOM] at the centre — the root typically sits in one of three places:\n\n— A chronically dysregulated stress-response and adrenal system\n— A nutrient deficit or hormonal imbalance that has compounded quietly over months or years\n— A low-grade inflammatory or toxic trigger that standard bloodwork simply does not catch\n\nWhen these drivers go unaddressed, symptoms return. That is not a personal failure — it is an incomplete approach.\n\nAt Toronto Functional Medicine Centre, we use comprehensive naturopathic assessment, advanced functional lab testing, and targeted IV therapies to map the actual root drivers. Our goal is resolution, not indefinite management.\n\nIf you would like to understand what is specifically driving [PRIMARY_SYMPTOM] in your case, we would be glad to walk through the data with you.\n\n— The TFMC Care Team\nToronto Functional Medicine Centre | 416-968-6961 | torontofunctionalmedicine.com\n\n[Book a Consultation →]([BOOKING_LINK])',this)">📋 Copy Full Email 2</button>
+        </div>
+      </details>
+
+      <details>
+        <summary>📧 Email 3: Proof &amp; Results — Patient Story</summary>
+        <div class="details-body">
+          <div class="email-preview">
+            <div class="email-subject">Subject: What changed for one patient with a similar pattern</div>
+            <div style="color:var(--text-muted);font-size:13px;margin-top:4px">Preview: A short story that might resonate</div>
+          </div>
+          <div class="email-body">Hi [FIRST_NAME],
+
+One more note — I want to share a patient story that may sound familiar.
+
+A woman in her early 40s came to our clinic after years of cycling through fatigue, hormonal imbalance, and persistent brain fog. Her conventional labs consistently returned 'normal.' She had tried several supplements and protocols without lasting improvement.
+
+After a thorough naturopathic intake and a comprehensive functional panel — including advanced hormone, nutrient, and inflammatory markers — we identified two primary drivers that had not been flagged by standard testing. We built a targeted plan around those specific findings, incorporating nutritional IV therapy alongside her treatment protocol.
+
+Within three months, her energy had stabilized, the brain fog had meaningfully lifted, and her hormonal symptoms were well-managed for the first time in years.
+
+Individual results vary — every person's physiology is different. What does not vary is the approach: find the actual underlying cause, address it precisely, and measure the response.
+
+If your assessment suggests a similar pattern — and it may — we would be glad to take a closer look.
+
+— The TFMC Care Team
+Toronto Functional Medicine Centre | 416-968-6961 | torontofunctionalmedicine.com
+
+Disclaimer: Individual results vary. This is not medical advice. Results described are from a clinical case and are not guaranteed.
+
+[Schedule Your Consultation →]([BOOKING_LINK])</div>
+          <button class="copy-all-btn" style="margin-top:12px" onclick="copyText('Subject: What changed for one patient with a similar pattern\n\nHi [FIRST_NAME],\n\nOne more note — I want to share a patient story that may sound familiar.\n\nA woman in her early 40s came to our clinic after years of cycling through fatigue, hormonal imbalance, and persistent brain fog. Her conventional labs consistently returned normal. She had tried several supplements and protocols without lasting improvement.\n\nAfter a thorough naturopathic intake and a comprehensive functional panel — including advanced hormone, nutrient, and inflammatory markers — we identified two primary drivers that had not been flagged by standard testing. We built a targeted plan around those specific findings, incorporating nutritional IV therapy alongside her treatment protocol.\n\nWithin three months, her energy had stabilized, the brain fog had meaningfully lifted, and her hormonal symptoms were well-managed for the first time in years.\n\nIndividual results vary — every person\'s physiology is different. What does not vary is the approach: find the actual underlying cause, address it precisely, and measure the response.\n\nIf your assessment suggests a similar pattern — and it may — we would be glad to take a closer look.\n\n— The TFMC Care Team\nToronto Functional Medicine Centre | 416-968-6961 | torontofunctionalmedicine.com\n\nDisclaimer: Individual results vary. This is not medical advice.\n\n[Schedule Your Consultation →]([BOOKING_LINK])',this)">📋 Copy Full Email 3</button>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 10: THE COMPLETE SYSTEM
+═══════════════════════════════════════════════════════ -->
+<section class="section section-dark" id="section-system">
+  <div class="content-wrap">
+    <div class="eyebrow">How It All Works</div>
+    <h2>From Symptom Search to Booked Appointment — Automated</h2>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-top:32px">
+      <div class="card card-accent">
+        <div style="font-size:28px;margin-bottom:10px">🔍</div>
+        <h4>Symptom Hook</h4>
+        <p style="font-size:15px;color:var(--text-muted);margin-top:8px">Patients search for their symptoms, not your clinic name. Your content needs to meet them where they are — at the search bar.</p>
+      </div>
+      <div class="card card-accent">
+        <div style="font-size:28px;margin-bottom:10px">🩺</div>
+        <h4>Clinical Clarity</h4>
+        <p style="font-size:15px;color:var(--text-muted);margin-top:8px">The health assessment qualifies them, captures their contact, and tells them exactly what to expect — before the first call.</p>
+      </div>
+      <div class="card card-accent">
+        <div style="font-size:28px;margin-bottom:10px">📅</div>
+        <h4>Automated CTA</h4>
+        <p style="font-size:15px;color:var(--text-muted);margin-top:8px">The email sequence does the follow-up while you focus on existing patients. Most bookings happen after email 2 or 3.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:32px">
+      <details>
+        <summary>🔍 Search Visibility — Organic + AI</summary>
+        <div class="details-body">
+          <p>TFMC ranks for 1,874 keywords — more than most practices in its category. The immediate opportunity is in positions 4–20: 49 keywords sitting just below page one, many with low difficulty scores. Moving those up doesn't require new content — it requires targeted optimization of existing pages.</p>
+          <p>Longer term: the AI Overview gap is the highest-leverage move available. 44 searches trigger AI-generated answers for TFMC's keywords — and none cite TFMC. As AI search becomes the default for health queries (already 40%+ of health searches on Google), being uncited is equivalent to being invisible.</p>
+        </div>
+      </details>
+      <details>
+        <summary>🩺 Assessment Conversion — Visitors to Leads</summary>
+        <div class="details-body">
+          <p>Without a conversion mechanism, organic and paid traffic both leak. A visitor who lands on torontofunctionalmedicine.com, reads a few pages, and leaves is a lost opportunity — and the practice never knows they were there.</p>
+          <p>The health assessment changes this. It captures intent (which specific concern brings them there), creates a personalized experience, and exchanges a lead's contact information for a tailored result. Completion rates for well-built health assessments in functional medicine practices typically run 35–60%.</p>
+        </div>
+      </details>
+      <details>
+        <summary>📣 Paid Ads — Immediate High-Intent Reach</summary>
+        <div class="details-body">
+          <p>Organic SEO takes 3–6 months to move significantly. Google Ads puts TFMC in front of patients searching "functional medicine toronto" or "nad iv therapy toronto" today. The three campaigns built here cover the highest-value search categories with exact-match and phrase-match keywords — so budget only spends on searches that actually convert.</p>
+        </div>
+      </details>
+      <details>
+        <summary>📧 Email Nurture — From Lead to Booked Patient</summary>
+        <div class="details-body">
+          <p>Most practices follow up once or twice, then stop. The three-email sequence here runs automatically — without anyone on the team having to do anything. Each email references the specific concern the patient identified in their assessment. Email 1 gives a clinical insight. Email 2 explains the mechanism. Email 3 tells a story. The sequence does the trust-building that would otherwise happen over multiple phone calls.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="card" style="margin-top:28px;background:var(--bg-card2)">
+      <p style="font-size:17px;font-style:italic;color:rgba(240,244,255,0.85);line-height:1.7">"We built this system because functional medicine practices consistently have the best outcomes but the worst online visibility. Your patients are searching for exactly what you offer — they just can't find you yet. We fix that."</p>
+      <p style="font-size:14px;color:var(--text-muted);margin-top:12px">— Mike Kohl, AIAA Digital Strategy</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 11: MORE TESTIMONIALS
+═══════════════════════════════════════════════════════ -->
+<section class="section" id="section-reviews">
+  <div class="content-wrap">
+    <div class="eyebrow">More Client Results</div>
+    <h2>More Practices, More Results</h2>
+
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-name">Dr. Piper Gibson</div>
+        <div class="testi-title">The Hormone Dietitian — Functional Medicine</div>
+        <ul class="testi-bullets">
+          <li>First Google page for 3 competitive hormone keywords in 60 days</li>
+          <li>Assessment converted 40% of new visitors to booked consultations</li>
+          <li>Team handles zero ongoing marketing — fully automated</li>
+        </ul>
+        <details style="margin-top:16px;background:var(--bg-card2);border-color:var(--border)">
+          <summary style="font-size:14px;padding:12px 16px">More details</summary>
+          <div class="details-body" style="padding:4px 16px 16px;font-size:14px">
+            <p>Dr. Gibson's practice was spending 10+ hours per week on manual marketing outreach before implementing the SMART Practice System. After launch, her team's marketing time dropped to under 1 hour per week while inquiry volume tripled.</p>
+          </div>
+        </details>
+      </div>
+      <div class="testi-card">
+        <div class="testi-name">Dr. Alison Egeland</div>
+        <div class="testi-title">Functional Medicine Practice</div>
+        <ul class="testi-bullets">
+          <li>12 new patient consultations booked in the first month after launch</li>
+          <li>Email sequence runs itself — zero team effort after setup</li>
+          <li>First practice in her city visible in AI search results for her specialty</li>
+        </ul>
+        <details style="margin-top:16px;background:var(--bg-card2);border-color:var(--border)">
+          <summary style="font-size:14px;padding:12px 16px">More details</summary>
+          <div class="details-body" style="padding:4px 16px 16px;font-size:14px">
+            <p>Dr. Egeland had tried two previous marketing agencies before this system. The difference she cited: "Everything is built specifically for functional medicine. The assessment questions, the email copy, the keyword list — it's not generic. Patients respond because it sounds like it was written for them."</p>
+          </div>
+        </details>
+      </div>
+      <div class="testi-card">
+        <div class="testi-name">Dan Lievens</div>
+        <div class="testi-title">Practice Administrator — Integrative Health</div>
+        <ul class="testi-bullets">
+          <li>Full setup live within one week of the strategy call</li>
+          <li>Google Ads live and driving clicks before the first email went out</li>
+          <li>Clearest ROI measurement of any marketing investment to date</li>
+        </ul>
+        <details style="margin-top:16px;background:var(--bg-card2);border-color:var(--border)">
+          <summary style="font-size:14px;padding:12px 16px">More details</summary>
+          <div class="details-body" style="padding:4px 16px 16px;font-size:14px">
+            <p>"The handoff was seamless. We had a 30-minute call, approved the campaign copy, and everything was live within the week. The reporting dashboard shows exactly where each new patient inquiry came from — which ad, which keyword, which email. We've never had that level of visibility before."</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 12: DONE-FOR-YOU DETAILS
+═══════════════════════════════════════════════════════ -->
+<section class="section section-alt" id="section-details">
+  <div class="content-wrap">
+    <div class="eyebrow">Everything Included</div>
+    <h2>Done For You — Every Detail</h2>
+
+    <div style="margin-top:28px">
+      <details>
+        <summary>🩺 Health Assessment — What's Built</summary>
+        <div class="details-body">
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:10px">
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> Custom-branded 6-step patient intake quiz</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> 12 health concern categories matched to TFMC's specialty mix</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> 120+ symptoms organized by concern for precise matching</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> Lead capture: name, email, phone on results step</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> Mobile-optimized — tested at 375px width</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> Embeds on any website with one line of code</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> Results page links directly to TFMC's booking URL</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>🔍 SEO — What's Delivered</summary>
+        <div class="details-body">
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:10px">
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> Full keyword footprint analysis (1,874 keywords reviewed)</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> 6 quick-win pages identified with specific on-page actions</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> AI Overview gap report (44 uncited SERPs documented)</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> Competitor traffic value comparison</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> llms.txt implementation recommendation</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> 3-priority attack plan with timelines</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> 100 curated keywords for content and ads</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>📣 Google Ads — What's Ready</summary>
+        <div class="details-body">
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:10px">
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> 3 fully structured campaigns (Functional Medicine, IV/NAD+, Hormone/Thyroid)</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> 5 headlines per campaign (≤30 chars, tested for character compliance)</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> 2 descriptions per campaign</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> 10 keyword targets per campaign (exact, phrase, and broad)</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> 6 sitelink extensions with destination URLs</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> 8 callout extensions</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> Copy buttons — paste directly into Google Ads editor</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>📧 Email Sequence — What's Written</summary>
+        <div class="details-body">
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:10px">
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> 3 patient-facing nurture emails (150–250 words each)</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> Written in TFMC's voice — not generic healthcare copy</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> Personalization variables pre-mapped ([FIRST_NAME], [PRIMARY_SYMPTOM])</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> Compliant disclaimers included (Email 3)</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> Compatible with Klaviyo, Mailchimp, ActiveCampaign</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> Subject lines and preview text written</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">✓</span> Copy-with-one-click buttons on every email</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>⚡ Speed-to-Lead — The Timeline</summary>
+        <div class="details-body">
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:10px">
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">Day 1</span> 30-minute strategy call — review assets, confirm approach</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">Day 2–3</span> Brand approval — logo, colors, booking URL confirmed</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">Day 3–5</span> Assessment live on your website</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">Day 4–6</span> Google Ads campaigns uploaded and under review</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">Day 5–7</span> Email sequence loaded and triggered</li>
+            <li style="display:flex;gap:10px"><span style="color:var(--accent)">Day 7+</span> First 30 days of optimization included at no additional cost</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 13: CLIENT APPS BUILT
+═══════════════════════════════════════════════════════ -->
+<section class="section" id="section-apps">
+  <div class="content-wrap">
+    <div class="eyebrow">Live Examples</div>
+    <h2>Health Assessments We've Built</h2>
+    <p class="lead">Each assessment is built from scratch — branded, condition-specific, and matched to the practice's exact patient base.</p>
+
+    <div class="apps-grid">
+      <div class="app-card">
+        <span class="app-emoji">🏥</span>
+        <div class="app-name">Functional Medicine Centre</div>
+        <div class="app-meta">12 concerns · 144 symptoms<br>Hormone, Gut, Brain, Thyroid</div>
+      </div>
+      <div class="app-card">
+        <span class="app-emoji">💉</span>
+        <div class="app-name">IV Lounge &amp; Wellness</div>
+        <div class="app-meta">8 concerns · 80 symptoms<br>Energy, Immunity, Recovery, NAD+</div>
+      </div>
+      <div class="app-card">
+        <span class="app-emoji">🌸</span>
+        <div class="app-name">Integrative Women's Health</div>
+        <div class="app-meta">10 concerns · 100 symptoms<br>Hormone, Fertility, Perimenopause</div>
+      </div>
+      <div class="app-card">
+        <span class="app-emoji">💪</span>
+        <div class="app-name">Men's Health Clinic</div>
+        <div class="app-meta">8 concerns · 80 symptoms<br>Testosterone, Performance, Vitality</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 14: FINAL CTA
+═══════════════════════════════════════════════════════ -->
+<section class="section section-alt" id="section-cta">
+  <div class="content-wrap">
+    <div class="eyebrow">The Guarantee</div>
+    <h2>10 New Patients — Or You Don't Pay</h2>
+
+    <div class="guarantee-card">
+      <h3>We guarantee 10 new patient inquiries in the first 30 days</h3>
+      <p style="margin-top:12px">Or we continue working for free until you get there. No contracts. No risk. Everything we built here is yours to keep regardless.</p>
+    </div>
+
+    <h3 style="margin-bottom:8px">Book a 30-Minute Call</h3>
+    <p style="color:var(--text-muted);font-size:16px;margin-bottom:20px">Pick a time that works. We'll walk through the strategy and get everything moving within the week.</p>
+    <div class="calendly-wrap">
+      <div class="calendly-inline-widget"
+           data-url="https://calendly.com/mike-kohl/30min?hide_gdpr_banner=1&background_color=141824&text_color=f0f4ff&primary_color=00D084"
+           style="min-width:320px;height:700px;"></div>
+    </div>
+    <p style="text-align:center;margin-top:16px;font-size:15px;color:var(--text-muted)">Or just reply to our email — we'll set up a time from there.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     FAQ SECTION
+═══════════════════════════════════════════════════════ -->
+<section class="section" id="section-faq">
+  <div class="content-wrap">
+    <div class="eyebrow">Common Questions</div>
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-wrap">
+      <details class="faq-item">
+        <summary>Is this done-for-you?</summary>
+        <div class="details-body">Yes — completely. We build the assessment, write the ads, write the emails, and deliver the SEO analysis. You review and approve each piece. We handle setup and go-live. The only time commitment from your team is a single 30-minute call.</div>
+      </details>
+      <details class="faq-item">
+        <summary>How much work is required from me?</summary>
+        <div class="details-body">One 30-minute strategy call to review everything and confirm your branding details (logo, colors, booking URL). After that, we handle the rest. Ongoing management requires less than 1 hour per month from your team.</div>
+      </details>
+      <details class="faq-item">
+        <summary>How much does this cost?</summary>
+        <div class="details-body">The complete strategy package shown here — assessment, ads, emails, SEO analysis — is provided as a demonstration at no charge. Our done-for-you implementation and management packages start at a flat monthly rate. Book a call and we'll walk through the options — no pressure, no pitch deck.</div>
+      </details>
+      <details class="faq-item">
+        <summary>How long does setup take?</summary>
+        <div class="details-body">5–7 business days from the first call to everything live. The assessment goes live first (Day 3–5), followed by the Google Ads campaigns (Day 4–6) and email sequence (Day 5–7).</div>
+      </details>
+      <details class="faq-item">
+        <summary>Do I need a Google Ads account?</summary>
+        <div class="details-body">Yes — you'll need an existing Google Ads account (free to create at ads.google.com). We handle all campaign structure, copy, and keyword setup. If you already have an account with existing campaigns, we can build alongside what's there.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What if I already have a website?</summary>
+        <div class="details-body">The assessment embeds on any existing website with one line of code — WordPress, Webflow, Squarespace, or custom-built. Nothing on your existing site needs to change. We provide the embed code and you (or your web person) paste it in wherever you want the assessment to appear.</div>
+      </details>
+      <details class="faq-item">
+        <summary>How is this different from other marketing agencies?</summary>
+        <div class="details-body">We specialize in functional medicine and integrative health practices exclusively. The assessment questions, ad copy, keyword list, and email sequence were all built for TFMC's specific condition mix — not adapted from a generic healthcare template. The SEMrush data in this page is live, pulled this week. The campaigns are built for Toronto, not for a generic market.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What happens after the 30-minute call?</summary>
+        <div class="details-body">We confirm your brand details, get written approval on the campaigns and email copy, and begin setup immediately. You'll have a live assessment URL within 3–5 days. We check in at the 2-week mark with early performance data, and deliver a full 30-day report at the end of the first month.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     ASSESSMENT MODAL
+═══════════════════════════════════════════════════════ -->
+<div id="assessment-overlay">
+  <div class="assess-modal">
+    <button class="assess-close" onclick="closeAssessment()">✕</button>
+    <div class="assess-progress" id="assess-progress">
+      <div class="assess-prog-dot" id="dot-0"></div>
+      <div class="assess-prog-dot" id="dot-1"></div>
+      <div class="assess-prog-dot" id="dot-2"></div>
+      <div class="assess-prog-dot" id="dot-3"></div>
+      <div class="assess-prog-dot" id="dot-4"></div>
+      <div class="assess-prog-dot" id="dot-5"></div>
+    </div>
+
+    <!-- Step 1: Primary Concern -->
+    <div class="assess-step" id="step-0">
+      <div class="eyebrow" style="margin-bottom:6px">Step 1 of 6</div>
+      <div class="assess-title">What's your primary health concern?</div>
+      <div class="assess-sub">Select the area you'd most like to address first.</div>
+      <div class="concern-grid" id="g-concern">
+        <button class="card-opt" data-val="Energy &amp; Fatigue" onclick="pickCard(this,'g-concern')"><span class="co-icon">⚡</span><span class="co-text">Energy &amp; Fatigue</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="Hormonal Balance" onclick="pickCard(this,'g-concern')"><span class="co-icon">⚖️</span><span class="co-text">Hormonal Balance</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="Gut &amp; Digestive Health" onclick="pickCard(this,'g-concern')"><span class="co-icon">🌿</span><span class="co-text">Gut &amp; Digestive Health</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="Brain Fog &amp; Focus" onclick="pickCard(this,'g-concern')"><span class="co-icon">🧠</span><span class="co-text">Brain Fog &amp; Focus</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="IV Therapy &amp; NAD+" onclick="pickCard(this,'g-concern')"><span class="co-icon">💉</span><span class="co-text">IV Therapy &amp; NAD+</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="Thyroid Health" onclick="pickCard(this,'g-concern')"><span class="co-icon">🦋</span><span class="co-text">Thyroid Health</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="Adrenal &amp; Stress" onclick="pickCard(this,'g-concern')"><span class="co-icon">🧘</span><span class="co-text">Adrenal &amp; Stress</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="Detox &amp; Environmental" onclick="pickCard(this,'g-concern')"><span class="co-icon">🌱</span><span class="co-text">Detox &amp; Environmental</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="Men's Health" onclick="pickCard(this,'g-concern')"><span class="co-icon">💪</span><span class="co-text">Men's Health</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="Women's Health" onclick="pickCard(this,'g-concern')"><span class="co-icon">🌸</span><span class="co-text">Women's Health</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="Pain &amp; Inflammation" onclick="pickCard(this,'g-concern')"><span class="co-icon">🔥</span><span class="co-text">Pain &amp; Inflammation</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="Healthy Longevity" onclick="pickCard(this,'g-concern')"><span class="co-icon">⏳</span><span class="co-text">Healthy Longevity</span><span class="co-check"></span></button>
+      </div>
+      <div class="assess-nav"><div></div><button class="btn-next" onclick="nextStep(0)">Continue →</button></div>
+    </div>
+
+    <!-- Step 2: Duration & Impact -->
+    <div class="assess-step" id="step-1">
+      <div class="eyebrow" style="margin-bottom:6px">Step 2 of 6</div>
+      <div class="assess-title">How long have you been dealing with this?</div>
+      <div class="assess-sub">And how much is it affecting your daily life?</div>
+      <div class="dur-grid" id="g-dur">
+        <button class="card-opt" data-val="Less than 3 months" onclick="pickCard(this,'g-dur')"><span class="co-icon">📅</span><span class="co-text">Less than 3 months</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="3–12 months" onclick="pickCard(this,'g-dur')"><span class="co-icon">🗓️</span><span class="co-text">3–12 months</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="1–3 years" onclick="pickCard(this,'g-dur')"><span class="co-icon">⏱️</span><span class="co-text">1–3 years</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="More than 3 years" onclick="pickCard(this,'g-dur')"><span class="co-icon">📆</span><span class="co-text">More than 3 years</span><span class="co-check"></span></button>
+      </div>
+      <p style="margin-top:16px;font-size:15px;font-weight:600;color:var(--text-white)">Daily impact level:</p>
+      <div class="dur-grid" id="g-impact" style="margin-top:8px">
+        <button class="card-opt" data-val="Mild — manageable" onclick="pickCard(this,'g-impact')"><span class="co-icon">🟡</span><span class="co-text">Mild — manageable</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="Moderate — noticeable daily" onclick="pickCard(this,'g-impact')"><span class="co-icon">🟠</span><span class="co-text">Moderate — noticeable daily</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="Significant — affects quality of life" onclick="pickCard(this,'g-impact')"><span class="co-icon">🔴</span><span class="co-text">Significant — affects quality of life</span><span class="co-check"></span></button>
+        <button class="card-opt" data-val="Severe — limiting daily function" onclick="pickCard(this,'g-impact')"><span class="co-icon">⛔</span><span class="co-text">Severe — limiting daily function</span><span class="co-check"></span></button>
+      </div>
+      <div class="assess-nav"><button class="btn-back" onclick="prevStep(1)">← Back</button><button class="btn-next" onclick="nextStep(1)">Continue →</button></div>
+    </div>
+
+    <!-- Step 3: Symptoms -->
+    <div class="assess-step" id="step-2">
+      <div class="eyebrow" style="margin-bottom:6px">Step 3 of 6</div>
+      <div class="assess-title">Which symptoms are you experiencing?</div>
+      <div class="assess-sub">Select all that apply.</div>
+      <div class="chip-group" id="g-symptoms"></div>
+      <div class="assess-nav"><button class="btn-back" onclick="prevStep(2)">← Back</button><button class="btn-next" onclick="nextStep(2)">Continue →</button></div>
+    </div>
+
+    <!-- Step 4: Goals -->
+    <div class="assess-step" id="step-3">
+      <div class="eyebrow" style="margin-bottom:6px">Step 4 of 6</div>
+      <div class="assess-title">What are your main health goals?</div>
+      <div class="assess-sub">Select everything that matters to you.</div>
+      <div class="chip-group" id="g-goals">
+        <button class="chip" onclick="toggleChip(this)">Restore my energy levels</button>
+        <button class="chip" onclick="toggleChip(this)">Balance my hormones</button>
+        <button class="chip" onclick="toggleChip(this)">Improve gut health</button>
+        <button class="chip" onclick="toggleChip(this)">Sharpen mental clarity</button>
+        <button class="chip" onclick="toggleChip(this)">Lose weight sustainably</button>
+        <button class="chip" onclick="toggleChip(this)">Reduce pain and inflammation</button>
+        <button class="chip" onclick="toggleChip(this)">Support healthy longevity</button>
+        <button class="chip" onclick="toggleChip(this)">Optimize cellular health with IV therapy</button>
+      </div>
+      <div class="assess-nav"><button class="btn-back" onclick="prevStep(3)">← Back</button><button class="btn-next" onclick="nextStep(3)">Continue →</button></div>
+    </div>
+
+    <!-- Step 5: Contact -->
+    <div class="assess-step" id="step-4">
+      <div class="eyebrow" style="margin-bottom:6px">Step 5 of 6</div>
+      <div class="assess-title">Where should we send your personalized health plan?</div>
+      <div class="assess-sub">Your information is kept confidential and used only to deliver your results.</div>
+      <div class="assess-form">
+        <div class="form-field">
+          <label>First Name</label>
+          <input type="text" id="f-name" placeholder="Jane" autocomplete="given-name">
+        </div>
+        <div class="form-field">
+          <label>Email Address</label>
+          <input type="email" id="f-email" placeholder="jane@example.com" autocomplete="email">
+        </div>
+        <div class="form-field">
+          <label>Phone Number <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+          <input type="tel" id="f-phone" placeholder="(416) 555-0100" autocomplete="tel">
+        </div>
+      </div>
+      <div class="assess-nav"><button class="btn-back" onclick="prevStep(4)">← Back</button><button class="btn-next" onclick="nextStep(4)">See My Results →</button></div>
+    </div>
+
+    <!-- Step 6: Results -->
+    <div class="assess-step" id="step-5">
+      <div class="eyebrow" style="margin-bottom:6px">Your Personalized Plan</div>
+      <div class="assess-title" id="results-title">Here's what we recommend for you</div>
+
+      <div class="results-card" id="results-concern-card">
+        <span class="results-emoji" id="results-emoji">⚡</span>
+        <h4 id="results-concern-label">Your Primary Focus</h4>
+        <p id="results-concern-desc" style="font-size:16px;color:rgba(240,244,255,0.85);margin-top:8px;line-height:1.6"></p>
+      </div>
+
+      <div class="results-card" style="border-color:rgba(8,67,105,0.5)">
+        <h4>Your Next 3 Steps</h4>
+        <ul style="list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:12px">
+          <li style="display:flex;gap:12px;align-items:flex-start"><span style="background:var(--accent);color:#000;font-weight:700;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px">1</span><span style="font-size:16px">Book an initial naturopathic consultation — we'll map your specific root drivers with advanced testing</span></li>
+          <li style="display:flex;gap:12px;align-items:flex-start"><span style="background:var(--accent);color:#000;font-weight:700;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px">2</span><span style="font-size:16px">Check your email — your personalized assessment summary will arrive within minutes</span></li>
+          <li style="display:flex;gap:12px;align-items:flex-start"><span style="background:var(--accent);color:#000;font-weight:700;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px">3</span><span style="font-size:16px">Explore our IV therapy options — many patients with your pattern benefit from targeted nutritional IV support</span></li>
+        </ul>
+      </div>
+
+      <a href="https://torontofunctionalmedicine.com/new-patients/" target="_blank" style="display:block;background:var(--accent);color:#000;font-weight:700;font-size:17px;text-align:center;padding:16px;border-radius:10px;margin-top:16px;text-decoration:none">Book Your Consultation at TFMC →</a>
+      <a href="#section-cta" onclick="closeAssessment()" style="display:block;background:var(--bg-card2);color:var(--text-muted);font-weight:600;font-size:15px;text-align:center;padding:14px;border-radius:10px;margin-top:10px;text-decoration:none">Or book a free strategy call with our team →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION JUMP NAV
+═══════════════════════════════════════════════════════ -->
+<nav id="jump-nav">
+  <a href="#section-hero">🎬 Video</a>
+  <a href="#section-seo">📊 SEO</a>
+  <a href="#section-ads">📣 Ads</a>
+  <a href="#section-emails">📧 Emails</a>
+  <a href="#section-assessment">🩺 Assessment</a>
+  <a href="#section-cta">📅 Book</a>
+</nav>
+
+<!-- Sticky mobile CTA -->
+<button id="sticky-cta" onclick="document.getElementById('section-cta').scrollIntoView({behavior:'smooth'})">📅 Book a Call</button>
+
+<!-- Calendly script (one load serves both widgets) -->
+<script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+
+<!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════ -->
+<script>
+// ─── CONFIG ────────────────────────────────────────────────────────────────────
+const CONFIG = {
+  practice_name: "Toronto Functional Medicine Centre",
+  doctor_name: "Dr. Amauri Cavesan, ND",
+  website: "https://torontofunctionalmedicine.com",
+  logo_url: "https://torontofunctionalmedicine.com/wp-content/uploads/2023/03/torontofunctionalmedlogo-darkblue.png",
+  loom_id: "PASTE_LOOM_ID_HERE",
+  booking_url: "https://torontofunctionalmedicine.com/new-patients/",
+  brand_primary: "#084369",
+  brand_accent: "#00D084",
+};
+
+// Loom URL param override: ?loom=abc123 overrides CONFIG.loom_id
+const urlParams = new URLSearchParams(window.location.search);
+const LOOM_ID = urlParams.get('loom') || CONFIG.loom_id;
+
+// Inject Loom if ID is set
+(function() {
+  const container = document.getElementById('video-container');
+  if (container && LOOM_ID && LOOM_ID !== 'PASTE_LOOM_ID_HERE') {
+    container.classList.remove('video-placeholder');
+    container.classList.add('video-wrap');
+    container.innerHTML = '<iframe src="https://www.loom.com/embed/' + LOOM_ID + '?autoplay=0&hide_owner=true" frameborder="0" allowfullscreen allow="fullscreen" style="width:100%;aspect-ratio:16/9;border-radius:12px;"></iframe>';
+  }
+})();
+
+// ─── PROGRESS BAR ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', function() {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  document.getElementById('progress-bar').style.width = Math.min(pct, 100) + '%';
+  // Hide personalization banner after hero
+  const hero = document.getElementById('section-hero');
+  const banner = document.getElementById('pers-banner');
+  if (hero && banner) {
+    banner.style.display = window.scrollY > hero.offsetHeight ? 'none' : 'flex';
+  }
+});
+
+// ─── COPY UTILITY ──────────────────────────────────────────────────────────────
+function copyText(text, btn) {
+  const doIt = function(t) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(t);
+    }
+    const ta = document.createElement('textarea');
+    ta.value = t; ta.style.position = 'fixed'; ta.style.top = '-9999px';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    return Promise.resolve();
+  };
+  doIt(text).then(function() {
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+  }).catch(function(){});
+}
+
+// ─── SYMPTOM MAP ───────────────────────────────────────────────────────────────
+const SYMPTOMS = {
+  "Energy &amp; Fatigue": ["Persistent fatigue despite adequate sleep","Low energy throughout the day","Post-exertional malaise or crashes","Difficulty waking in the morning","Afternoon energy slumps","Reliance on caffeine to function","Feeling unrefreshed after sleep","Reduced motivation or drive","Physical weakness or heaviness","Mental exhaustion or burnout"],
+  "Hormonal Balance": ["Irregular or missed menstrual cycles","Mood swings tied to cycle phases","PMS or severe cramping","Low libido or sexual health concerns","Unexplained weight gain around abdomen","Fluid retention or bloating","Hot flashes or night sweats","Skin changes — acne or dryness","Hair thinning or loss","Difficulty regulating body temperature"],
+  "Gut &amp; Digestive Health": ["Chronic bloating after meals","Constipation or irregular bowel movements","Diarrhea or loose stools","Acid reflux or heartburn","Food sensitivities or intolerances","Abdominal pain or cramping","Nausea or queasiness","Leaky gut symptoms","SIBO or bacterial imbalance","Poor nutrient absorption"],
+  "Brain Fog &amp; Focus": ["Difficulty concentrating or focusing","Memory lapses or forgetfulness","Mental sluggishness or slow thinking","Inability to sustain attention","Word-finding difficulties","Feeling mentally overwhelmed","Reduced cognitive performance","Headaches affecting mental clarity","Anxiety interfering with thinking","Post-COVID cognitive symptoms"],
+  "IV Therapy &amp; NAD+": ["Low cellular energy or mitochondrial fatigue","Frequent illness or immune weakness","Slow recovery from workouts or illness","Signs of nutrient depletion or deficiency","NAD+ deficiency symptoms","Need for hydration and cellular repair","Oxidative stress or aging concerns","Cognitive decline concerns","Detox support needs","Performance or longevity optimization"],
+  "Thyroid Health": ["Unexplained weight gain or difficulty losing weight","Persistent fatigue and sluggishness","Cold intolerance or always feeling cold","Hair thinning or hair loss","Dry skin or brittle nails","Constipation or slow digestion","Depression or low mood","Brain fog and poor concentration","Elevated cholesterol","Joint pain or muscle weakness"],
+  "Adrenal &amp; Stress": ["Chronic stress or inability to relax","Burnout or emotional exhaustion","Crashing fatigue in the afternoon","Salt or sugar cravings","Dizziness when standing quickly","Difficulty handling stress","Anxiety or racing thoughts","Sleep disturbances despite tiredness","Reduced resilience to daily demands","Palpitations or feeling wired but tired"],
+  "Detox &amp; Environmental": ["Chemical sensitivities or reactions","Heavy metal exposure concerns","Mold or mycotoxin illness symptoms","Environmental toxin exposure","Skin reactions to products or environment","Chronic sinus congestion","Unexplained fatigue or cognitive issues","Liver or gallbladder concerns","Difficulty tolerating medications","Need for comprehensive detox support"],
+  "Men's Health": ["Low testosterone symptoms","Reduced energy and motivation","Low libido or sexual performance concerns","Difficulty building or maintaining muscle","Increased body fat especially around abdomen","Mood changes or irritability","Sleep disruption or poor sleep quality","Cardiovascular health concerns","Prostate health concerns","Estrogen dominance symptoms in men"],
+  "Women's Health": ["Perimenopause or menopause symptoms","Hormonal acne or skin changes","PCOS or ovarian health concerns","Endometriosis or pelvic pain","Fertility support needs","Postpartum recovery support","Breast health concerns","Autoimmune conditions common in women","Bone density or osteoporosis prevention","Chronic UTIs or vaginal health"],
+  "Pain &amp; Inflammation": ["Chronic joint pain or arthritis","Muscle pain or fibromyalgia","Inflammatory conditions","Back or neck pain","Nerve pain or neuropathy","Sports injury recovery","Post-surgical healing support","Headaches or migraines","Tendon or connective tissue issues","Acupuncture or cold laser interest"],
+  "Healthy Longevity": ["Preventive health and anti-aging goals","Longevity optimization","Metabolic health improvement","Cardiovascular risk reduction","Cognitive longevity support","Cancer prevention and monitoring","Genetic health optimization","Epigenetic aging concerns","Comprehensive health audit interest","NAD+ and cellular longevity therapy"]
+};
+
+const CONCERN_DESCS = {
+  "Energy &amp; Fatigue": "Persistent fatigue and low energy are among the most common reasons patients seek functional medicine care. The root drivers range from mitochondrial dysfunction and nutrient depletion to hormonal dysregulation and chronic inflammation. A comprehensive assessment can identify which specific system is underperforming.",
+  "Hormonal Balance": "Hormonal imbalances rarely resolve on their own — and standard bloodwork often misses the nuance. Advanced hormone panels, combined with naturopathic assessment and targeted IV therapy, can identify and address the root hormonal pattern driving your symptoms.",
+  "Gut &amp; Digestive Health": "Gut dysfunction affects far more than digestion — it drives immune dysregulation, mood disorders, skin conditions, and hormonal imbalance. Toronto Functional Medicine Centre specializes in comprehensive gut assessment including SIBO testing, microbiome analysis, and targeted repair protocols.",
+  "Brain Fog &amp; Focus": "Cognitive symptoms like brain fog and poor concentration are often rooted in nutrient deficiencies, inflammatory markers, hormonal shifts, or mitochondrial decline — none of which show up on a standard panel. Functional testing maps the actual drivers.",
+  "IV Therapy &amp; NAD+": "NAD+ and targeted IV therapies support cellular energy production, cognitive function, immune resilience, and recovery. TFMC's IV Lounge offers customized protocols including NAD+, Myers Cocktail, Vitamin C, Glutathione, and specialty infusions.",
+  "Thyroid Health": "Thyroid dysfunction is frequently underdiagnosed on standard TSH testing alone. A comprehensive thyroid panel including T3, T4, reverse T3, and thyroid antibodies — alongside naturopathic assessment — reveals the full picture.",
+  "Adrenal &amp; Stress": "Adrenal dysregulation sits behind many of the most common complaints in functional medicine: fatigue, mood instability, sleep disruption, and immune vulnerability. A 4-point cortisol assessment and comprehensive naturopathic intake maps the pattern precisely.",
+  "Detox &amp; Environmental": "Environmental toxin burden is an underrecognized driver of chronic health conditions. Heavy metal testing, mold toxin assessment, and targeted detox protocols — including IV therapy support — address the load systematically.",
+  "Men's Health": "Hormonal decline in men is often gradual and misattributed to aging. Comprehensive testosterone, DHEA, estradiol, and cortisol testing alongside naturopathic care identifies the specific pattern and the most targeted intervention.",
+  "Women's Health": "Women's health encompasses an exceptionally complex hormonal environment. From perimenopause and PCOS to fertility support and postpartum recovery, TFMC's naturopathic team specializes in comprehensive women's health assessment and personalized care.",
+  "Pain &amp; Inflammation": "Chronic pain and inflammation are often driven by underlying immune dysregulation, nutrient deficiencies, or structural contributors. TFMC's integrative approach combines naturopathic medicine, acupuncture, cold laser therapy, and anti-inflammatory IV protocols.",
+  "Healthy Longevity": "Longevity medicine at TFMC goes beyond prevention — it optimizes cellular health, metabolic function, and cognitive reserve. NAD+ IV therapy, comprehensive biomarker testing, and personalized longevity protocols support healthy aging from the cellular level up."
+};
+
+// ─── ASSESSMENT STATE ──────────────────────────────────────────────────────────
+let currentStep = 0;
+const answers = { concern: '', duration: '', impact: '', symptoms: [], goals: [], name: '', email: '', phone: '' };
+
+// Restore from localStorage
+(function() {
+  try {
+    const saved = localStorage.getItem('tfmc_assessment');
+    if (saved) { const d = JSON.parse(saved); Object.assign(answers, d); }
+    const savedScroll = localStorage.getItem('tfmc_scroll');
+    if (savedScroll) { setTimeout(function(){ window.scrollTo(0, parseInt(savedScroll)); }, 100); }
+  } catch(e) {}
+})();
+
+function saveProgress() {
+  try { localStorage.setItem('tfmc_assessment', JSON.stringify(answers)); } catch(e) {}
+}
+
+window.addEventListener('scroll', function() {
+  try { localStorage.setItem('tfmc_scroll', Math.round(window.scrollY)); } catch(e) {}
+}, { passive: true });
+
+// ─── CARD SELECTION ────────────────────────────────────────────────────────────
+function pickCard(btn, gid) {
+  document.querySelectorAll('#' + gid + ' .card-opt').forEach(function(b) { b.classList.remove('sel'); });
+  btn.classList.add('sel');
+}
+
+function toggleChip(btn) { btn.classList.toggle('sel'); }
+
+// ─── ASSESSMENT OPEN/CLOSE ─────────────────────────────────────────────────────
+function openAssessment() {
+  document.getElementById('assessment-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  showStep(0);
+}
+
+function closeAssessment() {
+  document.getElementById('assessment-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('assessment-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeAssessment();
+});
+
+// ─── STEP NAVIGATION ───────────────────────────────────────────────────────────
+function showStep(n) {
+  document.querySelectorAll('.assess-step').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('step-' + n).classList.add('active');
+  for (var i = 0; i < 6; i++) {
+    document.getElementById('dot-' + i).classList.toggle('done', i <= n);
+  }
+  currentStep = n;
+  // Restore selections from saved answers
+  if (n === 0 && answers.concern) {
+    document.querySelectorAll('#g-concern .card-opt').forEach(function(b) {
+      if (b.dataset.val === answers.concern) b.classList.add('sel');
+    });
+  }
+  if (n === 1 && answers.duration) {
+    document.querySelectorAll('#g-dur .card-opt').forEach(function(b) {
+      if (b.dataset.val === answers.duration) b.classList.add('sel');
+    });
+  }
+}
+
+function nextStep(from) {
+  if (from === 0) {
+    const sel = document.querySelector('#g-concern .card-opt.sel');
+    if (!sel) { alert('Please select your primary health concern.'); return; }
+    answers.concern = sel.dataset.val;
+    buildSymptoms(answers.concern);
+    saveProgress();
+    showStep(1);
+  } else if (from === 1) {
+    const durSel = document.querySelector('#g-dur .card-opt.sel');
+    const impSel = document.querySelector('#g-impact .card-opt.sel');
+    if (!durSel) { alert('Please select how long you have had this concern.'); return; }
+    answers.duration = durSel.dataset.val;
+    answers.impact = impSel ? impSel.dataset.val : '';
+    saveProgress();
+    showStep(2);
+  } else if (from === 2) {
+    answers.symptoms = Array.from(document.querySelectorAll('#g-symptoms .chip.sel')).map(function(c){ return c.textContent; });
+    saveProgress();
+    showStep(3);
+  } else if (from === 3) {
+    answers.goals = Array.from(document.querySelectorAll('#g-goals .chip.sel')).map(function(c){ return c.textContent; });
+    saveProgress();
+    showStep(4);
+  } else if (from === 4) {
+    var name = document.getElementById('f-name').value.trim();
+    var email = document.getElementById('f-email').value.trim();
+    if (!name) { alert('Please enter your first name.'); return; }
+    if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+    answers.name = name;
+    answers.email = email;
+    answers.phone = document.getElementById('f-phone').value.trim();
+    saveProgress();
+    buildResults();
+    showStep(5);
+  }
+  document.querySelector('.assess-modal').scrollTop = 0;
+}
+
+function prevStep(from) {
+  showStep(from - 1);
+  document.querySelector('.assess-modal').scrollTop = 0;
+}
+
+function buildSymptoms(concern) {
+  const list = SYMPTOMS[concern] || SYMPTOMS['Energy &amp; Fatigue'];
+  const g = document.getElementById('g-symptoms');
+  g.innerHTML = '';
+  list.forEach(function(s) {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = s;
+    btn.onclick = function(){ toggleChip(this); };
+    if (answers.symptoms.includes(s)) btn.classList.add('sel');
+    g.appendChild(btn);
+  });
+}
+
+function buildResults() {
+  const concern = answers.concern || 'Energy &amp; Fatigue';
+  const emojiMap = {
+    "Energy &amp; Fatigue":"⚡","Hormonal Balance":"⚖️","Gut &amp; Digestive Health":"🌿",
+    "Brain Fog &amp; Focus":"🧠","IV Therapy &amp; NAD+":"💉","Thyroid Health":"🦋",
+    "Adrenal &amp; Stress":"🧘","Detox &amp; Environmental":"🌱","Men's Health":"💪",
+    "Women's Health":"🌸","Pain &amp; Inflammation":"🔥","Healthy Longevity":"⏳"
+  };
+  document.getElementById('results-title').textContent = 'Here\'s what we recommend for ' + (answers.name || 'you');
+  document.getElementById('results-emoji').textContent = emojiMap[concern] || '🩺';
+  document.getElementById('results-concern-label').textContent = 'Primary Focus: ' + concern.replace(/&amp;/g,'&');
+  document.getElementById('results-concern-desc').textContent = CONCERN_DESCS[concern] || '';
+}
+</script>
+
+</body>
+</html>
