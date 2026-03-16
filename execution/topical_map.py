@@ -946,126 +946,127 @@ def format_html(data: dict) -> str:
 <title>Topical Map: {topic}</title>
 <style>
   :root {{
-    --blue: #2563eb; --blue-light: #dbeafe; --blue-dark: #1e40af;
-    --green: #16a34a; --green-light: #dcfce7; --green-dark: #14532d;
-    --purple: #7c3aed; --orange: #ea580c;
-    --gray-50: #f8fafc; --gray-100: #f1f5f9; --gray-200: #e2e8f0;
-    --gray-400: #94a3b8; --gray-600: #475569; --gray-800: #1e293b;
-    --kd-low: #16a34a; --kd-mid: #d97706; --kd-high: #dc2626;
-    --radius: 8px; --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    --blue: #3b82f6; --blue-light: #1e3a6e; --blue-dark: #93c5fd;
+    --green: #22c55e; --green-light: #1a3a28; --green-dark: #86efac;
+    --purple: #a78bfa; --orange: #fb923c;
+    --bg: #0d0f1a; --card: #151828; --card-alt: #1a1e30;
+    --border: #252a42; --border-light: #1e2338;
+    --text: #e2e8f5; --text-muted: #8b9cc7; --text-dim: #4a5580;
+    --kd-low: #4ade80; --kd-mid: #fbbf24; --kd-high: #f87171;
+    --radius: 8px; --shadow: 0 2px 8px rgba(0,0,0,0.4);
   }}
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-         background: var(--gray-50); color: var(--gray-800); line-height: 1.5; }}
+         background: var(--bg); color: var(--text); line-height: 1.5; }}
   .container {{ max-width: 1200px; margin: 0 auto; padding: 20px; }}
 
   /* Header */
-  .header {{ background: var(--gray-800); color: white; padding: 24px; border-radius: var(--radius); margin-bottom: 20px; }}
+  .header {{ background: linear-gradient(135deg, #1a1e30 0%, #0f1422 100%); color: white; padding: 24px; border-radius: var(--radius); margin-bottom: 20px; border: 1px solid var(--border); }}
   .header h1 {{ font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; }}
-  .header-meta {{ font-size: 0.85rem; color: var(--gray-400); }}
+  .header-meta {{ font-size: 0.85rem; color: var(--text-muted); }}
   .header-meta span {{ margin-right: 20px; }}
 
   /* Stats bar */
   .stats-bar {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }}
-  .stat-card {{ background: white; border-radius: var(--radius); padding: 16px; border: 1px solid var(--gray-200); text-align: center; }}
+  .stat-card {{ background: var(--card); border-radius: var(--radius); padding: 16px; border: 1px solid var(--border); text-align: center; }}
   .stat-number {{ font-size: 1.8rem; font-weight: 700; color: var(--blue); }}
-  .stat-label {{ font-size: 0.75rem; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.05em; }}
+  .stat-label {{ font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }}
 
   /* Tabs */
-  .tabs {{ display: flex; gap: 4px; margin-bottom: 20px; background: white; padding: 6px; border-radius: var(--radius); border: 1px solid var(--gray-200); }}
-  .tab {{ padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500; color: var(--gray-600); transition: all 0.15s; border: none; background: none; }}
-  .tab:hover {{ background: var(--gray-100); }}
+  .tabs {{ display: flex; gap: 4px; margin-bottom: 20px; background: var(--card); padding: 6px; border-radius: var(--radius); border: 1px solid var(--border); }}
+  .tab {{ padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); transition: all 0.15s; border: none; background: none; }}
+  .tab:hover {{ background: var(--card-alt); color: var(--text); }}
   .tab.active {{ background: var(--blue); color: white; }}
   .tab-panel {{ display: none; }}
   .tab-panel.active {{ display: block; }}
 
   /* Controls */
   .controls {{ display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }}
-  .btn {{ padding: 7px 16px; border-radius: 6px; border: 1px solid var(--gray-200); background: white; cursor: pointer; font-size: 0.85rem; font-weight: 500; color: var(--gray-700); transition: all 0.15s; }}
-  .btn:hover {{ background: var(--gray-100); }}
+  .btn {{ padding: 7px 16px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); transition: all 0.15s; }}
+  .btn:hover {{ background: var(--card-alt); color: var(--text); }}
   .btn-primary {{ background: var(--blue); color: white; border-color: var(--blue); }}
-  .btn-primary:hover {{ background: var(--blue-dark); }}
-  .filter-label {{ font-size: 0.8rem; color: var(--gray-600); }}
-  .filter-btn {{ padding: 5px 10px; border-radius: 20px; border: 1px solid var(--gray-200); background: white; cursor: pointer; font-size: 0.75rem; }}
+  .btn-primary:hover {{ background: #2563eb; }}
+  .filter-label {{ font-size: 0.8rem; color: var(--text-muted); }}
+  .filter-btn {{ padding: 5px 10px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: 0.75rem; color: var(--text-muted); }}
   .filter-btn.active {{ background: var(--blue); color: white; border-color: var(--blue); }}
 
   /* Pillars */
-  .pillar {{ background: white; border-radius: var(--radius); margin-bottom: 12px; border: 1px solid var(--gray-200); box-shadow: var(--shadow); overflow: hidden; }}
+  .pillar {{ background: var(--card); border-radius: var(--radius); margin-bottom: 12px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }}
   .pillar-informational {{ border-left: 4px solid var(--blue); }}
   .pillar-commercial {{ border-left: 4px solid var(--green); }}
   .pillar-header {{ padding: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: flex-start; }}
-  .pillar-header:hover {{ background: var(--gray-50); }}
+  .pillar-header:hover {{ background: var(--card-alt); }}
   .pillar-title-row {{ display: flex; align-items: center; gap: 10px; }}
-  .pillar-toggle {{ color: var(--gray-400); font-size: 0.75rem; transition: transform 0.2s; min-width: 16px; }}
-  .pillar-title {{ font-size: 1rem; font-weight: 600; color: var(--gray-800); }}
+  .pillar-toggle {{ color: var(--text-dim); font-size: 0.75rem; transition: transform 0.2s; min-width: 16px; }}
+  .pillar-title {{ font-size: 1rem; font-weight: 600; color: var(--text); }}
   .pillar-badges {{ display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }}
-  .pillar-intention {{ font-size: 0.8rem; color: var(--gray-600); padding: 0 16px 6px; }}
-  .pillar-meta {{ font-size: 0.75rem; color: var(--gray-400); padding: 0 16px 12px; }}
-  .pillar-meta code {{ background: var(--gray-100); padding: 1px 5px; border-radius: 3px; }}
+  .pillar-intention {{ font-size: 0.8rem; color: var(--text-muted); padding: 0 16px 6px; }}
+  .pillar-meta {{ font-size: 0.75rem; color: var(--text-dim); padding: 0 16px 12px; }}
+  .pillar-meta code {{ background: var(--card-alt); padding: 1px 5px; border-radius: 3px; color: var(--blue-dark); }}
 
   /* Clusters */
   .clusters-container {{ padding: 0 16px 16px; }}
-  .cluster {{ border: 1px solid var(--gray-200); border-radius: 6px; margin-bottom: 8px; }}
+  .cluster {{ border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; background: var(--bg); }}
   .cluster-header {{ display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; }}
-  .cluster-header:hover {{ background: var(--gray-50); border-radius: 6px; }}
-  .cluster-toggle {{ color: var(--gray-400); font-size: 0.7rem; transition: transform 0.2s; }}
-  .cluster-title {{ font-size: 0.875rem; font-weight: 500; flex: 1; }}
+  .cluster-header:hover {{ background: var(--card-alt); border-radius: 6px; }}
+  .cluster-toggle {{ color: var(--text-dim); font-size: 0.7rem; transition: transform 0.2s; }}
+  .cluster-title {{ font-size: 0.875rem; font-weight: 500; flex: 1; color: var(--text); }}
   .cluster-stats {{ display: flex; gap: 5px; }}
-  .cluster-body {{ padding: 10px 12px; border-top: 1px solid var(--gray-100); }}
+  .cluster-body {{ padding: 10px 12px; border-top: 1px solid var(--border-light); }}
   .cluster-body.hidden {{ display: none; }}
-  .cluster-intent {{ font-size: 0.8rem; color: var(--gray-600); margin-bottom: 8px; }}
+  .cluster-intent {{ font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }}
   .articles-list {{ list-style: none; padding: 0; }}
-  .article-item {{ display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--gray-100); font-size: 0.8rem; }}
+  .article-item {{ display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border-light); font-size: 0.8rem; }}
   .article-item:last-child {{ border-bottom: none; }}
-  .article-title {{ color: var(--gray-800); flex: 1; }}
-  .article-meta {{ color: var(--gray-400); font-size: 0.75rem; }}
+  .article-title {{ color: var(--text); flex: 1; }}
+  .article-meta {{ color: var(--text-dim); font-size: 0.75rem; }}
 
   /* Badges */
-  .vol-badge {{ background: #eff6ff; color: var(--blue); padding: 2px 7px; border-radius: 20px; font-size: 0.7rem; font-weight: 500; white-space: nowrap; }}
+  .vol-badge {{ background: var(--blue-light); color: var(--blue-dark); padding: 2px 7px; border-radius: 20px; font-size: 0.7rem; font-weight: 500; white-space: nowrap; }}
   .kd-badge {{ padding: 2px 7px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; white-space: nowrap; }}
-  .kd-low {{ background: #dcfce7; color: var(--kd-low); }}
-  .kd-mid {{ background: #fef9c3; color: var(--kd-mid); }}
-  .kd-high {{ background: #fee2e2; color: var(--kd-high); }}
+  .kd-low {{ background: #1a3a28; color: var(--kd-low); }}
+  .kd-mid {{ background: #3a2a0a; color: var(--kd-mid); }}
+  .kd-high {{ background: #3a1010; color: var(--kd-high); }}
   .type-badge {{ padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 500; }}
   .type-informational {{ background: var(--blue-light); color: var(--blue-dark); }}
   .type-commercial {{ background: var(--green-light); color: var(--green-dark); }}
   .funnel-badge {{ padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }}
-  .funnel-tofu {{ background: #e0f2fe; color: #0369a1; }}
-  .funnel-mofu {{ background: #fef3c7; color: #92400e; }}
-  .funnel-bofu {{ background: #f3e8ff; color: #6b21a8; }}
-  .format-badge {{ background: var(--gray-100); color: var(--gray-600); padding: 2px 7px; border-radius: 20px; font-size: 0.7rem; }}
+  .funnel-tofu {{ background: #1a3040; color: #38bdf8; }}
+  .funnel-mofu {{ background: #332a0a; color: #fcd34d; }}
+  .funnel-bofu {{ background: #2a1640; color: #c084fc; }}
+  .format-badge {{ background: var(--card-alt); color: var(--text-muted); padding: 2px 7px; border-radius: 20px; font-size: 0.7rem; }}
 
   /* Tables */
-  .section {{ background: white; border-radius: var(--radius); border: 1px solid var(--gray-200); overflow: hidden; margin-bottom: 16px; }}
-  .section-header {{ padding: 14px 18px; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); font-weight: 600; font-size: 0.9rem; }}
+  .section {{ background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; margin-bottom: 16px; }}
+  .section-header {{ padding: 14px 18px; background: var(--card-alt); border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.9rem; color: var(--text); }}
   .section-body {{ padding: 0; }}
   table {{ width: 100%; border-collapse: collapse; font-size: 0.82rem; }}
-  th {{ background: var(--gray-100); padding: 9px 14px; text-align: left; font-weight: 600; color: var(--gray-600); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; border-bottom: 1px solid var(--gray-200); }}
-  td {{ padding: 9px 14px; border-bottom: 1px solid var(--gray-100); vertical-align: top; }}
+  th {{ background: var(--card-alt); padding: 9px 14px; text-align: left; font-weight: 600; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; border-bottom: 1px solid var(--border); }}
+  td {{ padding: 9px 14px; border-bottom: 1px solid var(--border-light); vertical-align: top; color: var(--text); }}
   tr:last-child td {{ border-bottom: none; }}
-  tr:hover td {{ background: var(--gray-50); }}
+  tr:hover td {{ background: var(--card-alt); }}
   .kd-cell-low {{ color: var(--kd-low); font-weight: 600; }}
   .kd-cell-mid {{ color: var(--kd-mid); font-weight: 600; }}
   .kd-cell-high {{ color: var(--kd-high); font-weight: 600; }}
-  code {{ background: var(--gray-100); padding: 1px 5px; border-radius: 3px; font-size: 0.8rem; }}
+  code {{ background: var(--card-alt); color: var(--blue-dark); padding: 1px 5px; border-radius: 3px; font-size: 0.8rem; }}
 
   /* Internal links */
   .priority-dot {{ width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }}
-  .priority-critical {{ background: #dc2626; }}
-  .priority-high {{ background: #d97706; }}
-  .priority-medium {{ background: var(--gray-400); }}
+  .priority-critical {{ background: #f87171; }}
+  .priority-high {{ background: #fbbf24; }}
+  .priority-medium {{ background: var(--text-dim); }}
 
   /* Action plan */
   .action-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }}
-  .action-section {{ background: white; border-radius: var(--radius); border: 1px solid var(--gray-200); padding: 16px; }}
-  .action-section h4 {{ font-size: 0.875rem; font-weight: 600; margin-bottom: 10px; color: var(--gray-800); }}
+  .action-section {{ background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; }}
+  .action-section h4 {{ font-size: 0.875rem; font-weight: 600; margin-bottom: 10px; color: var(--text); }}
   .action-section ul {{ list-style: none; padding: 0; }}
-  .action-section li {{ font-size: 0.82rem; color: var(--gray-700); padding: 4px 0; border-bottom: 1px solid var(--gray-100); }}
+  .action-section li {{ font-size: 0.82rem; color: var(--text-muted); padding: 4px 0; border-bottom: 1px solid var(--border-light); }}
   .action-section li:last-child {{ border-bottom: none; }}
   .action-section li::before {{ content: "→ "; color: var(--blue); font-weight: 600; }}
 
   /* Legend */
-  .legend {{ display: flex; gap: 16px; flex-wrap: wrap; padding: 10px 0; font-size: 0.75rem; color: var(--gray-600); }}
+  .legend {{ display: flex; gap: 16px; flex-wrap: wrap; padding: 10px 0; font-size: 0.75rem; color: var(--text-muted); }}
   .legend-item {{ display: flex; align-items: center; gap: 5px; }}
   .legend-dot {{ width: 10px; height: 10px; border-radius: 2px; }}
 
@@ -1100,11 +1101,11 @@ def format_html(data: dict) -> str:
 
   <!-- Legend -->
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#2563eb"></div> Informational Pillar</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div> Commercial Pillar</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1px solid #16a34a"></div> KD ≤30 (Low)</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#fef9c3;border:1px solid #d97706"></div> KD 31-60 (Med)</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#fee2e2;border:1px solid #dc2626"></div> KD &gt;60 (High)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> Informational Pillar</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> Commercial Pillar</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1a3a28;border:1px solid #4ade80"></div> KD ≤30 (Low)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3a2a0a;border:1px solid #fbbf24"></div> KD 31-60 (Med)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3a1010;border:1px solid #f87171"></div> KD &gt;60 (High)</div>
     <button class="btn btn-primary" onclick="downloadJSON()" style="margin-left:auto">⬇ Download JSON</button>
   </div>
 
