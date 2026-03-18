@@ -504,7 +504,9 @@ const CONFIG = {
       You've paid agencies. You've seen the reports. You're still not sure which dollar brought in which patient. This document was built for {{PRACTICE_NAME}} — before we spoke — to show you exactly what's missing and what to do about it.
     </p>
 
-    <!-- Loom embed -->
+    <!-- Loom embed — hidden until loom_id is added (controlled by {{LOOM_SECTION_STYLE}}) -->
+    <div id="loom-video-section" {{LOOM_SECTION_STYLE}}>
+
     <div class="max-w-4xl video-reveal">
       <div class="loom-wrapper">
         <iframe id="loom-frame"
@@ -523,6 +525,8 @@ const CONFIG = {
       <h3>How This Document Can Help Your Practice</h3>
       <p>Somewhere between your website and your front desk, patients are leaving. This doc shows you exactly where — and what it costs. Every number is pulled from your market. Every campaign is built for your conditions. Read it and you'll know exactly what to fix — whether you work with us or not.</p>
     </div>
+
+    </div><!-- /#loom-video-section -->
 
   </div>
 </section>
@@ -863,8 +867,8 @@ const CONFIG = {
     <!-- Stats bar: 4 dark cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 stagger-children">
       <div class="stat-dark">
-        <span class="stat-num" data-count="{{DOMAIN_RANK}}">{{DOMAIN_RANK}}</span>
-        <span class="stat-label">Global Rank</span>
+        <span class="stat-num">{{DOMAIN_RANK}}</span>
+        <span class="stat-label">Domain Rank</span>
       </div>
       <div class="stat-dark">
         <span class="stat-num" data-count="{{UNIQUE_KEYWORDS}}">{{UNIQUE_KEYWORDS}}</span>
@@ -908,7 +912,8 @@ const CONFIG = {
     </div>
 
     <!-- Competitors table -->
-    <h3 class="text-slate-900 font-bold text-xl mb-5 fade-up">Your Competitors Online</h3>
+    <h3 class="text-slate-900 font-bold text-xl mb-3 fade-up">Who's Ranking for Your Patients' Searches</h3>
+    <p class="text-slate-400 mb-5 fade-up" style="font-size:14px;">Domains ranked for the same high-intent healthcare searches as {{PRACTICE_NAME}}. Direct local practice competitors may rank below these due to lower overall volume.</p>
     <div class="overflow-x-auto rounded-2xl border border-slate-100 mb-8 fade-up">
       <table>
         <thead>

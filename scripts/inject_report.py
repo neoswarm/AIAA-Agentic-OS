@@ -69,9 +69,12 @@ def fmt_number(n, default="N/A"):
 
 
 def fmt_domain_rank(n):
-    """Format domain rank: 4561840 → '#4,561,840'"""
+    """Format domain rank: 4561840 → '#4,561,840'. Returns N/A when 0 (not ranked)."""
     try:
-        return f"#{int(n):,}"
+        v = int(n)
+        if v == 0:
+            return "N/A"
+        return f"#{v:,}"
     except (TypeError, ValueError):
         return "N/A"
 
@@ -201,13 +204,42 @@ def build_quick_wins_rows(quick_wins: list) -> str:
     return "\n".join(rows)
 
 
-def build_competitors_rows(competitors: list) -> str:
-    """Build <tr> rows for Competitors table."""
-    if not competitors:
-        return '<tr><td colspan="4" style="padding:20px;color:#94a3b8;text-align:center;">No competitor data available.</td></tr>'
+# Domains to exclude from competitors table — social, directories, info giants
+_COMPETITOR_BLOCKLIST = {
+    "facebook.com", "youtube.com", "instagram.com", "twitter.com", "x.com",
+    "linkedin.com", "pinterest.com", "tiktok.com", "reddit.com", "quora.com",
+    "yelp.com", "google.com", "maps.google.com", "amazon.com", "wikipedia.org",
+    "webmd.com", "healthline.com", "mayoclinic.org", "clevelandclinic.org",
+    "medlineplus.gov", "nih.gov", "cdc.gov", "who.int", "verywellhealth.com",
+    "medicalnewstoday.com", "everydayhealth.com", "drugs.com", "rxlist.com",
+    "zocdoc.com", "psychology-today.com", "psychologytoday.com",
+}
+
+def _is_real_competitor(domain: str, own_domain: str = "") -> bool:
+    """Return True if this domain is likely an actual competing practice."""
+    d = domain.lower().strip()
+    if own_domain and d == own_domain.lower().replace("https://", "").replace("www.", "").rstrip("/"):
+        return False
+    for blocked in _COMPETITOR_BLOCKLIST:
+        if d == blocked or d.endswith("." + blocked):
+            return False
+    return True
+
+
+def build_competitors_rows(competitors: list, own_domain: str = "") -> str:
+    """Build <tr> rows for Competitors table — filters generic/directory domains."""
+    real = [c for c in competitors if _is_real_competitor(c.get("domain", ""), own_domain)]
+
+    if not real:
+        return (
+            '<tr><td colspan="4" style="padding:20px;color:#94a3b8;text-align:center;">' +
+            'No direct practice competitors tracked in this dataset. ' +
+            'This means there is an open window — most competing practices in your area ' +
+            'are not investing in SEO yet.</td></tr>'
+        )
 
     rows = []
-    for comp in competitors:
+    for comp in real:
         domain  = escape_html(comp.get("domain", ""))
         kws     = fmt_number(comp.get("keywords", 0))
         traffic = fmt_number(comp.get("traffic", 0))
@@ -536,6 +568,25 @@ def build_replacements(p1: dict, p2: dict) -> dict:
 
     competitors = semrush.get("competitors", [])
 
+    # First real competitor traffic for narrative text
+    own_domain = p1.get("website", "")
+    real_comps = [c for c in competitors if _is_real_competitor(c.get("domain", ""), own_domain)]
+    if real_comps:
+        comp1_traffic = fmt_number(real_comps[0].get("traffic", 0))
+        comp1_domain  = real_comps[0].get("domain", "a top competitor")
+    else:
+        # Fall back to showing the market leader from DataForSEO's dataset
+        # (Cleveland Clinic / Healthline etc.) with context framing
+        non_social = [c for c in competitors if not any(
+            c.get("domain","").endswith(b) for b in ["facebook.com","youtube.com","instagram.com","reddit.com"]
+        ) and c.get("domain","") != own_domain.replace("https://","").replace("www.","").rstrip("/")]
+        if non_social:
+            comp1_traffic = fmt_number(non_social[0].get("traffic", 0))
+            comp1_domain  = non_social[0].get("domain", "a top search result")
+        else:
+            comp1_traffic = "thousands of"
+            comp1_domain  = "competitors"
+
     practice_name_raw = p1.get("name", "Your Practice")
     company_slug = make_company_slug(practice_name_raw)
 
@@ -559,7 +610,7 @@ def build_replacements(p1: dict, p2: dict) -> dict:
         "QUICK_WINS_COUNT":          quick_wins_count,
         "RUN_DATE":                  run_date,
         "QUICK_WINS_TABLE_ROWS":     build_quick_wins_rows(quick_wins),
-        "COMPETITORS_TABLE_ROWS":    build_competitors_rows(competitors),
+        "COMPETITORS_TABLE_ROWS":    build_competitors_rows(competitors, p1.get("website", "")),
         "DATA_NERDS_ROWS":           build_data_nerds_rows(semrush),   # kept for legacy
         "KEYWORD_ROWS_HTML":         build_keyword_rows_html(semrush, p2.get("keywords", [])),
         "AD_CAMPAIGNS_HTML":         build_ad_campaigns_html(p2.get("ads", [])),
@@ -573,6 +624,8 @@ def build_replacements(p1: dict, p2: dict) -> dict:
         "CITY":                      _extract_city(p1),
         "PRIMARY_CONDITION":         _extract_primary_condition(p1),
         "IS_MULTI_LOCATION":         "true" if p1.get("is_multi_location") else "false",
+        "COMPETITOR_1_TRAFFIC":      comp1_traffic,
+        "COMPETITOR_1_DOMAIN":       comp1_domain,
     }
 
 
@@ -684,12 +737,40 @@ def _load_env_var(key: str) -> str:
     return val
 
 
+def _sync_site_dir(site_dir: Path) -> None:
+    """
+    Sync all existing run dirs that have index.html into site_dir/{slug}/.
+    This ensures every deploy includes all previously-built reports.
+    """
+    runs_root = PROJECT_DIR / "output" / "d100_runs"
+    if not runs_root.exists():
+        return
+    for run_dir in sorted(runs_root.iterdir()):
+        idx = run_dir / "index.html"
+        if not idx.exists():
+            continue
+        # Derive slug from run_dir name (strip timestamp suffix: slug_YYYYMMDD_HHMMSS)
+        parts = run_dir.name.rsplit("_", 2)
+        slug = parts[0] if len(parts) == 3 and len(parts[1]) == 8 else run_dir.name
+        dest = site_dir / slug
+        dest.mkdir(parents=True, exist_ok=True)
+        shutil.copy(str(idx), str(dest / "index.html"))
+        fav = run_dir / "favicon.ico"
+        if fav.exists():
+            shutil.copy(str(fav), str(dest / "favicon.ico"))
+
+
 def deploy_to_vercel(run_dir: Path, practice_name: str, dry_run: bool = False) -> str:
     """
-    Deploy index.html (+ favicon) to Vercel under the VERCEL_DELIVERABLES_PROJECT
-    project, then alias to {slug}.DELIVERABLES_DOMAIN.
+    Deploy ALL reports as path-based pages under healthbizleads.com/{slug}/.
 
-    Returns the live healthbizleads.com URL.
+    Strategy:
+      1. Maintain output/site/ as accumulator — each report in its own subfolder
+      2. Sync all existing run dirs into output/site/
+      3. Deploy the entire output/site/ dir to healthbizleads-d100 project
+      4. Return https://healthbizleads.com/{slug}/
+
+    Returns the live healthbizleads.com URL for this specific report.
     """
     import shutil
 
@@ -702,111 +783,65 @@ def deploy_to_vercel(run_dir: Path, practice_name: str, dry_run: bool = False) -
         raise RuntimeError("VERCEL_TOKEN not set in environment or .env file")
 
     slug = make_company_slug(practice_name)
-    # Subdomain alias: aligned-modern-health.healthbizleads.com
-    custom_alias = f"{slug}.{deliverables_domain}"
-
-    index_path   = run_dir / "index.html"
-    favicon_path = run_dir / "favicon.ico"
-
-    if not index_path.exists():
-        raise FileNotFoundError(f"index.html not found in {run_dir}")
+    live_url = f"https://{deliverables_domain}/{slug}/"
 
     if dry_run:
-        print(f"   [DRY RUN] Would deploy to {deliverables_proj} → https://{custom_alias}")
-        return f"https://{custom_alias}"
+        print(f"   [DRY RUN] Would deploy to {deliverables_domain}/{slug}/")
+        return live_url
 
     vercel_bin = shutil.which("vercel")
     if not vercel_bin:
         raise RuntimeError("vercel CLI not found. Install with: npm i -g vercel")
 
-    # Create temp deploy directory
-    with tempfile.TemporaryDirectory() as tmpdir:
-        deploy_dir = Path(tmpdir) / "deploy"
-        deploy_dir.mkdir()
+    # Build the accumulator site directory
+    site_dir = PROJECT_DIR / "output" / "site"
+    site_dir.mkdir(parents=True, exist_ok=True)
 
-        shutil.copy(str(index_path), str(deploy_dir / "index.html"))
-        if favicon_path.exists():
-            shutil.copy(str(favicon_path), str(deploy_dir / "favicon.ico"))
+    # Sync ALL existing reports into site/{slug}/
+    _sync_site_dir(site_dir)
 
-        # vercel.json — deploy into the shared healthbizleads-d100 project
-        vercel_config = {
-            "version": 2,
-            "name": deliverables_proj,
-            "builds": [{"src": "**/*", "use": "@vercel/static"}],
-            "routes": [{"src": "/(.*)", "dest": "/$1"}]
-        }
-        (deploy_dir / "vercel.json").write_text(json.dumps(vercel_config, indent=2))
+    # Write vercel.json into site root
+    vercel_config = {
+        "version": 2,
+        "name": deliverables_proj,
+        "builds": [{"src": "**/*", "use": "@vercel/static"}],
+        "routes": [{"src": "/(.*)", "dest": "/$1"}]
+    }
+    (site_dir / "vercel.json").write_text(json.dumps(vercel_config, indent=2))
 
-        print(f"   Deploying to Vercel project: {deliverables_proj}")
-
-        result = subprocess.run(
-            [
-                vercel_bin,
-                "--yes",
-                "--prod",
-                "--scope", scope,
-                "--token", vercel_token,
-                "--cwd", str(deploy_dir),
-            ],
-            capture_output=True,
-            text=True,
-            timeout=120,
+    # Root index — simple redirect listing (not required, but nice to have)
+    root_idx = site_dir / "index.html"
+    if not root_idx.exists():
+        root_idx.write_text(
+            "<html><head><title>HealthBizLeads Reports</title>"
+            "<meta http-equiv=\'refresh\' content=\'0;url=https://healthbizleads.com\'/>"
+            "</head><body></body></html>"
         )
 
-        if result.returncode != 0:
-            raise RuntimeError(f"Vercel deploy failed:\n{result.stderr}\n{result.stdout}")
+    print(f"   Deploying site dir to Vercel project: {deliverables_proj}")
+    print(f"   Reports synced: {len(list(site_dir.iterdir()))} entries")
 
-        output = result.stdout.strip()
-        print(f"   Vercel output:\n{output}")
+    result = subprocess.run(
+        [
+            vercel_bin,
+            "--yes",
+            "--prod",
+            "--scope", scope,
+            "--token", vercel_token,
+            "--cwd", str(site_dir),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=180,
+    )
 
-        # Extract the raw deployment URL from CLI output
-        raw_url = ""
-        for line in reversed(output.splitlines()):
-            line = line.strip()
-            if line.startswith("https://") and ".vercel.app" in line:
-                raw_url = line
-                break
-        if not raw_url:
-            raw_url = f"https://{deliverables_proj}.vercel.app"
+    if result.returncode != 0:
+        raise RuntimeError(f"Vercel deploy failed:\n{result.stderr}\n{result.stdout}")
 
-        # Add {slug}.healthbizleads.com to the healthbizleads-d100 project via REST API.
-        # Vercel instantly verifies subdomains when apex domain (healthbizleads.com) is
-        # already owned by the same project — no extra DNS record needed.
-        import urllib.request as _urllib_req
-        print(f"   Adding domain to project: https://{custom_alias}")
-        _team_id = "team_PHGv2fagezEkW7AzGceiG4cs"
-        _api_url = f"https://api.vercel.com/v10/projects/{deliverables_proj}/domains?teamId={_team_id}"
-        _payload = json.dumps({"name": custom_alias}).encode("utf-8")
-        _req = _urllib_req.Request(
-            _api_url,
-            data=_payload,
-            headers={
-                "Authorization": f"Bearer {vercel_token}",
-                "Content-Type": "application/json",
-            },
-            method="POST",
-        )
-        try:
-            with _urllib_req.urlopen(_req, timeout=30) as _resp:
-                _data = json.loads(_resp.read().decode("utf-8"))
-                if _data.get("verified"):
-                    live_url = f"https://{custom_alias}"
-                    print(f"   ✓ Domain verified: {live_url}")
-                else:
-                    print(f"   ⚠️  Domain added but not yet verified — using fallback URL")
-                    live_url = raw_url
-        except Exception as _e:
-            _err_str = str(_e)
-            if "409" in _err_str or "Conflict" in _err_str:
-                # 409 = domain already registered on this project — that's fine, URL is valid
-                live_url = f"https://{custom_alias}"
-                print(f"   ✓ Domain already registered: {live_url}")
-            else:
-                print(f"   ⚠️  Domain API call failed ({_e}) — using raw Vercel URL")
-                live_url = raw_url
-
-        print(f"   ✓ Deployed → {live_url}")
-        return live_url
+    output = result.stdout.strip()
+    print(f"   Vercel output:\n{output}")
+    print(f"   ✓ Deployed → {live_url}")
+    return live_url
 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
