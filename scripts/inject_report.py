@@ -108,6 +108,39 @@ def escape_html(s):
     return escape(str(s)) if s else ""
 
 
+def _extract_city(p1: dict) -> str:
+    """Extract city from context string."""
+    context = p1.get("context", "") or ""
+    m = re.search(r'([A-Z][a-zA-Z\s]+,\s*[A-Z]{2})', context)
+    if m:
+        return m.group(1).strip()
+    website = p1.get("website", "")
+    if website:
+        domain = website.replace("https://","").replace("http://","").split("/")[0].split(".")[0]
+        return domain.replace("-"," ").title()
+    return "your area"
+
+
+def _extract_primary_condition(p1: dict) -> str:
+    """Extract primary condition from keywords or practice name."""
+    app_cfg = p1.get("app_config", {}) or {}
+    specialty = app_cfg.get("specialty", "") or app_cfg.get("primary_condition", "")
+    if specialty:
+        return specialty.lower()
+    semrush = p1.get("semrush", {}) or {}
+    top = semrush.get("top_by_volume", [])
+    if top:
+        kw = top[0].get("keyword", "")
+        kw = re.sub(r'\b(near me|michigan|mi|bloomfield|west|dr|doctor|specialist|com)\b', '', kw, flags=re.IGNORECASE).strip()
+        if kw:
+            return kw.lower()
+    name = (p1.get("name", "") or "").lower()
+    for word in ["chiropractic", "functional medicine", "naturopathic", "integrative", "neurofeedback"]:
+        if word in name:
+            return word
+    return "your condition"
+
+
 def extract_favicon_url(raw_scrape: str, website: str) -> str:
     """Try to extract favicon from scraped HTML."""
     patterns = [
@@ -212,6 +245,81 @@ def build_data_nerds_rows(semrush: dict) -> str:
               <td style="padding:12px 16px;color:#94a3b8;font-size:1.05rem;">{label}</td>
               <td style="padding:12px 16px;color:#f0f4ff;font-weight:700;font-size:1.1rem;">{value}</td>
             </tr>""")
+    return "\n".join(rows)
+
+
+def build_keyword_rows_html(semrush: dict, phase2_keywords: list) -> str:
+    """Build interactive keyword accordion rows from SEMrush + phase2 data."""
+    rows = []
+    seen = set()
+
+    def kd_badge(kd):
+        if kd == 0:
+            return '<span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Easy</span>'
+        elif kd < 30:
+            return '<span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Low</span>'
+        elif kd < 60:
+            return '<span style="background:#fde68a;color:#78350f;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Medium</span>'
+        else:
+            return '<span style="background:#fee2e2;color:#991b1b;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Hard</span>'
+
+    def pos_display(pos):
+        if pos <= 3:
+            color = "#10b981"
+        elif pos <= 10:
+            color = "#f59e0b"
+        else:
+            color = "#94a3b8"
+        return f'<span style="font-weight:700;color:{color};">#{pos}</span>'
+
+    def add_row(kw, pos, vol, kd, row_type, i):
+        bg = "#f8fafc" if i % 2 == 0 else "#ffffff"
+        type_badge = (
+            '<span style="background:rgba(132,189,187,0.15);color:var(--brand-accent);font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Quick Win</span>'
+            if row_type == "quick_win" else
+            '<span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span>'
+            if row_type == "ranking" else
+            '<span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span>'
+        )
+        pos_str = pos_display(pos) if pos else '<span style="color:#cbd5e1;font-size:13px;">—</span>'
+        vol_str = f'{vol:,}' if vol else '<span style="color:#cbd5e1;font-size:13px;">—</span>'
+        kd_str  = kd_badge(kd) if kd is not None else '<span style="color:#cbd5e1;font-size:13px;">—</span>'
+        return (
+            f'<tr style="background:{bg};">'
+            f'<td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">{escape_html(kw)}</td>'
+            f'<td style="padding:12px 16px;text-align:center;">{pos_str}</td>'
+            f'<td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">{vol_str}</td>'
+            f'<td style="padding:12px 16px;text-align:center;">{kd_str}</td>'
+            f'<td style="padding:12px 16px;text-align:center;">{type_badge}</td>'
+            f'</tr>'
+        )
+
+    i = 0
+    # Quick wins first (SEMrush data with position/volume/kd)
+    for kw_data in semrush.get("top_quick_wins", []):
+        kw = kw_data.get("keyword", "")
+        if kw and kw not in seen:
+            seen.add(kw)
+            rows.append(add_row(kw, kw_data.get("position"), kw_data.get("volume", 0), kw_data.get("kd"), "quick_win", i))
+            i += 1
+
+    # Top by volume (SEMrush data)
+    for kw_data in semrush.get("top_by_volume", []):
+        kw = kw_data.get("keyword", "")
+        if kw and kw not in seen:
+            seen.add(kw)
+            rows.append(add_row(kw, kw_data.get("position"), kw_data.get("volume", 0), kw_data.get("kd"), "ranking", i))
+            i += 1
+
+    # Phase 2 target keywords (no SEMrush data — just strings)
+    for kw in phase2_keywords:
+        if isinstance(kw, str) and kw and kw not in seen:
+            seen.add(kw)
+            rows.append(add_row(kw, None, None, None, "target", i))
+            i += 1
+
+    if not rows:
+        return '<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8;">No keyword data available</td></tr>'
     return "\n".join(rows)
 
 
@@ -452,13 +560,17 @@ def build_replacements(p1: dict, p2: dict) -> dict:
         "RUN_DATE":                  run_date,
         "QUICK_WINS_TABLE_ROWS":     build_quick_wins_rows(quick_wins),
         "COMPETITORS_TABLE_ROWS":    build_competitors_rows(competitors),
-        "DATA_NERDS_ROWS":           build_data_nerds_rows(semrush),
+        "DATA_NERDS_ROWS":           build_data_nerds_rows(semrush),   # kept for legacy
+        "KEYWORD_ROWS_HTML":         build_keyword_rows_html(semrush, p2.get("keywords", [])),
         "AD_CAMPAIGNS_HTML":         build_ad_campaigns_html(p2.get("ads", [])),
         "PATIENT_EMAIL_SEQUENCE_HTML": build_patient_email_html(p2.get("emails", [])),
         "ASSESSMENT_CONCERNS_JSON":  assessment_concerns_json,
         "ASSESSMENT_SYMPTOMS_JSON":  assessment_symptoms_json,
         "LOOM_ID":                   p1.get("loom_id", "PASTE_LOOM_ID_HERE"),
         "CLARITY_SNIPPET":           _clarity_snippet(os.environ.get("CLARITY_PROJECT_ID", "")),
+        "CITY":                      _extract_city(p1),
+        "PRIMARY_CONDITION":         _extract_primary_condition(p1),
+        "IS_MULTI_LOCATION":         "true" if p1.get("is_multi_location") else "false",
     }
 
 
@@ -602,8 +714,10 @@ def deploy_to_vercel(run_dir: Path, practice_name: str, dry_run: bool = False) -
             shutil.copy(str(favicon_path), str(deploy_dir / "favicon.ico"))
 
         # Write vercel.json to prevent build step (static deploy)
+        # Project name set here — --name flag deprecated in newer Vercel CLI
         vercel_config = {
             "version": 2,
+            "name": project_name,
             "builds": [{"src": "**/*", "use": "@vercel/static"}],
             "routes": [{"src": "/(.*)", "dest": "/$1"}]
         }
@@ -621,7 +735,7 @@ def deploy_to_vercel(run_dir: Path, practice_name: str, dry_run: bool = False) -
                 vercel_bin,
                 "--yes",
                 "--prod",
-                "--name", project_name,
+                "--scope", "kohl-digital",
                 "--token", vercel_token,
                 "--cwd", str(deploy_dir),
             ],

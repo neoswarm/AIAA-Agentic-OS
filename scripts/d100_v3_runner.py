@@ -1507,7 +1507,8 @@ def notify_slack_submit(webhook, practice, gen_id, website, semrush, run_id):
 # ── Main run logic (single site) ───────────────────────────────────────────────
 def run_single(row: dict, env: dict, dry_run: bool = False,
                phase1_only: bool = False,
-               existing_run_dir: str = None) -> dict:
+               existing_run_dir: str = None,
+               send_slack: bool = False) -> dict:
     website = row.get("website", "").rstrip("/")
     context = row.get("context", "")
     # booking_url and semrush_csv are auto-resolved — not required in CSV
@@ -1898,8 +1899,8 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         encoding="utf-8",
     )
 
-    # Slack success — #d100-runs (deploy notification)
-    if slack_webhook:
+    # Slack success — #d100-runs (deploy notification; opt-in via --slack flag)
+    if slack_webhook and send_slack:
         try:
             notify_slack_report_live(slack_webhook, practice_name, report_url, website, semrush, run_id)
             print("  ✓ Slack notified")
@@ -1933,9 +1934,10 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
     files = list(run_dir.rglob("*"))
     file_list = [str(f.relative_to(run_dir)) for f in files if f.is_file()]
     print(f"\n✅ COMPLETE — {run_id}")
-    print(f"   Report: {report_url}")
+    print(f"   Preview: {report_url}?preview=1")
+    print(f"   Live:    {report_url}")
     if app_url:
-        print(f"   App:    {app_url}")
+        print(f"   App:     {app_url}")
     print(f"   Files: {', '.join(file_list)}")
 
     return {
@@ -1987,7 +1989,8 @@ def run_with_checkpoint(args_tuple):
                 pass
 
     result = run_single(row, env, dry_run=dry_run, phase1_only=phase1_only,
-                        existing_run_dir=existing_run_dir)
+                        existing_run_dir=existing_run_dir,
+                        send_slack=args.slack)
 
     # Write checkpoint on success
     if result.get("status") == "completed":
@@ -2020,6 +2023,8 @@ def main():
                              "run Phase 3 (template inject → Vercel/GitHub Pages + Slack) only.")
     parser.add_argument("--run-dir", type=str, default=None,
                         help="Existing run directory to use (single-site override for --phase3-only).")
+    parser.add_argument("--slack", action="store_true",
+                        help="Send Slack notification on successful deploy (default: off).")
     args = parser.parse_args()
 
     if not os.path.exists(args.csv):

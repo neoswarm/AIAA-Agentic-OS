@@ -520,9 +520,10 @@ def main():
         )
 
     print(f"\n✅ Deploy complete!")
-    print(f"   Report: {report_url}")
+    print(f"   Preview: {report_url}?preview=1")
+    print(f"   Live:    {report_url}")
     if app_url:
-        print(f"   App:    {app_url}")
+        print(f"   App:     {app_url}")
 
     return report_url, app_url
 
