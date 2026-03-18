@@ -1775,10 +1775,9 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         )
         print(f"  ✓ phase1_data.json written — ready for Claude Code native Phase 2")
         print(f"  ⏭  Skipping Phase 3 for {domain} — run --phase3-only after Phase 2 completes")
-        results.append({"url": website, "run_dir": str(run_dir), "status": "phase2_pending",
-                        "domain_rank": semrush.get("domain_rank", 0),
-                        "unique_keywords": semrush.get("unique_keywords", 0)})
-        continue
+        return {"url": website, "run_dir": str(run_dir), "status": "phase2_pending",
+                "domain_rank": semrush.get("domain_rank", 0),
+                "unique_keywords": semrush.get("unique_keywords", 0)}
 
     print(f"  Quick wins: {semrush.get('quick_wins_count', 0)}")
 
@@ -1959,7 +1958,7 @@ def find_run_dir_for_site(website: str):
 
 def run_with_checkpoint(args_tuple):
     """Thread worker: checkpoint check → run_single → write checkpoint on success."""
-    i, row, env, dry_run, phase1_only, existing_run_dir = args_tuple
+    i, row, env, dry_run, phase1_only, existing_run_dir, send_slack_flag = args_tuple
     website = row.get("website", "")
 
     # Checkpoint: skip already-completed runs
@@ -1978,7 +1977,7 @@ def run_with_checkpoint(args_tuple):
 
     result = run_single(row, env, dry_run=dry_run, phase1_only=phase1_only,
                         existing_run_dir=existing_run_dir,
-                        send_slack=args.slack)
+                        send_slack=send_slack_flag)
 
     # Write checkpoint on success
     if result.get("status") == "completed":
@@ -2061,7 +2060,7 @@ def main():
                 results.append({"website": website, "status": "skipped_no_phase2", "report_url": ""})
                 continue
             print(f"  📁 [{i+1}/{n}] {website} → {existing_run_dir}")
-        worker_args.append((i, row, env, args.dry_run, args.phase1_only, existing_run_dir))
+        worker_args.append((i, row, env, args.dry_run, args.phase1_only, existing_run_dir, getattr(args, "slack", False)))
 
     workers = 1 if (args.site_index is not None or args.phase1_only) else MAX_WORKERS
     print(f"\n🚀 Starting {len(worker_args)} run(s) with max_workers={workers}...")

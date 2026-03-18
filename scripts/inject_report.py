@@ -566,7 +566,9 @@ def build_replacements(p1: dict, p2: dict) -> dict:
         "PATIENT_EMAIL_SEQUENCE_HTML": build_patient_email_html(p2.get("emails", [])),
         "ASSESSMENT_CONCERNS_JSON":  assessment_concerns_json,
         "ASSESSMENT_SYMPTOMS_JSON":  assessment_symptoms_json,
-        "LOOM_ID":                   p1.get("loom_id", "PASTE_LOOM_ID_HERE"),
+        "LOOM_ID":                   p1.get("loom_id", ""),
+        # Hide loom section if no loom_id set — unhide after adding Loom video
+        "LOOM_SECTION_STYLE":        '' if p1.get("loom_id", "").strip() else 'style="display:none"',
         "CLARITY_SNIPPET":           _clarity_snippet(os.environ.get("CLARITY_PROJECT_ID", "")),
         "CITY":                      _extract_city(p1),
         "PRIMARY_CONDITION":         _extract_primary_condition(p1),
@@ -669,29 +671,39 @@ def make_company_slug(practice_name: str) -> str:
     return slug[:50].rstrip("-")
 
 
-def deploy_to_vercel(run_dir: Path, practice_name: str, dry_run: bool = False) -> str:
-    """
-    Deploy index.html (+ favicon) to Vercel.
-    Project name: hbs-{company-slug}
-    Returns live URL.
-    """
-    import shutil
-
-    vercel_token = os.environ.get("VERCEL_TOKEN", "")
-    if not vercel_token:
-        # Try loading from .env
+def _load_env_var(key: str) -> str:
+    """Read a variable from os.environ or .env file."""
+    val = os.environ.get(key, "")
+    if not val:
         env_path = PROJECT_DIR / ".env"
         if env_path.exists():
             for line in env_path.read_text().splitlines():
-                if line.startswith("VERCEL_TOKEN="):
-                    vercel_token = line.split("=", 1)[1].strip().strip('"').strip("'")
+                if line.startswith(f"{key}="):
+                    val = line.split("=", 1)[1].strip().strip('"').strip("'")
                     break
+    return val
+
+
+def deploy_to_vercel(run_dir: Path, practice_name: str, dry_run: bool = False) -> str:
+    """
+    Deploy index.html (+ favicon) to Vercel under the VERCEL_DELIVERABLES_PROJECT
+    project, then alias to {slug}.DELIVERABLES_DOMAIN.
+
+    Returns the live healthbizleads.com URL.
+    """
+    import shutil
+
+    vercel_token       = _load_env_var("VERCEL_TOKEN")
+    deliverables_proj  = _load_env_var("VERCEL_DELIVERABLES_PROJECT") or "healthbizleads-d100"
+    deliverables_domain = _load_env_var("DELIVERABLES_DOMAIN") or "healthbizleads.com"
+    scope              = "kohl-digital"  # Vercel team slug
 
     if not vercel_token:
         raise RuntimeError("VERCEL_TOKEN not set in environment or .env file")
 
     slug = make_company_slug(practice_name)
-    project_name = f"hbs-{slug}"
+    # Subdomain alias: aligned-modern-health.healthbizleads.com
+    custom_alias = f"{slug}.{deliverables_domain}"
 
     index_path   = run_dir / "index.html"
     favicon_path = run_dir / "favicon.ico"
@@ -700,42 +712,39 @@ def deploy_to_vercel(run_dir: Path, practice_name: str, dry_run: bool = False) -
         raise FileNotFoundError(f"index.html not found in {run_dir}")
 
     if dry_run:
-        print(f"   [DRY RUN] Would deploy to Vercel project: {project_name}")
-        return f"https://{project_name}.vercel.app"
+        print(f"   [DRY RUN] Would deploy to {deliverables_proj} → https://{custom_alias}")
+        return f"https://{custom_alias}"
 
-    # Create temp deploy directory with required Vercel structure
+    vercel_bin = shutil.which("vercel")
+    if not vercel_bin:
+        raise RuntimeError("vercel CLI not found. Install with: npm i -g vercel")
+
+    # Create temp deploy directory
     with tempfile.TemporaryDirectory() as tmpdir:
         deploy_dir = Path(tmpdir) / "deploy"
         deploy_dir.mkdir()
 
-        # Copy files
         shutil.copy(str(index_path), str(deploy_dir / "index.html"))
         if favicon_path.exists():
             shutil.copy(str(favicon_path), str(deploy_dir / "favicon.ico"))
 
-        # Write vercel.json to prevent build step (static deploy)
-        # Project name set here — --name flag deprecated in newer Vercel CLI
+        # vercel.json — deploy into the shared healthbizleads-d100 project
         vercel_config = {
             "version": 2,
-            "name": project_name,
+            "name": deliverables_proj,
             "builds": [{"src": "**/*", "use": "@vercel/static"}],
             "routes": [{"src": "/(.*)", "dest": "/$1"}]
         }
         (deploy_dir / "vercel.json").write_text(json.dumps(vercel_config, indent=2))
 
-        print(f"   Deploying to Vercel project: {project_name}")
-
-        # Check if vercel CLI is available
-        vercel_bin = shutil.which("vercel")
-        if not vercel_bin:
-            raise RuntimeError("vercel CLI not found. Install with: npm i -g vercel")
+        print(f"   Deploying to Vercel project: {deliverables_proj}")
 
         result = subprocess.run(
             [
                 vercel_bin,
                 "--yes",
                 "--prod",
-                "--scope", "kohl-digital",
+                "--scope", scope,
                 "--token", vercel_token,
                 "--cwd", str(deploy_dir),
             ],
@@ -747,20 +756,54 @@ def deploy_to_vercel(run_dir: Path, practice_name: str, dry_run: bool = False) -
         if result.returncode != 0:
             raise RuntimeError(f"Vercel deploy failed:\n{result.stderr}\n{result.stdout}")
 
-        # Extract URL from output
         output = result.stdout.strip()
         print(f"   Vercel output:\n{output}")
 
-        # Find production URL (last line with https://)
-        live_url = ""
+        # Extract the raw deployment URL from CLI output
+        raw_url = ""
         for line in reversed(output.splitlines()):
             line = line.strip()
             if line.startswith("https://") and ".vercel.app" in line:
-                live_url = line
+                raw_url = line
                 break
+        if not raw_url:
+            raw_url = f"https://{deliverables_proj}.vercel.app"
 
-        if not live_url:
-            live_url = f"https://{project_name}.vercel.app"
+        # Add {slug}.healthbizleads.com to the healthbizleads-d100 project via REST API.
+        # Vercel instantly verifies subdomains when apex domain (healthbizleads.com) is
+        # already owned by the same project — no extra DNS record needed.
+        import urllib.request as _urllib_req
+        print(f"   Adding domain to project: https://{custom_alias}")
+        _team_id = "team_PHGv2fagezEkW7AzGceiG4cs"
+        _api_url = f"https://api.vercel.com/v10/projects/{deliverables_proj}/domains?teamId={_team_id}"
+        _payload = json.dumps({"name": custom_alias}).encode("utf-8")
+        _req = _urllib_req.Request(
+            _api_url,
+            data=_payload,
+            headers={
+                "Authorization": f"Bearer {vercel_token}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        try:
+            with _urllib_req.urlopen(_req, timeout=30) as _resp:
+                _data = json.loads(_resp.read().decode("utf-8"))
+                if _data.get("verified"):
+                    live_url = f"https://{custom_alias}"
+                    print(f"   ✓ Domain verified: {live_url}")
+                else:
+                    print(f"   ⚠️  Domain added but not yet verified — using fallback URL")
+                    live_url = raw_url
+        except Exception as _e:
+            _err_str = str(_e)
+            if "409" in _err_str or "Conflict" in _err_str:
+                # 409 = domain already registered on this project — that's fine, URL is valid
+                live_url = f"https://{custom_alias}"
+                print(f"   ✓ Domain already registered: {live_url}")
+            else:
+                print(f"   ⚠️  Domain API call failed ({_e}) — using raw Vercel URL")
+                live_url = raw_url
 
         print(f"   ✓ Deployed → {live_url}")
         return live_url
