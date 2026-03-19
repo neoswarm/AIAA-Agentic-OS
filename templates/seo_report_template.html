@@ -620,10 +620,7 @@ const CONFIG = {
         <span class="label-tag">Integrative Health Director</span>
       </div>
 
-      <div id="quote-multilocation" class="quote-dark" style="grid-column: span 1;">
-        <p class="text-white/80 italic leading-relaxed mb-4" style="font-size: 18px; line-height: 1.7;">"Every location has its own marketing person. None of them talk to each other. We have no idea which one is actually working."</p>
-        <span class="label-tag">Multi-Location Practice Owner</span>
-      </div>
+
 
     </div>
 
@@ -1947,6 +1944,19 @@ window.addEventListener('scroll', function() {
 })();
 
 // FAQ + details toggle
+  // Fix blurry Loom/YouTube iframes inside <details>: reload src on open
+  // so the embed initialises with correct pixel dimensions (not 0px from hidden state)
+  document.querySelectorAll('details').forEach(function(det) {
+    det.addEventListener('toggle', function() {
+      if (det.open) {
+        det.querySelectorAll('iframe').forEach(function(iframe) {
+          var src = iframe.src;
+          iframe.src = '';
+          iframe.src = src;
+        });
+      }
+    });
+  });
 document.querySelectorAll('details').forEach(function(d) {
   d.addEventListener('toggle', function() {
     var icon = d.querySelector('summary span:last-child');

@@ -2457,7 +2457,7 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────
-MAX_WORKERS = 3  # 3 parallel runs ≈ 3x throughput; safe for SEMrush + Vercel rate limits
+MAX_WORKERS = 5  # 5 parallel runs ≈ 5x throughput; safe for DataForSEO + Vercel rate limits
 
 
 def find_run_dir_for_site(website: str):
