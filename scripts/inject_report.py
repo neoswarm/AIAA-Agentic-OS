@@ -69,14 +69,45 @@ def fmt_number(n, default="N/A"):
 
 
 def fmt_domain_rank(n):
-    """Format domain rank: 4561840 → '#4,561,840'. Returns N/A when 0 (not ranked)."""
+    """Format domain rank: 4561840 → '#4,561,840'. Returns empty string when 0."""
     try:
         v = int(n)
         if v == 0:
-            return "N/A"
+            return ""
         return f"#{v:,}"
     except (TypeError, ValueError):
-        return "N/A"
+        return ""
+
+
+def build_domain_rank_display(semrush: dict):
+    """
+    Return (display_value, label) for the Domain Rank stat card.
+    Priority:
+      1. domain_rank (global ordinal) if > 0 — only populated for high-authority domains
+      2. Page 1 Keywords (pos 1-10 count) — always real, easy to understand for practice owners
+      3. avg_position (weighted avg keyword position) — always computable
+    Never returns N/A.
+    """
+    dr = semrush.get("domain_rank", 0) or 0
+    if dr > 0:
+        return f"#{dr:,}", "Domain Rank"
+
+    # Page 1 Keywords: count of keywords ranking positions 1-10.
+    # More compelling and understandable than an abstract authority score.
+    # "You have 662 keywords on page 1 of Google right now."
+    page1 = (
+        (semrush.get("pos1_count", 0) or 0) +
+        (semrush.get("pos2_3_count", 0) or 0) +
+        (semrush.get("pos4_10_count", 0) or 0)
+    )
+    if page1 > 0:
+        return f"{page1:,}", "Page 1 Keywords"
+
+    avg_pos = semrush.get("avg_position", 0) or 0
+    if avg_pos > 0:
+        return f"{avg_pos:.1f}", "Avg. Position"
+
+    return "New", "SEO Status"
 
 
 def difficulty_label(kd):
@@ -206,13 +237,25 @@ def build_quick_wins_rows(quick_wins: list) -> str:
 
 # Domains to exclude from competitors table — social, directories, info giants
 _COMPETITOR_BLOCKLIST = {
+    # Social media
     "facebook.com", "youtube.com", "instagram.com", "twitter.com", "x.com",
     "linkedin.com", "pinterest.com", "tiktok.com", "reddit.com", "quora.com",
-    "yelp.com", "google.com", "maps.google.com", "amazon.com", "wikipedia.org",
+    # Directories & review sites
+    "yelp.com", "healthgrades.com", "ratemds.com", "vitals.com", "doximity.com",
+    "findatopdoc.com", "zocdoc.com", "booksy.com", "thumbtack.com", "bark.com",
+    "homeadvisor.com", "massagebook.com", "massageenvy.com", "thervo.com",
+    # Generic web
+    "google.com", "maps.google.com", "amazon.com", "wikipedia.org",
+    "dictionary.cambridge.org", "dictionary.com", "merriam-webster.com", "thesaurus.com",
+    # National health publishers & government
     "webmd.com", "healthline.com", "mayoclinic.org", "clevelandclinic.org",
-    "medlineplus.gov", "nih.gov", "cdc.gov", "who.int", "verywellhealth.com",
-    "medicalnewstoday.com", "everydayhealth.com", "drugs.com", "rxlist.com",
-    "zocdoc.com", "psychology-today.com", "psychologytoday.com",
+    "medlineplus.gov", "nih.gov", "cdc.gov", "who.int", "cancer.gov", "va.gov",
+    "hhs.gov", "fda.gov", "betterhealth.vic.gov.au", "hms.harvard.edu",
+    "hopkinsmedicine.org", "usnews.com", "nytimes.com",
+    "verywellhealth.com", "medicalnewstoday.com", "everydayhealth.com",
+    "drugs.com", "rxlist.com", "psychologytoday.com", "psychology-today.com",
+    # Professional associations (not direct competitors)
+    "amtamassage.org", "medicalacupuncture.org",
 }
 
 def _is_real_competitor(domain: str, own_domain: str = "") -> bool:
@@ -240,16 +283,30 @@ def build_competitors_rows(competitors: list, own_domain: str = "") -> str:
 
     rows = []
     for comp in real:
-        domain  = escape_html(comp.get("domain", ""))
-        kws     = fmt_number(comp.get("keywords", 0))
+        domain   = escape_html(comp.get("domain", ""))
+        avg_pos  = comp.get("avg_position", 0) or 0
+        source   = comp.get("source", "")
+        kw_kw    = escape_html(comp.get("serp_keyword", ""))
+
+        # Position badge — only for SERP-sourced competitors (have real position data)
+        if source == "serp" and avg_pos:
+            pos_color = "#22c55e" if avg_pos <= 3 else "#f59e0b" if avg_pos <= 7 else "#94a3b8"
+            pos_badge = (f'<span style="background:{pos_color};color:#000;font-size:11px;'
+                         f'font-weight:800;padding:2px 8px;border-radius:12px;">#{int(avg_pos)}</span>')
+            source_note = f'<div style="font-size:11px;color:#64748b;margin-top:3px;">for "{kw_kw}"</div>' if kw_kw else ""
+        else:
+            kws    = fmt_number(comp.get("keywords", 0))
+            pos_badge   = f'<span style="color:#84bdbb;font-weight:700;">{kws} kws</span>'
+            source_note = ""
+
         traffic = fmt_number(comp.get("traffic", 0))
         tv      = comp.get("traffic_value", 0)
-        tv_fmt  = f"${fmt_number(tv)}" if tv else "$0"
+        tv_fmt  = f"${fmt_number(tv)}" if tv else "—"
         rows.append(f"""<tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
-              <td style="padding:14px 16px;color:#f0f4ff;font-family:monospace;">{domain}</td>
-              <td style="padding:14px 16px;color:#84bdbb;font-weight:700;">{kws}</td>
-              <td style="padding:14px 16px;color:#f0f4ff;">{traffic}/mo</td>
-              <td style="padding:14px 16px;color:#f0f4ff;">{tv_fmt}/mo</td>
+              <td style="padding:14px 16px;color:#f0f4ff;font-family:monospace;">{domain}{source_note}</td>
+              <td style="padding:14px 16px;">{pos_badge}</td>
+              <td style="padding:14px 16px;color:#f0f4ff;">{traffic if traffic != "0" else "—"}/mo</td>
+              <td style="padding:14px 16px;color:#f0f4ff;">{tv_fmt}</td>
             </tr>""")
     return "\n".join(rows)
 
@@ -257,7 +314,16 @@ def build_competitors_rows(competitors: list, own_domain: str = "") -> str:
 def build_data_nerds_rows(semrush: dict) -> str:
     """Build full data breakdown table rows."""
     rows_data = [
-        ("Domain Rank",             fmt_domain_rank(semrush.get("domain_rank"))),
+        ("Page 1 Keywords",          fmt_number(
+            (semrush.get("pos1_count", 0) or 0) +
+            (semrush.get("pos2_3_count", 0) or 0) +
+            (semrush.get("pos4_10_count", 0) or 0)
+        )),
+        ("Top 3 Keywords",           fmt_number(
+            (semrush.get("pos1_count", 0) or 0) +
+            (semrush.get("pos2_3_count", 0) or 0)
+        )),
+        ("Avg. Keyword Position",    str(semrush.get("avg_position", 0) or "—")),
         ("Total Keywords Ranked",   fmt_number(semrush.get("unique_keywords", 0))),
         ("Estimated Monthly Traffic", fmt_number(semrush.get("estimated_traffic", 0)) + " visits"),
         ("Traffic Value",           f"${fmt_number(semrush.get('traffic_value', 0))}/mo"),
@@ -493,6 +559,111 @@ def build_patient_email_html(emails: list) -> str:
 
 # ── Main Injector ─────────────────────────────────────────────────────────────
 
+def build_competitor_context_sentence(semrush: dict, p1: dict) -> str:
+    """
+    Generate the competitor context sentence under the stats bar.
+    Uses real SERP position data and search volume — never shows '0 visits'.
+    """
+    competitors = semrush.get("competitors", [])
+    own_positions = semrush.get("own_serp_positions", {})
+    city = p1.get("primary_city", "") or _extract_city(p1)
+    state = p1.get("primary_state", "")
+    specialty = semrush.get("serp_specialty", "functional medicine")
+
+    # Find the top local competitor (SERP-sourced, lowest position = best rank)
+    serp_comps = sorted(
+        [c for c in competitors if c.get("source") == "serp" and _is_real_competitor(c.get("domain",""), p1.get("website",""))],
+        key=lambda x: x.get("avg_position", 999)
+    )
+
+    # Build the geo context string
+    geo = f"{city}, {state}" if city and state else city or "your market"
+
+    # Own position context
+    own_pos_str = ""
+    if own_positions:
+        best_kw = min(own_positions, key=own_positions.get)
+        best_pos = own_positions[best_kw]
+        if best_pos <= 10:
+            own_pos_str = f" You rank #{best_pos} — close, but page 1 is where patients book."
+        elif best_pos <= 20:
+            own_pos_str = f" You're at #{best_pos} — one optimization sprint from being found first."
+        else:
+            own_pos_str = f" You don't appear in the top 20 yet — this is fixable."
+
+    if serp_comps:
+        top_comp = serp_comps[0]
+        top_domain = escape_html(top_comp.get("domain", "a competitor"))
+        top_pos = top_comp.get("avg_position", 0)
+        kw = escape_html(top_comp.get("serp_keyword", f"{specialty} near me"))
+
+        # Format as bold inline
+        return (
+            f'When patients in <strong>{escape_html(geo)}</strong> search '
+            f'<em>"{escape_html(kw)}"</em>, '
+            f'<strong>{escape_html(top_domain)}</strong> is the first practice they find '
+            f'(ranking #{top_pos}).{own_pos_str} '
+            f'Not because they\'re better — because they showed up first.'
+        )
+    else:
+        # Fallback: no SERP competitors, use keyword volume
+        total_kws = semrush.get("unique_keywords", 0)
+        qw_count  = semrush.get("quick_wins_count", 0)
+        loc_str   = f"in {geo} " if geo and geo != "your market" else ""
+        return (
+            f'Patients {loc_str}are already searching for what you offer — '
+            f'<strong>{fmt_number(total_kws)} keywords</strong> rank for your site right now. '
+            f'<strong>{fmt_number(qw_count)} of them</strong> are sitting in positions 4–10, '
+            f'one push away from page 1. That\'s booked appointments waiting to happen.'
+        )
+
+
+def build_ai_seo_callout(semrush: dict, p1: dict) -> str:
+    """
+    Build the AI SEO callout paragraph.
+    Flips 623/518 impossible math to accurate positive framing:
+      - ai_overview_cited_count = times practice content is cited IN AI Overviews (strength)
+      - ai_overview_serp_count  = keywords where AI Overview appears in SERP (opportunity/risk)
+    """
+    cited  = int(semrush.get("ai_overview_cited_count", 0) or 0)
+    ai_kws = int(semrush.get("ai_overview_serp_count", 0) or 0)
+    practice = escape_html(p1.get("name", "Your Practice"))
+    city = p1.get("primary_city", "") or _extract_city(p1)
+    city_str = f" in {escape_html(city)}" if city else ""
+
+    if cited > 0 and ai_kws > 0:
+        return (
+            f'✅ Google\'s AI already cites <strong>{practice}</strong> content '
+            f'<strong>{cited:,} times</strong> in AI Overviews — your expertise is surfaced '
+            f'before patients even click a link. '
+            f'But <strong>{ai_kws:,} of your keywords</strong> now trigger an AI answer box '
+            f'where a competitor could displace you overnight. '
+            f'AEO (Answer Engine Optimization) locks in your position{city_str} and expands it.'
+        )
+    elif cited > 0:
+        return (
+            f'✅ Google\'s AI already cites <strong>{practice}</strong> '
+            f'<strong>{cited:,} times</strong> in AI Overviews. '
+            f'We build on that foundation with AEO to make you the undisputed source '
+            f'AI turns to{city_str} — before your competitors even know this game exists.'
+        )
+    elif ai_kws > 0:
+        return (
+            f'🔶 <strong>{ai_kws:,} of your keywords</strong> now show an AI-generated '
+            f'answer above organic results{city_str}. Patients get an answer without clicking — '
+            f'unless that answer comes from you. '
+            f'AEO (Answer Engine Optimization) positions <strong>{practice}</strong> '
+            f'as the source Google\'s AI cites. This is the new page 1.'
+        )
+    else:
+        return (
+            f'🔶 AI Overviews are reshaping how patients find doctors{city_str}. '
+            f'Practices cited in AI answers get traffic without the click competition. '
+            f'We build your AEO profile so <strong>{practice}</strong> becomes '
+            f'the source Google\'s AI recommends when patients search your specialties.'
+        )
+
+
 def build_replacements(p1: dict, p2: dict) -> dict:
     """
     Build the full token → value mapping from phase1 + phase2 data.
@@ -518,7 +689,7 @@ def build_replacements(p1: dict, p2: dict) -> dict:
         brand_accent  = brand.get("secondary") or brand.get("accent") or "#84bdbb"
 
     # ── SEO data numbers (DataForSEO primary / SEMrush fallback) ─────────────
-    domain_rank      = fmt_domain_rank(semrush.get("domain_rank"))
+    domain_rank, domain_rank_label = build_domain_rank_display(semrush)
     unique_keywords  = fmt_number(semrush.get("unique_keywords", 0))
     monthly_traffic  = fmt_number(semrush.get("estimated_traffic", 0))
     traffic_value    = fmt_number(semrush.get("traffic_value", 0))
@@ -590,6 +761,15 @@ def build_replacements(p1: dict, p2: dict) -> dict:
     practice_name_raw = p1.get("name", "Your Practice")
     company_slug = make_company_slug(practice_name_raw)
 
+    # ── Build context sentences ───────────────────────────────────────────────
+    competitor_context_sentence = build_competitor_context_sentence(semrush, p1)
+    ai_seo_callout = build_ai_seo_callout(semrush, p1)
+
+    # ── Location tokens ───────────────────────────────────────────────────────
+    primary_city  = p1.get("primary_city", "") or _extract_city(p1)
+    primary_state = p1.get("primary_state", "")
+    serp_specialty = semrush.get("serp_specialty", "functional medicine")
+
     return {
         "PRACTICE_NAME":             practice_name_raw,
         "PRACTICE_NAME_ENCODED":     urllib.parse.quote(practice_name_raw, safe=""),
@@ -602,6 +782,7 @@ def build_replacements(p1: dict, p2: dict) -> dict:
         "BRAND_PRIMARY":             brand_primary,
         "BRAND_ACCENT":              brand_accent,
         "DOMAIN_RANK":               domain_rank,
+        "DOMAIN_RANK_LABEL":         domain_rank_label,
         "UNIQUE_KEYWORDS":           unique_keywords,
         "MONTHLY_TRAFFIC":           monthly_traffic,
         "TRAFFIC_VALUE":             traffic_value,
@@ -622,7 +803,12 @@ def build_replacements(p1: dict, p2: dict) -> dict:
         "LOOM_SECTION_STYLE":        '' if p1.get("loom_id", "").strip() else 'style="display:none"',
         "CLARITY_SNIPPET":           _clarity_snippet(os.environ.get("CLARITY_PROJECT_ID", "")),
         "CITY":                      _extract_city(p1),
+        "PRIMARY_CITY":              primary_city,
+        "PRIMARY_STATE":             primary_state,
         "PRIMARY_CONDITION":         _extract_primary_condition(p1),
+        "SERP_SPECIALTY":            serp_specialty.title(),
+        "COMPETITOR_CONTEXT_SENTENCE": competitor_context_sentence,
+        "AI_SEO_CALLOUT":            ai_seo_callout,
         "IS_MULTI_LOCATION":         "true" if p1.get("is_multi_location") else "false",
         "COMPETITOR_1_TRAFFIC":      comp1_traffic,
         "COMPETITOR_1_DOMAIN":       comp1_domain,
@@ -691,6 +877,17 @@ def inject(run_dir: Path, deploy: bool = False, dry_run: bool = False) -> Path:
     out_path.write_text(output, encoding="utf-8")
     size_kb = out_path.stat().st_size / 1024
     print(f"   ✓ Wrote index.html ({size_kb:.1f} KB)")
+
+    # Mirror to output/site/{company_slug}/ so path-based deploy works correctly.
+    # Use COMPANY_SLUG from replacements (derived from practice name via make_company_slug)
+    # NOT from run_dir folder name, which uses domain slug (e.g. alignedmodernhealth-com).
+    company_slug = replacements.get("COMPANY_SLUG", "")
+    if company_slug:
+        site_dir = PROJECT_DIR / "output" / "site"
+        slug_dir = site_dir / company_slug
+        slug_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy(str(out_path), str(slug_dir / "index.html"))
+        print(f"   ✓ Mirrored to output/site/{company_slug}/index.html")
 
     # Also write as seo_report.html for backward compat
     seo_report_path = run_dir / "seo_report.html"

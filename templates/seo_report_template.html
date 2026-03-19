@@ -868,7 +868,7 @@ const CONFIG = {
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 stagger-children">
       <div class="stat-dark">
         <span class="stat-num">{{DOMAIN_RANK}}</span>
-        <span class="stat-label">Domain Rank</span>
+        <span class="stat-label">{{DOMAIN_RANK_LABEL}}</span>
       </div>
       <div class="stat-dark">
         <span class="stat-num" data-count="{{UNIQUE_KEYWORDS}}">{{UNIQUE_KEYWORDS}}</span>
@@ -880,18 +880,18 @@ const CONFIG = {
       </div>
       <div class="stat-dark">
         <span class="stat-num" data-count="{{TRAFFIC_VALUE}}" data-prefix="$">${{TRAFFIC_VALUE}}</span>
-        <span class="stat-label">Traffic Value</span>
+        <span class="stat-label">Ad Budget Saved/Mo</span>
       </div>
     </div>
 
     <!-- Competitor context callout -->
     <div class="rounded-2xl p-7 mb-8 fade-up" style="background: #f8fafc; border-left: 4px solid var(--brand-primary);">
-      <p class="text-slate-700 leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">To put this in context: your top competitor in this market is pulling <strong>{{COMPETITOR_1_TRAFFIC}}</strong> visits a month from organic search alone. At an average patient value of even $500, that's a meaningful number of patients choosing them over you — not because they're better, but because they show up and you don't. <em>Yet.</em></p>
+      <p class="text-slate-700 leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">{{COMPETITOR_CONTEXT_SENTENCE}}</p>
     </div>
 
     <!-- AI Citation callout -->
     <div class="rounded-2xl p-7 mb-12 fade-up" style="background: #0f172a; border-left: 4px solid #ef4444;">
-      <p class="text-white leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">🔴 <strong>{{AI_CITED_COUNT}}</strong> of <strong>{{AI_OVERVIEW_COUNT}}</strong> AI searches cite {{PRACTICE_NAME}} — when patients in <strong>{{CITY}}</strong> ask about <strong>{{PRIMARY_CONDITION}}</strong>, you don't appear. We fix this.</p>
+      <p class="text-white leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">{{AI_SEO_CALLOUT}}</p>
     </div>
 
     <!-- Quick Wins table -->
@@ -912,8 +912,8 @@ const CONFIG = {
     </div>
 
     <!-- Competitors table -->
-    <h3 class="text-slate-900 font-bold text-xl mb-3 fade-up">Who's Ranking for Your Patients' Searches</h3>
-    <p class="text-slate-400 mb-5 fade-up" style="font-size:14px;">Domains ranked for the same high-intent healthcare searches as {{PRACTICE_NAME}}. Direct local practice competitors may rank below these due to lower overall volume.</p>
+    <h3 class="text-slate-900 font-bold text-xl mb-3 fade-up">Who's Ranking in {{PRIMARY_CITY}} for Your Patients' Searches</h3>
+    <p class="text-slate-400 mb-5 fade-up" style="font-size:14px;">Who actually shows up when a patient in {{PRIMARY_CITY}} searches for {{SERP_SPECIALTY}} right now. These are the practices taking appointments that should be yours.</p>
     <div class="overflow-x-auto rounded-2xl border border-slate-100 mb-8 fade-up">
       <table>
         <thead>

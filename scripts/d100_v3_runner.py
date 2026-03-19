@@ -564,13 +564,301 @@ def fetch_semrush_api(domain: str, api_key: str) -> dict:
     }
 
 
+# ── City-level DataForSEO location codes (city-specific SERP results) ──────────
+# Used for "near me" searches from the practice's actual city perspective.
+# Source: DataForSEO /v3/serp/google/locations (verified March 2026)
+CITY_LOCATION_CODES = {
+    ("Albuquerque", "NM"): 1022494, ("Anaheim", "CA"): 1013542,
+    ("Anchorage", "AK"): 1012873, ("Arlington", "TX"): 1026194,
+    ("Atlanta", "GA"): 1015254, ("Aurora", "CO"): 1014437,
+    ("Austin", "TX"): 1026201, ("Bakersfield", "CA"): 1013570,
+    ("Baltimore", "MD"): 1018511, ("Birmingham", "AL"): 1012954,
+    ("Boise", "ID"): 1016131, ("Boston", "MA"): 1018127,
+    ("Buffalo", "NY"): 1022764, ("Cary", "NC"): 1021041,
+    ("Chandler", "AZ"): 1013387, ("Chapel Hill", "NC"): 1021047,
+    ("Charlotte", "NC"): 1021048, ("Chicago", "IL"): 1016367,
+    ("Chula Vista", "CA"): 1013677, ("Cincinnati", "OH"): 1023626,
+    ("Cleveland", "OH"): 1023631, ("Colorado Springs", "CO"): 1014471,
+    ("Columbus", "OH"): 1023640, ("Corpus Christi", "TX"): 1026319,
+    ("Dallas", "TX"): 1026339, ("Denver", "CO"): 1014485,
+    ("Des Moines", "IA"): 1015746, ("Detroit", "MI"): 1019250,
+    ("Durham", "NC"): 1021085, ("El Paso", "TX"): 1026376,
+    ("Evanston", "IL"): 1016453, ("Fayetteville", "NC"): 1021108,
+    ("Fort Wayne", "IN"): 1017108, ("Fort Worth", "TX"): 1026411,
+    ("Fremont", "CA"): 1013802, ("Fresno", "CA"): 1013804,
+    ("Garland", "TX"): 1026419, ("Gilbert", "AZ"): 1013416,
+    ("Glendale", "AZ"): 1013417, ("Grand Rapids", "MI"): 1019316,
+    ("Greensboro", "NC"): 1021129, ("Henderson", "NV"): 1022635,
+    ("Honolulu", "HI"): 1015579, ("Houston", "TX"): 1026481,
+    ("Huntsville", "AL"): 1013042, ("Indianapolis", "IN"): 1017146,
+    ("Irving", "TX"): 1026497, ("Jacksonville", "FL"): 1015067,
+    ("Jersey City", "NJ"): 1022194, ("Kansas City", "MO"): 1020414,
+    ("Las Vegas", "NV"): 1022639, ("Lexington", "KY"): 1017818,
+    ("Lincoln", "NE"): 1021696, ("Little Rock", "AR"): 1013268,
+    ("Long Beach", "CA"): 1013958, ("Los Angeles", "CA"): 1013962,
+    ("Louisville", "KY"): 1017825, ("Madison", "WI"): 1028057,
+    ("Memphis", "TN"): 1026069, ("Mesa", "AZ"): 1013445,
+    ("Miami", "FL"): 1015116, ("Milwaukee", "WI"): 1028087,
+    ("Minneapolis", "MN"): 1019973, ("Naperville", "IL"): 1016710,
+    ("Nashville", "TN"): 1026083, ("New Orleans", "LA"): 1018036,
+    ("New York", "NY"): 1023191, ("Newark", "NJ"): 1022300,
+    ("Oak Park", "IL"): 1016734, ("Oklahoma City", "OK"): 1024290,
+    ("Omaha", "NE"): 1021721, ("Orlando", "FL"): 1015150,
+    ("Pasadena", "CA"): 1014118, ("Peoria", "AZ"): 1013461,
+    ("Philadelphia", "PA"): 1025197, ("Phoenix", "AZ"): 1013462,
+    ("Pittsburgh", "PA"): 1025202, ("Plano", "TX"): 1026695,
+    ("Portland", "OR"): 1024543, ("Raleigh", "NC"): 1021278,
+    ("Richmond", "VA"): 1027270, ("Riverside", "CA"): 1014197,
+    ("Rochester", "NY"): 1023315, ("Sacramento", "CA"): 1014208,
+    ("Salt Lake City", "UT"): 1026990, ("San Antonio", "TX"): 1026759,
+    ("San Bernardino", "CA"): 1014214, ("San Diego", "CA"): 1014218,
+    ("San Francisco", "CA"): 1014221, ("San Jose", "CA"): 1014226,
+    ("Santa Ana", "CA"): 1014247, ("Schaumburg", "IL"): 1016834,
+    ("Scottsdale", "AZ"): 1013482, ("Seattle", "WA"): 1027744,
+    ("Spokane", "WA"): 1027760, ("St. Louis", "MO"): 1020618,
+    ("Tacoma", "WA"): 1027773, ("Tampa", "FL"): 1015214,
+    ("Tempe", "AZ"): 1013487, ("Tucson", "AZ"): 1013509,
+    ("Virginia Beach", "VA"): 1027320, ("Washington", "DC"): 1014895,
+}
+
+# Metro adjacents: primary city → list of suburb/adjacent (city, state) tuples
+# Used to build a fuller picture of the local competitive market
+METRO_ADJACENTS = {
+    ("Chicago", "IL"):        [("Evanston", "IL"), ("Oak Park", "IL"), ("Naperville", "IL"), ("Schaumburg", "IL")],
+    ("New York", "NY"):       [("Newark", "NJ"), ("Jersey City", "NJ")],
+    ("Los Angeles", "CA"):    [("Pasadena", "CA"), ("Long Beach", "CA"), ("Anaheim", "CA"), ("Santa Ana", "CA")],
+    ("Dallas", "TX"):         [("Plano", "TX"), ("Irving", "TX"), ("Garland", "TX"), ("Arlington", "TX")],
+    ("Houston", "TX"):        [("Corpus Christi", "TX")],
+    ("Phoenix", "AZ"):        [("Scottsdale", "AZ"), ("Mesa", "AZ"), ("Chandler", "AZ"), ("Gilbert", "AZ"), ("Tempe", "AZ"), ("Glendale", "AZ"), ("Peoria", "AZ")],
+    ("San Francisco", "CA"):  [("San Jose", "CA"), ("Fremont", "CA")],
+    ("Seattle", "WA"):        [("Tacoma", "WA"), ("Spokane", "WA")],
+    ("Denver", "CO"):         [("Aurora", "CO"), ("Colorado Springs", "CO")],
+    ("Atlanta", "GA"):        [],
+    ("Boston", "MA"):         [],
+    ("Miami", "FL"):          [("Orlando", "FL"), ("Jacksonville", "FL"), ("Tampa", "FL")],
+    ("Charlotte", "NC"):      [("Raleigh", "NC"), ("Durham", "NC"), ("Cary", "NC"), ("Chapel Hill", "NC"), ("Greensboro", "NC"), ("Fayetteville", "NC")],
+    ("Raleigh", "NC"):        [("Durham", "NC"), ("Cary", "NC"), ("Chapel Hill", "NC")],
+    ("Austin", "TX"):         [("San Antonio", "TX")],
+    ("Minneapolis", "MN"):    [],
+    ("San Diego", "CA"):      [("Chula Vista", "CA")],
+    ("Portland", "OR"):       [],
+    ("Las Vegas", "NV"):      [("Henderson", "NV")],
+    ("San Antonio", "TX"):    [("Austin", "TX")],
+    ("Kansas City", "MO"):    [],
+    ("Columbus", "OH"):       [],
+    ("Indianapolis", "IN"):   [("Fort Wayne", "IN")],
+    ("Nashville", "TN"):      [("Memphis", "TN")],
+    ("Detroit", "MI"):        [("Grand Rapids", "MI")],
+    ("Milwaukee", "WI"):      [("Madison", "WI")],
+    ("Baltimore", "MD"):      [("Washington", "DC")],
+    ("Washington", "DC"):     [("Baltimore", "MD"), ("Richmond", "VA")],
+}
+
+# Area code → (city, state) for phone-based location fallback
+# Covers the most common US metro area codes
+AREA_CODE_CITY = {
+    "212": ("New York", "NY"), "718": ("New York", "NY"), "646": ("New York", "NY"), "917": ("New York", "NY"),
+    "213": ("Los Angeles", "CA"), "310": ("Los Angeles", "CA"), "323": ("Los Angeles", "CA"), "424": ("Los Angeles", "CA"),
+    "312": ("Chicago", "IL"), "773": ("Chicago", "IL"), "872": ("Chicago", "IL"),
+    "713": ("Houston", "TX"), "281": ("Houston", "TX"), "832": ("Houston", "TX"),
+    "602": ("Phoenix", "AZ"), "480": ("Phoenix", "AZ"), "623": ("Phoenix", "AZ"),
+    "215": ("Philadelphia", "PA"), "267": ("Philadelphia", "PA"),
+    "210": ("San Antonio", "TX"), "726": ("San Antonio", "TX"),
+    "858": ("San Diego", "CA"), "619": ("San Diego", "CA"),
+    "214": ("Dallas", "TX"), "469": ("Dallas", "TX"), "972": ("Dallas", "TX"),
+    "408": ("San Jose", "CA"), "669": ("San Jose", "CA"),
+    "512": ("Austin", "TX"), "737": ("Austin", "TX"),
+    "904": ("Jacksonville", "FL"),
+    "817": ("Fort Worth", "TX"),
+    "614": ("Columbus", "OH"),
+    "704": ("Charlotte", "NC"), "980": ("Charlotte", "NC"),
+    "317": ("Indianapolis", "IN"),
+    "415": ("San Francisco", "CA"), "628": ("San Francisco", "CA"),
+    "206": ("Seattle", "WA"), "253": ("Seattle", "WA"), "425": ("Seattle", "WA"),
+    "303": ("Denver", "CO"), "720": ("Denver", "CO"),
+    "615": ("Nashville", "TN"),
+    "405": ("Oklahoma City", "OK"),
+    "915": ("El Paso", "TX"),
+    "702": ("Las Vegas", "NV"),
+    "901": ("Memphis", "TN"),
+    "502": ("Louisville", "KY"),
+    "503": ("Portland", "OR"), "971": ("Portland", "OR"),
+    "443": ("Baltimore", "MD"), "410": ("Baltimore", "MD"),
+    "414": ("Milwaukee", "WI"),
+    "505": ("Albuquerque", "NM"),
+    "520": ("Tucson", "AZ"),
+    "559": ("Fresno", "CA"),
+    "916": ("Sacramento", "CA"),
+    "316": ("Wichita", "KS"),
+    "816": ("Kansas City", "MO"),
+    "402": ("Omaha", "NE"),
+    "919": ("Raleigh", "NC"), "984": ("Raleigh", "NC"),
+    "251": ("Birmingham", "AL"),
+    "907": ("Anchorage", "AK"),
+    "804": ("Richmond", "VA"),
+    "612": ("Minneapolis", "MN"), "763": ("Minneapolis", "MN"), "952": ("Minneapolis", "MN"),
+    "813": ("Tampa", "FL"), "727": ("Tampa", "FL"),
+    "918": ("Tulsa", "OK"),
+    "407": ("Orlando", "FL"), "321": ("Orlando", "FL"),
+    "216": ("Cleveland", "OH"),
+    "606": ("Lexington", "KY"), "859": ("Lexington", "KY"),
+    "716": ("Buffalo", "NY"),
+    "701": ("Fargo", "ND"),
+    "208": ("Boise", "ID"),
+    "801": ("Salt Lake City", "UT"), "385": ("Salt Lake City", "UT"),
+    "314": ("St. Louis", "MO"), "636": ("St. Louis", "MO"),
+    "336": ("Greensboro", "NC"),
+    "515": ("Des Moines", "IA"),
+    "202": ("Washington", "DC"),
+    "617": ("Boston", "MA"), "857": ("Boston", "MA"),
+    "404": ("Atlanta", "GA"), "678": ("Atlanta", "GA"), "770": ("Atlanta", "GA"),
+    "305": ("Miami", "FL"), "786": ("Miami", "FL"),
+    "509": ("Spokane", "WA"),
+    "253": ("Tacoma", "WA"),
+    "605": ("Sioux Falls", "SD"),
+    "603": ("Manchester", "NH"),
+    "860": ("Hartford", "CT"),
+    "843": ("Charleston", "SC"),
+    "903": ("Tyler", "TX"),
+    "806": ("Lubbock", "TX"),
+    "361": ("Corpus Christi", "TX"),
+    "847": ("Evanston", "IL"),
+    "630": ("Naperville", "IL"),
+    "219": ("Gary", "IN"),
+    "708": ("Oak Park", "IL"),
+}
+
+
+def fetch_practice_location(domain: str, brand_name: str, raw_scrape: str,
+                             dfs_login: str, dfs_password: str) -> dict:
+    """
+    4-layer pipeline to determine a practice's primary city/state.
+    Returns dict with: primary_city, primary_state, location_code, all_locations, is_multi_location.
+
+    Layer 1: Brand SERP → Google Local Pack (GMB-verified, most accurate)
+    Layer 2: Phone area code in scraped homepage (zero cost)
+    Layer 3: Address regex in scraped homepage
+    Layer 4: DataForSEO location lookup fallback (US-wide)
+    """
+    import base64
+
+    clean_domain = re.sub(r"https?://", "", domain).rstrip("/").split("/")[0]
+    auth = base64.b64encode(f"{dfs_login}:{dfs_password}".encode()).decode()
+    headers = {"Authorization": f"Basic {auth}", "Content-Type": "application/json"}
+
+    def post(endpoint, payload):
+        data = json.dumps(payload).encode()
+        req = urllib.request.Request(
+            f"https://api.dataforseo.com{endpoint}",
+            data=data, headers=headers, method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read().decode())
+
+    def location_code_for(city, state):
+        """Look up DataForSEO city location_code; return None if not in dict."""
+        return CITY_LOCATION_CODES.get((city, state)) or CITY_LOCATION_CODES.get((city.title(), state))
+
+    def parse_city_state_from_local_pack(description: str):
+        """Extract 'City, ST' from local_pack description like 'Chicago, IL · (773) 555-1234'."""
+        m = re.match(r"^([A-Za-z\s]+),\s*([A-Z]{2})\s*[·•]", description.strip())
+        if m:
+            return m.group(1).strip(), m.group(2).strip()
+        return None, None
+
+    result = {
+        "primary_city": "", "primary_state": "", "location_code": 2840,
+        "all_locations": [], "is_multi_location": False, "location_source": "fallback",
+    }
+
+    # ── Layer 1: Brand SERP → local_pack ────────────────────────────────────
+    try:
+        serp_resp = post("/v3/serp/google/organic/live/advanced", [{
+            "keyword": brand_name or clean_domain,
+            "language_code": "en", "location_code": 2840,
+            "device": "desktop", "depth": 5,
+        }])
+        items = serp_resp["tasks"][0]["result"][0].get("items", []) or []
+        lp_items = [i for i in items if i.get("type") == "local_pack"]
+        if lp_items:
+            cities_seen = {}
+            all_locs = []
+            for lp in lp_items:
+                desc = lp.get("description", "")
+                city, state = parse_city_state_from_local_pack(desc)
+                if city and state:
+                    key = f"{city}, {state}"
+                    cities_seen[key] = cities_seen.get(key, 0) + 1
+                    if key not in all_locs:
+                        all_locs.append(key)
+            if cities_seen:
+                # Primary city = most common in local pack results
+                primary_loc = max(cities_seen, key=cities_seen.get)
+                parts = primary_loc.split(", ")
+                city, state = parts[0], parts[1]
+                lc = location_code_for(city, state)
+                result.update({
+                    "primary_city": city,
+                    "primary_state": state,
+                    "location_code": lc or 2840,
+                    "all_locations": all_locs,
+                    "is_multi_location": len(all_locs) > 1,
+                    "location_source": "brand_serp_local_pack",
+                })
+                return result
+    except Exception:
+        pass
+
+    # ── Layer 2: Phone area code ─────────────────────────────────────────────
+    try:
+        phones = re.findall(r'\(?\b(\d{3})\)?[-.\s]\d{3}[-.\s]\d{4}', raw_scrape)
+        for area in phones:
+            if area in AREA_CODE_CITY:
+                city, state = AREA_CODE_CITY[area]
+                lc = location_code_for(city, state)
+                result.update({
+                    "primary_city": city, "primary_state": state,
+                    "location_code": lc or 2840,
+                    "all_locations": [f"{city}, {state}"],
+                    "is_multi_location": False,
+                    "location_source": "area_code",
+                })
+                return result
+    except Exception:
+        pass
+
+    # ── Layer 3: Address regex in homepage ───────────────────────────────────
+    try:
+        addr_re = re.compile(r'\b([A-Z][a-zA-Z\s]{2,20}),\s*([A-Z]{2})\s+\d{5}\b')
+        matches = addr_re.findall(raw_scrape)
+        if matches:
+            city, state = matches[0]
+            city = city.strip()
+            lc = location_code_for(city, state)
+            result.update({
+                "primary_city": city, "primary_state": state,
+                "location_code": lc or 2840,
+                "all_locations": [f"{city}, {state}"],
+                "is_multi_location": False,
+                "location_source": "address_regex",
+            })
+            return result
+    except Exception:
+        pass
+
+    # ── Layer 4: Fallback — US-wide (location_code 2840) ─────────────────────
+    result["location_source"] = "fallback_us_wide"
+    return result
+
+
 # ── Phase 1: DataForSEO API fetch (primary, preferred over SEMrush) ────────────
 # Cost per run: ~$0.041/domain (4 calls)
 #   domain_rank_overview      ~$0.010  → domain rank, position distribution, traffic value
 #   ranked_keywords (organic) ~$0.010  → keyword details, AI Overview SERP presence
 #   ranked_keywords (ai_ref)  ~$0.010  → AI Overview citation count
 #   competitors_domain        ~$0.010  → top organic competitors
-def fetch_dataforseo(domain: str, login: str, password: str) -> dict:
+def fetch_dataforseo(domain: str, login: str, password: str,
+                     city: str = "", state: str = "", location_code: int = 2840) -> dict:
     """
     Pull live SEO data from DataForSEO Labs API. ~$0.041 per domain.
     Returns same dict shape as fetch_semrush_api() for drop-in compatibility.
@@ -578,6 +866,9 @@ def fetch_dataforseo(domain: str, login: str, password: str) -> dict:
     import base64
 
     clean_domain = re.sub(r"https?://", "", domain).rstrip("/").split("/")[0]
+    _serp_city          = city
+    _serp_state         = state
+    _serp_location_code = location_code
     base_url = "https://api.dataforseo.com"
     auth = base64.b64encode(f"{login}:{password}".encode()).decode()
     headers = {"Authorization": f"Basic {auth}", "Content-Type": "application/json"}
@@ -601,7 +892,7 @@ def fetch_dataforseo(domain: str, login: str, password: str) -> dict:
     CTR_MAP = {1: 0.31, 2: 0.15, 3: 0.10, 4: 0.07, 5: 0.06,
                6: 0.05, 7: 0.04, 8: 0.04, 9: 0.03, 10: 0.03}
 
-    # Fire all 4 API calls in parallel — independent requests
+    # Fire 5 API calls in parallel — independent requests
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as ex:
         fut_overview = ex.submit(post,
             "/v3/dataforseo_labs/google/domain_rank_overview/live",
@@ -634,7 +925,7 @@ def fetch_dataforseo(domain: str, login: str, password: str) -> dict:
                 "target": clean_domain,
                 "language_code": "en",
                 "location_code": 2840,
-                "limit": 10,
+                "limit": 30,  # More results so blocklist has more to work with
             }]
         )
         overview_resp = fut_overview.result()
@@ -647,11 +938,13 @@ def fetch_dataforseo(domain: str, login: str, password: str) -> dict:
     domain_rank = 0
     traffic_value = 0
     ov_pos1 = ov_pos2_3 = ov_pos4_10 = ov_pos11_20 = ov_count = 0
+    ov_referring_domains = 0  # linking sites count (from Labs overview)
     try:
         ov_result = overview_resp["tasks"][0]["result"][0]
         ov_items  = ov_result.get("items", []) or []
         ov        = ov_items[0] if ov_items else {}
         domain_rank = safe_int(ov.get("rank", 0))
+        ov_referring_domains = safe_int(ov.get("referring_domains", 0))
         m = ov.get("metrics", {}).get("organic", {})
         ov_pos1     = safe_int(m.get("pos_1", 0))
         ov_pos2_3   = safe_int(m.get("pos_2_3", 0))
@@ -661,6 +954,8 @@ def fetch_dataforseo(domain: str, login: str, password: str) -> dict:
         traffic_value = safe_int(m.get("etv", 0))   # ETV = estimated traffic value (USD)
     except (KeyError, IndexError, TypeError):
         pass
+
+    referring_domains = ov_referring_domains  # from Labs domain_rank_overview (may be 0 for small sites)
 
     # ── Parse ranked_keywords (organic) ────────────────────────────────────────
     kw_items = []
@@ -753,24 +1048,148 @@ def fetch_dataforseo(domain: str, login: str, password: str) -> dict:
         ai_cited_count = 0
 
     # ── Parse competitors ───────────────────────────────────────────────────────
-    competitors = []
+    # Primary: competitors_domain (keyword overlap — returns 30 results so blocklist has more to filter)
+    competitors_raw = []
     try:
         comp_items = comp_resp["tasks"][0]["result"][0].get("items", []) or []
-        for ci in comp_items[:10]:
+        for ci in comp_items:
             cm = (ci.get("metrics", {}) or {}).get("organic", {}) or {}
-            competitors.append({
-                "domain":        ci.get("domain", ""),
-                "relevance":     ci.get("relevance", 0),
-                "keywords":      safe_int(cm.get("count", ci.get("intersections", 0))),
-                "traffic":       safe_int(cm.get("etv", 0)),
-                "traffic_value": safe_int(cm.get("etv", 0)),  # DataForSEO ETV = value in USD
+            competitors_raw.append({
+                "domain":         ci.get("domain", ""),
+                "avg_position":   round(float(ci.get("avg_pos", 0) or 0), 1),
+                "intersections":  safe_int(ci.get("intersections", 0)),
+                "keywords":       safe_int(cm.get("count", ci.get("intersections", 0))),
+                "traffic":        safe_int(cm.get("etv", 0)),
+                "traffic_value":  safe_int(cm.get("etv", 0)),
+                "source":         "keyword_overlap",
             })
     except (KeyError, IndexError, TypeError):
-        competitors = []
+        competitors_raw = []
+
+    # Secondary: SERP scraping using city-specific location codes.
+    # This finds who's ACTUALLY ranking when a patient searches from the practice's city.
+    # Uses location data stored in p1 (set by fetch_practice_location before this call).
+    serp_competitors = []
+    own_serp_position = {}
+    try:
+        # Build SERP queries: "near me" from practice city + geo-modified city query
+        city_loc_code   = _serp_location_code  # passed in via closure / caller
+        city_name       = _serp_city
+        state_abbr      = _serp_state
+
+        # Detect practice specialty from top keywords
+        SPECIALTY_TERMS = [
+            "functional medicine", "integrative medicine", "hormone health", "acupuncture",
+            "chiropractic", "physical therapy", "naturopath", "holistic", "wellness",
+            "weight loss", "primary care", "family medicine", "internal medicine",
+        ]
+        all_text = " ".join(kd.get("keyword", "") for kd in all_kw_data[:50]).lower()
+        specialty = "functional medicine"  # default
+        best_count = 0
+        for term in SPECIALTY_TERMS:
+            cnt = all_text.count(term)
+            if cnt > best_count:
+                best_count, specialty = cnt, term
+
+        # Build query list
+        serp_queries = []
+        if city_loc_code and city_loc_code != 2840:
+            # City-specific "near me" — true local perspective
+            serp_queries.append({"keyword": f"{specialty} near me",
+                                  "location_code": city_loc_code, "label": "near_me_local"})
+        # Geo-modified query (US-wide but city-qualified) — always add as fallback/supplement
+        if city_name and state_abbr:
+            serp_queries.append({"keyword": f"{specialty} {city_name} {state_abbr}",
+                                  "location_code": 2840, "label": "geo_modified"})
+        # If no city detected, use best practice-specific keyword we have
+        if not serp_queries:
+            best_kw = next((kd["keyword"] for kd in sorted(all_kw_data,
+                key=lambda x: x.get("volume", 0), reverse=True)
+                if len(kd.get("keyword","").split()) >= 2), specialty)
+            serp_queries.append({"keyword": best_kw, "location_code": 2840, "label": "fallback"})
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(serp_queries)) as serp_ex:
+            serp_futs = {
+                serp_ex.submit(post,
+                    "/v3/serp/google/organic/live/advanced",
+                    [{
+                        "keyword": q["keyword"],
+                        "language_code": "en",
+                        "location_code": q["location_code"],
+                        "device": "desktop",
+                        "depth": 10,
+                    }]
+                ): q
+                for q in serp_queries
+            }
+            for fut, q in serp_futs.items():
+                try:
+                    serp_resp = fut.result(timeout=30)
+                    items = serp_resp["tasks"][0]["result"][0].get("items", []) or []
+                    for item in items:
+                        if item.get("type") != "organic":
+                            continue
+                        domain_result = (item.get("domain", "") or "").lower().strip()
+                        pos = safe_int(item.get("rank_absolute", 0))
+                        url = item.get("url", "")
+                        title = item.get("title", "")
+                        if domain_result == clean_domain:
+                            own_serp_position[q["keyword"]] = pos
+                            continue  # own domain: record position but don't add as competitor
+                        if domain_result:
+                            serp_competitors.append({
+                                "domain": domain_result,
+                                "avg_position": pos,
+                                "intersections": 0,
+                                "keywords": 0,
+                                "traffic": 0,
+                                "traffic_value": 0,
+                                "source": "serp",
+                                "serp_keyword": q["keyword"],
+                                "serp_label": q["label"],
+                                "url": url,
+                            })
+                except Exception:
+                    pass
+
+        # Deduplicate: keep best (lowest) position per domain
+        seen_serp = {}
+        for sc in serp_competitors:
+            d = sc["domain"]
+            if d not in seen_serp or sc["avg_position"] < seen_serp[d]["avg_position"]:
+                seen_serp[d] = sc
+        serp_competitors = list(seen_serp.values())
+
+    except Exception:
+        serp_competitors = []
+        own_serp_position = {}
+
+    # Merge: SERP competitors first (most accurate for local), then keyword-overlap
+    seen_domains = set()
+    competitors = []
+    for c in serp_competitors:
+        d = c["domain"]
+        if d not in seen_domains:
+            seen_domains.add(d)
+            competitors.append(c)
+    for c in competitors_raw:
+        d = c["domain"]
+        if d not in seen_domains:
+            seen_domains.add(d)
+            competitors.append(c)
+
+    # Compute weighted avg position across pos 1-20 keywords (always a real number)
+    total_pos_kws = pos1 + pos2_3 + pos4_10 + pos11_20
+    if total_pos_kws > 0:
+        avg_position = round((pos1*1.0 + pos2_3*2.5 + pos4_10*7.0 + pos11_20*15.5) / total_pos_kws, 1)
+    else:
+        avg_position = 0.0
 
     return {
         "source":                  "dataforseo",
         "domain_rank":             domain_rank,
+        "referring_domains":       referring_domains,   # sites linking to this domain (from Labs overview)
+        "avg_position":            avg_position,        # weighted avg SERP position (always real, never 0)
         "unique_keywords":         total_kws,
         "estimated_traffic":       estimated_traffic,
         "traffic_value":           traffic_value,
@@ -788,6 +1207,11 @@ def fetch_dataforseo(domain: str, login: str, password: str) -> dict:
         "top3_sample":             top3_sample[:10],
         "top_by_volume":           top_by_volume,
         "competitors":             competitors,
+        "own_serp_positions":      own_serp_position,
+        "serp_city":               city,
+        "serp_state":              state,
+        "serp_location_code":      location_code,
+        "serp_specialty":          specialty if 'specialty' in dir() else "",
     }
 
 
@@ -1508,7 +1932,7 @@ def notify_slack_submit(webhook, practice, gen_id, website, semrush, run_id):
 def run_single(row: dict, env: dict, dry_run: bool = False,
                phase1_only: bool = False,
                existing_run_dir: str = None,
-               send_slack: bool = False) -> dict:
+               preview: bool = False) -> dict:
     website = row.get("website", "").rstrip("/")
     context = row.get("context", "")
     # booking_url and semrush_csv are auto-resolved — not required in CSV
@@ -1578,13 +2002,29 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         dfs_password = env.get("DATAFORSEO_PASSWORD", "").strip()
         semrush_key  = env.get("SEMRUSH_API_KEY", "").strip()
         domain = re.sub(r"https?://", "", website).rstrip("/")
+        loc_data = {"primary_city": "", "primary_state": "", "location_code": 2840,
+                    "all_locations": [], "is_multi_location": False, "location_source": "fallback"}
 
         if dfs_login and dfs_password:
+            print("  Detecting practice location (city-level SERP targeting)...")
+            raw_scrape_text = raw_scrape if isinstance(raw_scrape, str) else ""
+            brand = row.get("practice_name") or row.get("name") or ""
+            loc_data = fetch_practice_location(
+                domain, brand, raw_scrape_text, dfs_login, dfs_password
+            )
+            print(f"  ✓ Location: {loc_data.get('primary_city', '?')}, {loc_data.get('primary_state', '?')} "
+                  f"(source: {loc_data.get('location_source', 'unknown')}, "
+                  f"code: {loc_data.get('location_code', 2840)})")
             print("  Fetching DataForSEO API (~$0.04/domain)...")
             semrush = None
             for _attempt in range(2):
                 try:
-                    semrush = fetch_dataforseo(domain, dfs_login, dfs_password)
+                    semrush = fetch_dataforseo(
+                        domain, dfs_login, dfs_password,
+                        city=loc_data.get("primary_city", ""),
+                        state=loc_data.get("primary_state", ""),
+                        location_code=loc_data.get("location_code", 2840),
+                    )
                     ai_serp  = semrush.get("ai_overview_serp_count", "N/A")
                     ai_cited = semrush.get("ai_overview_cited_count", "N/A")
                     print(f"  ✓ DataForSEO: {semrush['unique_keywords']:,} KWs | "
@@ -1644,17 +2084,23 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         favicon_url = page_assets.get("favicon_url", "")
         booking_url = extract_booking_url(raw_scrape, website) if raw_scrape else website
         p1_data = {
-            "run_id":       run_id,
-            "website":      website,
-            "context":      context,
-            "raw_scrape":   raw_scrape[:6000] if raw_scrape else "",
-            "semrush":      semrush,
-            "crawl":        crawl,
-            "brand_colors": brand_colors,
-            "name":         "",        # enriched from phase2_output.json app_config
-            "doctor_name":  "",        # enriched from phase2_output.json app_config
-            "booking_url":  booking_url,
-            "logo_url":     logo_url,
+            "run_id":           run_id,
+            "website":          website,
+            "context":          context,
+            "raw_scrape":       raw_scrape[:6000] if raw_scrape else "",
+            "semrush":          semrush,
+            "crawl":            crawl,
+            "brand_colors":     brand_colors,
+            "name":             "",        # enriched from phase2_output.json app_config
+            "doctor_name":      "",        # enriched from phase2_output.json app_config
+            "booking_url":      booking_url,
+            "logo_url":         logo_url,
+            "primary_city":     loc_data.get("primary_city", ""),
+            "primary_state":    loc_data.get("primary_state", ""),
+            "location_code":    loc_data.get("location_code", 2840),
+            "all_locations":    loc_data.get("all_locations", []),
+            "is_multi_location": loc_data.get("is_multi_location", False),
+            "location_source":  loc_data.get("location_source", "fallback"),
             "images": {
                 "logo_url":    logo_url,
                 "favicon_url": favicon_url,
@@ -1886,8 +2332,8 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         encoding="utf-8",
     )
 
-    # Slack success — #d100-runs (deploy notification; opt-in via --slack flag)
-    if slack_webhook and send_slack:
+    # Slack success — fires automatically when SLACK_WEBHOOK_URL is set; suppressed with --preview
+    if slack_webhook and not preview:
         try:
             notify_slack_report_live(slack_webhook, practice_name, report_url, website, semrush, run_id)
             print("  ✓ Slack notified")
@@ -1958,7 +2404,7 @@ def find_run_dir_for_site(website: str):
 
 def run_with_checkpoint(args_tuple):
     """Thread worker: checkpoint check → run_single → write checkpoint on success."""
-    i, row, env, dry_run, phase1_only, existing_run_dir, send_slack_flag = args_tuple
+    i, row, env, dry_run, phase1_only, existing_run_dir, preview_flag = args_tuple
     website = row.get("website", "")
 
     # Checkpoint: skip already-completed runs
@@ -1977,7 +2423,7 @@ def run_with_checkpoint(args_tuple):
 
     result = run_single(row, env, dry_run=dry_run, phase1_only=phase1_only,
                         existing_run_dir=existing_run_dir,
-                        send_slack=send_slack_flag)
+                        preview=preview_flag)
 
     # Write checkpoint on success
     if result.get("status") == "completed":
@@ -2010,8 +2456,8 @@ def main():
                              "run Phase 3 (template inject → Vercel/GitHub Pages + Slack) only.")
     parser.add_argument("--run-dir", type=str, default=None,
                         help="Existing run directory to use (single-site override for --phase3-only).")
-    parser.add_argument("--slack", action="store_true",
-                        help="Send Slack notification on successful deploy (default: off).")
+    parser.add_argument("--preview", action="store_true",
+                        help="Preview run — suppresses Slack notification even if webhook is configured.")
     args = parser.parse_args()
 
     if not os.path.exists(args.csv):
@@ -2023,7 +2469,7 @@ def main():
     smr_status = "✓ SEMrush (fallback)" if env.get("SEMRUSH_API_KEY") else ""
     seo_status = dfs_status or smr_status or "✗ no SEO API"
     print(f"✓ Env loaded: SEO={seo_status} | "
-          f"Slack={'✓' if env.get('SLACK_WEBHOOK_URL') else '✗'}")
+          f"Slack={'✓ always-on' if env.get('SLACK_WEBHOOK_URL') else '✗ no webhook (add SLACK_WEBHOOK_URL)'}")
     print(f"  Note: All LLM generation is Claude Code native (Claude Max — zero API cost)")
     vercel_tok = env.get("VERCEL_TOKEN", "")
     print(f"  Note: Phase 3 = template inject → {'Vercel' if vercel_tok else 'GitHub Pages'}")
@@ -2060,7 +2506,7 @@ def main():
                 results.append({"website": website, "status": "skipped_no_phase2", "report_url": ""})
                 continue
             print(f"  📁 [{i+1}/{n}] {website} → {existing_run_dir}")
-        worker_args.append((i, row, env, args.dry_run, args.phase1_only, existing_run_dir, getattr(args, "slack", False)))
+        worker_args.append((i, row, env, args.dry_run, args.phase1_only, existing_run_dir, getattr(args, "preview", False)))
 
     workers = 1 if (args.site_index is not None or args.phase1_only) else MAX_WORKERS
     print(f"\n🚀 Starting {len(worker_args)} run(s) with max_workers={workers}...")
