@@ -1025,13 +1025,45 @@ def deploy_to_vercel(run_dir: Path, practice_name: str, dry_run: bool = False) -
     _sync_site_dir(site_dir)
 
     # Write vercel.json into site root
+    # cleanUrls + trailingSlash = Vercel auto-serves slug/index.html for slug/
+    # No builds/routes override so Vercel auto-detects api/ as serverless functions
     vercel_config = {
         "version": 2,
         "name": deliverables_proj,
-        "builds": [{"src": "**/*", "use": "@vercel/static"}],
-        "routes": [{"src": "/(.*)", "dest": "/$1"}]
+        "cleanUrls": True,
+        "trailingSlash": True,
     }
     (site_dir / "vercel.json").write_text(json.dumps(vercel_config, indent=2))
+
+    # Ensure the Slack-on-open serverless function exists in site root
+    api_dir = site_dir / "api"
+    api_dir.mkdir(exist_ok=True)
+    api_func = api_dir / "opened.js"
+    if not api_func.exists():
+        api_func.write_text(
+            "// D100 report-open Slack notifier\n"
+            "export default async function handler(req, res) {\n"
+            "  res.setHeader('Access-Control-Allow-Origin', '*');\n"
+            "  if (req.method === 'OPTIONS') return res.status(200).end();\n"
+            "  const webhook = process.env.SLACK_WEBHOOK_URL;\n"
+            "  if (!webhook) return res.status(200).json({ ok: false });\n"
+            "  const slug     = (req.query.slug     || 'unknown').replace(/[^a-z0-9-]/gi,'');\n"
+            "  const practice = decodeURIComponent(req.query.practice || slug);\n"
+            "  const url      = `https://healthbizleads.com/${slug}/`;\n"
+            "  const ts = new Date().toLocaleString('en-US',{timeZone:'America/Denver',"
+            "month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});\n"
+            "  try {\n"
+            "    await fetch(webhook, { method:'POST',\n"
+            "      headers:{'Content-Type':'application/json'},\n"
+            "      body: JSON.stringify({ text:`👁 *Report Opened* — ${practice}`,\n"
+            "        blocks:[{type:'section',text:{type:'mrkdwn',\n"
+            "          text:`👁 *Report Opened*\\n*Practice:* ${practice}\\n*URL:* <${url}|${url}>\\n*Time:* ${ts} MT`}}]})\n"
+            "    });\n"
+            "  } catch(_) {}\n"
+            "  return res.status(200).json({ ok: true });\n"
+            "}\n",
+            encoding="utf-8"
+        )
 
     # Root index — simple redirect listing (not required, but nice to have)
     root_idx = site_dir / "index.html"

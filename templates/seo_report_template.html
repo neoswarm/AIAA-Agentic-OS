@@ -1964,5 +1964,24 @@ document.querySelectorAll('details').forEach(function(d) {
   });
 });
 </script>
+
+  <!-- D100 open-tracking beacon — fires Slack notification on first load -->
+  <!-- Suppressed when URL contains ?preview=1 -->
+  <script>
+  (function() {
+    try {
+      if (new URLSearchParams(window.location.search).get('preview') === '1') return;
+      // Only fire once per session per slug (prevent repeat pings on refresh)
+      var slug = '{{COMPANY_SLUG}}';
+      var key  = 'd100_opened_' + slug;
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, '1');
+      fetch('/api/opened?slug=' + encodeURIComponent(slug) +
+            '&practice=' + encodeURIComponent('{{PRACTICE_NAME}}'),
+            { method: 'GET', keepalive: true })
+        .catch(function(){});
+    } catch(_) {}
+  })();
+  </script>
 </body>
 </html>
