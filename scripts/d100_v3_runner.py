@@ -541,6 +541,7 @@ def fetch_semrush_api(domain: str, api_key: str) -> dict:
         "unique_keywords": total_kws,
         "estimated_traffic": traffic_est,
         "traffic_value": traffic_val,
+        "clinical_traffic_value": 0,
         "serp_features_traffic": serp_features_traffic,
         "serp_features_value": serp_features_value,
         "ai_overview_serp_count": ai_serp_count,
@@ -851,6 +852,30 @@ def fetch_practice_location(domain: str, brand_name: str, raw_scrape: str,
     return result
 
 
+# ── Competitor type classification ──────────────────────────────────────────────
+# Known health system domain patterns — these are never "winnable" direct competitors
+_HEALTH_SYSTEM_PATTERNS = [
+    "nm.org", "northwestern", "dukehealth", "ucsf", "mayo", "cleveland",
+    "endeavorhealth", "advocatehealth", "ascension", "mercy", "sutter",
+    "henryford", "dignity", "providence", "banner", "hca", "tenet",
+    "commonspirit", "trinity", "christus", "geisinger", "intermountain",
+    "ohiohealth", "prisma", "wellstar", "atrium", "hackensack", "northwell",
+    "piedmont", "memorial", "baptist", "presbyterian", "methodist",
+    "catholic", "franciscan", "bon secours", "adventist", "kaiser",
+]
+
+
+def _classify_competitor(domain: str) -> str:
+    d = domain.lower()
+    for pattern in _HEALTH_SYSTEM_PATTERNS:
+        if pattern in d:
+            return "health_system"
+    # edu domains are typically academic medical centers
+    if d.endswith(".edu") or ".edu." in d:
+        return "health_system"
+    return "practice"
+
+
 # ── Phase 1: DataForSEO API fetch (primary, preferred over SEMrush) ────────────
 # Cost per run: ~$0.041/domain (4 calls)
 #   domain_rank_overview      ~$0.010  → domain rank, position distribution, traffic value
@@ -987,6 +1012,7 @@ def fetch_dataforseo(domain: str, login: str, password: str,
     # Build keyword detail lists from items
     ai_overview_serp_count = 0
     estimated_traffic = 0
+    clinical_traffic_value = 0
     quick_wins = []
     top3_sample = []
     all_kw_data = []
@@ -1022,6 +1048,10 @@ def fetch_dataforseo(domain: str, login: str, password: str,
         ctr = CTR_MAP.get(min(position, 10), 0.02)
         estimated_traffic += int(volume * ctr)
 
+        # Clinical traffic value: only keywords with CPC > $1.00 (high patient-intent)
+        if cpc >= 1.0:
+            clinical_traffic_value += int(volume * ctr * cpc)
+
         entry = {"keyword": keyword, "position": position, "volume": volume,
                  "kd": kw_diff, "cpc": cpc}
         all_kw_data.append(entry)
@@ -1054,14 +1084,16 @@ def fetch_dataforseo(domain: str, login: str, password: str,
         comp_items = comp_resp["tasks"][0]["result"][0].get("items", []) or []
         for ci in comp_items:
             cm = (ci.get("metrics", {}) or {}).get("organic", {}) or {}
+            _comp_domain = ci.get("domain", "")
             competitors_raw.append({
-                "domain":         ci.get("domain", ""),
-                "avg_position":   round(float(ci.get("avg_pos", 0) or 0), 1),
-                "intersections":  safe_int(ci.get("intersections", 0)),
-                "keywords":       safe_int(cm.get("count", ci.get("intersections", 0))),
-                "traffic":        safe_int(cm.get("etv", 0)),
-                "traffic_value":  safe_int(cm.get("etv", 0)),
-                "source":         "keyword_overlap",
+                "domain":           _comp_domain,
+                "avg_position":     round(float(ci.get("avg_pos", 0) or 0), 1),
+                "intersections":    safe_int(ci.get("intersections", 0)),
+                "keywords":         safe_int(cm.get("count", ci.get("intersections", 0))),
+                "traffic":          safe_int(cm.get("etv", 0)),
+                "traffic_value":    safe_int(cm.get("etv", 0)),
+                "source":           "keyword_overlap",
+                "competitor_type":  _classify_competitor(_comp_domain),
             })
     except (KeyError, IndexError, TypeError):
         competitors_raw = []
@@ -1148,6 +1180,7 @@ def fetch_dataforseo(domain: str, login: str, password: str,
                                 "serp_keyword": q["keyword"],
                                 "serp_label": q["label"],
                                 "url": url,
+                                "competitor_type": _classify_competitor(domain_result),
                             })
                 except Exception:
                     pass
@@ -1178,6 +1211,41 @@ def fetch_dataforseo(domain: str, login: str, password: str,
             seen_domains.add(d)
             competitors.append(c)
 
+    # ── Apply competitor type classification to all competitors ─────────────────
+    for c in competitors:
+        if "competitor_type" not in c:
+            c["competitor_type"] = _classify_competitor(c.get("domain", ""))
+
+    # ── Enrich competitor traffic via domain_rank_overview ──────────────────────
+    # Pull ETV for top 5 competitors that don't already have traffic data.
+    # Cost: ~$0.010 per competitor domain.
+    comps_needing_traffic = [c for c in competitors if c.get("traffic", 0) == 0][:5]
+    if comps_needing_traffic:
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as comp_ex:
+                def _fetch_comp_traffic(comp):
+                    try:
+                        r = post(
+                            "/v3/dataforseo_labs/google/domain_rank_overview/live",
+                            [{"target": comp["domain"], "language_code": "en", "location_code": 2840}]
+                        )
+                        ov_items = r["tasks"][0]["result"][0].get("items", []) or []
+                        ov = ov_items[0] if ov_items else {}
+                        m = ov.get("metrics", {}).get("organic", {}) or {}
+                        comp["traffic"] = safe_int(m.get("etv", 0))
+                        comp["traffic_value"] = safe_int(m.get("etv", 0))
+                        comp["keywords"] = safe_int(m.get("count", 0))
+                    except Exception:
+                        pass
+                    return comp
+                comp_futs = [comp_ex.submit(_fetch_comp_traffic, c) for c in comps_needing_traffic]
+                enriched = [f.result() for f in comp_futs]
+                # Update the competitors list with enriched data
+                enriched_domains = {c["domain"]: c for c in enriched}
+                competitors = [enriched_domains.get(c["domain"], c) for c in competitors]
+        except Exception:
+            pass  # Enrichment is best-effort, never crash
+
     # Compute weighted avg position across pos 1-20 keywords (always a real number)
     total_pos_kws = pos1 + pos2_3 + pos4_10 + pos11_20
     if total_pos_kws > 0:
@@ -1193,6 +1261,7 @@ def fetch_dataforseo(domain: str, login: str, password: str,
         "unique_keywords":         total_kws,
         "estimated_traffic":       estimated_traffic,
         "traffic_value":           traffic_value,
+        "clinical_traffic_value":  clinical_traffic_value,
         "serp_features_traffic":   0,   # DataForSEO doesn't have a direct SERP-features-traffic metric
         "serp_features_value":     0,
         "ai_overview_serp_count":  ai_overview_serp_count,
@@ -1219,7 +1288,7 @@ def fetch_dataforseo(domain: str, login: str, password: str,
 def parse_semrush(csv_path: str) -> dict:
     if not csv_path or not os.path.exists(csv_path):
         return {"source": "none", "unique_keywords": 0, "quick_wins_count": 0,
-                "estimated_traffic": 0, "traffic_value": 0,
+                "estimated_traffic": 0, "traffic_value": 0, "clinical_traffic_value": 0,
                 "top_quick_wins": [], "top3_sample": [], "top_by_volume": [],
                 "competitors": [], "pos1_3_count": 0, "domain_rank": 0}
 
@@ -1256,6 +1325,7 @@ def parse_semrush(csv_path: str) -> dict:
         "unique_keywords": len(unique),
         "estimated_traffic": round(total_traffic),
         "traffic_value": 0,
+        "clinical_traffic_value": 0,
         "domain_rank": 0,
         "pos1_3_count": len(pos1_3),
         "pos1_count": 0,

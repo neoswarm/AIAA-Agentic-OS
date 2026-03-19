@@ -299,14 +299,23 @@ def build_competitors_rows(competitors: list, own_domain: str = "") -> str:
             pos_badge   = f'<span style="color:#84bdbb;font-weight:700;">{kws} kws</span>'
             source_note = ""
 
-        traffic = fmt_number(comp.get("traffic", 0))
-        tv      = comp.get("traffic_value", 0)
-        tv_fmt  = f"${fmt_number(tv)}" if tv else "—"
+        # Traffic display
+        traffic_raw = comp.get("traffic", 0) or 0
+        traffic_display = f"{fmt_number(traffic_raw)}/mo" if traffic_raw > 0 else "—"
+
+        # Type badge
+        comp_type = comp.get("competitor_type", "practice")
+        type_badge = ('<span style="background:#334155;color:#94a3b8;font-size:10px;font-weight:700;'
+                      'padding:2px 7px;border-radius:10px;letter-spacing:0.05em;">HEALTH SYSTEM</span>'
+                      if comp_type == "health_system" else
+                      '<span style="background:#14532d;color:#86efac;font-size:10px;font-weight:700;'
+                      'padding:2px 7px;border-radius:10px;letter-spacing:0.05em;">PRACTICE</span>')
+
         rows.append(f"""<tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
               <td style="padding:14px 16px;color:#f0f4ff;font-family:monospace;">{domain}{source_note}</td>
               <td style="padding:14px 16px;">{pos_badge}</td>
-              <td style="padding:14px 16px;color:#f0f4ff;">{traffic if traffic != "0" else "—"}/mo</td>
-              <td style="padding:14px 16px;color:#f0f4ff;">{tv_fmt}</td>
+              <td style="padding:14px 16px;color:#f0f4ff;">{traffic_display}</td>
+              <td style="padding:14px 16px;">{type_badge}</td>
             </tr>""")
     return "\n".join(rows)
 
@@ -693,6 +702,8 @@ def build_replacements(p1: dict, p2: dict) -> dict:
     unique_keywords  = fmt_number(semrush.get("unique_keywords", 0))
     monthly_traffic  = fmt_number(semrush.get("estimated_traffic", 0))
     traffic_value    = fmt_number(semrush.get("traffic_value", 0))
+    clinical_tv_raw  = semrush.get("clinical_traffic_value", 0) or 0
+    clinical_traffic_value = fmt_number(clinical_tv_raw)
     ai_overview_cnt  = str(semrush.get("ai_overview_serp_count", 0))
     ai_cited_cnt     = str(semrush.get("ai_overview_cited_count", 0))
     quick_wins_count = str(semrush.get("quick_wins_count", 0))
@@ -765,6 +776,20 @@ def build_replacements(p1: dict, p2: dict) -> dict:
     competitor_context_sentence = build_competitor_context_sentence(semrush, p1)
     ai_seo_callout = build_ai_seo_callout(semrush, p1)
 
+    # ── Competitor type note ──────────────────────────────────────────────────
+    comp_list = competitors  # raw list from semrush
+    health_system_count = sum(1 for c in comp_list if c.get("competitor_type") == "health_system")
+    practice_count = sum(1 for c in comp_list if c.get("competitor_type") == "practice")
+
+    if health_system_count > 0 and practice_count > 0:
+        competitor_type_note = (f"Includes {health_system_count} large health system(s) that rank for the same searches — "
+                                f"context only, not winnable targets. Focus is on the {practice_count} independent practice(s) above.")
+    elif health_system_count > 0:
+        competitor_type_note = ("These are large health systems ranking for your specialty searches — "
+                                "they signal strong market demand. Independent local practices are your winnable targets.")
+    else:
+        competitor_type_note = ""
+
     # ── Location tokens ───────────────────────────────────────────────────────
     primary_city  = p1.get("primary_city", "") or _extract_city(p1)
     primary_state = p1.get("primary_state", "")
@@ -812,6 +837,8 @@ def build_replacements(p1: dict, p2: dict) -> dict:
         "IS_MULTI_LOCATION":         "true" if p1.get("is_multi_location") else "false",
         "COMPETITOR_1_TRAFFIC":      comp1_traffic,
         "COMPETITOR_1_DOMAIN":       comp1_domain,
+        "CLINICAL_TRAFFIC_VALUE":    clinical_traffic_value,
+        "COMPETITOR_TYPE_NOTE":      competitor_type_note,
     }
 
 
