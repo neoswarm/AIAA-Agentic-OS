@@ -26,6 +26,7 @@ Live URL: https://{GHUSER}.github.io/Plug-and-play-AI-SEO-and-Ad-Strategy-for-{C
 """
 
 import argparse
+import base64
 import concurrent.futures
 import csv
 import json
@@ -61,7 +62,8 @@ def load_env():
                 k, v = line.split("=", 1)
                 env[k.strip()] = v.strip()
     # Override with real environment (only if non-empty — Claude Code sets ANTHROPIC_API_KEY='' itself)
-    for k in ("ANTHROPIC_API_KEY", "SLACK_WEBHOOK_URL", "SEMRUSH_API_KEY", "VERCEL_TOKEN",
+    for k in ("ANTHROPIC_API_KEY", "SLACK_WEBHOOK_URL", "SLACK_D100_OPENS_WEBHOOK", "SMARTLEAD_API_KEY",
+              "SEMRUSH_API_KEY", "VERCEL_TOKEN",
               "DATAFORSEO_LOGIN", "DATAFORSEO_PASSWORD", "GOOGLE_SHEETS_ID"):
         if os.environ.get(k):
             env[k] = os.environ[k]
@@ -1753,9 +1755,12 @@ def _slack_post(webhook: str, msg: dict) -> bool:
 
 
 def notify_slack_report_live(webhook: str, practice: str, report_url: str,
-                              website: str, semrush: dict, run_id: str) -> bool:
+                              website: str, semrush: dict, run_id: str,
+                              ref_url: str = "", primary_email: str = "") -> bool:
     ai_serp  = semrush.get("ai_overview_serp_count", "N/A")
     ai_cited = semrush.get("ai_overview_cited_count", "N/A")
+    send_url = ref_url if ref_url else report_url
+    email_note = f"*Contact Email:*\n{primary_email}" if primary_email else "*Contact Email:*\nnot provided"
     msg = {
         "blocks": [
             {"type": "header", "text": {"type": "plain_text",
@@ -1770,6 +1775,10 @@ def notify_slack_report_live(webhook: str, practice: str, report_url: str,
             ]},
             {"type": "section", "text": {"type": "mrkdwn",
                 "text": f"*Deliverables Page:*\n<{report_url}|{report_url}>"}},
+            {"type": "section", "fields": [
+                {"type": "mrkdwn", "text": email_note},
+                {"type": "mrkdwn", "text": f"*📧 Send This URL:*\n<{send_url}|Copy tracked link>"},
+            ]},
             {"type": "section", "text": {"type": "mrkdwn",
                 "text": f"*👁 Preview (no Slack ping):* <{report_url}?preview=1|Open with ?preview=1>"}},
         ],
@@ -2007,6 +2016,11 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
     context = row.get("context", "")
     # booking_url and semrush_csv are auto-resolved — not required in CSV
     semrush_csv = row.get("semrush_csv", "")
+
+    # Extract primary email from CSV emails column for SmartLead ?ref= tracking
+    raw_emails = row.get("emails", "").strip()
+    primary_email = raw_emails.split(",")[0].strip() if raw_emails else ""
+    ref_token = base64.b64encode(primary_email.encode()).decode() if primary_email else ""
 
     # Support resuming from an existing run_dir (for --phase1-only → SEO step → phase2-4 flow)
     if existing_run_dir:
@@ -2379,6 +2393,9 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         app_url = None
 
     print(f"  ✓ Live URL: {report_url}")
+    ref_url = f"{report_url}?ref={ref_token}" if ref_token else report_url
+    if ref_token:
+        print(f"  ✓ Ref URL (send this): {ref_url}")
     print(f"  Phase 3 complete ({time.time()-t3:.1f}s)")
 
     # Write report_url to phase2_output.json
@@ -2405,7 +2422,8 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
     # Slack success — fires automatically when SLACK_WEBHOOK_URL is set; suppressed with --preview
     if slack_webhook and not preview:
         try:
-            notify_slack_report_live(slack_webhook, practice_name, report_url, website, semrush, run_id)
+            notify_slack_report_live(slack_webhook, practice_name, report_url, website, semrush, run_id,
+                                          ref_url=ref_url, primary_email=primary_email)
             print("  ✓ Slack notified")
         except Exception as e:
             print(f"  ⚠️  Slack failed: {e}")
@@ -2439,6 +2457,10 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
     print(f"\n✅ COMPLETE — {run_id}")
     print(f"   Preview: {report_url}?preview=1")
     print(f"   Live:    {report_url}")
+    if ref_token:
+        print(f"   📧 Send this URL: {ref_url}")
+    else:
+        print(f"   ⚠️  No email in CSV — SmartLead tracking disabled (add 'emails' column)")
     if app_url:
         print(f"   App:     {app_url}")
     print(f"   Files: {', '.join(file_list)}")
@@ -2448,6 +2470,8 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         "status": "completed",
         "website": website,
         "report_url": report_url,
+        "ref_url": ref_url,
+        "primary_email": primary_email,
         "gamma_url": report_url,   # shim — CSV column kept for backward compat
         "keywords_count": len(phase2_data.get("keywords", [])),
         "quick_wins": semrush.get("quick_wins_count", 0),
