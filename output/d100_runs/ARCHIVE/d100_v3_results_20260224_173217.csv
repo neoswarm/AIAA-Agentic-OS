@@ -1,6 +1,0 @@
-website,status,error
-https://sccimed.org,failed,"Expecting ',' delimiter: line 214 column 426 (char 8940)"
-https://integrativemediowa.com,failed,Unterminated string starting at: line 289 column 7 (char 27487)
-https://enhancedwellnessliving.com,failed,Unterminated string starting at: line 288 column 7 (char 29780)
-https://rebelmednw.com,failed,Expecting property name enclosed in double quotes: line 265 column 31 (char 29523)
-https://aliveandwell.health,failed,Expecting value: line 332 column 9 (char 29553)

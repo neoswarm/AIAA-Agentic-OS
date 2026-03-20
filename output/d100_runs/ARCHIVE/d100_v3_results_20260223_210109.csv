@@ -1,2 +1,0 @@
-website,status,error
-https://forumhealth.com/,failed,"Gamma API HTTP 400: {""message"":""Input validation errors: 1. property additionalInstructions should not exist"",""statusCode"":400}"

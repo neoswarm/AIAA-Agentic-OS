@@ -27,3 +27,8 @@ aiaa-agentic-os-*.json
 
 # Ralphy local worktrees
 .ralphy-worktrees/
+
+# Output / build artifacts (code only in git)
+output/
+app-dist/
+vercel-dist/

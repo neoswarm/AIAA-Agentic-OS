@@ -1,4 +1,0 @@
-I need the [SERVICES] and [CONDITIONS] information to generate your keyword list. Please provide:
-1. **[SERVICES]**: List the medical services offered (e.g., primary care, cardiology, dermatology, urgent care, etc.)
-2. **[CONDITIONS]**: List the conditions treated (e.g., diabetes, hypertension, acne, back pain, etc.)
-Once you provide this information, I'll generate a comprehensive list of up to 100 unique, high-intent keywords following all the specified rules and categories for your BrightLocal setup.

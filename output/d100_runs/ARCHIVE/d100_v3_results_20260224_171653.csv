@@ -1,6 +1,0 @@
-website,status,error
-https://sccimed.org,failed,ANTHROPIC_API_KEY not found in .env
-https://integrativemediowa.com,failed,ANTHROPIC_API_KEY not found in .env
-https://enhancedwellnessliving.com,failed,ANTHROPIC_API_KEY not found in .env
-https://rebelmednw.com,failed,ANTHROPIC_API_KEY not found in .env
-https://aliveandwell.health,failed,ANTHROPIC_API_KEY not found in .env

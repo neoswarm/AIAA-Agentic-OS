@@ -1,8 +1,0 @@
-{
-  "ai_status": "BLOCKING AI",
-  "blocked_crawlers": [
-    "GPTBot"
-  ],
-  "llms_txt": "NOT FOUND",
-  "sitemap_urls": 5
-}
