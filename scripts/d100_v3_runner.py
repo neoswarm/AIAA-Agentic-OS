@@ -2017,9 +2017,10 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
     # booking_url and semrush_csv are auto-resolved — not required in CSV
     semrush_csv = row.get("semrush_csv", "")
 
-    # Extract primary email from CSV emails column for SmartLead ?ref= tracking
-    raw_emails = row.get("emails", "").strip()
-    primary_email = raw_emails.split(",")[0].strip() if raw_emails else ""
+    # Extract emails — accepts both 'emails' and 'email' column names
+    raw_emails = row.get("emails", row.get("email", "")).strip()
+    all_emails = [e.strip() for e in raw_emails.split(",") if e.strip()]
+    primary_email = all_emails[0] if all_emails else ""
     ref_token = base64.b64encode(primary_email.encode()).decode() if primary_email else ""
 
     # Support resuming from an existing run_dir (for --phase1-only → SEO step → phase2-4 flow)
@@ -2472,6 +2473,10 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         "report_url": report_url,
         "ref_url": ref_url,
         "primary_email": primary_email,
+        "all_emails": all_emails,
+        "clinic_name": row.get("clinic_name", row.get("context", "")).split(",")[0].strip(),
+        "decision_maker": row.get("decision_maker", ""),
+        "linkedin": row.get("linkedin", ""),
         "gamma_url": report_url,   # shim — CSV column kept for backward compat
         "keywords_count": len(phase2_data.get("keywords", [])),
         "quick_wins": semrush.get("quick_wins_count", 0),
@@ -2675,6 +2680,45 @@ def main():
             writer.writeheader()
             writer.writerows(results)
         print(f"\n📊 Results written: {results_path}")
+
+    # ── SmartLead master import CSV (one row per contact) ─────────────────────
+    sl_rows = []
+    for r in results:
+        if r.get("status") != "completed":
+            continue
+        base_url = r.get("report_url", "")
+        all_emails = r.get("all_emails") or ([r["primary_email"]] if r.get("primary_email") else [])
+        decision_makers = [dm.strip() for dm in r.get("decision_maker", "").split(",") if dm.strip()]
+        clinic = r.get("clinic_name", "") or r.get("website", "")
+        website = r.get("website", "")
+        linkedin = r.get("linkedin", "")
+        for idx, email in enumerate(all_emails):
+            # Parse first/last from decision_maker positionally
+            dm = decision_makers[idx] if idx < len(decision_makers) else (decision_makers[0] if decision_makers else "")
+            # Strip titles (Dr., MD, ND, etc.)
+            dm_clean = re.sub(r"\b(Dr\.|MD|ND|DO|PA-C|NP|PhD|MPH|ABOIM|IFMCP|DACM|AP|Dipl\.OM|CFMP|ABPMR|ABPMR|FNP-BC|Board-Certified[^,]*)\b", "", dm).strip().strip(",").strip()
+            parts = dm_clean.split()
+            first = parts[0] if parts else ""
+            last = " ".join(parts[1:]) if len(parts) > 1 else ""
+            ref = base64.b64encode(email.encode()).decode()
+            ref_url = f"{base_url}?ref={ref}" if base_url else ""
+            sl_rows.append({
+                "email": email,
+                "first_name": first,
+                "last_name": last,
+                "company_name": clinic,
+                "website": website,
+                "report_url": ref_url,
+                "linkedin": linkedin,
+            })
+    if sl_rows:
+        sl_path = OUTPUT_ROOT / f"smartlead_import_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        sl_fields = ["email", "first_name", "last_name", "company_name", "website", "report_url", "linkedin"]
+        with open(sl_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=sl_fields, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(sl_rows)
+        print(f"📧 SmartLead import CSV: {sl_path} ({len(sl_rows)} contacts)")
 
     success = sum(1 for r in results if r.get("status") in ("completed", "submitted", "skipped_checkpoint", "phase1_complete", "dry_run"))
     print(f"\n{'='*60}")

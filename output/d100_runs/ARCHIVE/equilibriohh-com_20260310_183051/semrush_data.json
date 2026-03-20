@@ -1,0 +1,81 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 3304568,
+  "unique_keywords": 19,
+  "estimated_traffic": 129,
+  "traffic_value": 0,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 0,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 2,
+  "pos2_3_count": 1,
+  "pos4_10_count": 2,
+  "pos11_20_count": 0,
+  "pos1_3_count": 3,
+  "quick_wins_count": 0,
+  "top_quick_wins": [],
+  "top3_sample": [
+    {
+      "keyword": "equilibrio home health of virginia",
+      "position": 1,
+      "volume": 140
+    }
+  ],
+  "top_by_volume": [
+    {
+      "keyword": "equilibrio home health of virginia",
+      "position": 1,
+      "volume": 140,
+      "kd": 32.0
+    },
+    {
+      "keyword": "equilibrio home health",
+      "position": 5,
+      "volume": 40,
+      "kd": 0.0
+    },
+    {
+      "keyword": "equilibrio home health",
+      "position": 4,
+      "volume": 40,
+      "kd": 0.0
+    },
+    {
+      "keyword": "equilibrio home health",
+      "position": 2,
+      "volume": 40,
+      "kd": 0.0
+    },
+    {
+      "keyword": "equilibrio home health",
+      "position": 1,
+      "volume": 40,
+      "kd": 0.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "equilibrio-health.com",
+      "relevance": "0.81",
+      "keywords": 28,
+      "traffic": 0,
+      "traffic_value": 0
+    },
+    {
+      "domain": "equilibrium.healthcare",
+      "relevance": "0.31",
+      "keywords": 16,
+      "traffic": 0,
+      "traffic_value": 0
+    },
+    {
+      "domain": "helpadvisor.com",
+      "relevance": "0.00",
+      "keywords": 123232,
+      "traffic": 40630,
+      "traffic_value": 209747
+    }
+  ]
+}

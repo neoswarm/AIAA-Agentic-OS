@@ -1,0 +1,738 @@
+{
+  "run_id": "fmcofnj-com_20260320_111643",
+  "website": "https://fmcofnj.com",
+  "context": "",
+  "raw_scrape": "## PAGE: https://fmcofnj.com\n\nFunctional Medicine Center of New Jersey | Root Cause Medicine in Saddle River, NJ\n\n---\n\n## PAGE: https://fmcofnj.com/about/\n\nFunctional Medicine Center of New Jersey | Why Choose the Functional Medicine Center of New Jersey\n\n---\n\n## PAGE: https://fmcofnj.com/services/\n\nFunctional Medicine Center of New Jersey | Our Services &amp; Healing Therapies\n\n---\n\n## PAGE: https://fmcofnj.com/team/\n\nFunctional Medicine Center of New Jersey | Meet Our Health Experts\n\n---\n\n## PAGE: https://fmcofnj.com/new-patients/\n\nERROR: HTTP Error 404: Not Found\n\n---\n\n## PAGE: https://fmcofnj.com/functional-medicine/\n\nFunctional Medicine Center of New Jersey | The Functional Medicine Difference | Root-Cause Care in New Jersey\n\n---\n\n## PAGE: https://fmcofnj.com/weight-loss/\n\nFunctional Medicine Center of New Jersey | Manage Weight &amp; Insulin Resistance Effectively\n\n---\n\n## PAGE: https://fmcofnj.com/hormone/\n\nERROR: HTTP Error 404: Not Found\n\n---\n\n## PAGE: https://fmcofnj.com/contact/\n\nFunctional Medicine Center of New Jersey | Get in Touch for Functional Medicine Solutions",
+  "semrush": {
+    "source": "dataforseo",
+    "domain_rank": 0,
+    "referring_domains": 0,
+    "avg_position": 9.7,
+    "unique_keywords": 250,
+    "estimated_traffic": 4727,
+    "traffic_value": 887,
+    "clinical_traffic_value": 16605,
+    "serp_features_traffic": 0,
+    "serp_features_value": 0,
+    "ai_overview_serp_count": 134,
+    "ai_overview_cited_count": 61,
+    "pos1_count": 8,
+    "pos2_3_count": 7,
+    "pos4_10_count": 16,
+    "pos11_20_count": 28,
+    "pos1_3_count": 15,
+    "quick_wins_count": 7,
+    "top_quick_wins": [
+      {
+        "keyword": "root cause medicine",
+        "position": 8,
+        "volume": 1300,
+        "kd": 7.0,
+        "cpc": 6.539999961853027
+      },
+      {
+        "keyword": "functional medicine new jersey",
+        "position": 4,
+        "volume": 590,
+        "kd": 18.0,
+        "cpc": 4.110000133514404
+      },
+      {
+        "keyword": "functional doctor nj",
+        "position": 4,
+        "volume": 320,
+        "kd": 14.0,
+        "cpc": 4.800000190734863
+      },
+      {
+        "keyword": "holistic doctor nj",
+        "position": 5,
+        "volume": 320,
+        "kd": 6.0,
+        "cpc": 4.320000171661377
+      },
+      {
+        "keyword": "the functional medicine center",
+        "position": 7,
+        "volume": 320,
+        "kd": 22.0,
+        "cpc": 2.3399999141693115
+      },
+      {
+        "keyword": "does honey help immune system",
+        "position": 9,
+        "volume": 90,
+        "kd": 35.0,
+        "cpc": 3.950000047683716
+      },
+      {
+        "keyword": "new jersey functional medicine",
+        "position": 8,
+        "volume": 70,
+        "kd": 9.0,
+        "cpc": 2.0299999713897705
+      }
+    ],
+    "top3_sample": [
+      {
+        "keyword": "the functional medicine center of new jersey",
+        "position": 1,
+        "volume": 390,
+        "kd": 9.0,
+        "cpc": 1.1299999952316284
+      },
+      {
+        "keyword": "functional doctors in nj",
+        "position": 3,
+        "volume": 320,
+        "kd": 10.0,
+        "cpc": 4.800000190734863
+      },
+      {
+        "keyword": "functional medicine nj",
+        "position": 3,
+        "volume": 320,
+        "kd": 11.0,
+        "cpc": 4.800000190734863
+      },
+      {
+        "keyword": "nj functional medicine",
+        "position": 2,
+        "volume": 320,
+        "kd": 11.0,
+        "cpc": 4.800000190734863
+      },
+      {
+        "keyword": "functional medicine center of nj",
+        "position": 1,
+        "volume": 260,
+        "kd": 13.0,
+        "cpc": 5.25
+      },
+      {
+        "keyword": "dr nicole anderson",
+        "position": 1,
+        "volume": 110,
+        "kd": 0.0,
+        "cpc": 2.4800000190734863
+      },
+      {
+        "keyword": "a better alternative medical center",
+        "position": 3,
+        "volume": 70,
+        "kd": 3.0,
+        "cpc": 0.0
+      },
+      {
+        "keyword": "functional medicine center of new jersey",
+        "position": 1,
+        "volume": 70,
+        "kd": 2.0,
+        "cpc": 4.630000114440918
+      },
+      {
+        "keyword": "functional medicine saddle river nj",
+        "position": 1,
+        "volume": 70,
+        "kd": 0.0,
+        "cpc": 18.399999618530273
+      },
+      {
+        "keyword": "functional medicine of nj",
+        "position": 1,
+        "volume": 50,
+        "kd": 15.0,
+        "cpc": 2.1600000858306885
+      }
+    ],
+    "top_by_volume": [
+      {
+        "keyword": "functional doctors near me",
+        "position": 68,
+        "volume": 49500,
+        "kd": 56.0,
+        "cpc": 4.409999847412109
+      },
+      {
+        "keyword": "benefits of cinnamon spice",
+        "position": 80,
+        "volume": 18100,
+        "kd": 37.0,
+        "cpc": 0.07999999821186066
+      },
+      {
+        "keyword": "functional medicine.near me",
+        "position": 92,
+        "volume": 18100,
+        "kd": 20.0,
+        "cpc": 4.0
+      },
+      {
+        "keyword": "functional medicine doctors near me",
+        "position": 40,
+        "volume": 6600,
+        "kd": 15.0,
+        "cpc": 3.549999952316284
+      },
+      {
+        "keyword": "functional medicine doctors near.me",
+        "position": 50,
+        "volume": 6600,
+        "kd": 9.0,
+        "cpc": 3.549999952316284
+      },
+      {
+        "keyword": "pemf therapy near me",
+        "position": 82,
+        "volume": 2400,
+        "kd": 0.0,
+        "cpc": 5.150000095367432
+      },
+      {
+        "keyword": "gastrointestinal detoxification",
+        "position": 28,
+        "volume": 1600,
+        "kd": 16.0,
+        "cpc": 1.159999966621399
+      },
+      {
+        "keyword": "integrative and functional medicine",
+        "position": 75,
+        "volume": 1600,
+        "kd": 24.0,
+        "cpc": 4.670000076293945
+      },
+      {
+        "keyword": "sot treatment",
+        "position": 11,
+        "volume": 1600,
+        "kd": 0.0,
+        "cpc": 4.210000038146973
+      },
+      {
+        "keyword": "cardio metabolic disease",
+        "position": 68,
+        "volume": 1300,
+        "kd": 7.0,
+        "cpc": 5.920000076293945
+      },
+      {
+        "keyword": "cardio metabolic diseases",
+        "position": 62,
+        "volume": 1300,
+        "kd": 11.0,
+        "cpc": 5.920000076293945
+      },
+      {
+        "keyword": "cardiometabolic disease",
+        "position": 82,
+        "volume": 1300,
+        "kd": 7.0,
+        "cpc": 5.920000076293945
+      },
+      {
+        "keyword": "root cause medicine",
+        "position": 8,
+        "volume": 1300,
+        "kd": 7.0,
+        "cpc": 6.539999961853027
+      },
+      {
+        "keyword": "what is sot",
+        "position": 20,
+        "volume": 1300,
+        "kd": 6.0,
+        "cpc": 0.0
+      },
+      {
+        "keyword": "dr fuksina",
+        "position": 47,
+        "volume": 880,
+        "kd": 3.0,
+        "cpc": 5.179999828338623
+      },
+      {
+        "keyword": "hyperbaric oxygen chambers near me",
+        "position": 70,
+        "volume": 880,
+        "kd": 7.0,
+        "cpc": 3.8600001335144043
+      },
+      {
+        "keyword": "mold exposure doctor",
+        "position": 27,
+        "volume": 880,
+        "kd": 7.0,
+        "cpc": 4.230000019073486
+      },
+      {
+        "keyword": "cardio metabolic health",
+        "position": 58,
+        "volume": 590,
+        "kd": 16.0,
+        "cpc": 4.519999980926514
+      },
+      {
+        "keyword": "cardio-metabolic health",
+        "position": 43,
+        "volume": 590,
+        "kd": 11.0,
+        "cpc": 4.519999980926514
+      },
+      {
+        "keyword": "cardiometabolic health",
+        "position": 53,
+        "volume": 590,
+        "kd": 9.0,
+        "cpc": 4.519999980926514
+      }
+    ],
+    "competitors": [
+      {
+        "domain": "www.ifm.org",
+        "avg_position": 5,
+        "intersections": 0,
+        "keywords": 44373,
+        "traffic": 449841,
+        "traffic_value": 449841,
+        "source": "serp",
+        "serp_keyword": "functional doctors near me",
+        "serp_label": "fallback",
+        "url": "http://www.ifm.org/find-a-practitioner",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "www.aurorahealthcare.org",
+        "avg_position": 6,
+        "intersections": 0,
+        "keywords": 309427,
+        "traffic": 5680224,
+        "traffic_value": 5680224,
+        "source": "serp",
+        "serp_keyword": "functional doctors near me",
+        "serp_label": "fallback",
+        "url": "https://www.aurorahealthcare.org/services/integrative-medicine/consultations",
+        "competitor_type": "health_system"
+      },
+      {
+        "domain": "hmlfunctionalcare.com",
+        "avg_position": 7,
+        "intersections": 0,
+        "keywords": 943,
+        "traffic": 5437,
+        "traffic_value": 5437,
+        "source": "serp",
+        "serp_keyword": "functional doctors near me",
+        "serp_label": "fallback",
+        "url": "https://hmlfunctionalcare.com/functional-medicine/",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "my.clevelandclinic.org",
+        "avg_position": 8,
+        "intersections": 0,
+        "keywords": 5618083,
+        "traffic": 525639844,
+        "traffic_value": 525639844,
+        "source": "serp",
+        "serp_keyword": "functional doctors near me",
+        "serp_label": "fallback",
+        "url": "https://my.clevelandclinic.org/departments/functional-medicine",
+        "competitor_type": "health_system"
+      },
+      {
+        "domain": "inhstl.com",
+        "avg_position": 9,
+        "intersections": 0,
+        "keywords": 2041,
+        "traffic": 7618,
+        "traffic_value": 7618,
+        "source": "serp",
+        "serp_keyword": "functional doctors near me",
+        "serp_label": "fallback",
+        "url": "https://inhstl.com/",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "www.yelp.com",
+        "avg_position": 10,
+        "intersections": 0,
+        "keywords": 0,
+        "traffic": 0,
+        "traffic_value": 0,
+        "source": "serp",
+        "serp_keyword": "functional doctors near me",
+        "serp_label": "fallback",
+        "url": "https://www.yelp.com/biz/the-functional-medicine-md-knoxville",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "www.adventhealth.com",
+        "avg_position": 11,
+        "intersections": 0,
+        "keywords": 0,
+        "traffic": 0,
+        "traffic_value": 0,
+        "source": "serp",
+        "serp_keyword": "functional doctors near me",
+        "serp_label": "fallback",
+        "url": "https://www.adventhealth.com/adventhealth-whole-health-institute",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "www.wildrootswellness.com",
+        "avg_position": 12,
+        "intersections": 0,
+        "keywords": 0,
+        "traffic": 0,
+        "traffic_value": 0,
+        "source": "serp",
+        "serp_keyword": "functional doctors near me",
+        "serp_label": "fallback",
+        "url": "https://www.wildrootswellness.com/functional-medicine/",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "account.allinahealth.org",
+        "avg_position": 13,
+        "intersections": 0,
+        "keywords": 0,
+        "traffic": 0,
+        "traffic_value": 0,
+        "source": "serp",
+        "serp_keyword": "functional doctors near me",
+        "serp_label": "fallback",
+        "url": "https://account.allinahealth.org/services/857",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "fmcofnj.com",
+        "avg_position": 0.0,
+        "intersections": 250,
+        "keywords": 250,
+        "traffic": 887,
+        "traffic_value": 887,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "facebook.com",
+        "avg_position": 0.0,
+        "intersections": 196,
+        "keywords": 196,
+        "traffic": 591,
+        "traffic_value": 591,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "youtube.com",
+        "avg_position": 0.0,
+        "intersections": 184,
+        "keywords": 184,
+        "traffic": 287,
+        "traffic_value": 287,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "instagram.com",
+        "avg_position": 0.0,
+        "intersections": 164,
+        "keywords": 164,
+        "traffic": 580,
+        "traffic_value": 580,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "nih.gov",
+        "avg_position": 0.0,
+        "intersections": 140,
+        "keywords": 140,
+        "traffic": 340,
+        "traffic_value": 340,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "clevelandclinic.org",
+        "avg_position": 0.0,
+        "intersections": 116,
+        "keywords": 116,
+        "traffic": 547,
+        "traffic_value": 547,
+        "source": "keyword_overlap",
+        "competitor_type": "health_system"
+      },
+      {
+        "domain": "webmd.com",
+        "avg_position": 0.0,
+        "intersections": 110,
+        "keywords": 110,
+        "traffic": 135,
+        "traffic_value": 135,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "yelp.com",
+        "avg_position": 0.0,
+        "intersections": 103,
+        "keywords": 103,
+        "traffic": 730,
+        "traffic_value": 730,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "healthline.com",
+        "avg_position": 0.0,
+        "intersections": 102,
+        "keywords": 102,
+        "traffic": 99,
+        "traffic_value": 99,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "mayoclinic.org",
+        "avg_position": 0.0,
+        "intersections": 93,
+        "keywords": 93,
+        "traffic": 404,
+        "traffic_value": 404,
+        "source": "keyword_overlap",
+        "competitor_type": "health_system"
+      },
+      {
+        "domain": "reddit.com",
+        "avg_position": 0.0,
+        "intersections": 86,
+        "keywords": 86,
+        "traffic": 158,
+        "traffic_value": 158,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "quora.com",
+        "avg_position": 0.0,
+        "intersections": 80,
+        "keywords": 80,
+        "traffic": 73,
+        "traffic_value": 73,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "ifm.org",
+        "avg_position": 0.0,
+        "intersections": 77,
+        "keywords": 77,
+        "traffic": 741,
+        "traffic_value": 741,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "healthgrades.com",
+        "avg_position": 0.0,
+        "intersections": 63,
+        "keywords": 63,
+        "traffic": 214,
+        "traffic_value": 214,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "atlantichealth.org",
+        "avg_position": 0.0,
+        "intersections": 63,
+        "keywords": 63,
+        "traffic": 504,
+        "traffic_value": 504,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "wikipedia.org",
+        "avg_position": 0.0,
+        "intersections": 63,
+        "keywords": 63,
+        "traffic": 274,
+        "traffic_value": 274,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "medicalnewstoday.com",
+        "avg_position": 0.0,
+        "intersections": 60,
+        "keywords": 60,
+        "traffic": 63,
+        "traffic_value": 63,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "sciencedirect.com",
+        "avg_position": 0.0,
+        "intersections": 60,
+        "keywords": 60,
+        "traffic": 70,
+        "traffic_value": 70,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "princetonih.com",
+        "avg_position": 0.0,
+        "intersections": 55,
+        "keywords": 55,
+        "traffic": 629,
+        "traffic_value": 629,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "mapquest.com",
+        "avg_position": 0.0,
+        "intersections": 52,
+        "keywords": 52,
+        "traffic": 279,
+        "traffic_value": 279,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "verywellhealth.com",
+        "avg_position": 0.0,
+        "intersections": 51,
+        "keywords": 51,
+        "traffic": 59,
+        "traffic_value": 59,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "hackensackmeridianhealth.org",
+        "avg_position": 0.0,
+        "intersections": 50,
+        "keywords": 50,
+        "traffic": 524,
+        "traffic_value": 524,
+        "source": "keyword_overlap",
+        "competitor_type": "health_system"
+      },
+      {
+        "domain": "amazon.com",
+        "avg_position": 0.0,
+        "intersections": 49,
+        "keywords": 49,
+        "traffic": 23,
+        "traffic_value": 23,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "advancedintegratedhealth.com",
+        "avg_position": 0.0,
+        "intersections": 46,
+        "keywords": 46,
+        "traffic": 596,
+        "traffic_value": 596,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "integrativemedicineofnj.com",
+        "avg_position": 0.0,
+        "intersections": 44,
+        "keywords": 44,
+        "traffic": 491,
+        "traffic_value": 491,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "healfm.com",
+        "avg_position": 0.0,
+        "intersections": 42,
+        "keywords": 42,
+        "traffic": 492,
+        "traffic_value": 492,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "medifind.com",
+        "avg_position": 0.0,
+        "intersections": 42,
+        "keywords": 42,
+        "traffic": 220,
+        "traffic_value": 220,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "harvard.edu",
+        "avg_position": 0.0,
+        "intersections": 42,
+        "keywords": 42,
+        "traffic": 61,
+        "traffic_value": 61,
+        "source": "keyword_overlap",
+        "competitor_type": "health_system"
+      },
+      {
+        "domain": "medicinenet.com",
+        "avg_position": 0.0,
+        "intersections": 42,
+        "keywords": 42,
+        "traffic": 58,
+        "traffic_value": 58,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      },
+      {
+        "domain": "njfunctionalmed.com",
+        "avg_position": 0.0,
+        "intersections": 41,
+        "keywords": 41,
+        "traffic": 496,
+        "traffic_value": 496,
+        "source": "keyword_overlap",
+        "competitor_type": "practice"
+      }
+    ],
+    "own_serp_positions": {},
+    "serp_city": "",
+    "serp_state": "",
+    "serp_location_code": 2840,
+    "serp_specialty": "functional medicine"
+  },
+  "crawl": {
+    "llms_txt": "NOT FOUND",
+    "ai_status": "AI ACCESSIBLE",
+    "blocked_crawlers": [],
+    "sitemap_urls": 1
+  },
+  "brand_colors": {
+    "primary": "#8BA3A3",
+    "background": "#FFFFFF",
+    "source": "phase2_app_config",
+    "accent": "#A8BFBF",
+    "secondary": "#5C7A7A"
+  },
+  "name": "Functional Medicine Center of New Jersey",
+  "doctor_name": "Dr. Nicole Anderson & Dr. Kelly Blundy",
+  "booking_url": "https://fmcofnj.com/new-patients/",
+  "logo_url": "",
+  "images": {
+    "logo_url": "",
+    "favicon_url": "https://morphic-images.s3.us-east-2.amazonaws.com/1192/Favicon_df20ef1a2f.png",
+    "hero_url": "",
+    "headshot_url": ""
+  }
+}

@@ -1,0 +1,272 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 1314735,
+  "unique_keywords": 606,
+  "estimated_traffic": 719,
+  "traffic_value": 309,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 25,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 1,
+  "pos2_3_count": 2,
+  "pos4_10_count": 22,
+  "pos11_20_count": 25,
+  "pos1_3_count": 3,
+  "quick_wins_count": 15,
+  "top_quick_wins": [
+    {
+      "keyword": "naturopathic near me",
+      "position": 6,
+      "volume": 4400,
+      "kd": 50.0
+    },
+    {
+      "keyword": "homeopathy for headache",
+      "position": 7,
+      "volume": 1000,
+      "kd": 0.0
+    },
+    {
+      "keyword": "homeopathic remedies for headaches",
+      "position": 9,
+      "volume": 880,
+      "kd": 14.0
+    },
+    {
+      "keyword": "igg vs ige",
+      "position": 8,
+      "volume": 720,
+      "kd": 16.0
+    },
+    {
+      "keyword": "ige vs igg",
+      "position": 7,
+      "volume": 480,
+      "kd": 22.0
+    },
+    {
+      "keyword": "homeopathic remedies for headache",
+      "position": 7,
+      "volume": 480,
+      "kd": 14.0
+    },
+    {
+      "keyword": "natural headache remedy for child",
+      "position": 4,
+      "volume": 390,
+      "kd": 25.0
+    },
+    {
+      "keyword": "naturopathic pediatrician",
+      "position": 8,
+      "volume": 260,
+      "kd": 36.0
+    },
+    {
+      "keyword": "dr stacy sims meal plan",
+      "position": 9,
+      "volume": 260,
+      "kd": 42.0
+    },
+    {
+      "keyword": "homeopathic for headaches",
+      "position": 8,
+      "volume": 210,
+      "kd": 13.0
+    },
+    {
+      "keyword": "headache homeopathic remedy",
+      "position": 6,
+      "volume": 170,
+      "kd": 16.0
+    },
+    {
+      "keyword": "ige versus igg",
+      "position": 10,
+      "volume": 140,
+      "kd": 16.0
+    },
+    {
+      "keyword": "bay area naturopathic medicine",
+      "position": 10,
+      "volume": 140,
+      "kd": 28.0
+    },
+    {
+      "keyword": "functional doctor bay area",
+      "position": 4,
+      "volume": 110,
+      "kd": 45.0
+    },
+    {
+      "keyword": "homeopathy for headaches",
+      "position": 7,
+      "volume": 110,
+      "kd": 11.0
+    }
+  ],
+  "top3_sample": [
+    {
+      "keyword": "peninsula integrative medicine",
+      "position": 1,
+      "volume": 480
+    },
+    {
+      "keyword": "iga vs ige",
+      "position": 2,
+      "volume": 170
+    },
+    {
+      "keyword": "ige vs iga",
+      "position": 2,
+      "volume": 170
+    }
+  ],
+  "top_by_volume": [
+    {
+      "keyword": "naturopathic near me",
+      "position": 6,
+      "volume": 4400,
+      "kd": 50.0
+    },
+    {
+      "keyword": "homeopathic remedy for headache",
+      "position": 11,
+      "volume": 2900,
+      "kd": 26.0
+    },
+    {
+      "keyword": "homeopathy for headache",
+      "position": 7,
+      "volume": 1000,
+      "kd": 0.0
+    },
+    {
+      "keyword": "homeopathic remedies for headaches",
+      "position": 9,
+      "volume": 880,
+      "kd": 14.0
+    },
+    {
+      "keyword": "igg vs ige",
+      "position": 8,
+      "volume": 720,
+      "kd": 16.0
+    },
+    {
+      "keyword": "ige vs igg",
+      "position": 7,
+      "volume": 480,
+      "kd": 22.0
+    },
+    {
+      "keyword": "homeopathic remedies for headache",
+      "position": 7,
+      "volume": 480,
+      "kd": 14.0
+    },
+    {
+      "keyword": "peninsula integrative medicine",
+      "position": 1,
+      "volume": 480,
+      "kd": 44.0
+    },
+    {
+      "keyword": "natural headache remedy for child",
+      "position": 4,
+      "volume": 390,
+      "kd": 25.0
+    },
+    {
+      "keyword": "peninsula alternative health reviews",
+      "position": 14,
+      "volume": 320,
+      "kd": 16.0
+    },
+    {
+      "keyword": "naturopathic pediatrician",
+      "position": 8,
+      "volume": 260,
+      "kd": 36.0
+    },
+    {
+      "keyword": "dr stacy sims meal plan",
+      "position": 9,
+      "volume": 260,
+      "kd": 42.0
+    },
+    {
+      "keyword": "igg vs iga",
+      "position": 14,
+      "volume": 260,
+      "kd": 62.0
+    },
+    {
+      "keyword": "dr amina",
+      "position": 17,
+      "volume": 210,
+      "kd": 38.0
+    },
+    {
+      "keyword": "peninsula natural health",
+      "position": 18,
+      "volume": 210,
+      "kd": 8.0
+    },
+    {
+      "keyword": "dr torrens",
+      "position": 16,
+      "volume": 210,
+      "kd": 28.0
+    },
+    {
+      "keyword": "homeopathic for headaches",
+      "position": 8,
+      "volume": 210,
+      "kd": 13.0
+    },
+    {
+      "keyword": "peninsula natural health center",
+      "position": 15,
+      "volume": 210,
+      "kd": 22.0
+    },
+    {
+      "keyword": "pediatric natural doctor",
+      "position": 18,
+      "volume": 210,
+      "kd": 0.0
+    },
+    {
+      "keyword": "apple cider vinegar for allergies",
+      "position": 17,
+      "volume": 210,
+      "kd": 9.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "frederickcountyhomesteaders.com",
+      "relevance": "0.10",
+      "keywords": 162,
+      "traffic": 506,
+      "traffic_value": 26
+    },
+    {
+      "domain": "naturalchef.com",
+      "relevance": "0.10",
+      "keywords": 155,
+      "traffic": 48,
+      "traffic_value": 0
+    },
+    {
+      "domain": "ancorawellness.com",
+      "relevance": "0.09",
+      "keywords": 321,
+      "traffic": 196,
+      "traffic_value": 39
+    }
+  ]
+}

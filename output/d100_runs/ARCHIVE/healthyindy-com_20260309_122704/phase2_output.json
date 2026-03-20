@@ -1,0 +1,335 @@
+{
+  "keywords": [
+    "functional medicine indianapolis",
+    "iv therapy indianapolis",
+    "holistic doctor indianapolis",
+    "integrative medicine indianapolis",
+    "anti aging indianapolis",
+    "naturopathic doctor indianapolis",
+    "functional medicine doctor indianapolis",
+    "hormone replacement therapy indianapolis",
+    "iv vitamin therapy indianapolis",
+    "root cause medicine indianapolis",
+    "integrative health specialists indiana",
+    "myers cocktail indianapolis",
+    "glutathione iv indianapolis",
+    "functional medicine near me",
+    "holistic medicine indianapolis",
+    "chronic fatigue treatment indianapolis",
+    "hormone specialist indianapolis",
+    "thyroid specialist indianapolis",
+    "gut health doctor indianapolis",
+    "autoimmune specialist indianapolis",
+    "weight loss indianapolis",
+    "migraine treatment indianapolis",
+    "heavy metal detox indianapolis",
+    "immune boost iv indianapolis",
+    "wellness clinic indianapolis",
+    "integrative health near me",
+    "functional nutrition indianapolis",
+    "bioidentical hormones indianapolis",
+    "chelation therapy indianapolis",
+    "rhonda marsh indianapolis"
+  ],
+  "ads": [
+    {
+      "campaign_name": "Functional Medicine - High Intent",
+      "target_audience": "Indianapolis residents searching for functional medicine, integrative care, and root-cause health solutions",
+      "headlines": [
+        "Functional Medicine Indy",
+        "Find Your Root Cause",
+        "Insurance Accepted",
+        "Same-Week Appointments",
+        "25 Years Serving Indy"
+      ],
+      "descriptions": [
+        "Uncover why you feel unwell. Personalized functional medicine from Rhonda Marsh NP. Most insurance accepted.",
+        "Stop treating symptoms. Address root causes with personalized care. Book your visit today at HealthyIndy."
+      ],
+      "keywords": [
+        "[functional medicine indianapolis]",
+        "[integrative medicine indianapolis]",
+        "\"functional medicine doctor indianapolis\"",
+        "\"holistic doctor indianapolis\"",
+        "root cause medicine indianapolis",
+        "integrative health indianapolis",
+        "functional doctor near me",
+        "holistic medicine indianapolis"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Insurance Accepted",
+          "Root Cause Approach",
+          "Same-Week Visits",
+          "25 Years Experience"
+        ],
+        "Sitelink Extensions": [
+          "New Patients | What to expect at your first visit",
+          "IV Therapy | Personalized vitamin blends in under an hour",
+          "Our Approach | Why functional medicine works differently"
+        ]
+      }
+    },
+    {
+      "campaign_name": "IV Therapy - Cash Pay Services",
+      "target_audience": "Health-conscious Indianapolis residents seeking IV vitamin therapy, detox, energy boost, and wellness treatments",
+      "headlines": [
+        "IV Therapy Indianapolis",
+        "Energy & Detox IVs",
+        "Myers Cocktail Available",
+        "Under 1 Hour Sessions",
+        "Glutathione IV Therapy"
+      ],
+      "descriptions": [
+        "Personalized IV vitamin therapy in under an hour. Myers, Glutathione, Immune Boost & more. Book today.",
+        "Feel nourished and ready to shine. Targeted IV blends for energy, detox, migraines & immunity."
+      ],
+      "keywords": [
+        "[iv therapy indianapolis]",
+        "[myers cocktail indianapolis]",
+        "\"glutathione iv indianapolis\"",
+        "\"iv vitamin therapy indianapolis\"",
+        "immune boost iv indianapolis",
+        "migraine iv treatment indianapolis",
+        "detox iv therapy indianapolis",
+        "wellness iv indianapolis"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Under 1 Hour Sessions",
+          "Personalized Blends",
+          "Experienced RN Team",
+          "Walk-Ins Welcome"
+        ],
+        "Sitelink Extensions": [
+          "IV Menu | Myers, Glutathione, Immune Boost & more",
+          "Book IV Session | Quick online scheduling",
+          "First Visit | What to bring and expect"
+        ]
+      }
+    },
+    {
+      "campaign_name": "Hormone & Anti-Aging",
+      "target_audience": "Adults 35+ experiencing fatigue, weight gain, hormone imbalance, or aging symptoms seeking natural solutions",
+      "headlines": [
+        "Hormone Specialist Indy",
+        "Anti-Aging Medicine",
+        "Balance Your Hormones",
+        "Feel Younger & Stronger",
+        "Bioidentical Hormones"
+      ],
+      "descriptions": [
+        "Restore hormone balance naturally. Expert anti-aging care from Rhonda Marsh NP. Insurance accepted.",
+        "Stop settling for fatigue and weight gain. Personalized hormone therapy to help you feel like yourself again."
+      ],
+      "keywords": [
+        "[hormone specialist indianapolis]",
+        "[anti aging indianapolis]",
+        "\"bioidentical hormones indianapolis\"",
+        "hormone replacement therapy indianapolis",
+        "thyroid specialist indianapolis",
+        "menopause treatment indianapolis",
+        "testosterone therapy indianapolis",
+        "hormone imbalance treatment"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Anti-Aging Diplomate",
+          "Insurance Accepted",
+          "Personalized Plans",
+          "25 Years Experience"
+        ],
+        "Sitelink Extensions": [
+          "Hormone Services | Balance, energy & vitality restored",
+          "Schedule Consult | Meet with Rhonda Marsh NP",
+          "Patient Forms | Complete forms before your visit"
+        ]
+      }
+    }
+  ],
+  "emails": [
+    {
+      "email_number": 1,
+      "type": "smart_practice_value_drop",
+      "subject": "Why [PRIMARY_SYMPTOM] might not be the real problem",
+      "preview": "Your body is giving you important clues",
+      "body": "Hi [FIRST_NAME],\n\nThank you for completing your health assessment. I wanted to reach out personally because [PRIMARY_SYMPTOM] can be really frustrating—especially when standard treatments only provide temporary relief.\n\nHere's what most people don't realize: [PRIMARY_SYMPTOM] is often a signal, not the source. Your assessment revealed [KEY_ASSESSMENT_INSIGHT], which suggests there may be an underlying imbalance that conventional care typically doesn't address.\n\nAt Healthy Indy, we don't just manage symptoms. We work to identify why they're happening in the first place—looking at hormone balance, nutrient deficiencies, inflammation, and metabolic health—so you can experience lasting improvement.\n\nIf you're ready to get real answers, we'd love to help. Our next availability is within the same week, and we accept most insurance plans.\n\n[BOOKING_LINK]\n\nWarm regards,\nThe Care Team at Healthy Indy",
+      "cta_text": "Book Your Visit",
+      "cta_url": "https://healthyindy.com/new-patients/"
+    },
+    {
+      "email_number": 2,
+      "type": "mechanism_story",
+      "subject": "The upstream problem behind [PRIMARY_SYMPTOM]",
+      "preview": "Think of your body like a river system",
+      "body": "Hi [FIRST_NAME],\n\nI want to share a simple way to think about what might be driving [PRIMARY_SYMPTOM].\n\nImagine your body like a river. When you see algae blooms downstream, you could scoop them out every day—or you could go upstream and find out what's creating the conditions for algae to grow in the first place. Maybe it's runoff. Maybe it's temperature. Maybe it's stagnant flow.\n\nMost conventional care focuses downstream: managing the bloom. Functional medicine goes upstream: restoring balance so the bloom doesn't keep coming back.\n\nBased on your assessment, [RECOMMENDED_SERVICE_OR_FOCUS] may help us address what's happening upstream for you—whether that's hormone signaling, gut barrier health, detox pathways, or chronic inflammation.\n\nResults vary by person, but our approach is designed to give your body what it needs to function the way it's meant to.\n\nReady to go upstream?\n\n[BOOKING_LINK]\n\nRhonda Marsh, NP and the Healthy Indy Team",
+      "cta_text": "Schedule Your Appointment",
+      "cta_url": "https://healthyindy.com/new-patients/"
+    },
+    {
+      "email_number": 3,
+      "type": "proof_and_results",
+      "subject": "A patient story that might sound familiar",
+      "preview": "She had the same symptom you listed",
+      "body": "Hi [FIRST_NAME],\n\nI wanted to share a quick story from our practice that reminded me of your assessment.\n\nA patient came to us last year dealing with [PRIMARY_SYMPTOM], along with fatigue and brain fog. She'd tried multiple specialists and felt like she was just collecting prescriptions without getting better.\n\nWhen we dug into her labs and health history, we found subclinical thyroid dysfunction and nutrient deficiencies that standard testing had missed. We addressed those through [RECOMMENDED_SERVICE_OR_FOCUS], and within three months, her energy returned, her symptoms improved significantly, and she felt like herself again.\n\nEvery person is different, and results vary—but when we focus on root causes instead of just managing symptoms, real change becomes possible.\n\nIf her story resonates with you, we'd be honored to work with you too. We have same-week availability and accept most insurance.\n\n[BOOKING_LINK]\n\nLooking forward to meeting you,\nHealthy Indy Care Team",
+      "cta_text": "Book My Appointment",
+      "cta_url": "https://healthyindy.com/new-patients/"
+    }
+  ],
+  "app_config": {
+    "practiceName": "Integrative Health Specialists of Indiana",
+    "practiceShortName": "Healthy Indy",
+    "providerName": "Rhonda J. Marsh",
+    "providerTitle": "NP, Anti-Aging Diplomate",
+    "tagline": "Refresh · Restore · Revive",
+    "primaryColor": "#0D3749",
+    "primaryDark": "#081E28",
+    "primaryLight": "#1A5570",
+    "primaryXLight": "#E8EEF1",
+    "backgroundColor": "#FFFFFF",
+    "bookingUrl": "https://healthyindy.com/new-patients/",
+    "phone": "317-580-9333",
+    "concerns": [
+      {
+        "label": "Chronic Fatigue",
+        "emoji": "😴"
+      },
+      {
+        "label": "Hormone Imbalance",
+        "emoji": "⚖️"
+      },
+      {
+        "label": "Digestive Issues",
+        "emoji": "🥗"
+      },
+      {
+        "label": "Brain Fog",
+        "emoji": "🌫️"
+      },
+      {
+        "label": "Weight Struggles",
+        "emoji": "⚖️"
+      },
+      {
+        "label": "Low Energy",
+        "emoji": "🔋"
+      },
+      {
+        "label": "Thyroid Problems",
+        "emoji": "🦋"
+      },
+      {
+        "label": "Autoimmune Symptoms",
+        "emoji": "🛡️"
+      },
+      {
+        "label": "Migraines",
+        "emoji": "🤕"
+      },
+      {
+        "label": "Inflammation",
+        "emoji": "🔥"
+      }
+    ],
+    "symptom_map": {
+      "Chronic Fatigue": [
+        "Exhausted no matter how much I sleep",
+        "Energy crashes in the afternoon",
+        "Too tired to exercise",
+        "Need caffeine just to function",
+        "Wake up feeling unrefreshed",
+        "Can't keep up with daily tasks"
+      ],
+      "Hormone Imbalance": [
+        "Hot flashes or night sweats",
+        "Mood swings or irritability",
+        "Low libido",
+        "Weight gain around the middle",
+        "Irregular or heavy periods",
+        "Trouble sleeping through the night"
+      ],
+      "Digestive Issues": [
+        "Bloating after meals",
+        "Constipation or diarrhea",
+        "Acid reflux or heartburn",
+        "Food sensitivities",
+        "Stomach pain or cramping",
+        "Feeling like food just sits there"
+      ],
+      "Brain Fog": [
+        "Trouble concentrating or focusing",
+        "Forgetting words mid-sentence",
+        "Mental fatigue by midday",
+        "Difficulty making decisions",
+        "Feel like I'm in a haze",
+        "Memory not as sharp as it used to be"
+      ],
+      "Weight Struggles": [
+        "Can't lose weight no matter what I try",
+        "Weight gain despite eating well",
+        "Cravings I can't control",
+        "Losing muscle, gaining fat",
+        "Metabolism feels stuck",
+        "Nothing seems to work anymore"
+      ],
+      "Low Energy": [
+        "Feel drained all day long",
+        "No motivation to do things I used to enjoy",
+        "Rely on coffee or sugar to get through the day",
+        "Feel run down and worn out",
+        "Energy dips after eating",
+        "Can't push through workouts"
+      ],
+      "Thyroid Problems": [
+        "Always cold, especially hands and feet",
+        "Hair thinning or falling out",
+        "Unexplained weight gain",
+        "Dry skin and brittle nails",
+        "Constipation",
+        "Feeling sluggish and slow"
+      ],
+      "Autoimmune Symptoms": [
+        "Joint pain or stiffness",
+        "Skin rashes or flare-ups",
+        "Feeling inflamed all the time",
+        "Chronic pain that moves around",
+        "Swelling in hands or feet",
+        "Fatigue that won't go away"
+      ],
+      "Migraines": [
+        "Severe headaches with light sensitivity",
+        "Nausea or vomiting with headaches",
+        "Visual disturbances before headache starts",
+        "Headaches that last hours or days",
+        "Triggered by stress, food, or hormones",
+        "Pain that disrupts daily life"
+      ],
+      "Inflammation": [
+        "Achy joints or muscles",
+        "Swelling or puffiness",
+        "Chronic pain that won't resolve",
+        "Skin issues like redness or irritation",
+        "Digestive discomfort",
+        "Feel like my body is constantly reacting"
+      ]
+    },
+    "careModels": [
+      {
+        "name": "Functional Medicine Consultation",
+        "desc": "Comprehensive root-cause evaluation with personalized treatment plan. Insurance accepted.",
+        "price": "Covered by most insurance plans"
+      },
+      {
+        "name": "IV Vitamin Therapy",
+        "desc": "Targeted nutrient infusions including Myers Cocktail, Glutathione, Immune Boost, and more.",
+        "price": "Starting at $150 per session"
+      },
+      {
+        "name": "Hormone Optimization",
+        "desc": "Anti-aging and hormone replacement therapy tailored to restore balance and vitality.",
+        "price": "Custom pricing based on treatment plan"
+      }
+    ]
+  },
+  "report_url": "https://healthbizleads.com/integrative-health-specialists-of-indiana/"
+}

@@ -1,0 +1,410 @@
+{
+  "source": "dataforseo",
+  "domain_rank": 0,
+  "unique_keywords": 6938,
+  "estimated_traffic": 127675,
+  "traffic_value": 25032,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 518,
+  "ai_overview_cited_count": 623,
+  "pos1_count": 67,
+  "pos2_3_count": 100,
+  "pos4_10_count": 495,
+  "pos11_20_count": 956,
+  "pos1_3_count": 167,
+  "quick_wins_count": 90,
+  "top_quick_wins": [
+    {
+      "keyword": "gelband",
+      "position": 9,
+      "volume": 9900,
+      "kd": 2.0,
+      "cpc": 0.0
+    },
+    {
+      "keyword": "what are bird dog exercises",
+      "position": 9,
+      "volume": 2900,
+      "kd": 5.0,
+      "cpc": 0.029999999329447746
+    },
+    {
+      "keyword": "what are bird dogs exercise",
+      "position": 5,
+      "volume": 2900,
+      "kd": 0.0,
+      "cpc": 0.029999999329447746
+    },
+    {
+      "keyword": "can massage help a pinched nerve",
+      "position": 7,
+      "volume": 1900,
+      "kd": 0.0,
+      "cpc": 6.559999942779541
+    },
+    {
+      "keyword": "does massage help pinched nerve",
+      "position": 8,
+      "volume": 1900,
+      "kd": 0.0,
+      "cpc": 6.559999942779541
+    },
+    {
+      "keyword": "does menopause cause nausea",
+      "position": 9,
+      "volume": 1900,
+      "kd": 9.0,
+      "cpc": 1.309999942779541
+    },
+    {
+      "keyword": "lincoln square massage",
+      "position": 5,
+      "volume": 1900,
+      "kd": 0.0,
+      "cpc": 6.769999980926514
+    },
+    {
+      "keyword": "massage therapist chicago il",
+      "position": 9,
+      "volume": 1900,
+      "kd": 10.0,
+      "cpc": 3.7699999809265137
+    },
+    {
+      "keyword": "massage therapists chicago",
+      "position": 4,
+      "volume": 1900,
+      "kd": 9.0,
+      "cpc": 2.7300000190734863
+    },
+    {
+      "keyword": "will a massage help a pinched nerve",
+      "position": 9,
+      "volume": 1900,
+      "kd": 0.0,
+      "cpc": 2.569999933242798
+    },
+    {
+      "keyword": "massage therapist in illinois",
+      "position": 6,
+      "volume": 1600,
+      "kd": 0.0,
+      "cpc": 0.029999999329447746
+    },
+    {
+      "keyword": "splenius capitis pain",
+      "position": 4,
+      "volume": 1600,
+      "kd": 0.0,
+      "cpc": 3.5799999237060547
+    },
+    {
+      "keyword": "acupuncture and stress reduction",
+      "position": 8,
+      "volume": 1300,
+      "kd": 24.0,
+      "cpc": 1.9600000381469727
+    },
+    {
+      "keyword": "aligned health and wellness",
+      "position": 9,
+      "volume": 1300,
+      "kd": 19.0,
+      "cpc": 7.329999923706055
+    },
+    {
+      "keyword": "aligned wellness",
+      "position": 8,
+      "volume": 1000,
+      "kd": 6.0,
+      "cpc": 3.690000057220459
+    }
+  ],
+  "top3_sample": [
+    {
+      "keyword": "aligned modern health",
+      "position": 1,
+      "volume": 12100,
+      "kd": 15.0,
+      "cpc": 0.800000011920929
+    },
+    {
+      "keyword": "dr roach",
+      "position": 2,
+      "volume": 6600,
+      "kd": 0.0,
+      "cpc": 5.659999847412109
+    },
+    {
+      "keyword": "acupuncture chicago area",
+      "position": 1,
+      "volume": 2400,
+      "kd": 30.0,
+      "cpc": 5.019999980926514
+    },
+    {
+      "keyword": "acupuncture chicago il",
+      "position": 2,
+      "volume": 2400,
+      "kd": 26.0,
+      "cpc": 6.03000020980835
+    },
+    {
+      "keyword": "acupuncturist chicago il",
+      "position": 3,
+      "volume": 2400,
+      "kd": 30.0,
+      "cpc": 5.019999980926514
+    },
+    {
+      "keyword": "acupuncturist in chicago il",
+      "position": 3,
+      "volume": 2400,
+      "kd": 23.0,
+      "cpc": 5.019999980926514
+    },
+    {
+      "keyword": "aligned medicine",
+      "position": 1,
+      "volume": 1900,
+      "kd": 0.0,
+      "cpc": 1.9700000286102295
+    },
+    {
+      "keyword": "massage therapy chicago",
+      "position": 3,
+      "volume": 1900,
+      "kd": 14.0,
+      "cpc": 3.7699999809265137
+    },
+    {
+      "keyword": "massage therapy in chicago",
+      "position": 2,
+      "volume": 1900,
+      "kd": 11.0,
+      "cpc": 2.7300000190734863
+    },
+    {
+      "keyword": "massage therapy in chicago il",
+      "position": 3,
+      "volume": 1900,
+      "kd": 10.0,
+      "cpc": 3.7699999809265137
+    }
+  ],
+  "top_by_volume": [
+    {
+      "keyword": "acupuncture",
+      "position": 53,
+      "volume": 301000,
+      "kd": 63.0,
+      "cpc": 3.619999885559082
+    },
+    {
+      "keyword": "therapeutic massage therapists near me",
+      "position": 22,
+      "volume": 301000,
+      "kd": 44.0,
+      "cpc": 1.9900000095367432
+    },
+    {
+      "keyword": "aligned",
+      "position": 16,
+      "volume": 165000,
+      "kd": 29.0,
+      "cpc": 2.8399999141693115
+    },
+    {
+      "keyword": "therapy in massage",
+      "position": 38,
+      "volume": 165000,
+      "kd": 28.0,
+      "cpc": 2.8299999237060547
+    },
+    {
+      "keyword": "wellness centers",
+      "position": 64,
+      "volume": 110000,
+      "kd": 48.0,
+      "cpc": 3.880000114440918
+    },
+    {
+      "keyword": "3/2",
+      "position": 74,
+      "volume": 74000,
+      "kd": 3.0,
+      "cpc": 0.9700000286102295
+    },
+    {
+      "keyword": "3:2",
+      "position": 57,
+      "volume": 74000,
+      "kd": 0.0,
+      "cpc": 0.699999988079071
+    },
+    {
+      "keyword": "bird dogs workout",
+      "position": 26,
+      "volume": 74000,
+      "kd": 17.0,
+      "cpc": 0.10000000149011612
+    },
+    {
+      "keyword": "cupping for therapy",
+      "position": 63,
+      "volume": 74000,
+      "kd": 53.0,
+      "cpc": 1.899999976158142
+    },
+    {
+      "keyword": "2/4",
+      "position": 58,
+      "volume": 60500,
+      "kd": 16.0,
+      "cpc": 0.3799999952316284
+    },
+    {
+      "keyword": "functional medicine",
+      "position": 30,
+      "volume": 60500,
+      "kd": 39.0,
+      "cpc": 9.720000267028809
+    },
+    {
+      "keyword": "doctor of functional medicine near me",
+      "position": 47,
+      "volume": 49500,
+      "kd": 36.0,
+      "cpc": 4.0
+    },
+    {
+      "keyword": "functional doctor near me",
+      "position": 55,
+      "volume": 49500,
+      "kd": 54.0,
+      "cpc": 4.409999847412109
+    },
+    {
+      "keyword": "functional doctors near me",
+      "position": 72,
+      "volume": 49500,
+      "kd": 56.0,
+      "cpc": 4.0
+    },
+    {
+      "keyword": "functional medicine practitioner near me",
+      "position": 38,
+      "volume": 49500,
+      "kd": 56.0,
+      "cpc": 4.0
+    },
+    {
+      "keyword": "maternity massage",
+      "position": 69,
+      "volume": 49500,
+      "kd": 32.0,
+      "cpc": 1.7699999809265137
+    },
+    {
+      "keyword": "pre natal massage",
+      "position": 43,
+      "volume": 49500,
+      "kd": 17.0,
+      "cpc": 1.7699999809265137
+    },
+    {
+      "keyword": "prenatal massage",
+      "position": 55,
+      "volume": 49500,
+      "kd": 32.0,
+      "cpc": 1.7699999809265137
+    },
+    {
+      "keyword": "imbalance hormones",
+      "position": 94,
+      "volume": 40500,
+      "kd": 19.0,
+      "cpc": 3.6399998664855957
+    },
+    {
+      "keyword": "imbalance of hormones",
+      "position": 82,
+      "volume": 40500,
+      "kd": 19.0,
+      "cpc": 4.289999961853027
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "alignedmodernhealth.com",
+      "relevance": 0,
+      "keywords": 6938,
+      "traffic": 25032,
+      "traffic_value": 25032
+    },
+    {
+      "domain": "facebook.com",
+      "relevance": 0,
+      "keywords": 5130,
+      "traffic": 19434,
+      "traffic_value": 19434
+    },
+    {
+      "domain": "youtube.com",
+      "relevance": 0,
+      "keywords": 5035,
+      "traffic": 18535,
+      "traffic_value": 18535
+    },
+    {
+      "domain": "instagram.com",
+      "relevance": 0,
+      "keywords": 4442,
+      "traffic": 15616,
+      "traffic_value": 15616
+    },
+    {
+      "domain": "yelp.com",
+      "relevance": 0,
+      "keywords": 3637,
+      "traffic": 15861,
+      "traffic_value": 15861
+    },
+    {
+      "domain": "reddit.com",
+      "relevance": 0,
+      "keywords": 3476,
+      "traffic": 11064,
+      "traffic_value": 11064
+    },
+    {
+      "domain": "webmd.com",
+      "relevance": 0,
+      "keywords": 3083,
+      "traffic": 7103,
+      "traffic_value": 7103
+    },
+    {
+      "domain": "clevelandclinic.org",
+      "relevance": 0,
+      "keywords": 2868,
+      "traffic": 8166,
+      "traffic_value": 8166
+    },
+    {
+      "domain": "healthline.com",
+      "relevance": 0,
+      "keywords": 2673,
+      "traffic": 6703,
+      "traffic_value": 6703
+    },
+    {
+      "domain": "nih.gov",
+      "relevance": 0,
+      "keywords": 2502,
+      "traffic": 6615,
+      "traffic_value": 6615
+    }
+  ]
+}

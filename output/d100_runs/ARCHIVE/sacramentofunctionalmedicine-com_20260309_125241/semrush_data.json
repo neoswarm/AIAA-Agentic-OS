@@ -1,0 +1,195 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 4822795,
+  "unique_keywords": 246,
+  "estimated_traffic": 50,
+  "traffic_value": 118,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 7,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 4,
+  "pos2_3_count": 6,
+  "pos4_10_count": 8,
+  "pos11_20_count": 19,
+  "pos1_3_count": 10,
+  "quick_wins_count": 3,
+  "top_quick_wins": [
+    {
+      "keyword": "sacramento hypnotherapy",
+      "position": 8,
+      "volume": 210,
+      "kd": 14.0
+    },
+    {
+      "keyword": "dr godby",
+      "position": 7,
+      "volume": 210,
+      "kd": 13.0
+    },
+    {
+      "keyword": "sacramento hypnosis",
+      "position": 5,
+      "volume": 110,
+      "kd": 12.0
+    }
+  ],
+  "top3_sample": [
+    {
+      "keyword": "dennis godby",
+      "position": 3,
+      "volume": 140
+    },
+    {
+      "keyword": "hyperbaric chamber sacramento",
+      "position": 3,
+      "volume": 90
+    }
+  ],
+  "top_by_volume": [
+    {
+      "keyword": "dr godby sacramento",
+      "position": 14,
+      "volume": 210,
+      "kd": 24.0
+    },
+    {
+      "keyword": "dr godby sacramento",
+      "position": 3,
+      "volume": 210,
+      "kd": 24.0
+    },
+    {
+      "keyword": "sacramento hypnotherapy",
+      "position": 8,
+      "volume": 210,
+      "kd": 14.0
+    },
+    {
+      "keyword": "dr godby",
+      "position": 7,
+      "volume": 210,
+      "kd": 13.0
+    },
+    {
+      "keyword": "allergies sacramento",
+      "position": 14,
+      "volume": 170,
+      "kd": 14.0
+    },
+    {
+      "keyword": "dr dennis godby",
+      "position": 18,
+      "volume": 170,
+      "kd": 15.0
+    },
+    {
+      "keyword": "dr dennis godby",
+      "position": 3,
+      "volume": 170,
+      "kd": 15.0
+    },
+    {
+      "keyword": "dennis godby",
+      "position": 3,
+      "volume": 140,
+      "kd": 16.0
+    },
+    {
+      "keyword": "functional medicine sacramento",
+      "position": 20,
+      "volume": 110,
+      "kd": 25.0
+    },
+    {
+      "keyword": "functional medicine sacramento",
+      "position": 1,
+      "volume": 110,
+      "kd": 25.0
+    },
+    {
+      "keyword": "sacramento hypnosis",
+      "position": 5,
+      "volume": 110,
+      "kd": 12.0
+    },
+    {
+      "keyword": "dr godby sacramento ca",
+      "position": 17,
+      "volume": 90,
+      "kd": 23.0
+    },
+    {
+      "keyword": "dr godby sacramento ca",
+      "position": 3,
+      "volume": 90,
+      "kd": 23.0
+    },
+    {
+      "keyword": "oxygen chambers near me",
+      "position": 15,
+      "volume": 90,
+      "kd": 15.0
+    },
+    {
+      "keyword": "functional medicine sacramento ca",
+      "position": 16,
+      "volume": 90,
+      "kd": 17.0
+    },
+    {
+      "keyword": "functional medicine sacramento ca",
+      "position": 1,
+      "volume": 90,
+      "kd": 17.0
+    },
+    {
+      "keyword": "functional medicine doctor sacramento",
+      "position": 15,
+      "volume": 90,
+      "kd": 37.0
+    },
+    {
+      "keyword": "functional medicine doctor sacramento",
+      "position": 1,
+      "volume": 90,
+      "kd": 37.0
+    },
+    {
+      "keyword": "sacramento iv therapy",
+      "position": 19,
+      "volume": 90,
+      "kd": 8.0
+    },
+    {
+      "keyword": "hyperbaric chamber sacramento",
+      "position": 3,
+      "volume": 90,
+      "kd": 9.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "bioidenticaldoctorsacramento.com",
+      "relevance": "0.51",
+      "keywords": 68,
+      "traffic": 16,
+      "traffic_value": 52
+    },
+    {
+      "domain": "sacnd.com",
+      "relevance": "0.41",
+      "keywords": 25,
+      "traffic": 277,
+      "traffic_value": 339
+    },
+    {
+      "domain": "elkecookemd.com",
+      "relevance": "0.36",
+      "keywords": 31,
+      "traffic": 2,
+      "traffic_value": 3
+    }
+  ]
+}

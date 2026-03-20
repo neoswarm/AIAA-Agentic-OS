@@ -1,0 +1,96 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 1975371,
+  "unique_keywords": 22,
+  "estimated_traffic": 361,
+  "traffic_value": 1097,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 2,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 3,
+  "pos2_3_count": 2,
+  "pos4_10_count": 0,
+  "pos11_20_count": 0,
+  "pos1_3_count": 5,
+  "quick_wins_count": 0,
+  "top_quick_wins": [],
+  "top3_sample": [
+    {
+      "keyword": "evan hirsch md",
+      "position": 1,
+      "volume": 260
+    },
+    {
+      "keyword": "energy md",
+      "position": 2,
+      "volume": 260
+    },
+    {
+      "keyword": "energy dr",
+      "position": 3,
+      "volume": 70
+    },
+    {
+      "keyword": "energymd",
+      "position": 1,
+      "volume": 50
+    }
+  ],
+  "top_by_volume": [
+    {
+      "keyword": "evan hirsch md",
+      "position": 1,
+      "volume": 260,
+      "kd": 30.0
+    },
+    {
+      "keyword": "energy md",
+      "position": 2,
+      "volume": 260,
+      "kd": 50.0
+    },
+    {
+      "keyword": "energy dr",
+      "position": 3,
+      "volume": 70,
+      "kd": 19.0
+    },
+    {
+      "keyword": "energymd",
+      "position": 1,
+      "volume": 50,
+      "kd": 43.0
+    },
+    {
+      "keyword": "dr evan hirsch",
+      "position": 1,
+      "volume": 30,
+      "kd": 27.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "functionalmedicinedoctornearme.com",
+      "relevance": "0.27",
+      "keywords": 52,
+      "traffic": 0,
+      "traffic_value": 0
+    },
+    {
+      "domain": "evan-hirsch.com",
+      "relevance": "0.25",
+      "keywords": 10,
+      "traffic": 41,
+      "traffic_value": 0
+    },
+    {
+      "domain": "myenergydoctor.com",
+      "relevance": "0.17",
+      "keywords": 5,
+      "traffic": 3,
+      "traffic_value": 0
+    }
+  ]
+}

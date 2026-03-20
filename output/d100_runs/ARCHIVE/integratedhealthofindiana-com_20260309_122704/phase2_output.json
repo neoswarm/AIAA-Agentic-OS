@@ -1,0 +1,305 @@
+{
+  "keywords": [
+    "functional medicine North Vernon IN",
+    "functional medicine doctor Indiana",
+    "chiropractor North Vernon",
+    "acupuncture North Vernon IN",
+    "hormone imbalance treatment Indiana",
+    "root cause medicine Indiana",
+    "gut health doctor North Vernon",
+    "chronic fatigue treatment Indiana",
+    "thyroid specialist North Vernon",
+    "functional medicine practitioner Indiana",
+    "holistic doctor North Vernon",
+    "IBS treatment North Vernon",
+    "hormone replacement therapy Indiana",
+    "natural medicine North Vernon",
+    "integrative medicine Indiana",
+    "food sensitivity testing North Vernon",
+    "adrenal fatigue treatment Indiana",
+    "autoimmune disease doctor North Vernon",
+    "digestive health specialist Indiana",
+    "functional nutrition North Vernon",
+    "cash pay doctor Indiana",
+    "membership medicine North Vernon",
+    "IFMCP Indiana",
+    "bioidentical hormones North Vernon",
+    "leaky gut treatment Indiana",
+    "migraine specialist North Vernon",
+    "back pain chiropractor Indiana",
+    "shockwave therapy North Vernon",
+    "IV therapy North Vernon IN",
+    "wellness doctor Indiana"
+  ],
+  "ads": [
+    {
+      "campaign_name": "Functional Medicine - Root Cause Focus",
+      "target_audience": "Adults 35-65 with chronic health issues seeking root cause solutions in southern Indiana",
+      "headlines": [
+        "Find Your Root Cause",
+        "Functional Medicine Indiana",
+        "Stop Chasing Symptoms",
+        "IFMCP Dr. Trevor Miller",
+        "Solve Health Problems"
+      ],
+      "descriptions": [
+        "Lab-based approach to hormones, gut health, fatigue. North Vernon functional medicine practice.",
+        "IFM-certified practitioner. Comprehensive testing. Personalized care plans. Cash memberships available."
+      ],
+      "keywords": [
+        "[functional medicine north vernon]",
+        "[functional medicine doctor indiana]",
+        "\"functional medicine practitioner\" indiana",
+        "\"root cause doctor\" indiana",
+        "hormone imbalance treatment",
+        "chronic fatigue doctor",
+        "gut health specialist",
+        "thyroid doctor north vernon",
+        "integrative medicine indiana",
+        "holistic doctor near me"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "IFM Certified Practitioner",
+          "Root Cause Approach",
+          "Comprehensive Lab Testing",
+          "Cash-Pay Memberships"
+        ],
+        "Sitelink Extensions": [
+          "New Patients | Start your journey to whole-body wellness",
+          "Conditions We Treat | Hormones, gut health, pain, fatigue",
+          "Functional Medicine | Lab-based personalized care plans"
+        ]
+      }
+    },
+    {
+      "campaign_name": "Chiropractic + Integrated Care",
+      "target_audience": "Local residents with back pain, headaches, and musculoskeletal issues seeking natural care",
+      "headlines": [
+        "Chiropractor North Vernon",
+        "Natural Pain Relief",
+        "Beyond Symptom Relief",
+        "Dr. Trevor Miller DC",
+        "Shockwave Therapy Available"
+      ],
+      "descriptions": [
+        "Chiropractic, acupuncture, functional medicine under one roof. Treat the whole person, not just pain.",
+        "North Vernon integrated health center. Same-day appointments available. Call (812) 346-1757."
+      ],
+      "keywords": [
+        "[chiropractor north vernon]",
+        "[back pain doctor north vernon]",
+        "\"chiropractic care\" north vernon in",
+        "\"migraine treatment\" indiana",
+        "headache specialist",
+        "natural pain relief",
+        "acupuncture north vernon",
+        "shockwave therapy indiana",
+        "holistic chiropractor",
+        "wellness chiropractor near me"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Same-Day Appointments",
+          "No Referral Needed",
+          "Multiple Therapies",
+          "Whole-Person Approach"
+        ],
+        "Sitelink Extensions": [
+          "Chiropractic Care | Nervous system-focused natural healing",
+          "Shockwave Therapy | Non-invasive pain relief option",
+          "Book Appointment | Call or schedule online today"
+        ]
+      }
+    },
+    {
+      "campaign_name": "Hormone + Gut Health",
+      "target_audience": "Women and men 30-60 with hormone imbalances, digestive issues, weight concerns",
+      "headlines": [
+        "Hormone Specialist Indiana",
+        "Fix Gut Health Naturally",
+        "Thyroid & Hormone Help",
+        "Lab-Based Solutions",
+        "IBS & Digestive Relief"
+      ],
+      "descriptions": [
+        "Comprehensive hormone testing and natural rebalancing. Address root causes of fatigue, weight gain, mood.",
+        "Functional approach to IBS, bloating, food sensitivities. Personalized nutrition and supplement protocols."
+      ],
+      "keywords": [
+        "[hormone doctor indiana]",
+        "[gut health specialist north vernon]",
+        "\"thyroid specialist\" indiana",
+        "\"hormone imbalance treatment\"",
+        "IBS treatment north vernon",
+        "digestive health doctor",
+        "food sensitivity testing",
+        "natural hormone therapy",
+        "adrenal fatigue treatment",
+        "leaky gut doctor"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Comprehensive Lab Work",
+          "Natural Protocols",
+          "Personalized Care Plans",
+          "Nutrition Guidance"
+        ],
+        "Sitelink Extensions": [
+          "Hormone Services | Testing, balancing, monitoring",
+          "Gut Health Solutions | Root cause digestive care",
+          "Free Health Guide | Download our wellness resource"
+        ]
+      }
+    }
+  ],
+  "emails": [
+    {
+      "email_number": 1,
+      "type": "smart_practice_value_drop",
+      "subject": "Why [PRIMARY_SYMPTOM] keeps coming back",
+      "preview": "There's usually a reason it won't go away",
+      "body": "Hi [FIRST_NAME],\n\nThanks for completing your health assessment. I noticed [PRIMARY_SYMPTOM] has been affecting your daily life, and I want to share something important.\n\nMost people dealing with [PRIMARY_SYMPTOM] get treatments aimed at the symptom itself. But symptoms are just your body's way of signaling that something deeper needs attention. When we only address what you feel without investigating why you feel it, relief tends to be temporary.\n\nAt Integrated Health of Indiana, we use comprehensive lab testing and a functional medicine approach to uncover what's actually driving your symptoms. Whether it's hormone imbalances, inflammation, nutrient deficiencies, or gut dysfunction, we look for the root cause so you can experience lasting improvement.\n\nIf you're ready to stop chasing symptoms and start solving problems, we'd love to help.\n\n[BOOKING_LINK]\n\nDr. Trevor Miller and the IHI Care Team",
+      "cta_text": "Book Your Consultation",
+      "cta_url": "https://integratedhealthofindiana.com/new-patients/"
+    },
+    {
+      "email_number": 2,
+      "type": "mechanism_story",
+      "subject": "The real reason standard care misses this",
+      "preview": "It's not your fault nothing's worked yet",
+      "body": "Hi [FIRST_NAME],\n\nImagine your body as a house with a leaky roof. You can keep mopping the floor, but until you fix the roof, the water keeps coming back.\n\nThat's what happens with [PRIMARY_SYMPTOM]. Standard care often focuses on mopping—managing symptoms with medications or short-term fixes. But if the underlying system (your hormones, gut, immune function, or metabolism) is out of balance, the symptoms will return.\n\nFunctional medicine works differently. We run detailed labs to see what's happening at a cellular level. We look at your nutrition, stress, sleep, inflammation markers, and hormone levels. Then we create a plan that addresses the actual source of dysfunction, not just the surface-level complaint.\n\nIt's not a quick fix, but it's a real one. And based on your assessment, [KEY_ASSESSMENT_INSIGHT] suggests [RECOMMENDED_SERVICE_OR_FOCUS] could be a helpful starting point.\n\nWhen you're ready to explore what's really going on, we're here.\n\nThe team at Integrated Health of Indiana",
+      "cta_text": "Schedule Your Visit",
+      "cta_url": "https://integratedhealthofindiana.com/new-patients/"
+    },
+    {
+      "email_number": 3,
+      "type": "proof_and_results",
+      "subject": "How Sarah finally figured it out",
+      "preview": "A similar story to yours",
+      "body": "Hi [FIRST_NAME],\n\nI want to share a story that might sound familiar.\n\nSarah came to us after two years of dealing with fatigue, brain fog, and digestive issues. She'd tried elimination diets, supplements from the internet, and multiple doctor visits. Nothing stuck.\n\nWhen we ran her labs, we found thyroid dysfunction, nutrient deficiencies, and gut inflammation—all connected. We built a care plan around those findings: targeted supplementation, nutrition changes, and ongoing monitoring.\n\nWithin three months, her energy returned. Her digestion stabilized. She felt like herself again. Every case is different, and results vary, but the pattern is the same: when you address the root cause, your body has a chance to heal.\n\nYour assessment pointed to [KEY_ASSESSMENT_INSIGHT], and we think there's a real path forward for you too.\n\nIf you're tired of guessing and ready for answers, let's talk.\n\n[BOOKING_LINK]\n\nDr. Trevor Miller and the IHI Team",
+      "cta_text": "Book My Appointment",
+      "cta_url": "https://integratedhealthofindiana.com/new-patients/"
+    }
+  ],
+  "app_config": {
+    "practiceName": "Integrated Health of Indiana",
+    "practiceShortName": "IHI",
+    "providerName": "Dr. Trevor Miller",
+    "providerTitle": "DC, IFMCP, LAc, CFMP",
+    "tagline": "Whole-body wellness from the inside out",
+    "primaryColor": "#F05022",
+    "primaryDark": "#C7401B",
+    "primaryLight": "#F47B56",
+    "primaryXLight": "#FEE9E4",
+    "backgroundColor": "#FFFFFF",
+    "bookingUrl": "https://integratedhealthofindiana.com/new-patients/",
+    "phone": "(812) 346-1757",
+    "concerns": [
+      {
+        "label": "Hormone Imbalance",
+        "emoji": "⚖️"
+      },
+      {
+        "label": "Gut & Digestive Issues",
+        "emoji": "🔬"
+      },
+      {
+        "label": "Chronic Fatigue",
+        "emoji": "🔋"
+      },
+      {
+        "label": "Headaches & Migraines",
+        "emoji": "🧠"
+      },
+      {
+        "label": "Back & Joint Pain",
+        "emoji": "🦴"
+      },
+      {
+        "label": "Weight & Metabolism",
+        "emoji": "⚡"
+      }
+    ],
+    "symptom_map": {
+      "Hormone Imbalance": [
+        "Unexplained weight gain or difficulty losing weight",
+        "Fatigue that doesn't improve with rest",
+        "Brain fog and difficulty concentrating",
+        "Mood swings or irritability",
+        "Low libido or sexual dysfunction",
+        "Hot flashes or night sweats",
+        "Irregular periods or PMS",
+        "Hair thinning or skin changes"
+      ],
+      "Gut & Digestive Issues": [
+        "Bloating after meals",
+        "Constipation or diarrhea",
+        "Food sensitivities or reactions",
+        "Acid reflux or heartburn",
+        "Abdominal pain or cramping",
+        "Gas and discomfort",
+        "Diagnosed IBS or IBD",
+        "Skin issues related to digestion"
+      ],
+      "Chronic Fatigue": [
+        "Waking up tired despite full sleep",
+        "Energy crashes in afternoon",
+        "Needing caffeine to function",
+        "Difficulty recovering from exercise",
+        "Brain fog throughout the day",
+        "Feeling wired but tired",
+        "Difficulty handling stress",
+        "Unexplained muscle weakness"
+      ],
+      "Headaches & Migraines": [
+        "Frequent tension headaches",
+        "Migraines with or without aura",
+        "Headaches triggered by stress or foods",
+        "Neck tension and stiffness",
+        "Sensitivity to light or sound",
+        "Jaw pain or TMJ symptoms",
+        "Dizziness or vertigo",
+        "Pain that disrupts daily activities"
+      ],
+      "Back & Joint Pain": [
+        "Lower back pain or stiffness",
+        "Neck pain or limited mobility",
+        "Shoulder tension or discomfort",
+        "Hip or knee pain",
+        "Sciatica or nerve pain",
+        "Joint stiffness in the morning",
+        "Pain that worsens with activity",
+        "Previous injuries that never fully healed"
+      ],
+      "Weight & Metabolism": [
+        "Difficulty losing weight despite diet and exercise",
+        "Unexplained weight gain",
+        "Slow metabolism or thyroid concerns",
+        "Sugar cravings throughout the day",
+        "Insulin resistance or prediabetes",
+        "Inflammation or water retention",
+        "Low energy affecting activity level",
+        "Hormonal weight gain around midsection"
+      ]
+    },
+    "careModels": [
+      {
+        "name": "Functional Medicine Membership",
+        "desc": "Comprehensive root-cause care with lab testing, personalized protocols, and ongoing support for chronic conditions",
+        "price": "Custom pricing based on individual needs"
+      },
+      {
+        "name": "Chiropractic Care Packages",
+        "desc": "Natural pain relief and nervous system optimization through chiropractic adjustments and complementary therapies",
+        "price": "Package pricing available"
+      },
+      {
+        "name": "Integrated Wellness Plans",
+        "desc": "Combination of chiropractic, functional medicine, acupuncture, and IV therapy tailored to your health goals",
+        "price": "Consultation required"
+      }
+    ]
+  },
+  "report_url": "https://healthbizleads.com/integrated-health-of-indiana/"
+}

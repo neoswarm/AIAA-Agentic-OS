@@ -1,0 +1,338 @@
+{
+  "keywords": [
+    "naturopath Fort Langley BC",
+    "naturopath Surrey BC",
+    "naturopathic doctor South Surrey",
+    "integrative medicine White Rock BC",
+    "functional medicine Surrey BC",
+    "cancer naturopath BC",
+    "integrative cancer care Surrey",
+    "naturopathic oncology BC",
+    "women's health naturopath Surrey",
+    "escharotic treatment BC",
+    "IV therapy Surrey BC",
+    "ozone therapy Surrey BC",
+    "iron infusion naturopath BC",
+    "naturopath for chronic fatigue Surrey",
+    "root cause medicine BC",
+    "naturopath for hormones Surrey",
+    "perimenopause naturopath BC",
+    "digestive health naturopath Surrey",
+    "intralipid infusion BC",
+    "naturopath for cancer support BC",
+    "integrative palliative care BC",
+    "naturopath for autoimmune BC",
+    "acupuncture Surrey BC",
+    "naturopath weight management Surrey",
+    "naturopath mental health BC",
+    "integrative health clinic Surrey",
+    "naturopathic medicine Fort Langley",
+    "cancer integrative therapy BC",
+    "naturopath cardiovascular health BC",
+    "best naturopath Surrey White Rock"
+  ],
+  "ads": [
+    {
+      "campaign_name": "Cancer Integrative Care - Surrey/White Rock BC",
+      "target_audience": "Cancer patients and families in Surrey, White Rock, Fort Langley BC seeking integrative oncology support alongside conventional treatment",
+      "headlines": [
+        "Integrative Cancer Care BC",
+        "Naturopathic Oncology Surrey",
+        "Science-Based Cancer Support",
+        "Root Cause Cancer Care",
+        "Book Cancer Consult Today"
+      ],
+      "descriptions": [
+        "Expert NDs support your cancer journey with evidence-based integrative care. Serving Surrey, White Rock and Fort Langley.",
+        "Specialized cancer screening, management and palliative care alongside your conventional treatment. Book a consultation."
+      ],
+      "keywords": [
+        "[integrative cancer care Surrey BC]",
+        "[naturopathic oncology BC]",
+        "\"cancer naturopath Surrey\"",
+        "\"integrative cancer treatment BC\"",
+        "cancer naturopath BC",
+        "integrative oncology Surrey",
+        "naturopath for cancer support",
+        "cancer care naturopathic doctor",
+        "holistic cancer treatment BC",
+        "palliative care naturopath BC"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "No Referral Needed",
+          "Root Cause Approach",
+          "12+ Expert NDs On Staff",
+          "Same-Week Consults Available"
+        ],
+        "Sitelink Extensions": [
+          "Cancer Care Centre | Screening, management and palliative support",
+          "Meet Our Doctors | 12 experienced NDs with prescriptive rights",
+          "New Patients | What to expect at your first visit"
+        ]
+      }
+    },
+    {
+      "campaign_name": "Women's Health Naturopath - Surrey/White Rock BC",
+      "target_audience": "Women in Surrey, White Rock and Fort Langley BC seeking naturopathic care for hormones, fertility, perimenopause and women's health",
+      "headlines": [
+        "Women's Health Naturopath BC",
+        "Hormone Balance Surrey ND",
+        "Fertility & Prenatal Care",
+        "Perimenopause Support BC",
+        "Book Women's Health Visit"
+      ],
+      "descriptions": [
+        "From fertility to menopause, our NDs address root causes of women's health concerns. Serving Surrey, White Rock, Fort Langley.",
+        "IUD insertions, escharotic treatment, prenatal care, and hormone balancing. Accepting new patients - book now."
+      ],
+      "keywords": [
+        "[women's health naturopath Surrey BC]",
+        "[escharotic treatment BC]",
+        "\"naturopath for hormones Surrey\"",
+        "\"perimenopause naturopath BC\"",
+        "fertility naturopath BC",
+        "women's health naturopath",
+        "hormone balance naturopath Surrey",
+        "prenatal naturopath BC",
+        "IUD insertion naturopath BC",
+        "menopause naturopath Surrey"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "No Referral Needed",
+          "IUD Insertions Available",
+          "Prenatal & Postnatal Care",
+          "Evidence-Based Treatments"
+        ],
+        "Sitelink Extensions": [
+          "Women's Health Services | Hormones, fertility and reproductive care",
+          "Escharotic Treatment | Specialized cervical dysplasia care",
+          "New Patients | Start your care journey today"
+        ]
+      }
+    },
+    {
+      "campaign_name": "General Naturopathic Care - Surrey/White Rock BC",
+      "target_audience": "Residents of Surrey, White Rock, Fort Langley and South Surrey BC seeking naturopathic family and general health care",
+      "headlines": [
+        "Naturopath Surrey White Rock",
+        "Root Cause Health Care BC",
+        "Family Naturopath Fort Langley",
+        "IV Therapy & Ozone Surrey",
+        "Accept New Patients Now"
+      ],
+      "descriptions": [
+        "Experienced naturopathic doctors treating chronic fatigue, digestive issues, mental health and more. Root cause care in Surrey BC.",
+        "IV therapy, ozone therapy, acupuncture, and comprehensive naturopathic medicine. Book your first visit today."
+      ],
+      "keywords": [
+        "[naturopath Surrey BC]",
+        "[naturopath White Rock BC]",
+        "\"naturopathic doctor Fort Langley\"",
+        "\"ozone therapy Surrey BC\"",
+        "naturopath near me Surrey",
+        "IV therapy naturopath BC",
+        "integrative medicine Surrey",
+        "chronic fatigue naturopath BC",
+        "digestive health naturopath Surrey",
+        "family naturopath Surrey BC"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "No Referral Needed",
+          "Prescriptive Rights NDs",
+          "Free Parking On Site",
+          "Same-Week Appointments"
+        ],
+        "Sitelink Extensions": [
+          "Services Overview | Full-scope naturopathic and integrative care",
+          "IV Therapy & Ozone | Advanced integrative therapies",
+          "Book Appointment | Online booking for new and existing patients"
+        ]
+      }
+    }
+  ],
+  "emails": [
+    {
+      "email_number": 1,
+      "type": "smart_practice_value_drop",
+      "subject": "Why [PRIMARY_SYMPTOM] often doesn't respond to standard care, [FIRST_NAME]",
+      "preview": "The root cause most doctors overlook",
+      "body": "Hi [FIRST_NAME],\n\nBased on your health assessment, you mentioned [PRIMARY_SYMPTOM] has been affecting your daily life. You're not alone - and more importantly, there's often a reason why conventional approaches haven't given you lasting relief.\n\nStandard care tends to address symptoms as they appear. But [PRIMARY_SYMPTOM] frequently has underlying drivers - whether hormonal imbalances, chronic inflammation, nutrient deficiencies, or disrupted gut-brain signalling - that go undetected without thorough, root-cause investigation.\n\nAt Integrated Health Clinic, our naturopathic doctors take the time to understand your full health picture. We use advanced laboratory testing and integrative approaches to identify what's actually driving your symptoms, then build a care plan specific to you.\n\n[KEY_ASSESSMENT_INSIGHT] suggests this may be particularly relevant to your situation.\n\nIf you'd like to explore whether a naturopathic approach could help, we'd be glad to connect.\n\nWarm regards,\nThe Care Team at Integrated Health Clinic",
+      "cta_text": "Book a Consultation",
+      "cta_url": "https://integratedhealthclinic.com/new-patients/"
+    },
+    {
+      "email_number": 2,
+      "type": "mechanism_story",
+      "subject": "Think of your body like a dimmer switch, [FIRST_NAME]",
+      "preview": "Why symptoms aren't the problem - they're the signal",
+      "body": "Hi [FIRST_NAME],\n\nHere's a simple way to think about [PRIMARY_SYMPTOM]: imagine your body's regulatory systems as a dimmer switch rather than an on/off switch. When the switch is dialled correctly, everything functions smoothly. When it's out of range - even slightly - you feel it in ways that are hard to explain and harder to resolve.\n\nStandard care often looks at the light itself (the symptom) and either replaces the bulb or turns off the switch entirely. What's frequently missed is the wiring - the underlying physiological systems like your HPA axis, mitochondrial function, or gut microbiome that are controlling the dial.\n\nNaturopathic medicine is built around identifying where in the system the dysregulation is happening. It's a different lens, not a rejection of conventional care - and for many patients, it's the piece that was missing.\n\n[RECOMMENDED_SERVICE_OR_FOCUS] may be a useful starting point based on your assessment profile.\n\nWe're here when you're ready to explore this further.\n\nThe IHC Care Team",
+      "cta_text": "Learn About Our Approach",
+      "cta_url": "https://integratedhealthclinic.com/new-patients/"
+    },
+    {
+      "email_number": 3,
+      "type": "proof_and_results",
+      "subject": "What changed when the root cause was finally addressed, [FIRST_NAME]",
+      "preview": "A patient story worth sharing",
+      "body": "Hi [FIRST_NAME],\n\nA patient came to us several years ago with a pattern similar to yours - persistent fatigue, brain fog, and symptoms that had been attributed to stress or lifestyle without any real resolution. Standard testing had come back 'normal.'\n\nAfter a thorough intake and functional lab review, our naturopathic team identified a combination of adrenal dysregulation and nutrient depletion that had been compounding for years. With a targeted care plan, gradual but meaningful improvements followed over the subsequent months.\n\nResults vary significantly from person to person, and we would never promise a specific outcome. What we can offer is a thorough, individualized evaluation and a care team that listens.\n\nIf [KEY_ASSESSMENT_INSIGHT] resonates with what you've been experiencing, we'd welcome the conversation.\n\nWe're accepting new patients and would be glad to see you.\n\nWarmly,\nIntegrated Health Clinic",
+      "cta_text": "Request Your First Appointment",
+      "cta_url": "https://integratedhealthclinic.com/new-patients/"
+    }
+  ],
+  "app_config": {
+    "practiceName": "Integrated Health Clinic",
+    "practiceShortName": "IHC",
+    "providerName": "Dr. Gurdev Parmar & Dr. Karen Parmar",
+    "providerTitle": "ND, Co-Founders & Medical Directors",
+    "tagline": "Working Together For Your Health",
+    "primaryColor": "#7A00DF",
+    "primaryDark": "#5500A0",
+    "primaryLight": "#9B33FF",
+    "primaryXLight": "#F2E6FF",
+    "backgroundColor": "#FFFFFF",
+    "bookingUrl": "https://integratedhealthclinic.com/new-patients/",
+    "phone": "1-604-888-8325",
+    "concerns": [
+      {
+        "label": "Fatigue & Energy",
+        "emoji": "⚡"
+      },
+      {
+        "label": "Cancer Support",
+        "emoji": "🎗"
+      },
+      {
+        "label": "Women's Health",
+        "emoji": "🌸"
+      },
+      {
+        "label": "Digestive Health",
+        "emoji": "🫁"
+      },
+      {
+        "label": "Hormonal Balance",
+        "emoji": "⚖️"
+      },
+      {
+        "label": "Mental Wellness",
+        "emoji": "🧠"
+      },
+      {
+        "label": "Pain & Inflammation",
+        "emoji": "🔥"
+      },
+      {
+        "label": "Weight Management",
+        "emoji": "🏃"
+      }
+    ],
+    "symptom_map": {
+      "Fatigue & Energy": [
+        "Waking up tired even after a full night's sleep",
+        "Energy crashes in the afternoon",
+        "Difficulty concentrating or brain fog",
+        "Feeling exhausted after mild physical activity",
+        "Needing caffeine just to function",
+        "Low motivation or feeling flat",
+        "Muscle weakness or heaviness",
+        "Getting sick frequently"
+      ],
+      "Cancer Support": [
+        "Looking for support alongside conventional cancer treatment",
+        "Managing treatment side effects like fatigue or nausea",
+        "Interested in cancer prevention or screening",
+        "Concerned about recurrence risk",
+        "Seeking integrative palliative care",
+        "Wanting nutritional support during chemotherapy or radiation",
+        "Exploring immune-supportive therapies",
+        "Navigating survivorship and recovery"
+      ],
+      "Women's Health": [
+        "Irregular or painful periods",
+        "Difficulty conceiving or recurrent pregnancy loss",
+        "Hot flashes or night sweats",
+        "Mood swings linked to your cycle",
+        "Vaginal dryness or discomfort",
+        "Abnormal Pap or HPV results",
+        "Looking for a contraception option that suits you",
+        "Transitioning through perimenopause or menopause"
+      ],
+      "Digestive Health": [
+        "Bloating after most meals",
+        "Alternating constipation and loose stools",
+        "Acid reflux or heartburn",
+        "Food sensitivities you can't identify",
+        "Abdominal cramping or discomfort",
+        "Feeling full quickly even with small meals",
+        "Nausea without a clear cause",
+        "Digestive symptoms that worsen with stress"
+      ],
+      "Hormonal Balance": [
+        "Unexplained weight gain especially around the midsection",
+        "Hair thinning or loss",
+        "Skin changes like dryness or acne",
+        "Low libido",
+        "Mood instability or irritability",
+        "Cold hands and feet",
+        "Irregular menstrual cycles",
+        "Difficulty managing stress"
+      ],
+      "Mental Wellness": [
+        "Persistent low mood that doesn't lift",
+        "Anxiety or constant worry",
+        "Poor sleep quality or insomnia",
+        "Difficulty managing stress",
+        "Feeling overwhelmed by everyday tasks",
+        "Low motivation or social withdrawal",
+        "Brain fog and poor concentration",
+        "Irritability or emotional reactivity"
+      ],
+      "Pain & Inflammation": [
+        "Joint pain or stiffness, especially in the morning",
+        "Chronic muscle soreness",
+        "Headaches or migraines",
+        "Pain that moves around the body",
+        "Swelling or puffiness in joints",
+        "Concussion symptoms that haven't resolved",
+        "Allergy-related symptoms or skin reactions",
+        "Pain that worsens with certain foods"
+      ],
+      "Weight Management": [
+        "Difficulty losing weight despite diet and exercise",
+        "Weight regain after previous success",
+        "Strong cravings for sugar or carbohydrates",
+        "Feeling hungry shortly after eating",
+        "Slow metabolism or feeling cold frequently",
+        "Emotional eating patterns",
+        "Plateau in weight loss progress",
+        "Fatigue that limits physical activity"
+      ]
+    },
+    "careModels": [
+      {
+        "name": "Initial Naturopathic Consultation",
+        "desc": "Comprehensive 60-75 min intake with one of our NDs. Full health history, symptom mapping, and initial care plan.",
+        "price": "Contact clinic for pricing"
+      },
+      {
+        "name": "Cancer Integrative Care",
+        "desc": "Specialized naturopathic support for cancer patients. Includes integrative oncology consult, lab review, and treatment coordination.",
+        "price": "Contact clinic for pricing"
+      },
+      {
+        "name": "IV Therapy & Infusions",
+        "desc": "Evidence-based intravenous nutrient therapy, ozone therapy, iron infusions and intralipid treatments.",
+        "price": "Contact clinic for pricing"
+      },
+      {
+        "name": "Women's Health Program",
+        "desc": "Comprehensive women's health care including hormones, fertility, prenatal support, IUD insertions, and escharotic treatment.",
+        "price": "Contact clinic for pricing"
+      }
+    ]
+  },
+  "report_url": "https://healthbizleads.com/integrated-health-clinic/"
+}

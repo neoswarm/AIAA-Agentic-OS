@@ -1,0 +1,296 @@
+{
+  "keywords": [
+    "functional medicine chicago",
+    "functional medicine doctor chicago",
+    "integrative medicine chicago",
+    "root cause medicine chicago",
+    "acupuncture chicago",
+    "acupuncture chicago il",
+    "acupuncturist chicago",
+    "chiropractic chicago",
+    "chiropractor chicago il",
+    "physical therapy chicago",
+    "hormone health chicago",
+    "hormone doctor chicago il",
+    "gut health specialist chicago",
+    "holistic doctor chicago",
+    "naturopathic doctor chicago",
+    "functional medicine near me",
+    "hormone imbalance doctor near me",
+    "gut health doctor near me",
+    "integrative health clinic chicago",
+    "massage therapy chicago",
+    "aligned modern health",
+    "functional medicine lincoln park",
+    "acupuncture river north chicago",
+    "chiropractic wicker park chicago",
+    "functional medicine andersonville",
+    "hormone replacement therapy chicago",
+    "autoimmune specialist chicago",
+    "chronic fatigue doctor chicago",
+    "weight loss functional medicine chicago",
+    "pain management integrative chicago"
+  ],
+  "ads": [
+    {
+      "campaign_name": "Root Cause Functional Medicine — Chicago",
+      "target_audience": "Chicago-area adults 28-55 with unresolved chronic symptoms — fatigue, gut issues, hormone imbalance, autoimmune — who've tried conventional medicine without answers",
+      "headlines": [
+        "Root Cause Medicine Chicago",
+        "Tired of Band-Aid Fixes?",
+        "100+ Expert Clinicians",
+        "Functional Medicine Chicago",
+        "Same-Week Appointments"
+      ],
+      "descriptions": [
+        "Stop masking symptoms. Our functional medicine team finds the root cause — advanced diagnostics, personalized care plans.",
+        "Major insurance accepted. 7 days a week. 15+ Chicago locations. Book your first visit at Aligned Modern Health."
+      ],
+      "keywords": [
+        "[functional medicine chicago]",
+        "[functional medicine doctor chicago]",
+        "\"root cause doctor chicago\"",
+        "\"integrative medicine chicago\"",
+        "\"holistic doctor chicago\"",
+        "functional medicine near me",
+        "chronic fatigue doctor chicago",
+        "gut health specialist chicago",
+        "autoimmune doctor chicago",
+        "hormone imbalance specialist chicago"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Major Insurance Accepted",
+          "Root Cause Approach",
+          "Same-Week Appointments",
+          "100+ Expert Clinicians"
+        ],
+        "Sitelink Extensions": [
+          "New Patients | What to expect at your first visit",
+          "Services | Functional medicine, hormones, acupuncture",
+          "Locations | 15+ clinics across Chicagoland"
+        ]
+      }
+    },
+    {
+      "campaign_name": "Pain Relief & Recovery — Chicago",
+      "target_audience": "Chicago-area adults 25-65 dealing with back pain, neck pain, sports injuries, or chronic pain seeking non-surgical drug-free relief via chiropractic and physical therapy",
+      "headlines": [
+        "Chicago Pain Relief — No Surgery",
+        "Chiropractic + PT Chicago",
+        "Drug-Free Pain Solutions",
+        "Feel Better. Move Better.",
+        "Book Same-Week Appt"
+      ],
+      "descriptions": [
+        "Back pain, neck pain, sports injuries — our chiropractic and PT team builds a plan to get you moving again, fast.",
+        "Evidence-based care. 7 days a week. Major insurance accepted. 15+ Chicagoland locations. Book today."
+      ],
+      "keywords": [
+        "[chiropractor chicago]",
+        "[chiropractic chicago il]",
+        "\"physical therapy chicago\"",
+        "\"back pain doctor chicago\"",
+        "\"sports injury clinic chicago\"",
+        "pain management chicago",
+        "neck pain chiropractor chicago",
+        "sciatica treatment chicago",
+        "physical therapist near me chicago",
+        "chiropractic adjustment chicago"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "No Surgery Required",
+          "Drug-Free Relief",
+          "Evidence-Based Care",
+          "Insurance Accepted"
+        ],
+        "Sitelink Extensions": [
+          "Chiropractic | Spine, joint, and sports injury care",
+          "Physical Therapy | Personalized movement recovery plans",
+          "New Patients | Easy online booking, fast availability"
+        ]
+      }
+    },
+    {
+      "campaign_name": "Hormone & Women's Wellness — Chicago",
+      "target_audience": "Women 30-55 in Chicago experiencing hormone imbalance, perimenopause, fatigue, weight gain, low libido, or thyroid issues seeking answers beyond standard OB-GYN care",
+      "headlines": [
+        "Hormone Doctor Chicago IL",
+        "Feel Like Yourself Again",
+        "Perimenopause? We Can Help",
+        "Hormone Testing + Treatment",
+        "Women's Wellness Chicago"
+      ],
+      "descriptions": [
+        "Fatigue, weight gain, mood swings — it could be your hormones. Get advanced testing and a plan that actually works.",
+        "Aligned Modern Health specializes in hormone health for women. Insurance accepted. Book your consultation today."
+      ],
+      "keywords": [
+        "[hormone doctor chicago]",
+        "[hormone health chicago il]",
+        "\"hormone imbalance doctor chicago\"",
+        "\"perimenopause doctor chicago\"",
+        "\"thyroid specialist chicago\"",
+        "hormone replacement therapy chicago",
+        "women's health clinic chicago",
+        "low testosterone women chicago",
+        "adrenal fatigue doctor chicago",
+        "PCOS specialist chicago"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Advanced Hormone Testing",
+          "Personalized Care Plans",
+          "Major Insurance Accepted",
+          "No Referral Needed"
+        ],
+        "Sitelink Extensions": [
+          "Hormone Health | Comprehensive testing for women and men",
+          "What We Treat | Thyroid, adrenal, reproductive hormones",
+          "Book Now | Same-week appointments at 15+ locations"
+        ]
+      }
+    }
+  ],
+  "emails": [
+    {
+      "email_number": 1,
+      "type": "smart_practice_value_drop",
+      "subject": "Why your symptoms keep coming back, [FIRST_NAME]",
+      "preview": "The root cause most doctors miss",
+      "body": "Hi [FIRST_NAME],\n\nIf you've been dealing with [PRIMARY_SYMPTOM] and still don't have a clear answer, you're not alone — and you're not imagining it.\n\nMost standard care treats the symptom, not the system. What our team looks for instead is the upstream driver — the hormonal pattern, the gut imbalance, the nervous system signal that's keeping your body stuck in a loop.\n\nYour health assessment flagged [KEY_ASSESSMENT_INSIGHT]. That's exactly the kind of pattern our clinicians are trained to investigate with advanced diagnostics — the kind that don't show up on a routine blood panel.\n\nThis is what makes integrative, root-cause care different. You don't have to keep guessing.\n\nIf you're ready to actually find out what's going on, we'd love to help.\n\nWarm regards,\nThe Aligned Modern Health Care Team",
+      "cta_text": "Schedule Your First Visit",
+      "cta_url": "https://alignedmodernhealth.com/new-patients/"
+    },
+    {
+      "email_number": 2,
+      "type": "mechanism_story",
+      "subject": "Think of your body like a tangled garden hose, [FIRST_NAME]",
+      "preview": "A simple way to understand what's happening",
+      "body": "Hi [FIRST_NAME],\n\nHere's a simple way to think about [PRIMARY_SYMPTOM]: imagine a garden hose with a kink in it. The lawn isn't getting water — but the problem isn't the lawn. It's the kink.\n\nMost conventional care focuses on the lawn. Root-cause medicine looks for the kink.\n\nFor many people, that kink is a hormone imbalance, a gut microbiome disruption, or chronic inflammation that's been quietly building for years. Standard bloodwork often misses it because it's looking at the wrong markers.\n\nOur clinicians use advanced functional testing to map the whole system — not just the part that's visibly struggling. Then we build a care plan around [RECOMMENDED_SERVICE_OR_FOCUS] that works with your biology, not against it.\n\nNo guarantees — every person is different. But understanding the mechanism changes everything.\n\nHere when you're ready,\nThe Aligned Modern Health Care Team",
+      "cta_text": "Learn What's Possible",
+      "cta_url": "https://alignedmodernhealth.com/new-patients/"
+    },
+    {
+      "email_number": 3,
+      "type": "proof_and_results",
+      "subject": "What changed when she stopped guessing, [FIRST_NAME]",
+      "preview": "A patient story you might recognize",
+      "body": "Hi [FIRST_NAME],\n\nOne of our patients — a 41-year-old woman — came to us after two years of fatigue, brain fog, and weight that wouldn't budge no matter what she tried. Every test came back 'normal.' She'd been told it was stress.\n\nIt wasn't stress. It was a combination of suboptimal thyroid function, elevated cortisol, and a gut that wasn't absorbing nutrients properly. None of it would have shown up on a routine panel.\n\nWithin four months of a targeted care plan, she reported more consistent energy, clearer thinking, and the first time in years that she felt like herself again. Results vary — her path won't be exactly yours — but the process of actually finding the root cause? That part is the same.\n\nIf your assessment showed [KEY_ASSESSMENT_INSIGHT], there may be a similar thread worth investigating.\n\nWe're here when you're ready to dig deeper.\n\nWith care,\nThe Aligned Modern Health Care Team",
+      "cta_text": "Book Your First Visit",
+      "cta_url": "https://alignedmodernhealth.com/new-patients/"
+    }
+  ],
+  "app_config": {
+    "practiceName": "Aligned Modern Health",
+    "practiceShortName": "AMH",
+    "providerName": "Lauren Radcliffe",
+    "providerTitle": "CEO & Co-Founder",
+    "tagline": "Healthcare Designed For You",
+    "primaryColor": "#EFB661",
+    "primaryDark": "#3D3935",
+    "primaryLight": "#F5CC90",
+    "primaryXLight": "#FDF4E3",
+    "backgroundColor": "#FFFFFF",
+    "bookingUrl": "https://alignedmodernhealth.com/new-patients/",
+    "phone": "773-598-4387",
+    "concerns": [
+      {"label": "Chronic Fatigue", "emoji": "😴"},
+      {"label": "Gut Health", "emoji": "🫁"},
+      {"label": "Hormone Imbalance", "emoji": "⚖️"},
+      {"label": "Chronic Pain", "emoji": "🦴"},
+      {"label": "Autoimmune Issues", "emoji": "🛡️"},
+      {"label": "Weight & Metabolism", "emoji": "⚡"},
+      {"label": "Anxiety & Mood", "emoji": "🧠"},
+      {"label": "Women's Health", "emoji": "🌸"}
+    ],
+    "symptom_map": {
+      "Chronic Fatigue": [
+        "I wake up tired even after 8 hours of sleep",
+        "I crash hard in the afternoon every day",
+        "I need caffeine just to feel normal",
+        "My energy is unpredictable and I can't plan around it",
+        "I feel exhausted after tasks that used to be easy",
+        "I've had labs done and everything 'looks normal'",
+        "Brain fog makes it hard to think clearly at work",
+        "I've been told it's just stress or getting older"
+      ],
+      "Gut Health": [
+        "I bloat after almost every meal",
+        "I never know if it's going to be a good or bad stomach day",
+        "I've cut out foods but the symptoms keep coming back",
+        "I've been diagnosed with IBS but treatments haven't helped",
+        "I have food sensitivities that seem to be growing",
+        "My digestion feels sluggish and uncomfortable",
+        "I experience acid reflux or heartburn regularly",
+        "My gut issues seem connected to my mood and energy"
+      ],
+      "Hormone Imbalance": [
+        "My mood swings feel out of control lately",
+        "My periods are irregular or have changed recently",
+        "I'm gaining weight especially around my belly",
+        "My libido has dropped significantly",
+        "I have night sweats or hot flashes",
+        "I feel like a completely different person than I used to be",
+        "My doctor says my hormones are 'in range' but I feel terrible",
+        "I think I might be in perimenopause but I'm not sure"
+      ],
+      "Chronic Pain": [
+        "I have back or neck pain that won't go away",
+        "I've tried pain medication but I don't want to depend on it",
+        "Pain wakes me up at night or limits my movement",
+        "I've had an injury that never fully healed",
+        "I'm afraid surgery might be my only option",
+        "My pain comes and goes but is getting worse over time",
+        "Everyday activities like walking or sitting are uncomfortable",
+        "I want to stay active but pain keeps stopping me"
+      ],
+      "Autoimmune Issues": [
+        "I've been diagnosed with an autoimmune condition",
+        "My symptoms flare unpredictably and I can't find a pattern",
+        "I'm on medication but still don't feel well",
+        "I feel like my immune system is working against me",
+        "I have joint pain, rashes, or inflammation that comes and goes",
+        "I'm exhausted most days even when not in a flare",
+        "My condition affects multiple systems in my body",
+        "I'm looking for root-cause answers, not just symptom management"
+      ],
+      "Weight & Metabolism": [
+        "I've tried multiple diets and nothing seems to work long-term",
+        "I eat well and exercise but can't lose weight",
+        "I feel like my metabolism is broken",
+        "I gained weight suddenly without changing my habits",
+        "I have insulin resistance or pre-diabetes",
+        "My doctor hasn't looked into why I'm gaining weight",
+        "I feel hungry all the time even after eating",
+        "My weight issues seem connected to my hormones or thyroid"
+      ],
+      "Anxiety & Mood": [
+        "I feel anxious or on edge most of the time",
+        "My mood is unpredictable and affects my relationships",
+        "I feel depressed but antidepressants haven't helped",
+        "My mental health feels connected to my physical symptoms",
+        "I have panic attacks or racing thoughts",
+        "I struggle to focus or feel present",
+        "I feel burned out and emotionally depleted",
+        "I want to address mood issues without relying solely on medication"
+      ],
+      "Women's Health": [
+        "My periods have become heavier, lighter, or more irregular",
+        "I'm struggling with fertility or cycle regularity",
+        "I have endometriosis, PCOS, or fibroids",
+        "My OB hasn't been able to explain what's happening",
+        "I've been told my labs are normal but I don't feel normal",
+        "Perimenopause symptoms are affecting my quality of life",
+        "I want a care team that looks at hormones and gut health together",
+        "I'm postpartum and haven't felt like myself since giving birth"
+      ]
+    },
+    "careModels": [
+      {"name": "Functional Medicine Consult", "desc": "Deep-dive root cause assessment with advanced lab review and personalized care plan", "price": "Varies by insurance"},
+      {"name": "Hormone Health Program", "desc": "Comprehensive hormone panel, analysis, and targeted treatment protocol", "price": "Covered by most major insurance"},
+      {"name": "Chiropractic + PT Bundle", "desc": "Combined chiropractic and physical therapy for pain relief and lasting recovery", "price": "Insurance accepted"}
+    ]
+  }
+}

@@ -1,0 +1,310 @@
+{
+  "keywords": [
+    "home health care Hampton Roads",
+    "skilled nursing Virginia Beach",
+    "Medicare home health Virginia",
+    "post hospital care Norfolk",
+    "home health services Chesapeake",
+    "physical therapy at home",
+    "wound care home health",
+    "balance therapy home visits",
+    "vestibular rehab at home",
+    "home health nurse Virginia",
+    "skilled home care Medicare",
+    "hospital discharge planning",
+    "fall prevention home therapy",
+    "chronic disease management home",
+    "medication management at home",
+    "post surgical home care",
+    "home health physical therapist",
+    "occupational therapy home visits",
+    "home health aide services",
+    "senior care at home Virginia",
+    "vertigo treatment at home",
+    "balance disorder therapy",
+    "home health after surgery",
+    "skilled nursing visits",
+    "home health rehabilitation",
+    "Medicare certified home health",
+    "transitional care at home",
+    "geriatric home health care",
+    "home bound patient care",
+    "accredited home health Virginia"
+  ],
+  "ads": [
+    {
+      "campaign_name": "Medicare Home Health - Core Services",
+      "target_audience": "Medicare patients 65+ in Hampton Roads needing post-hospital skilled nursing or rehab at home",
+      "headlines": [
+        "Medicare Home Health Care",
+        "Skilled Nursing at Home",
+        "Post-Hospital Care VA",
+        "Balance & Fall Prevention",
+        "Accredited Home Health VA"
+      ],
+      "descriptions": [
+        "Compassionate skilled nursing, PT, and wound care at home. Medicare certified. Serving Hampton Roads with personalized recovery plans.",
+        "Reduce hospital readmissions with expert home health support. Medication management, rehab, and chronic care coordination."
+      ],
+      "keywords": [
+        "[Medicare home health Virginia]",
+        "[skilled nursing at home]",
+        "\"home health services Hampton Roads\"",
+        "\"post hospital care at home\"",
+        "physical therapy home visits",
+        "wound care home health",
+        "balance therapy at home",
+        "fall prevention program",
+        "skilled home health Medicare",
+        "home health nurse Virginia Beach"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Medicare Certified",
+          "ACHC Accredited",
+          "Balance Specialists",
+          "Seamless Hospital Discharge"
+        ],
+        "Sitelink Extensions": [
+          "Refer a Patient | Fast coordination with hospitals and physicians",
+          "Balance Programs | Specialized vertigo and fall prevention therapy",
+          "Medicare Eligibility | Learn who qualifies for home health benefits"
+        ]
+      }
+    },
+    {
+      "campaign_name": "Balance & Vertigo Specialty",
+      "target_audience": "Seniors and adults experiencing dizziness, vertigo, or fall risk needing in-home vestibular therapy",
+      "headlines": [
+        "Vertigo Treatment at Home",
+        "Fall Prevention Therapy",
+        "Balance Disorder Care",
+        "Vestibular Rehab at Home",
+        "Stop Dizzy Spells at Home"
+      ],
+      "descriptions": [
+        "Expert balance therapy at home. We identify positional vertigo and weakened balance systems with comprehensive assessments.",
+        "Reduce fall risk with targeted vestibular rehab. Medicare covered. Serving Hampton Roads with compassionate care."
+      ],
+      "keywords": [
+        "[vertigo treatment at home]",
+        "[balance therapy home visits]",
+        "\"vestibular rehabilitation home\"",
+        "\"fall prevention therapy\"",
+        "positional vertigo treatment",
+        "balance disorder therapy",
+        "dizziness treatment at home",
+        "home based balance training",
+        "fall risk assessment home",
+        "vestibular therapy Medicare"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Vertigo Specialists",
+          "Fall Risk Assessment",
+          "Medicare Accepted",
+          "Personalized Care Plans"
+        ],
+        "Sitelink Extensions": [
+          "Balance Programs | Comprehensive approach to vestibular disorders",
+          "How We Help | Identify and target the right balance system",
+          "Refer a Patient | Physicians and care coordinators welcome"
+        ]
+      }
+    },
+    {
+      "campaign_name": "Post-Surgical & Wound Care",
+      "target_audience": "Patients discharged from hospital needing wound care, post-op recovery, or complex medical management at home",
+      "headlines": [
+        "Post-Surgical Care at Home",
+        "Advanced Wound Care VA",
+        "Hospital to Home Care",
+        "Complex Medical Care Home",
+        "Skilled Nursing Recovery"
+      ],
+      "descriptions": [
+        "Expert wound care and post-surgical recovery at home. Medication management and chronic disease support. Medicare certified.",
+        "Safer hospital discharge with skilled nursing at home. Reduce readmissions. Compassionate care in Hampton Roads."
+      ],
+      "keywords": [
+        "[post surgical care at home]",
+        "[wound care home health]",
+        "\"hospital discharge home care\"",
+        "\"medication management home\"",
+        "complex medical care home",
+        "post op recovery at home",
+        "chronic disease management",
+        "skilled nursing post surgery",
+        "home health after hospital",
+        "transitional care services"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Advanced Wound Care",
+          "Reduce Readmissions",
+          "24/7 Care Coordination",
+          "Experienced RN Team"
+        ],
+        "Sitelink Extensions": [
+          "Our Services | Skilled nursing, rehab, and social work support",
+          "Partner With Us | Hospital and physician referral process",
+          "Medicare Benefits | Understanding coverage for home health"
+        ]
+      }
+    }
+  ],
+  "emails": [
+    {
+      "email_number": 1,
+      "type": "smart_practice_value_drop",
+      "subject": "Why [PRIMARY_SYMPTOM] might mean more than you think",
+      "preview": "There's usually a reason behind the symptom",
+      "body": "Hi [FIRST_NAME],\n\nThank you for completing your health assessment. When you mentioned [PRIMARY_SYMPTOM], it caught our attention because symptoms like these rarely happen in isolation.\n\nMany people we work with have been told their concerns are just part of aging or a minor issue. But what we've learned over years of home-based care is that symptoms often point to an underlying imbalance in how your body's systems are working together.\n\nFor example, balance issues aren't always just about weakness. They can involve your vestibular system, vision coordination, medication side effects, or even nutritional gaps. Generic care often treats the symptom without investigating the pattern.\n\nBased on your assessment, we think [RECOMMENDED_SERVICE_OR_FOCUS] could help us understand what's really going on. We'd be honored to support you.\n\nWarm regards,\nThe Equilibrio Home Health Care Team",
+      "cta_text": "Schedule Your In-Home Assessment",
+      "cta_url": "https://equilibriohh.com/new-patients/"
+    },
+    {
+      "email_number": 2,
+      "type": "mechanism_story",
+      "subject": "What's really happening when you feel [PRIMARY_SYMPTOM]",
+      "preview": "A simple explanation that makes sense",
+      "body": "Hi [FIRST_NAME],\n\nThink of your body's balance system like a three-legged stool. One leg is your inner ear, one is your vision, and one is the sensation from your muscles and joints. If even one leg weakens, the whole stool becomes unstable.\n\nWhen you experience [PRIMARY_SYMPTOM], it's often because one of those legs isn't getting the support it needs. Maybe your inner ear isn't sending clear signals. Maybe medications are interfering. Maybe muscle strength has quietly declined.\n\nStandard medical care often focuses on the symptom itself—prescribing a pill or suggesting 'take it easy.' But if we don't identify which leg of the stool needs reinforcement, the problem persists or even gets worse.\n\nOur approach at Equilibrio is different. We assess all three systems in your own home, where you live and move every day. Then we build a personalized plan targeting the actual source.\n\nNo guarantees, but we've seen real progress when we address the right system.\n\nThe Equilibrio Team",
+      "cta_text": "Learn How We Can Help",
+      "cta_url": "https://equilibriohh.com/new-patients/"
+    },
+    {
+      "email_number": 3,
+      "type": "proof_and_results",
+      "subject": "How one patient found steadiness again",
+      "preview": "Real story, similar to your situation",
+      "body": "Hi [FIRST_NAME],\n\nWe recently worked with a patient in Virginia Beach who came to us after multiple falls and constant dizziness. She'd been told it was just her age and to use a walker.\n\nDuring our in-home assessment, we discovered positional vertigo in her inner ear—something simple tests had missed. We also found that two of her medications were interacting in a way that worsened her balance.\n\nAfter targeted vestibular therapy and coordinating with her doctor to adjust medications, she regained confidence. Within six weeks, she was walking her neighborhood again. Her daughter told us it gave the whole family peace of mind.\n\nEvery case is different, and results vary. But when we take time to understand the root cause instead of just managing symptoms, meaningful change becomes possible.\n\nIf [PRIMARY_SYMPTOM] is affecting your daily life, we'd like to help you explore what might be at the root.\n\nWith care,\nEquilibrio Home Health Team",
+      "cta_text": "Book Your Assessment Today",
+      "cta_url": "https://equilibriohh.com/new-patients/"
+    }
+  ],
+  "app_config": {
+    "practiceName": "Equilibrio Home Health",
+    "practiceShortName": "Equilibrio",
+    "providerName": "Equilibrio Care Team",
+    "providerTitle": "Skilled Home Health Specialists",
+    "tagline": "Balance in Life Through Compassionate Home Care",
+    "primaryColor": "#6EC1E4",
+    "primaryDark": "#3A9FBF",
+    "primaryLight": "#9DD5ED",
+    "primaryXLight": "#E8F7FC",
+    "backgroundColor": "#FFFFFF",
+    "bookingUrl": "https://equilibriohh.com/new-patients/",
+    "phone": "757-965-9942",
+    "concerns": [
+      {
+        "label": "Balance & Falls",
+        "emoji": "🧘"
+      },
+      {
+        "label": "Post-Surgery Recovery",
+        "emoji": "🏥"
+      },
+      {
+        "label": "Chronic Condition Management",
+        "emoji": "💊"
+      },
+      {
+        "label": "Wound Care",
+        "emoji": "🩹"
+      },
+      {
+        "label": "Vertigo & Dizziness",
+        "emoji": "😵"
+      },
+      {
+        "label": "Medication Management",
+        "emoji": "💉"
+      }
+    ],
+    "symptom_map": {
+      "Balance & Falls": [
+        "Feeling unsteady when walking",
+        "Fear of falling at home",
+        "Dizziness when standing up",
+        "Difficulty navigating stairs",
+        "Loss of confidence in mobility",
+        "Need to hold onto furniture",
+        "Previous falls or near-falls",
+        "Feeling off-balance in the dark"
+      ],
+      "Post-Surgery Recovery": [
+        "Healing from recent surgery",
+        "Limited mobility after hospital stay",
+        "Need for wound monitoring",
+        "Pain management at home",
+        "Difficulty with daily activities",
+        "Concern about infection",
+        "Fatigue and weakness",
+        "Uncertain about recovery progress"
+      ],
+      "Chronic Condition Management": [
+        "Living with diabetes",
+        "Heart condition requiring monitoring",
+        "COPD or breathing difficulties",
+        "Multiple medications to track",
+        "Frequent hospital readmissions",
+        "Declining independence",
+        "Difficulty following care plan",
+        "Need for ongoing skilled nursing"
+      ],
+      "Wound Care": [
+        "Slow-healing surgical incision",
+        "Diabetic foot wound",
+        "Pressure sore or ulcer",
+        "Infection risk concern",
+        "Complex dressing changes needed",
+        "Pain at wound site",
+        "Discharge or drainage",
+        "Previous wound complications"
+      ],
+      "Vertigo & Dizziness": [
+        "Room spinning sensation",
+        "Dizziness with head movement",
+        "Nausea with position changes",
+        "Difficulty getting out of bed",
+        "Feeling lightheaded often",
+        "Balance issues when turning",
+        "Visual disturbances",
+        "Positional vertigo symptoms"
+      ],
+      "Medication Management": [
+        "Confusion about medication schedule",
+        "Taking multiple prescriptions",
+        "Concerns about side effects",
+        "Trouble remembering doses",
+        "Recent medication changes",
+        "Drug interactions worry",
+        "Need for medication education",
+        "Difficulty organizing pills"
+      ]
+    },
+    "careModels": [
+      {
+        "name": "Skilled Nursing Visits",
+        "desc": "Registered nurses provide wound care, medication management, chronic disease monitoring, and patient education in your home",
+        "price": "Covered by Medicare"
+      },
+      {
+        "name": "Physical Therapy",
+        "desc": "In-home rehabilitation to improve strength, mobility, balance, and functional independence after illness or surgery",
+        "price": "Covered by Medicare"
+      },
+      {
+        "name": "Balance & Vestibular Program",
+        "desc": "Specialized therapy for vertigo, dizziness, and fall prevention using comprehensive balance system assessment",
+        "price": "Covered by Medicare"
+      },
+      {
+        "name": "Occupational Therapy",
+        "desc": "Help with daily activities, adaptive equipment, safety modifications, and strategies for independent living at home",
+        "price": "Covered by Medicare"
+      }
+    ]
+  },
+  "report_url": "https://healthbizleads.com/equilibrio-home-health/"
+}

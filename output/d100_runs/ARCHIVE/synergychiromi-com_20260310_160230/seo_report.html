@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI, SEO &amp; Ad Strategy — Synergy Chiropractic</title>
+  <link rel="icon" href="https://www.synergychiromi.com/wp-content/uploads/2023/09/cropped-Chiropractic-West-Bloomfield-MI-Synergy-Chiropractic-Favicon-v2-32x32.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600&display=swap" rel="stylesheet">
+  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: '#2C5F8D',
+            accent: '#4A8BC2',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","vv58unfjot");</script>
+  <style>
+    :root {
+      --brand-primary: #2C5F8D;
+      --brand-accent: #4A8BC2;
+      --black: #080808;
+      --dark: #0f172a;
+      --surface: #f8fafc;
+      --white: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --subtle: #e2e8f0;
+    }
+
+    html { scroll-behavior: smooth; font-size: 18px; }
+    body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; background: #fff; color: var(--text); }
+
+    /* Progress bar */
+    #progress-bar { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: var(--brand-accent); z-index: 9999; transition: width 0.1s; }
+
+    /* Hero headline */
+    .hero-headline {
+      font-size: clamp(52px, 7.5vw, 92px);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+    }
+
+    /* Section headlines */
+    .section-headline {
+      font-size: clamp(36px, 5vw, 60px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    /* Label / eyebrow */
+    .label-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--brand-accent);
+    }
+
+    /* Subheadings */
+    .subheading {
+      font-size: clamp(22px, 2.5vw, 30px);
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    /* Video wrappers */
+    .loom-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+    }
+    .loom-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+    .yt-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .yt-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+    /* Calendly */
+    .calendly-inline-widget { min-width: 320px; height: 950px; border-radius: 12px; overflow: hidden; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #0f172a;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.78rem;
+      padding: 14px 16px;
+      text-align: left;
+      white-space: nowrap;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    tbody td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; color: #334155; font-size: 0.92rem; vertical-align: top; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:nth-child(even) { background: #f8fafc; }
+    tbody tr:hover { background: #f1f5f9; }
+
+    /* Badges */
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 0.78rem; font-weight: 700; }
+    .badge-high { background: rgba(13,122,78,0.12); color: #059669; border: 1px solid rgba(13,122,78,0.25); }
+    .badge-medium { background: rgba(245,158,11,0.1); color: #d97706; border: 1px solid rgba(245,158,11,0.2); }
+    .badge-low { background: rgba(99,102,241,0.1); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); }
+
+    /* Details / accordion */
+    details summary::-webkit-details-marker { display: none; }
+    details summary { user-select: none; list-style: none; }
+
+    /* ── Animation system ──────────────────────────────────── */
+
+    /* Scroll fade — base */
+    .fade-up { opacity: 0; transform: translateY(32px); transition: opacity 0.65s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.65s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    /* Stagger children — applied by JS to grid containers */
+    .stagger-children > * { opacity: 0; transform: translateY(28px); transition: opacity 0.55s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .stagger-children.visible > * { opacity: 1; transform: translateY(0); }
+    .stagger-children.visible > *:nth-child(1) { transition-delay: 0s; }
+    .stagger-children.visible > *:nth-child(2) { transition-delay: 0.09s; }
+    .stagger-children.visible > *:nth-child(3) { transition-delay: 0.18s; }
+    .stagger-children.visible > *:nth-child(4) { transition-delay: 0.27s; }
+    .stagger-children.visible > *:nth-child(5) { transition-delay: 0.36s; }
+
+    /* Slide in from left / right */
+    .slide-left  { opacity: 0; transform: translateX(-40px); transition: opacity 0.6s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .slide-left.visible { opacity: 1; transform: translateX(0); }
+    .slide-right { opacity: 0; transform: translateX(40px);  transition: opacity 0.6s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .slide-right.visible { opacity: 1; transform: translateX(0); }
+
+    /* Scale in */
+    .scale-in { opacity: 0; transform: scale(0.92); transition: opacity 0.55s cubic-bezier(0.34,1.56,0.64,1), transform 0.55s cubic-bezier(0.34,1.56,0.64,1); }
+    .scale-in.visible { opacity: 1; transform: scale(1); }
+
+    /* Number counter — stat values */
+    .stat-num { display: block; }
+
+    /* Hero entrance */
+    @keyframes heroFadeUp {
+      from { opacity: 0; transform: translateY(50px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes heroPill {
+      from { opacity: 0; transform: translateY(18px) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .hero-animate-1 { animation: heroPill 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.15s both; }
+    .hero-animate-2 { animation: heroFadeUp 0.75s cubic-bezier(0.25,0.46,0.45,0.94) 0.3s both; }
+    .hero-animate-3 { animation: heroFadeUp 0.7s cubic-bezier(0.25,0.46,0.45,0.94) 0.5s both; }
+    .hero-animate-4 { animation: heroFadeUp 0.8s cubic-bezier(0.25,0.46,0.45,0.94) 0.65s both; }
+
+    /* Floating badge */
+    @keyframes floatBadge {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-6px); }
+    }
+    .float-badge { animation: floatBadge 4s ease-in-out infinite; }
+
+    /* Glow pulse on brand accent elements */
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 0 0 transparent; }
+      50%       { box-shadow: 0 0 20px 4px color-mix(in srgb, var(--brand-accent) 40%, transparent); }
+    }
+    .glow-pulse { animation: glowPulse 3s ease-in-out infinite; }
+
+    /* Shimmer sweep on dark cards */
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    /* Marquee for logo/brand bar */
+    @keyframes marqueeScroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    .marquee-track { animation: marqueeScroll 24s linear infinite; }
+
+    /* Loom/video reveal — scale up from slightly small */
+    @keyframes videoReveal {
+      from { opacity: 0; transform: scale(0.96) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .video-reveal { animation: videoReveal 0.9s cubic-bezier(0.25,0.46,0.45,0.94) 0.8s both; }
+
+    /* Card hover glow — light bg cards */
+    .hover-card {
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
+    }
+    .hover-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.1), 0 0 0 1px color-mix(in srgb, var(--brand-accent) 30%, transparent);
+    }
+
+    /* Dark card hover glow */
+    .hover-card-dark {
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .hover-card-dark:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 0 1px color-mix(in srgb, var(--brand-accent) 40%, transparent);
+      border-color: color-mix(in srgb, var(--brand-accent) 50%, transparent) !important;
+    }
+
+    /* CTA button press */
+    .btn-press {
+      transition: transform 0.12s ease, opacity 0.12s ease;
+    }
+    .btn-press:active { transform: scale(0.97); opacity: 0.9; }
+
+    /* Table row entrance */
+    tbody tr {
+      transition: background 0.2s ease;
+    }
+
+    /* Gradient border on stat cards */
+    .stat-dark {
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-dark::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--brand-accent), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .stat-dark:hover::after { opacity: 1; }
+    .stat-dark { transition: transform 0.2s ease; }
+    .stat-dark:hover { transform: translateY(-3px); }
+
+    /* Accordion smooth open */
+    details > div {
+      overflow: hidden;
+    }
+
+    /* Section divider glow line */
+    .section-glow-line {
+      width: 60px; height: 3px;
+      background: var(--brand-accent);
+      border-radius: 2px;
+      margin: 0 auto 2rem;
+      box-shadow: 0 0 12px 2px color-mix(in srgb, var(--brand-accent) 60%, transparent);
+    }
+
+    /* Typewriter cursor blink */
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+    /* Step number reveal */
+    @keyframes stepReveal {
+      from { opacity: 0; transform: translateX(-20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .step-num-animate { animation: stepReveal 0.5s cubic-bezier(0.25,0.46,0.45,0.94) both; }
+
+    /* Stats dark card */
+    .stat-dark {
+      background: #0f172a;
+      color: #fff;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .stat-dark .stat-num {
+      display: block;
+      font-size: clamp(26px, 3vw, 36px);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 0.35rem;
+    }
+    .stat-dark .stat-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+
+    /* Quote card on dark bg */
+    .quote-dark {
+      border: 1px solid rgba(255,255,255,0.1);
+      border-left: 4px solid var(--brand-accent);
+      border-radius: 1rem;
+      padding: 2rem;
+      background: rgba(255,255,255,0.04);
+    }
+
+    /* Check / cross list items */
+    .check-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .check-row:last-child { border-bottom: none; }
+
+    /* Mobile */
+    @media (max-width: 640px) {
+      html { font-size: 16px; }
+      .hero-headline { font-size: 46px; }
+      .section-headline { font-size: 34px; }
+      .ads-grid { grid-template-columns: 1fr !important; }
+    }
+
+    /* Nav */
+    #main-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: #0d0d0d;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    #main-nav a.nav-link {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    #main-nav a.nav-link:hover { color: #ffffff; }
+
+    /* Step cards — Superpower-style numbered steps */
+    .step-card {
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+      padding: 2rem;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 1.25rem;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    .step-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.08);
+    }
+    .step-badge {
+      flex-shrink: 0;
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    /* Call agenda */
+    .agenda-item {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .agenda-item:last-child { border-bottom: none; }
+    .agenda-time {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--brand-accent);
+      padding-top: 3px;
+      min-width: 100px;
+    }
+
+    /* SEO section safety — ensure dark text on white background */
+    #section-seo { color: #0f172a; }
+    #section-seo td { color: #334155 !important; }
+  </style>
+</head>
+<body>
+
+<!-- OPEN TRACKING BEACON -->
+<script>
+(function() {
+  try {
+    if (new URLSearchParams(window.location.search).get('preview') === '1') return;
+    if (localStorage.getItem('hbl_notrack') === '1') return;
+    var SK = 'hbl_sid_synergy-chiropractic';
+    var sid = localStorage.getItem(SK);
+    var isNew = !sid ? '1' : '0';
+    if (!sid) { sid = Math.random().toString(36).slice(2,10) + Date.now().toString(36); localStorage.setItem(SK, sid); }
+    var tz = (Intl && Intl.DateTimeFormat) ? (Intl.DateTimeFormat().resolvedOptions().timeZone || '') : '';
+    var mob = (window.innerWidth < 768) ? '1' : '0';
+    var scr = (window.screen ? window.screen.width + 'x' + window.screen.height : '');
+    var lp = encodeURIComponent(window.location.pathname);
+    var params = ['c=synergy-chiropractic','n=Synergy%20Chiropractic','s=synergy-chiropractic','tz='+encodeURIComponent(tz),'mob='+mob,'scr='+encodeURIComponent(scr),'sid='+encodeURIComponent(sid),'new='+isNew,'lp='+lp].join('&');
+    fetch('/api/track?' + params, { method: 'GET', mode: 'no-cors', keepalive: true }).catch(function(){});
+  } catch(e) {}
+})();
+</script>
+
+<div id="progress-bar"></div>
+
+<!-- JS CONFIG BLOCK -->
+<script>
+const CONFIG = {
+  practice_name: "Synergy Chiropractic",
+  doctor_name: "Dr. Eric Mintz",
+  website: "http://synergychiromi.com",
+  logo_url: "https://www.synergychiromi.com/wp-content/uploads/2023/09/Chiropractic-West-Bloomfield-MI-Synergy-Chiropractic-SCR-Logo.webp",
+  loom_id: "c15f136d1a984e4783fd09d17628f977",
+  booking_url: "http://synergychiromi.com/new-patients/",
+  brand_primary: "#2C5F8D",
+  brand_accent: "#4A8BC2",
+  city: "West Bloomfield, MI",
+  primary_condition: "brainhealthassessment",
+  is_multi_location: "false",
+  company_slug: "synergy-chiropractic",
+  run_date: "March 10, 2026"
+};
+</script>
+
+<!-- =============================
+     STICKY NAV
+     ============================= -->
+<nav id="main-nav" role="navigation" aria-label="Main navigation">
+  <div class="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between gap-4">
+    <a href="#section-hero" aria-label="Synergy Chiropractic home" class="flex items-center flex-shrink-0">
+      <img src="https://www.synergychiromi.com/wp-content/uploads/2023/09/Chiropractic-West-Bloomfield-MI-Synergy-Chiropractic-SCR-Logo.webp" alt="Synergy Chiropractic logo" class="h-8 w-auto object-contain" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span style="display:none; color: var(--brand-accent); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em;">Synergy Chiropractic</span>
+    </a>
+    <!-- Desktop nav links (hidden on small screens) -->
+    <div class="hidden md:flex items-center gap-7 flex-1 justify-center">
+      <a href="#section-whats-inside" class="nav-link">What We Built</a>
+      <a href="#section-seo" class="nav-link">SEO Audit</a>
+      <a href="#section-ads" class="nav-link">Ad Plan</a>
+      <a href="#section-reviews" class="nav-link">Results</a>
+      <a href="#section-faq" class="nav-link">FAQ</a>
+    </div>
+    <a href="#calendly-1" class="inline-flex items-center gap-2 font-bold py-2.5 px-6 rounded-full text-sm text-white hover:opacity-90 transition-opacity whitespace-nowrap no-underline btn-press flex-shrink-0" style="background: #F4570D;">
+      Get Your Growth Plan &rarr;
+    </a>
+  </div>
+</nav>
+
+<!-- =============================
+     SECTION 1 — HERO
+     ============================= -->
+<section id="section-hero" style="background: #080808; min-height: 100vh;" class="flex flex-col justify-center pt-20 pb-28 px-5">
+  <div class="max-w-5xl mx-auto w-full">
+
+    <!-- Pill badge -->
+    <div class="mb-8 hero-animate-1">
+      <span class="inline-block border border-white/20 text-white/60 text-xs font-semibold tracking-widest uppercase px-4 py-2 rounded-full float-badge">
+        Built exclusively for Synergy Chiropractic
+      </span>
+    </div>
+
+    <!-- Hero headline -->
+    <h1 class="hero-headline text-white mb-7 hero-animate-2">
+      Synergy Chiropractic Is Growing.<br>
+      <span style="color: var(--brand-accent);">Here's What's Slowing It Down.</span>
+    </h1>
+
+    <!-- Hero subtext -->
+    <p class="text-white/50 mb-14 hero-animate-3" style="font-size: 18px; line-height: 1.7;">
+      Everything in this document was built for Synergy Chiropractic before we ever spoke.
+    </p>
+
+    <!-- Loom embed -->
+    <div class="max-w-4xl video-reveal">
+      <div class="loom-wrapper">
+        <iframe id="loom-frame"
+          src="https://www.loom.com/embed/c15f136d1a984e4783fd09d17628f977?hide_owner=true&hide_share=true&hide_title=true&hideEmbedTopBar=true"
+          allow="fullscreen; encrypted-media"
+          title="Personalized strategy video for Synergy Chiropractic"></iframe>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 2 — WHAT'S PREPARED
+     ============================= -->
+<section id="section-whats-inside" class="bg-white py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Label -->
+    <div class="mb-5 fade-up">
+      <span class="label-tag">What We Built For You</span>
+    </div>
+
+    <!-- Headline -->
+    <h2 class="section-headline text-slate-900 mb-4 fade-up">
+      Built For You. Before We Spoke.
+    </h2>
+    <p class="text-slate-500 mb-16 fade-up" style="font-size: 18px; line-height: 1.7; max-width: 560px;">
+      Everything you see in this document was built before we ever spoke. That's how we work.
+    </p>
+
+    <!-- STEP format — 5 numbered deliverables with WHY -->
+    <div class="flex flex-col gap-4 mb-14 stagger-children">
+
+      <!-- STEP 1 -->
+      <div class="step-card fade-up">
+        <div class="step-badge" style="background: var(--brand-accent);">1</div>
+        <div class="flex-1">
+          <p class="text-xs font-bold tracking-widest uppercase mb-1" style="color: var(--brand-accent);">STEP 1</p>
+          <h4 class="text-slate-900 font-bold text-lg mb-2">Your SEO Quick Wins Report</h4>
+          <p class="text-slate-500 leading-relaxed m-0" style="font-size: 17px; line-height: 1.75;">1 searches your ideal patients are running right now where Synergy Chiropractic should be ranking but isn't. We found the easiest wins — pages that could be on page 1 of Google within 30–60 days.</p>
+        </div>
+        <span class="hidden md:block text-xs font-bold px-3 py-1.5 rounded-full flex-shrink-0 self-start mt-1" style="background: rgba(132,189,187,0.1); border: 1px solid var(--brand-accent); color: var(--brand-accent); white-space: nowrap;">Analysis complete</span>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-card fade-up">
+        <div class="step-badge" style="background: var(--brand-accent);">2</div>
+        <div class="flex-1">
+          <p class="text-xs font-bold tracking-widest uppercase mb-1" style="color: var(--brand-accent);">STEP 2</p>
+          <h4 class="text-slate-900 font-bold text-lg mb-2">3 Google Ad Campaigns, Ready to Launch</h4>
+          <p class="text-slate-500 leading-relaxed m-0" style="font-size: 17px; line-height: 1.75;">Three complete campaigns for Synergy Chiropractic's top patient types — written, structured, and ready to turn on. Paid ads get you in front of new patients this week, not six months from now.</p>
+        </div>
+        <span class="hidden md:block text-xs font-bold px-3 py-1.5 rounded-full flex-shrink-0 self-start mt-1" style="background: rgba(132,189,187,0.1); border: 1px solid var(--brand-accent); color: var(--brand-accent); white-space: nowrap;">Built for you</span>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step-card fade-up">
+        <div class="step-badge" style="background: var(--brand-accent);">3</div>
+        <div class="flex-1">
+          <p class="text-xs font-bold tracking-widest uppercase mb-1" style="color: var(--brand-accent);">STEP 3</p>
+          <h4 class="text-slate-900 font-bold text-lg mb-2">Your AI Visibility Report</h4>
+          <p class="text-slate-500 leading-relaxed m-0" style="font-size: 17px; line-height: 1.75;">AI tools like ChatGPT and Google now recommend doctors directly to patients. We show you exactly where Synergy Chiropractic stands in those results — and what it takes to show up when patients ask.</p>
+        </div>
+        <span class="hidden md:block text-xs font-bold px-3 py-1.5 rounded-full flex-shrink-0 self-start mt-1" style="background: rgba(132,189,187,0.1); border: 1px solid var(--brand-accent); color: var(--brand-accent); white-space: nowrap;">Analysis complete</span>
+      </div>
+
+
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center fade-up">
+      <a href="#calendly-1" class="inline-flex items-center gap-2 text-white font-bold text-lg py-4 px-12 rounded-xl hover:opacity-90 transition-opacity no-underline btn-press" style="background: var(--brand-primary);">
+        Book Your Free Strategy Call &rarr;
+      </a>
+      <p class="text-slate-400 text-sm mt-4">30 minutes. Real data. No pitch. No pressure.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 4 — PROBLEM / QUOTES (DARK)
+     ============================= -->
+<section id="section-agitation" style="background: #080808;" class="py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Label -->
+    <div class="mb-6 fade-up">
+      <span class="label-tag">The Pattern We Keep Seeing</span>
+    </div>
+
+    <!-- Headline -->
+    <h2 class="hero-headline text-white mb-4 fade-up">
+      You're Not Getting Bad Work.
+    </h2>
+    <p class="text-white/60 fade-up" style="font-size: clamp(28px, 4vw, 48px); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 3.5rem;">
+      You're Getting The Wrong Work.
+    </p>
+
+    <!-- Quote grid: 5 cards -->
+    <div class="grid gap-5 mb-16 stagger-children" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+
+
+      <div class="quote-dark hover-card-dark">
+        <p class="text-white/80 italic leading-relaxed mb-4" style="font-size: 18px; line-height: 1.7;">"Our Google Ads guy said we'd get 20–30 leads a month. We got leads — people looking for free consults or checking insurance. Not patients. Leads."</p>
+        <span class="label-tag">Functional Medicine Director</span>
+      </div>
+
+      <div class="quote-dark hover-card-dark">
+        <p class="text-white/80 italic leading-relaxed mb-4" style="font-size: 18px; line-height: 1.7;">"I asked my agency to show me ROI. They showed me impressions. I don't bill for impressions."</p>
+        <span class="label-tag">Naturopathic Physician</span>
+      </div>
+
+      <div class="quote-dark hover-card-dark">
+        <p class="text-white/80 italic leading-relaxed mb-4" style="font-size: 18px; line-height: 1.7;">"We bought an AI tool to help front desk. Six months in, half the team still doesn't use it because it took too long to learn and half the features don't apply to us."</p>
+        <span class="label-tag">Integrative Health Director</span>
+      </div>
+
+      <div id="quote-multilocation" class="quote-dark" style="grid-column: span 1;">
+        <p class="text-white/80 italic leading-relaxed mb-4" style="font-size: 18px; line-height: 1.7;">"Every location has its own marketing person. None of them talk to each other. We have no idea which one is actually working."</p>
+        <span class="label-tag">Multi-Location Practice Owner</span>
+      </div>
+
+    </div>
+
+    <!-- Problem breakdown cards -->
+    <p class="text-white/50 mb-8 fade-up" style="font-size: 18px; line-height: 1.7;">The work is happening. The connection to revenue isn't.</p>
+
+    <div class="flex flex-col gap-5 fade-up">
+
+      <div class="rounded-2xl p-8 border border-white/10 hover-card-dark" style="background: rgba(255,255,255,0.04);">
+        <h4 class="text-white font-bold text-lg mb-3">📊 Metrics that don't connect to revenue.</h4>
+        <p class="mb-4" style="color: rgba(255,255,255,0.6); font-size: 17px; line-height: 1.7;">Traffic reports. Impression counts. Keyword rankings. These are the numbers agencies can control — and the only ones they talk about. What you actually need is a straight line from spend to booked patients. Most agencies can't draw that line because they've never been held to it.</p>
+        <p style="color: rgba(255,255,255,0.85); font-size: 16px; line-height: 1.7;"><strong style="color: var(--brand-accent);">What we do instead:</strong> Every campaign we run traces directly to patient inquiries. If we can't show the line from ad spend to revenue, we don't run it.</p>
+      </div>
+
+      <div class="rounded-2xl p-8 border border-white/10 hover-card-dark" style="background: rgba(255,255,255,0.04);">
+        <h4 class="text-white font-bold text-lg mb-3">💸 Ad spend without intent targeting.</h4>
+        <p class="mb-4" style="color: rgba(255,255,255,0.6); font-size: 17px; line-height: 1.7;">Broad keywords fill pipelines. They just fill them with the wrong people. A patient searching "fatigue doctor near me" is infinitely more valuable than someone searching "health clinic." Most ad managers don't make that distinction — or don't know how to build campaigns around it.</p>
+        <p style="color: rgba(255,255,255,0.85); font-size: 16px; line-height: 1.7;"><strong style="color: var(--brand-accent);">What we do instead:</strong> We only bid on searches from patients who have already decided they need help and are looking for someone specific. Zero broad match. Zero wasted impressions.</p>
+      </div>
+
+      <div class="rounded-2xl p-8 border border-white/10 hover-card-dark" style="background: rgba(255,255,255,0.04);">
+        <h4 class="text-white font-bold text-lg mb-3">🔍 SEO built for search engines, not patients.</h4>
+        <p class="mb-4" style="color: rgba(255,255,255,0.6); font-size: 17px; line-height: 1.7;">Generic content farms write about your conditions using medical jargon that reads well to algorithms and terribly to patients. You rank for something no one searches. Or you rank for something people search but don't convert — because the page doesn't speak their language.</p>
+        <p style="color: rgba(255,255,255,0.85); font-size: 16px; line-height: 1.7;"><strong style="color: var(--brand-accent);">What we do instead:</strong> Every page we write is built around how your patients actually describe their symptoms, their fears, and the outcome they want. That's what ranks and converts.</p>
+      </div>
+
+      <div class="rounded-2xl p-8 border border-white/10 hover-card-dark" style="background: rgba(255,255,255,0.04);">
+        <h4 class="text-white font-bold text-lg mb-3">🤖 AI tools built for someone else's business.</h4>
+        <p class="mb-4" style="color: rgba(255,255,255,0.6); font-size: 17px; line-height: 1.7;">Most AI tools were built for Amazon sellers, real estate agents, and generic SaaS companies. When healthcare practices try them, they spend months customizing something that was never designed for clinical workflows, HIPAA-sensitive communication, or the complexity of a multi-provider practice.</p>
+        <p style="color: rgba(255,255,255,0.85); font-size: 16px; line-height: 1.7;"><strong style="color: var(--brand-accent);">What we do instead:</strong> We don't pick a tool and hand you a login. We build from scratch, around exactly how your practice runs. Your team uses it from day one.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 5 — SOCIAL PROOF
+     ============================= -->
+<section id="section-social-proof" class="bg-white py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <h2 class="section-headline text-slate-900 mb-12 fade-up">Don't Take Our Word for It</h2>
+
+    <div class="yt-wrapper mb-8 fade-up">
+      <iframe src="https://www.youtube.com/embed/1C5OkpnlCvQ?rel=0&start=1" allow="fullscreen; encrypted-media; autoplay" title="Dr. Diane testimonial — Health Biz Scale"></iframe>
+    </div>
+
+    <div class="rounded-2xl p-8 mb-12 fade-up" style="background: var(--surface); border-left: 5px solid var(--brand-accent);">
+      <p class="text-slate-700 text-lg italic leading-relaxed">"Since working with Health Biz Scale (Naturopathic SEO), Dr. Diane saw her new patient calls multiply by 10x. She was able to eliminate all other marketing, hire new doctors, and create a waiting list."</p>
+    </div>
+
+    <h3 class="subheading text-slate-900 mb-8 fade-up">HOW DID WE 10X PATIENT CALLS TO CREATE A WAITING LIST FOR DR. DIANE:</h3>
+
+    <!-- Dr. Diane results 2x2 grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10 stagger-children">
+      <div class="bg-white rounded-2xl border border-slate-100 p-7 shadow-sm hover-card" style="border-left: 3px solid var(--brand-primary);">
+        <h4 class="font-bold text-base mb-2" style="color: var(--brand-accent);">Closed the Patient Search Gap</h4>
+        <p class="text-slate-500 text-sm leading-relaxed m-0">We found every search her ideal patients were running that she wasn't showing up for. Then we fixed every gap. New pages, optimized existing ones, technical fixes — all of it. Her visibility for high-intent, condition-specific searches went from scattered to dominant.</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-100 p-7 shadow-sm hover-card" style="border-left: 3px solid var(--brand-primary);">
+        <h4 class="font-bold text-base mb-2" style="color: var(--brand-accent);">Ranked for High-Intent, Patient-Ready Searches</h4>
+        <p class="text-slate-500 text-sm leading-relaxed m-0">We rebuilt her service and condition pages around the searches patients make when they're ready to book. Not broad health terms — specific condition + location + intent combinations that bring in patients, not browsers.</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-100 p-7 shadow-sm hover-card" style="border-left: 3px solid var(--brand-primary);">
+        <h4 class="font-bold text-base mb-2" style="color: var(--brand-accent);">Built SEO-Driven Lead Magnets That Convert</h4>
+        <p class="text-slate-500 text-sm leading-relaxed m-0">We built tools and opt-ins tied to her patients' real problems. They rank in Google and get cited in ChatGPT. Qualified leads who already understand her approach arrive pre-sold on working with her specifically.</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-100 p-7 shadow-sm hover-card" style="border-left: 3px solid var(--brand-primary);">
+        <h4 class="font-bold text-base mb-2" style="color: var(--brand-accent);">Eliminated All Other Marketing</h4>
+        <p class="text-slate-500 text-sm leading-relaxed m-0">When organic patient flow reaches a certain velocity, you stop needing to pay for attention. That's the outcome we build toward — a practice that fills itself, not one that depends on a monthly ad budget to stay alive.</p>
+      </div>
+    </div>
+
+    <a href="#section-reviews" class="block mt-8 bg-slate-50 border border-slate-200 rounded-2xl py-5 px-6 text-center text-sm font-bold no-underline hover:bg-slate-100 transition-colors fade-up" style="color: var(--brand-accent);">(SEE MORE TESTIMONIALS AT THE BOTTOM ↓)</a>
+
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 6 — THREE PILLARS
+     ============================= -->
+<section id="section-system" style="background: #f8fafc;" class="py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="mb-5 fade-up">
+      <span class="label-tag">Three Things That Move Together</span>
+    </div>
+
+    <h2 class="section-headline text-slate-900 mb-4 fade-up">Fix All Three. Growth Compounds.</h2>
+    <p class="text-slate-500 mb-16 fade-up" style="font-size: 18px; line-height: 1.7; max-width: 520px;">Fix any one of these in isolation and you'll feel it. Fix all three and the growth becomes self-sustaining.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 stagger-children">
+
+      <div class="bg-white rounded-2xl p-10 shadow-sm border border-slate-100 hover-card">
+        <span class="block text-5xl mb-6">🤖</span>
+        <h3 class="text-slate-900 font-bold text-xl mb-4">AI Infrastructure</h3>
+        <p class="text-slate-500 leading-relaxed" style="font-size: 16px; line-height: 1.7;">Purpose-built automation for how your practice actually operates. Missed call recovery. Appointment reminders. Intake workflows that run without your team lifting a finger. Built for you, owned by you.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-10 shadow-sm border border-slate-100 hover-card">
+        <span class="block text-5xl mb-6">📍</span>
+        <h3 class="text-slate-900 font-bold text-xl mb-4">SEO That Compounds</h3>
+        <p class="text-slate-500 leading-relaxed" style="font-size: 16px; line-height: 1.7;">Condition-specific content ranked for the searches patients make when they're ready to book. Technical fixes that hold. Local authority that compounds month over month. Traffic that doesn't stop when you stop paying.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-10 shadow-sm border border-slate-100 hover-card">
+        <span class="block text-5xl mb-6">📢</span>
+        <h3 class="text-slate-900 font-bold text-xl mb-4">Ads That Convert</h3>
+        <p class="text-slate-500 leading-relaxed" style="font-size: 16px; line-height: 1.7;">Every dollar targeted at patients who are already looking for what you offer. Condition-specific campaigns, not broad health terms. Your ad spend goes to people who are frustrated, ready, and searching for someone exactly like you.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 7 — AI INFRASTRUCTURE
+     ============================= -->
+<section id="section-ai" style="background: #080808;" class="py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="mb-6 fade-up">
+      <span class="label-tag">AI Infrastructure</span>
+    </div>
+
+    <h2 class="section-headline text-white mb-5 fade-up">
+      Every AI Tool You've Tried Was Built For Someone Else.
+    </h2>
+    <p class="mb-16 fade-up" style="color: rgba(255,255,255,0.55); font-size: 18px; line-height: 1.7; max-width: 560px;">
+      Healthcare practices need something different — and almost no one is building it for them.
+    </p>
+
+    <!-- Two-column comparison -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 stagger-children">
+
+      <!-- Bad side -->
+      <div class="rounded-2xl border border-white/10 p-8 hover-card-dark" style="background: rgba(255,255,255,0.03);">
+        <h3 class="font-bold text-lg mb-6" style="color: rgba(255,100,100,0.9);">❌ What most AI tools look like in practice</h3>
+        <div>
+          <div class="check-row">
+            <span style="color: rgba(255,255,255,0.35); font-size: 16px; line-height: 1.7;">Weeks of setup before anything works</span>
+          </div>
+          <div class="check-row">
+            <span style="color: rgba(255,255,255,0.35); font-size: 16px; line-height: 1.7;">Staff training on tools not built for clinical environments</span>
+          </div>
+          <div class="check-row">
+            <span style="color: rgba(255,255,255,0.35); font-size: 16px; line-height: 1.7;">You pay for 10 features and use 2</span>
+          </div>
+          <div class="check-row">
+            <span style="color: rgba(255,255,255,0.35); font-size: 16px; line-height: 1.7;">When it's not quite right, there's no one to call — just a support ticket</span>
+          </div>
+          <div class="check-row" style="border-bottom: none;">
+            <span style="color: rgba(255,255,255,0.35); font-size: 16px; line-height: 1.7;">Three months in, half the team still doesn't use it</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Good side -->
+      <div class="rounded-2xl border border-white/10 p-8 hover-card-dark" style="background: rgba(255,255,255,0.03);">
+        <h3 class="font-bold text-lg mb-6" style="color: var(--brand-accent);">✓ What a purpose-built system looks like</h3>
+        <div>
+          <div class="check-row">
+            <span class="text-white" style="font-size: 16px; line-height: 1.7;">Built around the workflows inside your specific practice</span>
+          </div>
+          <div class="check-row">
+            <span class="text-white" style="font-size: 16px; line-height: 1.7;">Your team uses it from day one — no learning curve, no workarounds</span>
+          </div>
+          <div class="check-row">
+            <span class="text-white" style="font-size: 16px; line-height: 1.7;">Intake, follow-up, scheduling friction — the things that actually eat your time</span>
+          </div>
+          <div class="check-row">
+            <span class="text-white" style="font-size: 16px; line-height: 1.7;">If it doesn't save you real time in 30 days, we haven't done our job</span>
+          </div>
+          <div class="check-row" style="border-bottom: none;">
+            <span class="text-white" style="font-size: 16px; line-height: 1.7;">You own it — not a subscription someone can pull out from under you</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Opportunity callout -->
+    <div class="rounded-2xl p-8 md:p-10 fade-up" style="background: #0d1f35; border-left: 4px solid var(--brand-accent);">
+      <h3 class="font-bold text-xl mb-3" style="color: var(--brand-accent);">The Opportunity Right Now</h3>
+      <p style="color: rgba(255,255,255,0.7); font-size: 17px; line-height: 1.7; margin-bottom: 1rem;">Most practices at Synergy Chiropractic's level have SEO running and ads live. What almost none of them have is AI that actually plugs into how their practice runs — intake, follow-up, reactivation, scheduling. That gap is the opportunity.</p>
+      <p style="color: rgba(255,255,255,0.7); font-size: 17px; line-height: 1.7; margin-bottom: 1rem;">I don't prescribe a solution before I understand how your practice runs. The AI conversation happens on the call. We figure out what fits, what's worth building, and what the ROI looks like specifically for you.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 8 — SEO AUDIT
+     ============================= -->
+<section id="section-seo" class="bg-white py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="mb-5 fade-up">
+      <span class="label-tag">Your SEO Audit</span>
+    </div>
+
+    <h2 class="section-headline text-slate-900 mb-5 fade-up">
+      Your Competitors Are Getting Found For Searches You're Losing.
+    </h2>
+    <p class="text-slate-500 mb-12 fade-up" style="font-size: 18px; line-height: 1.7; max-width: 580px;">
+      These are condition-specific searches happening in your market right now. Patients who match your practice model, ready to book, using Google to find someone exactly like you.
+    </p>
+
+    <!-- Stats bar: 4 dark cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 stagger-children">
+      <div class="stat-dark">
+        <span class="stat-num" data-count="#6,974,602">#6,974,602</span>
+        <span class="stat-label">Global Rank</span>
+      </div>
+      <div class="stat-dark">
+        <span class="stat-num" data-count="126">126</span>
+        <span class="stat-label">Keywords Ranking</span>
+      </div>
+      <div class="stat-dark">
+        <span class="stat-num" data-count="15">15</span>
+        <span class="stat-label">Monthly Visits</span>
+      </div>
+      <div class="stat-dark">
+        <span class="stat-num" data-count="2" data-prefix="$">$2</span>
+        <span class="stat-label">Traffic Value</span>
+      </div>
+    </div>
+
+    <!-- AI Citation callout: dark card -->
+    <div class="rounded-2xl p-7 mb-12 fade-up" style="background: #0f172a; border-left: 4px solid #ef4444;">
+      <p class="text-white leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">🔴 <strong>0</strong> of <strong>14</strong> AI searches cite Synergy Chiropractic — when patients in <strong>West Bloomfield, MI</strong> ask about <strong>brainhealthassessment</strong>, you don't appear. We fix this.</p>
+    </div>
+
+    <!-- Quick Wins table -->
+    <h3 class="text-slate-900 font-bold text-xl mb-5 fade-up">⚡ High-Value Searches You're Not Capturing Yet</h3>
+    <div class="overflow-x-auto rounded-2xl border border-slate-100 mb-12 fade-up">
+      <table>
+        <thead>
+          <tr>
+            <th>KEYWORD</th>
+            <th>CURRENT POSITION</th>
+            <th>MONTHLY SEARCHES</th>
+            <th>DIFFICULTY</th>
+            <th>OPPORTUNITY</th>
+          </tr>
+        </thead>
+        <tbody><tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+              <td style="padding:14px 16px;color:#f0f4ff;font-weight:600;">pediatric chiropractic near me</td>
+              <td style="padding:14px 16px;color:#84bdbb;font-weight:700;font-size:1.2rem;">#5</td>
+              <td style="padding:14px 16px;color:#f0f4ff;">170/mo</td>
+              <td style="padding:14px 16px;"><span style="color:#22c55e;font-weight:700;">Very Easy</span></td>
+              <td style="padding:14px 16px;color:#84bdbb;font-style:italic;">Featured snippet grab</td>
+            </tr></tbody>
+      </table>
+    </div>
+
+    <!-- Competitors table -->
+    <h3 class="text-slate-900 font-bold text-xl mb-5 fade-up">Your Competitors Online</h3>
+    <div class="overflow-x-auto rounded-2xl border border-slate-100 mb-8 fade-up">
+      <table>
+        <thead>
+          <tr>
+            <th>DOMAIN</th>
+            <th>KEYWORDS</th>
+            <th>TRAFFIC/MO</th>
+            <th>TRAFFIC VALUE</th>
+          </tr>
+        </thead>
+        <tbody><tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+              <td style="padding:14px 16px;color:#f0f4ff;font-family:monospace;">bloomfieldwellnessclinic.com</td>
+              <td style="padding:14px 16px;color:#84bdbb;font-weight:700;">142</td>
+              <td style="padding:14px 16px;color:#f0f4ff;">298/mo</td>
+              <td style="padding:14px 16px;color:#f0f4ff;">$44/mo</td>
+            </tr>
+<tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+              <td style="padding:14px 16px;color:#f0f4ff;font-family:monospace;">bloomfieldchiropracticcenter.com</td>
+              <td style="padding:14px 16px;color:#84bdbb;font-weight:700;">202</td>
+              <td style="padding:14px 16px;color:#f0f4ff;">108/mo</td>
+              <td style="padding:14px 16px;color:#f0f4ff;">$189/mo</td>
+            </tr>
+<tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+              <td style="padding:14px 16px;color:#f0f4ff;font-family:monospace;">gordondc.com</td>
+              <td style="padding:14px 16px;color:#84bdbb;font-weight:700;">52</td>
+              <td style="padding:14px 16px;color:#f0f4ff;">124/mo</td>
+              <td style="padding:14px 16px;color:#f0f4ff;">$351/mo</td>
+            </tr></tbody>
+      </table>
+    </div>
+
+    <!-- Full Keyword Data Accordion -->
+    <details class="rounded-2xl border border-slate-100 bg-white mb-12 fade-up overflow-hidden">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors" style="list-style:none;">
+        <div class="text-left">
+          <p class="font-bold text-slate-900 text-lg m-0">Full Keyword Ranking Data</p>
+          <p class="text-slate-500 text-base m-0 mt-1">126 keywords tracked &middot; Click to expand</p>
+        </div>
+        <span class="text-2xl font-light text-slate-400 flex-shrink-0 ml-6">+</span>
+      </summary>
+      <div class="overflow-x-auto">
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:left;">KEYWORD</th>
+              <th>POSITION</th>
+              <th>MONTHLY SEARCHES</th>
+              <th>DIFFICULTY</th>
+              <th>TYPE</th>
+            </tr>
+          </thead>
+          <tbody><tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">pediatric chiropractic near me</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#f59e0b;">#5</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">170</td><td style="padding:12px 16px;text-align:center;"><span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Easy</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:rgba(132,189,187,0.15);color:var(--brand-accent);font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Quick Win</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">brainhealthassessment com</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#94a3b8;">#19</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">260</td><td style="padding:12px 16px;text-align:center;"><span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Low</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">chiropractor near me scoliosis</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#94a3b8;">#15</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">140</td><td style="padding:12px 16px;text-align:center;"><span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Easy</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">chiropractor for whiplash near me</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#94a3b8;">#13</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">110</td><td style="padding:12px 16px;text-align:center;"><span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Easy</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">eric mintz</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#f59e0b;">#8</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">70</td><td style="padding:12px 16px;text-align:center;"><span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Low</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">chiropractor migraine specialist</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#94a3b8;">#16</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">70</td><td style="padding:12px 16px;text-align:center;"><span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Easy</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">chiropractic care for low back pain near me</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#94a3b8;">#12</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">50</td><td style="padding:12px 16px;text-align:center;"><span style="background:#fde68a;color:#78350f;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Medium</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">chiropractor west bloomfield</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#94a3b8;">#19</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">50</td><td style="padding:12px 16px;text-align:center;"><span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Low</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">chiropractor for low back pain bloomfield hills mi</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#94a3b8;">#12</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">40</td><td style="padding:12px 16px;text-align:center;"><span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Low</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">pregnancy chiropractor bloomfield hills mi</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#94a3b8;">#19</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">40</td><td style="padding:12px 16px;text-align:center;"><span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Easy</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">chiropractor for neck pain bloomfield hills mi</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#94a3b8;">#20</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">40</td><td style="padding:12px 16px;text-align:center;"><span style="background:#fde68a;color:#78350f;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Medium</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">chiropractor for headaches bloomfield hills mi</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#94a3b8;">#20</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">40</td><td style="padding:12px 16px;text-align:center;"><span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Low</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">chiropractor for herniated disc bloomfield hills mi</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#94a3b8;">#11</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">40</td><td style="padding:12px 16px;text-align:center;"><span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Low</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">shoulder pain relief farmington hills</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#94a3b8;">#15</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">40</td><td style="padding:12px 16px;text-align:center;"><span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Low</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">chiropractor for migraines bloomfield hills mi</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#f59e0b;">#6</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">40</td><td style="padding:12px 16px;text-align:center;"><span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Low</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">neck pain treatment bloomfield hills mi</td><td style="padding:12px 16px;text-align:center;"><span style="font-weight:700;color:#94a3b8;">#12</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;">40</td><td style="padding:12px 16px;text-align:center;"><span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Easy</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Ranking</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">pediatric chiropractor west bloomfield mi</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">neurofeedback therapy michigan</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">migraine specialist near me</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">functional neurology bloomfield hills</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">brain health assessment west bloomfield</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">chiropractor for kids michigan</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">migraine treatment without medication</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">neurofeedback for adhd bloomfield</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">root cause chiropractic care</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">whiplash treatment west bloomfield</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">vertigo chiropractor michigan</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">scoliosis treatment bloomfield hills</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">functional medicine chiropractor</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">brain based chiropractic care</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">ear infection chiropractic treatment</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">fibromyalgia specialist michigan</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">pregnancy chiropractor bloomfield</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">neck pain treatment west bloomfield</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">headache specialist michigan</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">audio visual entrainment therapy</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">food sensitivity testing michigan</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">carpal tunnel chiropractor</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">sciatica treatment bloomfield hills</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">disc injury specialist michigan</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">shoulder pain chiropractor</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">back pain west bloomfield</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#f8fafc;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">work injury chiropractor michigan</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr>
+<tr style="background:#ffffff;"><td style="padding:12px 16px;color:#1e293b;font-weight:500;font-size:15px;text-align:left;">natural migraine relief bloomfield</td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;font-size:15px;color:#334155;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="color:#cbd5e1;font-size:13px;">—</span></td><td style="padding:12px 16px;text-align:center;"><span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">Target</span></td></tr></tbody>
+        </table>
+      </div>
+      <div class="px-7 py-4 border-t border-slate-100 bg-slate-50">
+        <p class="text-slate-400 text-sm m-0">Source: SEMrush API &middot; Data captured at report generation</p>
+      </div>
+    </details>
+
+    <!-- 3-Priority Attack Plan -->
+    <h3 class="text-slate-900 font-bold text-xl mb-6 fade-up">3-Priority Attack Plan</h3>
+    <div class="flex flex-col gap-5 fade-up">
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex gap-6 items-start hover-card slide-left">
+        <span class="inline-flex items-center justify-center w-11 h-11 rounded-full text-white font-black text-base flex-shrink-0" style="background: var(--brand-primary);">1</span>
+        <div>
+          <h4 class="text-slate-900 font-bold text-base mb-2">Capture Quick-Win Keywords</h4>
+          <p class="text-slate-500 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">The 1 high-intent searches with real volume where Synergy Chiropractic should be ranking but isn't. These are the fastest path to more organic patient inquiries — pages we can optimize or create within 30 days.</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex gap-6 items-start hover-card slide-left">
+        <span class="inline-flex items-center justify-center w-11 h-11 rounded-full text-white font-black text-base flex-shrink-0" style="background: var(--brand-primary);">2</span>
+        <div>
+          <h4 class="text-slate-900 font-bold text-base mb-2">Close the Competitor Gap</h4>
+          <p class="text-slate-500 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">For every keyword a competitor ranks in the top 3 for that Synergy Chiropractic doesn't, there's a blueprint for what it takes to outrank them. We reverse-engineer what's working and build it better.</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex gap-6 items-start hover-card slide-left">
+        <span class="inline-flex items-center justify-center w-11 h-11 rounded-full text-white font-black text-base flex-shrink-0" style="background: var(--brand-primary);">3</span>
+        <div>
+          <h4 class="text-slate-900 font-bold text-base mb-2">Build AI Overview Presence</h4>
+          <p class="text-slate-500 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">AI-generated search results are replacing traditional blue links for medical queries. We build the content structure, citations, and authority signals that get Synergy Chiropractic included when patients ask AI about brainhealthassessment and similar conditions.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 9 — GOOGLE ADS
+     ============================= -->
+<section id="section-ads" style="background: #f8fafc;" class="py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="mb-5 fade-up">
+      <span class="label-tag">Where Your Ad Budget Goes</span>
+    </div>
+
+    <h2 class="section-headline text-slate-900 mb-5 fade-up">
+      Most Practices Are Paying to Attract the Wrong Patients.
+    </h2>
+    <p class="text-slate-500 mb-16 fade-up" style="font-size: 18px; line-height: 1.7; max-width: 620px;">
+      Broad targeting fills your pipeline with people who won't book. Condition-specific targeting fills your calendar with patients already convinced they need exactly what you offer.
+    </p>
+
+    <!-- Comparison cards -->
+    <div class="ads-grid grid grid-cols-1 md:grid-cols-2 gap-6 mb-14 fade-up">
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-7 py-5" style="background: #dc2626;">
+          <h3 class="text-white font-extrabold text-base m-0">What Most Practices Run</h3>
+        </div>
+        <div class="p-7 flex flex-col gap-3">
+          <div class="flex items-start gap-3">
+            <span class="text-red-500 font-black flex-shrink-0">✗</span>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">Broad keywords: "doctor near me," "health clinic," "wellness center"</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-red-500 font-black flex-shrink-0">✗</span>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">One campaign for all services — no differentiation by condition</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-red-500 font-black flex-shrink-0">✗</span>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">Generic landing page — same page regardless of what the patient searched</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-red-500 font-black flex-shrink-0">✗</span>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">Low Quality Score = higher cost-per-click than competitors</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-red-500 font-black flex-shrink-0">✗</span>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">Can't tell which keywords led to booked appointments</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-7 py-5" style="background: #16a34a;">
+          <h3 class="text-white font-extrabold text-base m-0">What Books Patients</h3>
+        </div>
+        <div class="p-7 flex flex-col gap-3">
+          <div class="flex items-start gap-3">
+            <span class="font-black flex-shrink-0" style="color: var(--brand-accent);">✓</span>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">Condition + location + intent keywords: "[condition] specialist [city]"</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="font-black flex-shrink-0" style="color: var(--brand-accent);">✓</span>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">Separate campaigns per condition — each with its own keywords and copy</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="font-black flex-shrink-0" style="color: var(--brand-accent);">✓</span>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">Dedicated landing page per condition — patient lands exactly where they need to</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="font-black flex-shrink-0" style="color: var(--brand-accent);">✓</span>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">High Quality Score = lower cost-per-click than competitors running broad</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="font-black flex-shrink-0" style="color: var(--brand-accent);">✓</span>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">Every conversion tracked back to the keyword and campaign that drove it</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Ad Attack Plan: 4 cards on white bg -->
+    <h3 class="text-slate-900 font-bold text-2xl mb-6 fade-up">The Ad Attack Plan</h3>
+    <div class="ads-grid grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 stagger-children">
+
+      <div class="bg-white border border-slate-200 rounded-2xl p-8 hover-card">
+        <h4 class="text-slate-900 font-bold text-lg mb-4">Campaign Architecture</h4>
+        <p class="text-slate-500 leading-relaxed" style="font-size: 16px; line-height: 1.7;">We build 3 focused campaigns, not 1 generic one. Each targets a specific condition you treat — with its own keywords, ad copy, and landing page. When everything matches, Google rewards you with lower cost-per-click.</p>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-2xl p-8 hover-card">
+        <h4 class="text-slate-900 font-bold text-lg mb-4">Keyword Selection</h4>
+        <p class="text-slate-500 leading-relaxed" style="font-size: 16px; line-height: 1.7;">We only bid on searches from patients who have already decided they need help. Condition + location + intent. Zero broad match. Zero wasted impressions on people who were just curious.</p>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-2xl p-8 hover-card">
+        <h4 class="text-slate-900 font-bold text-lg mb-4">What You'll See (30/60/90 Days)</h4>
+        <p class="text-slate-500 leading-relaxed" style="font-size: 16px; line-height: 1.7;"><strong class="text-slate-700">Day 1–30:</strong> Campaigns live, first inquiries in.<br><strong class="text-slate-700">Day 31–60:</strong> Best ads scale, cost-per-inquiry drops.<br><strong class="text-slate-700">Day 61–90:</strong> Fully optimized. Every dollar traceable to a real patient.</p>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-2xl p-8 hover-card">
+        <h4 class="text-slate-900 font-bold text-lg mb-4">What You Own</h4>
+        <p class="text-slate-500 leading-relaxed" style="font-size: 16px; line-height: 1.7;">You own the ad account, conversion data, audience lists. If we part ways, everything stays with you. We build it in your name, not ours.</p>
+      </div>
+
+    </div>
+
+    <!-- City callout: dark slate -->
+    <div class="rounded-2xl p-8 fade-up" style="background: #1e293b; color: white;">
+      <p class="leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">We show you the exact searches your ideal patients are running in <strong>West Bloomfield, MI</strong> right now. You'll see where <strong>Synergy Chiropractic</strong>'s ad spend is winning and where it's being lost. We cover this live on the call.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 10 — THREE THINGS (DARK)
+     ============================= -->
+<section id="section-three-things" style="background: #080808;" class="py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="mb-6 fade-up">
+      <span class="label-tag">Three Things That Build A Practice That Lasts</span>
+    </div>
+
+    <h2 class="section-headline text-white mb-4 fade-up">You Can Start With One. All Three Compound.</h2>
+    <p class="mb-16 fade-up" style="color: rgba(255,255,255,0.5); font-size: 18px; line-height: 1.7; max-width: 520px;">Each strategy stands on its own — and every single one is something you can measure, own, and build on.</p>
+
+    <div class="flex flex-col fade-up" style="border-top: 1px solid rgba(255,255,255,0.08);">
+
+      <!-- Item 01 -->
+      <div class="flex gap-8 items-start py-12" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <div class="flex-shrink-0 w-16 text-right">
+          <span class="font-black text-4xl" style="color: rgba(255,255,255,0.1);">01</span>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-white font-bold text-2xl mb-4">Get More Patients<span id="ml-text-01" style="display:none;"> Across Every Location</span></h3>
+          <p style="color: rgba(255,255,255,0.55); font-size: 17px; line-height: 1.7; margin-bottom: 1rem;">SEO and ads working together — organic traffic from condition-specific searches ranked in the top 3, and paid campaigns that only spend on patients who are already decided. Not leads. Booked patients.</p>
+          <p style="color: rgba(255,255,255,0.55); font-size: 17px; line-height: 1.7;">The combination means your acquisition engine works 24/7. SEO builds compounding organic presence. Ads capture high-intent patients this week. Together, they fill your calendar without you constantly chasing the next campaign.</p>
+        </div>
+      </div>
+
+      <!-- Item 02 -->
+      <div class="flex gap-8 items-start py-12" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <div class="flex-shrink-0 w-16 text-right">
+          <span class="font-black text-4xl" style="color: rgba(255,255,255,0.1);">02</span>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-white font-bold text-2xl mb-4">Retain More Patients</h3>
+          <p style="color: rgba(255,255,255,0.55); font-size: 17px; line-height: 1.7; margin-bottom: 1rem;">The fastest revenue a practice can recover isn't new patients — it's the ones who've already trusted you enough to book once. Missed follow-ups, dropped reactivations, and slow response times are invisible leaks that drain the ROI of every marketing dollar you spend.</p>
+          <p style="color: rgba(255,255,255,0.55); font-size: 17px; line-height: 1.7;">AI systems that run follow-up, reactivation, and review workflows automatically mean no patient falls through the cracks. Not because your team remembered — because the system never forgets.</p>
+        </div>
+      </div>
+
+      <!-- Item 03 -->
+      <div class="flex gap-8 items-start py-12">
+        <div class="flex-shrink-0 w-16 text-right">
+          <span class="font-black text-4xl" style="color: rgba(255,255,255,0.1);">03</span>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-white font-bold text-2xl mb-4">Get Time Back</h3>
+          <p style="color: rgba(255,255,255,0.55); font-size: 17px; line-height: 1.7; margin-bottom: 1rem;">The goal isn't just more patients — it's a practice that runs without requiring your personal attention at every step. Purpose-built AI handles the operational overhead that slows your team down, reduces no-shows, and ensures every patient communication happens at exactly the right moment.</p>
+          <p style="color: rgba(255,255,255,0.55); font-size: 17px; line-height: 1.7;">When your team stops spending hours on tasks that a well-built system can handle in seconds, they do better work on the things that actually require human judgment.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 11 — REVIEWS
+     ============================= -->
+<section id="section-reviews" class="bg-white py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <h2 class="section-headline text-slate-900 mb-4 fade-up">Don't Take Our Word for It</h2>
+    <p class="text-slate-500 mb-12 fade-up" style="font-size: 18px; line-height: 1.7;">These are real practitioners. Real results. No cherry-picked screenshots.</p>
+
+    <!-- Dr. Piper Gibson -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-5 fade-up">
+      <summary class="flex items-center justify-between p-6 cursor-pointer" style="background: #f8fafc;">
+        <div>
+          <div class="text-slate-900 font-semibold text-base">Dr. Piper Gibson</div>
+          <div class="text-sm font-semibold mt-0.5" style="color: var(--brand-accent);">Naturopathic Physician — Arizona</div>
+        </div>
+        <span class="text-3xl font-light text-slate-400 flex-shrink-0 ml-4">+</span>
+      </summary>
+      <div class="p-8 bg-white">
+        <div class="yt-wrapper mb-6">
+          <iframe src="https://www.youtube.com/embed/bWoJjHdNGRQ?rel=0" allow="fullscreen; encrypted-media" title="Dr. Piper Gibson testimonial"></iframe>
+        </div>
+        <blockquote class="text-slate-700 text-base italic leading-relaxed mb-7 pl-5" style="border-left: 4px solid var(--brand-accent);">"It has been one of the best investments that we have made. We can now easily be found on Google for all of our services. My business has grown substantially."</blockquote>
+        <h4 class="font-bold text-base mb-4" style="color: var(--brand-accent);">How We Drove Results for Dr. Gibson:</h4>
+        <div class="flex flex-col gap-3">
+          <div class="bg-slate-50 rounded-xl p-5" style="border-left: 3px solid var(--brand-primary);">
+            <strong class="text-slate-800 block mb-1 text-sm">Multi-Format Search Domination</strong>
+            <span class="text-slate-500 text-sm leading-relaxed">Optimized her practice for traditional search results, map pack visibility, and AI-generated answer citations — so she shows up wherever her patients are searching, in whatever format they're searching in.</span>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-5" style="border-left: 3px solid var(--brand-primary);">
+            <strong class="text-slate-800 block mb-1 text-sm">Full Site Migration</strong>
+            <span class="text-slate-500 text-sm leading-relaxed">Rebuilt her website architecture to support ranking for every condition and service she treats — without cannibalizing existing rankings or losing domain authority in the transition.</span>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-5" style="border-left: 3px solid var(--brand-primary);">
+            <strong class="text-slate-800 block mb-1 text-sm">Tools Built for Her New Offer</strong>
+            <span class="text-slate-500 text-sm leading-relaxed">Built a health assessment tool tied to her specific patient conditions — it ranks in Google, gets cited in AI results, and pre-qualifies leads before they book a call.</span>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-5" style="border-left: 3px solid var(--brand-primary);">
+            <strong class="text-slate-800 block mb-1 text-sm">Got Her Time Back</strong>
+            <span class="text-slate-500 text-sm leading-relaxed">Automated intake and follow-up workflows so Dr. Gibson's team could focus on patient care instead of administrative overhead. Her marketing now runs without her needing to manage it week-to-week.</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- Dr. Alison Egeland -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-5 fade-up">
+      <summary class="flex items-center justify-between p-6 cursor-pointer" style="background: #f8fafc;">
+        <div>
+          <div class="text-slate-900 font-semibold text-base">Dr. Alison Egeland</div>
+          <div class="text-sm font-semibold mt-0.5" style="color: var(--brand-accent);">Functional Medicine — New Mexico</div>
+        </div>
+        <span class="text-3xl font-light text-slate-400 flex-shrink-0 ml-4">+</span>
+      </summary>
+      <div class="p-8 bg-white">
+        <div class="yt-wrapper mb-6">
+          <iframe src="https://www.youtube.com/embed/wV0k_e2IW2c?rel=0" allow="fullscreen; encrypted-media" title="Dr. Alison Egeland testimonial"></iframe>
+        </div>
+        <blockquote class="text-slate-700 text-base italic leading-relaxed mb-7 pl-5" style="border-left: 4px solid var(--brand-accent);">"I definitely saw my new patient inquiries go up. I would say there's more consistency as well, which is really nice. It's a really good and organized process."</blockquote>
+        <h4 class="font-bold text-base mb-4" style="color: var(--brand-accent);">How We Drove Results for Dr. Egeland:</h4>
+        <div class="flex flex-col gap-3">
+          <div class="bg-slate-50 rounded-xl p-5" style="border-left: 3px solid var(--brand-primary);">
+            <strong class="text-slate-800 block mb-1 text-sm">Stabilizing Patient Volume</strong>
+            <span class="text-slate-500 text-sm leading-relaxed">Stopped the feast-or-famine cycle that plagues most functional medicine practices — replaced unpredictable referral-based growth with a consistent, organic pipeline of pre-qualified patient inquiries.</span>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-5" style="border-left: 3px solid var(--brand-primary);">
+            <strong class="text-slate-800 block mb-1 text-sm">Measurable Inquiry Growth</strong>
+            <span class="text-slate-500 text-sm leading-relaxed">Built tracking that showed exactly which searches and pages were generating new patient contact — so the strategy could be refined based on what was actually working, not what looked good in a report.</span>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-5" style="border-left: 3px solid var(--brand-primary);">
+            <strong class="text-slate-800 block mb-1 text-sm">Organized from Day One</strong>
+            <span class="text-slate-500 text-sm leading-relaxed">Clear onboarding, defined deliverables, and regular updates — Dr. Egeland knew what was happening and why at every stage. No ambiguity about what we were building or how to measure success.</span>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-5" style="border-left: 3px solid var(--brand-primary);">
+            <strong class="text-slate-800 block mb-1 text-sm">Fast Start in a New Market</strong>
+            <span class="text-slate-500 text-sm leading-relaxed">After relocating to a new city, Dr. Egeland needed to establish search presence from scratch. We built it quickly and prioritized the highest-impact keywords first, so she started seeing results before most agencies would even finish onboarding.</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- Dan Lievens -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-5 fade-up">
+      <summary class="flex items-center justify-between p-6 cursor-pointer" style="background: #f8fafc;">
+        <div>
+          <div class="text-slate-900 font-semibold text-base">Dan Lievens</div>
+          <div class="text-sm font-semibold mt-0.5" style="color: var(--brand-accent);">Founder / CEO</div>
+        </div>
+        <span class="text-3xl font-light text-slate-400 flex-shrink-0 ml-4">+</span>
+      </summary>
+      <div class="p-8 bg-white">
+        <div class="yt-wrapper mb-6">
+          <iframe src="https://www.youtube.com/embed/vjfy81AKaLs?rel=0" allow="fullscreen; encrypted-media" title="Dan Lievens testimonial"></iframe>
+        </div>
+        <blockquote class="text-slate-700 text-base italic leading-relaxed mb-7 pl-5" style="border-left: 4px solid var(--brand-accent);">"He's unlike an agency... he's in there implementing all the changes and all the SEO blogs himself. Mike's incredible. He's one of those service providers that does what he says he's going to do."</blockquote>
+        <h4 class="font-bold text-base mb-4" style="color: var(--brand-accent);">How We Drove Results for Dan Lievens:</h4>
+        <div class="flex flex-col gap-3">
+          <div class="bg-slate-50 rounded-xl p-5" style="border-left: 3px solid var(--brand-primary);">
+            <strong class="text-slate-800 block mb-1 text-sm">Full Content &amp; Email Ownership</strong>
+            <span class="text-slate-500 text-sm leading-relaxed">Wrote, optimized, and published every piece of content. Built and managed email sequences that kept his audience engaged. Dan focused on his business — we handled everything else.</span>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-5" style="border-left: 3px solid var(--brand-primary);">
+            <strong class="text-slate-800 block mb-1 text-sm">Built the Organic Foundation</strong>
+            <span class="text-slate-500 text-sm leading-relaxed">Built the SEO infrastructure that gives Dan's business compounding visibility — not just rankings, but the technical and content foundation that holds and grows over time without ongoing ad spend to sustain it.</span>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-5" style="border-left: 3px solid var(--brand-primary);">
+            <strong class="text-slate-800 block mb-1 text-sm">Showed Up When It Wasn't Required</strong>
+            <span class="text-slate-500 text-sm leading-relaxed">Dan noted multiple times that Mike went beyond what was scoped — addressing issues proactively before they became problems, and suggesting improvements without waiting to be asked.</span>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-5" style="border-left: 3px solid var(--brand-primary);">
+            <strong class="text-slate-800 block mb-1 text-sm">No Junior Handoff</strong>
+            <span class="text-slate-500 text-sm leading-relaxed">Unlike most agencies that use your account to train junior staff, Dan worked directly with Mike throughout. Every strategy call, every deliverable, every decision — handled at the senior level from start to finish.</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 3 — FIRST CALENDLY CTA
+     ============================= -->
+<section id="calendly-1" class="py-28 px-5" style="background: var(--brand-primary);">
+  <div class="max-w-3xl mx-auto text-center">
+    <h2 class="text-white font-black mb-3" style="font-size: clamp(28px, 4vw, 44px); letter-spacing: -0.02em;">
+      Book Your Free 30-Minute Strategy Call
+    </h2>
+    <p class="text-white/80 mb-8" style="font-size: 18px; line-height: 1.7;">
+      You spent years building your expertise. This 30 minutes shows you how to make sure the right patients can actually find you — and book with you.
+    </p>
+
+    <div class="bg-white rounded-2xl p-6 md:p-8 shadow-2xl">
+      <div class="calendly-inline-widget" data-url="https://calendly.com/mike-kohl/30min"></div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 12 — ABOUT MIKE
+     ============================= -->
+<section id="section-about" style="background: #f8fafc;" class="py-28 px-5">
+  <div class="max-w-3xl mx-auto">
+
+    <div class="mb-5 fade-up">
+      <span class="label-tag">About The Founder</span>
+    </div>
+
+    <h2 class="section-headline text-slate-900 mb-10 fade-up">Mike Kohl</h2>
+
+    <div class="flex gap-10 items-start flex-wrap fade-up">
+      <img src="https://cdn.gamma.app/mjm5y0nds88d8jl/edited-images/g0isINFXrwVAPawOu-C9K.png" alt="Mike Kohl" class="w-36 h-36 rounded-full object-cover flex-shrink-0 shadow-lg" style="border: 3px solid var(--brand-accent);">
+      <div class="flex-1 min-w-64">
+        <p class="text-slate-700 leading-relaxed mb-5" style="font-size: 17px; line-height: 1.7;">I build patient acquisition systems for functional and integrative medicine practices. Not campaigns or one-off tactics — systems that bring in the right patients consistently and give you and your team time back.</p>
+        <p class="text-slate-700 leading-relaxed mb-5" style="font-size: 17px; line-height: 1.7;">That includes local SEO that positions your practice as the trusted authority in your area, Google Ads that reach patients actively searching for what you offer, and AI built around your specific workflows — not a generic template someone else built for a different kind of business.</p>
+        <p class="text-slate-700 leading-relaxed mb-5" style="font-size: 17px; line-height: 1.7;">Before this, I was a software engineer. The last enterprise platform I helped scale <strong>grew to $500M in under five years</strong>. That taught me one thing: real growth comes from infrastructure — not more marketing spend. Most health practices have the marketing spend. They're missing the infrastructure.</p>
+        <p class="text-slate-700 leading-relaxed mb-5" style="font-size: 17px; line-height: 1.7;">Outside of work, I'm a dad of three, living in the Colorado Rockies. Time matters to me — which is why I build systems that give it back to you.</p>
+        <p class="text-slate-700 leading-relaxed" style="font-size: 17px; line-height: 1.7;">If you value clear communication, ownership of outcomes, and a predictable way to grow your practice, this will make sense quickly.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 13 — FAQs
+     ============================= -->
+<section id="section-faq" class="bg-white py-28 px-5">
+  <div class="max-w-3xl mx-auto">
+
+    <div class="mb-5 fade-up">
+      <span class="label-tag">Frequently Asked Questions</span>
+    </div>
+    <h2 class="section-headline text-slate-900 mb-12 fade-up">Questions We Get Before Every Call</h2>
+
+    <!-- FAQ 1: Done For You -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-4 fade-up">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer font-semibold text-slate-900 text-base">
+        <span>Is This A Done For You Offer?</span>
+        <span class="text-3xl font-light flex-shrink-0 ml-4" style="color: var(--brand-accent);">+</span>
+      </summary>
+      <div class="px-7 pb-7">
+        <p class="text-slate-600 leading-relaxed mb-4" style="font-size: 16px; line-height: 1.7;">Yes. But not in the way most agencies mean it. The SEO analysis and ad targeting gap review you see in this document were built for Synergy Chiropractic before I reached out. That's how I work.</p>
+        <p class="text-slate-600 leading-relaxed mb-4" style="font-size: 16px; line-height: 1.7;">The AI conversation happens on the call — we figure out what fits your specific workflows before anything gets built. You don't pay us anything until after that call, and only if it makes sense to move forward.</p>
+        <p class="text-slate-600 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">After onboarding, most doctors spend less than 30 minutes a month with us. You review and approve. We execute.</p>
+      </div>
+    </details>
+
+    <!-- FAQ 2: What Makes This Different -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-4 fade-up">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer font-semibold text-slate-900 text-base">
+        <span>What Makes This Different From What I've Tried Before?</span>
+        <span class="text-3xl font-light flex-shrink-0 ml-4" style="color: var(--brand-accent);">+</span>
+      </summary>
+      <div class="px-7 pb-7">
+        <p class="text-slate-600 leading-relaxed mb-7" style="font-size: 16px; line-height: 1.7;">We're not asking you to trust a promise. We're asking you to compare what you've experienced with how we actually work.</p>
+        <div class="overflow-x-auto rounded-xl border border-slate-100">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 28%;">What you're measuring</th>
+                <th style="width: 36%; color: #ef4444;">Most agencies</th>
+                <th style="width: 36%; color: #10b981;">What we do</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="font-semibold">How success is defined</td><td class="text-slate-400">✗ Rankings, traffic, impressions</td><td>✓ New booked patients, retention rate, staff hours saved</td></tr>
+              <tr><td class="font-semibold">Multi-location strategy</td><td class="text-slate-400">✗ Same campaign, copy-pasted across locations</td><td>✓ Each location treated as its own market with its own strategy</td></tr>
+              <tr><td class="font-semibold">SEO content</td><td class="text-slate-400">✗ Written for search engines; thin on patient trust</td><td>✓ Written for your patients' exact questions and fears — and optimized</td></tr>
+              <tr><td class="font-semibold">Ad targeting</td><td class="text-slate-400">✗ Broad keywords that generate curiosity clicks</td><td>✓ Condition-specific, intent-based — people already looking for you</td></tr>
+              <tr><td class="font-semibold">AI implementation</td><td class="text-slate-400">✗ Off-the-shelf tools with a steep learning curve</td><td>✓ Built from scratch around your practice; your team uses it on day one</td></tr>
+              <tr><td class="font-semibold">Ongoing involvement</td><td class="text-slate-400">✗ Monthly report. Rarely changes anything.</td><td>✓ Active management; we adjust as your practice and market evolves</td></tr>
+              <tr><td class="font-semibold">Guarantees</td><td class="text-slate-400">✗ Big promises upfront; fine print later</td><td>✓ Honest projections; you keep the strategy whether you hire us or not</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+
+    <!-- FAQ 3: What Happens On The Call -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-4 fade-up">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer font-semibold text-slate-900 text-base">
+        <span>What Happens On The Call?</span>
+        <span class="text-3xl font-light flex-shrink-0 ml-4" style="color: var(--brand-accent);">+</span>
+      </summary>
+      <div class="px-7 pb-7">
+        <p class="text-slate-600 leading-relaxed mb-8" style="font-size: 16px; line-height: 1.7;">This isn't a discovery call where I ask you questions for 45 minutes and then pitch you at the end. You'll leave with a real strategy — specific to your practice, your locations, your gaps.</p>
+        <div class="flex flex-col gap-4 mb-8">
+          <div class="bg-slate-50 rounded-xl p-6" style="border-left: 3px solid var(--brand-accent);">
+            <h4 class="text-slate-800 font-bold text-sm mb-2">A look at what's actually happening</h4>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">We walk through the SEO data on Synergy Chiropractic live — the gap between where you rank now and where you should be, which keywords are closest to the top 3, and exactly what it would take to close those gaps.</p>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-6" style="border-left: 3px solid var(--brand-accent);">
+            <h4 class="text-slate-800 font-bold text-sm mb-2">A strategy across all three areas</h4>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">SEO, ads, and AI — we cover all three. Not a general overview. A specific, prioritized plan for where Synergy Chiropractic is right now and what the highest-leverage moves are.</p>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-6" style="border-left: 3px solid var(--brand-accent);">
+            <h4 class="text-slate-800 font-bold text-sm mb-2">Steps you can take immediately</h4>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">Whether or not you hire us, you'll leave with a list of things you can do — or have someone else do — that will make a measurable difference. No withheld strategy. No "I'll tell you if you sign."</p>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-6" style="border-left: 3px solid var(--brand-accent);">
+            <h4 class="text-slate-800 font-bold text-sm mb-2">No pressure. Seriously.</h4>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">I don't follow up with aggressive sales emails. There's no "limited time" pressure tactic. You decide if it makes sense — on your timeline, on your terms.</p>
+          </div>
+        </div>
+        <div class="bg-slate-50 rounded-2xl border border-slate-100 p-7">
+          <p class="text-slate-700 font-bold text-sm mb-3">Why free?</p>
+          <p class="text-slate-500 text-sm leading-relaxed mb-5">It's worth your time even if we never work together — you'll know exactly what to do. It's worth my time because I get the chance to earn your business by being useful first. No gotcha. No follow-up pressure.</p>
+          <p class="text-slate-500 text-xs font-semibold uppercase tracking-wide mb-3">Who this is for</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="bg-slate-100 border border-slate-200 rounded-full px-4 py-1.5 text-xs text-slate-500">Chiropractors</span>
+            <span class="bg-slate-100 border border-slate-200 rounded-full px-4 py-1.5 text-xs text-slate-500">Naturopathic Physicians</span>
+            <span class="bg-slate-100 border border-slate-200 rounded-full px-4 py-1.5 text-xs text-slate-500">Functional Medicine</span>
+            <span class="bg-slate-100 border border-slate-200 rounded-full px-4 py-1.5 text-xs text-slate-500">Integrative Health Clinics</span>
+            <span class="bg-slate-100 border border-slate-200 rounded-full px-4 py-1.5 text-xs text-slate-500">Multi-Location Practices</span>
+            <span class="bg-slate-100 border border-slate-200 rounded-full px-4 py-1.5 text-xs text-slate-500">Physical Therapy Groups</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- FAQ 4: How Do You Create SEO Content -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-4 fade-up">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer font-semibold text-slate-900 text-base">
+        <span>How Do You Create The SEO Content For Me?</span>
+        <span class="text-3xl font-light flex-shrink-0 ml-4" style="color: var(--brand-accent);">+</span>
+      </summary>
+      <div class="px-7 pb-7">
+        <p class="text-slate-600 leading-relaxed mb-4" style="font-size: 16px; line-height: 1.7;">All you have to do is approve the clinical topics we select. We handle everything else — research, writing, technical optimization, and publishing.</p>
+        <p class="text-slate-600 leading-relaxed mb-7" style="font-size: 16px; line-height: 1.7;">You don't write. You don't edit. You review what goes on your site and say yes or no. Most doctors spend less than an hour a month on this step.</p>
+        <div class="flex flex-col gap-4">
+          <div class="bg-slate-50 rounded-xl p-6" style="border-left: 3px solid var(--brand-accent);">
+            <h4 class="text-slate-800 font-bold text-sm mb-2">What we write</h4>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">Condition-specific service pages ranked for the searches your ideal patients make. Long-form educational content that builds authority and gets cited by AI. Local content that strengthens your presence across every city you serve.</p>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-6" style="border-left: 3px solid var(--brand-accent);">
+            <h4 class="text-slate-800 font-bold text-sm mb-2">What we optimize</h4>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">Technical SEO, schema markup, internal linking, page speed, Core Web Vitals, and on-page optimization. Everything Google uses to rank and trust a medical website — handled before it becomes a problem.</p>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- FAQ 5: What Services Include -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-4 fade-up">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer font-semibold text-slate-900 text-base">
+        <span>What Do Your Services Include?</span>
+        <span class="text-3xl font-light flex-shrink-0 ml-4" style="color: var(--brand-accent);">+</span>
+      </summary>
+      <div class="px-7 pb-7">
+        <p class="text-slate-600 leading-relaxed mb-6" style="font-size: 16px; line-height: 1.7;">We scope before we prescribe. But here's what we work across — and because we build everything ourselves as engineers, we can go further than most agencies will.</p>
+        <div class="flex flex-col gap-4">
+          <div class="bg-slate-50 rounded-xl p-6" style="border-left: 3px solid var(--brand-accent);">
+            <h4 class="text-slate-800 font-bold text-base mb-3">📍 SEO — Get found for free, every month</h4>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">Condition-specific content, technical fixes, local citations, and AI search optimization. We push your highest-value keywords into the top 3 positions and keep Synergy Chiropractic visible long-term — including the AI Overviews that are replacing traditional search results. This is SEO built by people who understand code, not just keywords.</p>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-6" style="border-left: 3px solid var(--brand-accent);">
+            <h4 class="text-slate-800 font-bold text-base mb-3">📢 Google Ads — Patients this week, not six months from now</h4>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">We only bid on searches from patients who are frustrated and ready to act. Condition-specific targeting. No broad terms, no wasted spend. Every dollar tied back to a real patient inquiry.</p>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-6" style="border-left: 3px solid var(--brand-accent);">
+            <h4 class="text-slate-800 font-bold text-base mb-3">🤖 Systems &amp; Automation — Stop the bleeding, then build the engine</h4>
+            <p class="text-slate-500 text-sm leading-relaxed mb-4">Missed calls that text back in seconds. Appointment reminders that actually go out. No-show recovery. Patient reactivation. Email sequences that run before anyone picks up the phone. AI assistants that book appointments while you sleep.</p>
+            <p class="text-slate-500 text-sm leading-relaxed m-0">Most agencies stop there. We don't. Because we're engineers, we can connect any tool, build what doesn't exist off the shelf, and make it fit how your practice actually runs — not how a template assumes it does.</p>
+          </div>
+        </div>
+        <p class="text-slate-600 leading-relaxed mt-6" style="font-size: 16px; line-height: 1.7;">The scope depends on where Synergy Chiropractic is right now. Some practices need to stop losing patients they've already paid to attract. Some are ready to build something that fills the calendar on its own. Some want to own the market completely. We figure out which one fits on the call.</p>
+      </div>
+    </details>
+
+    <!-- FAQ 6: How Much Time -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-4 fade-up">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer font-semibold text-slate-900 text-base">
+        <span>How Much Work/Time Will This Take From Me?</span>
+        <span class="text-3xl font-light flex-shrink-0 ml-4" style="color: var(--brand-accent);">+</span>
+      </summary>
+      <div class="px-7 pb-7">
+        <div class="yt-wrapper mb-6">
+          <iframe src="https://www.loom.com/embed/cc2e1713bc8440a6a5ab287f4c71fcbd" allow="fullscreen; encrypted-media" title="How much time does this take?"></iframe>
+        </div>
+        <p class="text-slate-600 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">Less than you'd think. After a 30-minute onboarding call, we handle everything. You review and approve content when we ask — typically 1–2 hours per month. That's it.</p>
+      </div>
+    </details>
+
+    <!-- FAQ 7: How Much Does This Cost -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-4 fade-up">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer font-semibold text-slate-900 text-base">
+        <span>How Much Does This Cost?</span>
+        <span class="text-3xl font-light flex-shrink-0 ml-4" style="color: var(--brand-accent);">+</span>
+      </summary>
+      <div class="px-7 pb-7">
+        <div class="yt-wrapper mb-6">
+          <iframe src="https://www.loom.com/embed/53305368ddb243a9b11d639d33f640e0" allow="fullscreen; encrypted-media" title="How much does this cost?"></iframe>
+        </div>
+        <p class="text-slate-600 leading-relaxed mb-5" style="font-size: 16px; line-height: 1.7;">We discuss pricing on the strategy call — never in email. Every engagement is scoped to fit the practice. Click below to see your ROI potential before we talk.</p>
+        <a href="https://healthbizscale.com/access-now#paragraph-LSJ6fsqZBR" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-white font-bold py-3 px-7 rounded-xl hover:opacity-90 transition-opacity no-underline text-sm" style="background: var(--brand-primary);">View ROI Calculator &rarr;</a>
+      </div>
+    </details>
+
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 14 — FINAL CTA
+     ============================= -->
+<section id="section-cta" class="py-28 px-5" style="background: var(--brand-primary);">
+  <div class="max-w-3xl mx-auto text-center">
+
+    <div class="mb-6">
+      <span class="inline-block border border-white/30 text-white/80 rounded-full px-5 py-2 text-xs font-semibold tracking-widest uppercase">Book your call</span>
+    </div>
+
+    <h2 class="text-white font-black mb-5" style="font-size: clamp(32px, 5vw, 54px); letter-spacing: -0.025em; line-height: 1.0;">
+      Let's Build Your Strategy — Together.
+    </h2>
+    <p class="text-white/80 mb-12 max-w-xl mx-auto" style="font-size: 18px; line-height: 1.7;">
+      One conversation. A real plan. Specific to Synergy Chiropractic. You'll walk away knowing exactly what to do next — in all three areas — whether you hire us or not.
+    </p>
+
+    <!-- 3 Bullet Outcomes -->
+    <div class="flex flex-col gap-5 max-w-lg mx-auto mb-12 text-left">
+      <div class="flex items-start gap-5">
+        <span class="font-black text-2xl flex-shrink-0 leading-tight" style="color: rgba(255,255,255,0.4);">01</span>
+        <p class="text-white/90 leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">Get More New Patients — consistently<span id="ml-cta-01" style="display:none;">, across every location</span></p>
+      </div>
+      <div class="flex items-start gap-5">
+        <span class="font-black text-2xl flex-shrink-0 leading-tight" style="color: rgba(255,255,255,0.4);">02</span>
+        <p class="text-white/90 leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">Retain More Patients — and reactivate the ones you've lost touch with</p>
+      </div>
+      <div class="flex items-start gap-5">
+        <span class="font-black text-2xl flex-shrink-0 leading-tight" style="color: rgba(255,255,255,0.4);">03</span>
+        <p class="text-white/90 leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">Reclaim Your Time — and your team's — with AI built for your practice</p>
+      </div>
+    </div>
+
+    <!-- Mike's closing quote -->
+    <div class="rounded-2xl border border-white/20 p-8 mb-12 text-left" style="background: rgba(255,255,255,0.08);">
+      <p class="text-white/80 italic leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">I believe the best way to earn someone's trust is to be genuinely useful before they ever pay you a dollar. After this call, you'll have a strategy you can act on immediately — with or without me. If you move forward, great. If you don't, I'm glad I could help anyway. No hard feelings, no follow-up pressure, no obligation whatsoever.</p>
+    </div>
+
+    <!-- Second Calendly -->
+    <div class="rounded-2xl border border-white/20 p-6 md:p-10" style="background: rgba(255,255,255,0.08);">
+      <h3 class="text-white font-black text-2xl mb-3">Get Your AI, SEO &amp; Patient Growth Plan</h3>
+      <p class="text-white/70 mb-8" style="font-size: 17px; line-height: 1.7;">30 minutes. Real data on your practice. No pitch. No pressure.</p>
+      <div class="bg-white rounded-2xl p-4">
+        <div class="calendly-inline-widget" data-url="https://calendly.com/mike-kohl/30min"></div>
+      </div>
+      <p class="text-white/40 text-sm mt-5">The strategy is yours to keep — whether we work together or not.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- =============================
+     FOOTER
+     ============================= -->
+<footer style="background: #080808; border-top: 1px solid rgba(255,255,255,0.06);" class="py-10 px-5 text-center">
+  <p class="text-sm m-0" style="color: rgba(255,255,255,0.4);">
+    <a href="https://healthbizscale.com" target="_blank" class="no-underline hover:opacity-80 transition-opacity" style="color: rgba(255,255,255,0.4);">healthbizscale.com</a>
+    &middot; Health Biz Scale
+  </p>
+  <p class="text-xs mt-2" style="color: rgba(255,255,255,0.2);">This page was built exclusively for Synergy Chiropractic and is not publicly indexed.</p>
+</footer>
+
+<!-- =============================
+     SCRIPTS
+     ============================= -->
+<script>
+// Multi-location toggle
+(function() {
+  if (CONFIG.is_multi_location !== 'true') {
+    var el = document.getElementById('quote-multilocation');
+    if (el) el.style.display = 'none';
+  } else {
+    ['ml-text-01','ml-cta-01'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = 'inline';
+    });
+  }
+})();
+
+// Loom ID override from URL param
+(function() {
+  var p = new URLSearchParams(window.location.search).get('loom');
+  var f = document.getElementById('loom-frame');
+  if (f && p) f.src = 'https://www.loom.com/embed/' + p + '?hide_owner=true&hide_share=true&hide_title=true&hideEmbedTopBar=true';
+})();
+
+// Progress bar
+window.addEventListener('scroll', function() {
+  var d = document.documentElement;
+  var pct = (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100;
+  var bar = document.getElementById('progress-bar');
+  if (bar) bar.style.width = pct + '%';
+}, { passive: true });
+
+// ── Scroll animations ───────────────────────────────────────────────────────
+(function() {
+  var animClasses = ['.fade-up', '.slide-left', '.slide-right', '.scale-in', '.stagger-children'];
+  var els = document.querySelectorAll(animClasses.join(','));
+  if (!els.length) return;
+
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.07, rootMargin: '0px 0px -30px 0px' });
+
+  els.forEach(function(el) { io.observe(el); });
+})();
+
+// ── Number counter animation ─────────────────────────────────────────────────
+(function() {
+  function formatNum(n, prefix, suffix) {
+    var abs = Math.abs(n);
+    var formatted;
+    if (abs >= 1000000) {
+      formatted = (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    } else if (abs >= 1000) {
+      formatted = (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    } else {
+      formatted = n.toString();
+    }
+    return (prefix || '') + formatted + (suffix || '');
+  }
+
+  function animateCounter(el) {
+    var raw = el.getAttribute('data-count');
+    if (!raw) return;
+    // Strip non-numeric except decimal — extract number
+    var num = parseFloat(raw.replace(/[^0-9.]/g, '')) || 0;
+    if (!num) return;
+    var prefix = el.getAttribute('data-prefix') || '';
+    var suffix = el.getAttribute('data-suffix') || '';
+    // Detect if original has K/M/B suffix
+    var upperRaw = raw.toUpperCase();
+    var multiplier = 1;
+    if (upperRaw.indexOf('M') !== -1) multiplier = 1000000;
+    else if (upperRaw.indexOf('K') !== -1) multiplier = 1000;
+    var target = num * multiplier;
+    var duration = 1400;
+    var start = null;
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+    function step(ts) {
+      if (!start) start = ts;
+      var elapsed = ts - start;
+      var progress = Math.min(elapsed / duration, 1);
+      var current = Math.round(easeOut(progress) * target);
+      el.textContent = formatNum(current, prefix, suffix);
+      if (progress < 1) requestAnimationFrame(step);
+      else el.textContent = (prefix || '') + raw.replace(/[^0-9.,KMB]/g, '') + (suffix || '');
+    }
+    requestAnimationFrame(step);
+  }
+
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) {
+        animateCounter(e.target);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('[data-count]').forEach(function(el) { io.observe(el); });
+})();
+
+// ── Parallax tilt on hero headline ──────────────────────────────────────────
+(function() {
+  var hero = document.getElementById('section-hero');
+  var h1 = hero ? hero.querySelector('.hero-headline') : null;
+  if (!h1 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.addEventListener('mousemove', function(e) {
+    var cx = window.innerWidth / 2;
+    var cy = window.innerHeight / 2;
+    var dx = (e.clientX - cx) / cx;
+    var dy = (e.clientY - cy) / cy;
+    h1.style.transform = 'translate(' + (dx * 6) + 'px, ' + (dy * 3) + 'px)';
+  }, { passive: true });
+})();
+
+// ── Ripple effect on brand-primary buttons ───────────────────────────────────
+(function() {
+  document.querySelectorAll('a.btn-press, button.btn-press').forEach(function(btn) {
+    btn.style.position = 'relative';
+    btn.style.overflow = 'hidden';
+    btn.addEventListener('click', function(e) {
+      var rect = btn.getBoundingClientRect();
+      var ripple = document.createElement('span');
+      var size = Math.max(rect.width, rect.height) * 2;
+      ripple.style.cssText = [
+        'position:absolute',
+        'border-radius:50%',
+        'background:rgba(255,255,255,0.25)',
+        'width:' + size + 'px',
+        'height:' + size + 'px',
+        'left:' + (e.clientX - rect.left - size/2) + 'px',
+        'top:' + (e.clientY - rect.top - size/2) + 'px',
+        'transform:scale(0)',
+        'animation:rippleAnim 0.55s ease-out forwards',
+        'pointer-events:none'
+      ].join(';');
+      btn.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    });
+  });
+  // Inject keyframes for ripple
+  var s = document.createElement('style');
+  s.textContent = '@keyframes rippleAnim { to { transform: scale(1); opacity: 0; } }';
+  document.head.appendChild(s);
+})();
+
+// ── Stagger SEO table rows on reveal ────────────────────────────────────────
+(function() {
+  var tables = document.querySelectorAll('.overflow-x-auto table');
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (!e.isIntersecting) return;
+      var rows = e.target.querySelectorAll('tbody tr');
+      rows.forEach(function(row, i) {
+        row.style.opacity = '0';
+        row.style.transform = 'translateX(-12px)';
+        row.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+        setTimeout(function() {
+          row.style.opacity = '1';
+          row.style.transform = 'translateX(0)';
+        }, 60 + i * 45);
+      });
+      io.unobserve(e.target);
+    });
+  }, { threshold: 0.1 });
+  tables.forEach(function(t) { io.observe(t); });
+})();
+
+// Calendly script loader
+(function() {
+  var s = document.createElement('script');
+  s.src = 'https://assets.calendly.com/assets/external/widget.js';
+  s.async = true;
+  document.head.appendChild(s);
+})();
+
+// FAQ + details toggle — swap + to ×
+document.querySelectorAll('details').forEach(function(d) {
+  d.addEventListener('toggle', function() {
+    var icon = d.querySelector('summary span:last-child');
+    if (icon) icon.textContent = d.open ? '×' : '+';
+  });
+});
+</script>
+</body>
+</html>

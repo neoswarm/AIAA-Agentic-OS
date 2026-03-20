@@ -1,0 +1,333 @@
+{
+  "keywords": [
+    "naturopathic doctor Oregon",
+    "bioidentical hormone therapy Portland",
+    "hormone replacement therapy Oregon",
+    "naturopathic medicine Portland",
+    "women's health naturopath",
+    "men's health hormone therapy",
+    "low dose naltrexone Oregon",
+    "holistic hormone doctor",
+    "natural medicine Oregon",
+    "progesterone therapy Portland",
+    "testosterone replacement natural",
+    "menopause treatment naturopathic",
+    "perimenopause symptoms treatment",
+    "thyroid doctor naturopathic",
+    "adrenal fatigue treatment",
+    "digestive health naturopath",
+    "functional medicine Oregon",
+    "integrative hormone therapy",
+    "natural thyroid treatment",
+    "bioidentical progesterone therapy",
+    "hormone imbalance treatment",
+    "holistic women's health",
+    "natural men's health clinic",
+    "root cause medicine Oregon",
+    "hormone testing Portland",
+    "naturopathic physician Oregon",
+    "holistic healthcare Portland",
+    "botanical medicine Oregon",
+    "personalized hormone therapy",
+    "integrative health Oregon"
+  ],
+  "ads": [
+    {
+      "campaign_name": "Hormone Health - Women's Symptoms",
+      "target_audience": "Women 35-60 experiencing perimenopause, menopause, hormonal imbalance symptoms in Oregon",
+      "headlines": [
+        "Bioidentical Hormone Therapy",
+        "Natural Menopause Relief",
+        "Balance Your Hormones Naturally",
+        "Women's Hormone Specialists",
+        "Free Hormone Consultation"
+      ],
+      "descriptions": [
+        "Personalized bioidentical hormone therapy for women. Address root causes with natural medicine.",
+        "Oregon naturopathic doctors specializing in hormone balance. Book your free consultation today."
+      ],
+      "keywords": [
+        "[bioidentical hormone therapy oregon]",
+        "[naturopathic doctor portland]",
+        "\"menopause treatment natural\"",
+        "\"bioidentical hormones women\"",
+        "hormone replacement therapy",
+        "perimenopause symptoms",
+        "natural hormone balance",
+        "women's health naturopath",
+        "holistic hormone doctor",
+        "thyroid treatment natural"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Free Consultation",
+          "Root Cause Approach",
+          "Personalized Treatment",
+          "Research-Based Care"
+        ],
+        "Sitelink Extensions": [
+          "Women's Health | Bioidentical hormone therapy for menopause and perimenopause",
+          "Hormonal Health | Personalized treatment plans for hormone balance",
+          "New Patients | Schedule your free consultation today"
+        ]
+      }
+    },
+    {
+      "campaign_name": "Hormone Health - Men's Symptoms",
+      "target_audience": "Men 40-65 experiencing low testosterone, fatigue, hormone-related symptoms in Oregon",
+      "headlines": [
+        "Men's Hormone Therapy Oregon",
+        "Natural Testosterone Support",
+        "Holistic Men's Health Care",
+        "Boost Energy Naturally",
+        "Free Men's Health Consult"
+      ],
+      "descriptions": [
+        "Comprehensive hormone therapy for men. Naturopathic approach to energy, vitality, and wellness.",
+        "Address low testosterone and hormone imbalance naturally. Book your free consultation now."
+      ],
+      "keywords": [
+        "[men's hormone therapy oregon]",
+        "[testosterone replacement natural]",
+        "\"bioidentical hormones men\"",
+        "\"low testosterone treatment\"",
+        "men's health naturopath",
+        "natural testosterone therapy",
+        "holistic men's health",
+        "hormone doctor portland",
+        "fatigue treatment men",
+        "men's wellness oregon"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Free Consultation",
+          "No Referral Needed",
+          "Personalized Plans",
+          "Natural Approach"
+        ],
+        "Sitelink Extensions": [
+          "Men's Health | Natural hormone therapy and vitality optimization",
+          "Hormone Testing | Comprehensive evaluation and treatment planning",
+          "Book Now | Start with a free consultation"
+        ]
+      }
+    },
+    {
+      "campaign_name": "Digestive & Specialty Conditions",
+      "target_audience": "Oregon residents seeking naturopathic treatment for digestive issues, chronic conditions, LDN therapy",
+      "headlines": [
+        "Naturopathic Medicine Oregon",
+        "Digestive Health Specialists",
+        "Low Dose Naltrexone Therapy",
+        "Root Cause Treatment",
+        "Holistic Health Solutions"
+      ],
+      "descriptions": [
+        "Treat digestive issues, chronic conditions with natural medicine. Personalized care from Oregon naturopaths.",
+        "Expert LDN therapy and holistic treatment. Address underlying causes. Free consultation available."
+      ],
+      "keywords": [
+        "[low dose naltrexone oregon]",
+        "[naturopathic medicine portland]",
+        "\"digestive health naturopath\"",
+        "\"LDN therapy\"",
+        "holistic medicine oregon",
+        "functional medicine portland",
+        "natural health clinic",
+        "integrative medicine",
+        "chronic condition treatment",
+        "gut health specialist"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Free Consultation",
+          "Evidence-Based Care",
+          "Individualized Plans",
+          "Whole-Person Approach"
+        ],
+        "Sitelink Extensions": [
+          "Digestive Health | Natural treatments for gut and digestive concerns",
+          "Low Dose Naltrexone | Specialized LDN therapy and monitoring",
+          "New Patients | Schedule your free consultation"
+        ]
+      }
+    }
+  ],
+  "emails": [
+    {
+      "email_number": 1,
+      "type": "smart_practice_value_drop",
+      "subject": "[FIRST_NAME], what if it's not just stress?",
+      "preview": "Your symptoms might be telling a deeper story",
+      "body": "Hi [FIRST_NAME],\n\nThank you for completing your health assessment. When you mentioned experiencing [PRIMARY_SYMPTOM], something stood out to us.\n\nMany people are told their hormone-related symptoms are just part of aging or stress. But [KEY_ASSESSMENT_INSIGHT] often points to something more specific: an underlying hormone imbalance that standard care doesn't always investigate deeply.\n\nAt Oregon Natural Medicine, we don't just address symptoms on the surface. We run comprehensive testing to understand what's actually happening with your hormones, thyroid, and overall physiology. Then we create a personalized treatment plan using bioidentical hormones, nutrition, and botanical medicine tailored specifically to you.\n\nYou deserve answers that go deeper than 'this is normal.' If you're ready to explore what's really going on, we'd love to help.\n\nWarmly,\nThe Oregon Natural Medicine Team",
+      "cta_text": "Book Your Free Consultation",
+      "cta_url": "https://oregonnaturalmedicine.com/new-patients/"
+    },
+    {
+      "email_number": 2,
+      "type": "mechanism_story",
+      "subject": "Why [PRIMARY_SYMPTOM] happens (the simple version)",
+      "preview": "Understanding what's actually going on",
+      "body": "Hi [FIRST_NAME],\n\nThink of your hormones like a team of messengers. When one messenger (like progesterone or testosterone) starts running late or not showing up at all, the whole system gets confused. Your body tries to compensate, which often creates [PRIMARY_SYMPTOM] and other symptoms you might be experiencing.\n\nMost conventional approaches focus on managing symptoms individually. But if the root issue is a hormone imbalance or thyroid dysfunction, those surface treatments often fall short because they're not addressing why the messengers stopped working properly in the first place.\n\nOur approach at Oregon Natural Medicine is different. We test your hormone levels comprehensively, identify which messengers are struggling, and use bioidentical hormone therapy and natural medicine to help restore balance. It's not about masking symptoms; it's about supporting your body's natural systems.\n\nEvery person is different, and results vary. But understanding the 'why' is the first step toward feeling better.\n\nBest,\nDr. Reynolds and Team",
+      "cta_text": "Schedule Your Free Consultation",
+      "cta_url": "https://oregonnaturalmedicine.com/new-patients/"
+    },
+    {
+      "email_number": 3,
+      "type": "proof_and_results",
+      "subject": "A patient story you might relate to",
+      "preview": "Someone who felt the same way you do now",
+      "body": "Hi [FIRST_NAME],\n\nWe recently worked with a patient who came to us experiencing symptoms very similar to yours: [PRIMARY_SYMPTOM], fatigue, and feeling like something was just 'off.' She had been told everything was normal, but she knew her body was telling her something different.\n\nAfter comprehensive hormone testing, we discovered her progesterone levels were significantly low and her thyroid wasn't converting hormones efficiently. Once we addressed those root causes with personalized bioidentical hormone therapy and nutritional support, she noticed changes within weeks. Her energy returned, [PRIMARY_SYMPTOM] improved, and she felt like herself again.\n\nOf course, every person's body is unique, and results vary depending on individual circumstances. But what remained consistent was our commitment to finding and treating the underlying cause, not just managing symptoms.\n\nIf her story sounds familiar, we'd welcome the opportunity to explore [RECOMMENDED_SERVICE_OR_FOCUS] with you during a free consultation.\n\nTake care,\nOregon Natural Medicine",
+      "cta_text": "Book Your Free Consultation Now",
+      "cta_url": "https://oregonnaturalmedicine.com/new-patients/"
+    }
+  ],
+  "app_config": {
+    "practiceName": "Oregon Natural Medicine",
+    "practiceShortName": "ONM",
+    "providerName": "Dr. John Reynolds",
+    "providerTitle": "Naturopathic Physician",
+    "tagline": "Natural Health. Modern Holistic Medicine",
+    "primaryColor": "#40513B",
+    "primaryDark": "#2d3a29",
+    "primaryLight": "#5a6d54",
+    "primaryXLight": "#e8ebe7",
+    "backgroundColor": "#FFFFFF",
+    "bookingUrl": "https://oregonnaturalmedicine.com/new-patients/",
+    "phone": "",
+    "concerns": [
+      {
+        "label": "Hormonal Imbalance",
+        "emoji": "⚖️"
+      },
+      {
+        "label": "Menopause Symptoms",
+        "emoji": "🌡️"
+      },
+      {
+        "label": "Low Energy",
+        "emoji": "🔋"
+      },
+      {
+        "label": "Digestive Issues",
+        "emoji": "🥗"
+      },
+      {
+        "label": "Thyroid Problems",
+        "emoji": "🦋"
+      },
+      {
+        "label": "Sleep Disruption",
+        "emoji": "😴"
+      },
+      {
+        "label": "Weight Changes",
+        "emoji": "⚖️"
+      },
+      {
+        "label": "Mood Imbalance",
+        "emoji": "🧠"
+      }
+    ],
+    "symptom_map": {
+      "Hormonal Imbalance": [
+        "Hot flashes or night sweats",
+        "Irregular periods or heavy bleeding",
+        "Mood swings or irritability",
+        "Low libido or sexual dysfunction",
+        "Brain fog or difficulty concentrating",
+        "Unexplained weight gain",
+        "Hair thinning or loss",
+        "Fatigue despite adequate sleep"
+      ],
+      "Menopause Symptoms": [
+        "Hot flashes throughout the day",
+        "Night sweats disrupting sleep",
+        "Vaginal dryness or discomfort",
+        "Mood changes or anxiety",
+        "Difficulty sleeping through the night",
+        "Weight gain around midsection",
+        "Decreased energy and motivation",
+        "Joint pain or stiffness"
+      ],
+      "Low Energy": [
+        "Persistent fatigue throughout the day",
+        "Difficulty waking up in the morning",
+        "Afternoon energy crashes",
+        "Need for caffeine to function",
+        "Exhaustion after minimal activity",
+        "Brain fog or mental fatigue",
+        "Lack of motivation or drive",
+        "Feeling unrested after sleep"
+      ],
+      "Digestive Issues": [
+        "Bloating after meals",
+        "Gas or abdominal discomfort",
+        "Irregular bowel movements",
+        "Food sensitivities or reactions",
+        "Heartburn or acid reflux",
+        "Nausea or stomach pain",
+        "Constipation or diarrhea",
+        "Feeling full quickly when eating"
+      ],
+      "Thyroid Problems": [
+        "Unexplained weight changes",
+        "Always feeling cold",
+        "Dry skin or hair loss",
+        "Fatigue or sluggishness",
+        "Difficulty concentrating",
+        "Constipation or digestive issues",
+        "Muscle weakness or aches",
+        "Depression or low mood"
+      ],
+      "Sleep Disruption": [
+        "Difficulty falling asleep",
+        "Waking frequently during night",
+        "Night sweats or overheating",
+        "Racing thoughts at bedtime",
+        "Waking too early",
+        "Feeling unrested after sleep",
+        "Needing naps during the day",
+        "Restless or light sleep"
+      ],
+      "Weight Changes": [
+        "Unexplained weight gain",
+        "Difficulty losing weight despite effort",
+        "Weight gain around midsection",
+        "Increased appetite or cravings",
+        "Slow metabolism",
+        "Water retention or puffiness",
+        "Loss of muscle mass",
+        "Sudden unexplained weight loss"
+      ],
+      "Mood Imbalance": [
+        "Anxiety or nervousness",
+        "Depression or low mood",
+        "Irritability or anger",
+        "Emotional sensitivity",
+        "Difficulty managing stress",
+        "Panic attacks or racing heart",
+        "Feeling overwhelmed easily",
+        "Sudden mood swings"
+      ]
+    },
+    "careModels": [
+      {
+        "name": "Comprehensive Initial Visit",
+        "desc": "In-depth consultation, health history review, physical exam, and personalized treatment plan development",
+        "price": "Contact for pricing"
+      },
+      {
+        "name": "Bioidentical Hormone Therapy",
+        "desc": "Customized hormone replacement using bioidentical hormones with ongoing monitoring and adjustment",
+        "price": "Varies by treatment plan"
+      },
+      {
+        "name": "Follow-Up Care",
+        "desc": "Ongoing visits for treatment monitoring, lab review, and treatment plan refinement",
+        "price": "Contact for pricing"
+      }
+    ]
+  },
+  "report_url": "https://healthbizleads.com/oregon-natural-medicine/"
+}

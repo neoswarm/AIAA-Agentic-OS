@@ -1,0 +1,338 @@
+{
+  "keywords": [
+    "functional medicine san diego",
+    "functional medicine near me",
+    "holistic doctor san diego",
+    "naturopathic doctor san diego",
+    "functional medicine doctor san diego",
+    "advanced functional medicine",
+    "root cause medicine san diego",
+    "integrative medicine san diego",
+    "holistic health san diego",
+    "hormone replacement therapy san diego",
+    "hrt san diego",
+    "thyroid doctor san diego",
+    "autoimmune disease treatment san diego",
+    "gut health doctor san diego",
+    "digestive disorder specialist san diego",
+    "weight loss doctor san diego",
+    "functional medicine weight loss",
+    "histamine intolerance treatment",
+    "histamine intolerance remedy",
+    "how to lower histamine levels",
+    "mold toxicity treatment san diego",
+    "fertility specialist functional medicine",
+    "female hormone specialist san diego",
+    "diabetes functional medicine",
+    "comprehensive lab testing san diego",
+    "peptide therapy san diego",
+    "naturopath san diego ca",
+    "sd functional medicine",
+    "natural doctor san diego",
+    "functional gp san diego"
+  ],
+  "ads": [
+    {
+      "campaign_name": "San Diego Functional Medicine - Root Cause",
+      "target_audience": "San Diego adults 30-65 with chronic symptoms seeking root-cause answers beyond standard care",
+      "headlines": [
+        "San Diego's #1 FM Clinic",
+        "Find Your Root Cause",
+        "96% Patient Success Rate",
+        "200+ Biomarkers Tested",
+        "No Referral Needed"
+      ],
+      "descriptions": [
+        "Stop guessing. Our San Diego functional medicine team runs 200+ biomarkers to uncover what's really driving your symptoms.",
+        "Hormones, gut, autoimmune, weight — we build a personalized plan. Schedule your free discovery call today."
+      ],
+      "keywords": [
+        "[functional medicine san diego]",
+        "[holistic doctor san diego]",
+        "[naturopathic doctor san diego ca]",
+        "\"functional medicine near me\"",
+        "\"root cause doctor san diego\"",
+        "\"integrative medicine san diego\"",
+        "functional medicine doctor",
+        "holistic health doctor",
+        "natural doctor san diego",
+        "sd functional medicine"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Free Discovery Call",
+          "Root Cause Approach",
+          "200+ Biomarkers Tested",
+          "Same-Week Consults"
+        ],
+        "Sitelink Extensions": [
+          "New Patients | What to expect at your first visit",
+          "Our Specialties | Hormones, gut, autoimmune & more",
+          "Meet the Team | Experienced functional medicine providers"
+        ]
+      }
+    },
+    {
+      "campaign_name": "Hormone Replacement Therapy San Diego",
+      "target_audience": "Women and men 35-65 in San Diego experiencing hormonal imbalance, fatigue, or menopause symptoms",
+      "headlines": [
+        "HRT Now Available SD",
+        "Balance Your Hormones",
+        "Feel Like Yourself Again",
+        "Personalized HRT Plans",
+        "Free Consult Available"
+      ],
+      "descriptions": [
+        "Hormonal imbalance affects everything — energy, weight, mood, sleep. Our San Diego HRT team builds a plan around your labs.",
+        "Advanced Functional Medicine now offers HRT services in San Diego. Comprehensive testing, personalized protocols. Book today."
+      ],
+      "keywords": [
+        "[hormone replacement therapy san diego]",
+        "[hrt san diego]",
+        "\"hormone doctor san diego\"",
+        "\"bioidentical hormones san diego\"",
+        "\"menopause doctor san diego\"",
+        "hormone imbalance treatment",
+        "testosterone therapy san diego",
+        "estrogen therapy san diego",
+        "female hormone specialist",
+        "hormone optimization san diego"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Bioidentical Hormones",
+          "Lab-Driven Protocols",
+          "Male & Female HRT",
+          "No Referral Needed"
+        ],
+        "Sitelink Extensions": [
+          "HRT Services | Learn about our hormone therapy programs",
+          "Lab Testing | 200+ biomarkers analyzed",
+          "Schedule Now | Book your free discovery call online"
+        ]
+      }
+    },
+    {
+      "campaign_name": "Histamine Intolerance & Gut Health San Diego",
+      "target_audience": "Adults nationwide and in San Diego searching for histamine intolerance treatment and gut health solutions",
+      "headlines": [
+        "Histamine Intolerance Help",
+        "Gut Health Specialists",
+        "Root Cause Diagnosis",
+        "Remote Patients Welcome",
+        "Proven Remedy Protocols"
+      ],
+      "descriptions": [
+        "Struggling with histamine reactions, bloating, or digestive issues? Our team identifies the root cause with advanced lab testing.",
+        "Advanced Functional Medicine treats histamine intolerance and gut disorders nationwide. Telehealth available. Book a consult."
+      ],
+      "keywords": [
+        "[histamine intolerance treatment]",
+        "[histamine intolerance remedy]",
+        "\"how to treat histamine intolerance\"",
+        "\"how to lower histamine levels\"",
+        "\"gut health doctor near me\"",
+        "digestive disorder specialist",
+        "treating histamine intolerance",
+        "leaky gut treatment",
+        "sibo treatment functional medicine",
+        "food sensitivity testing"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Telehealth Available",
+          "All States Welcome",
+          "Advanced Lab Testing",
+          "Root Cause Protocol"
+        ],
+        "Sitelink Extensions": [
+          "Digestive Disorders | How we approach gut health",
+          "DIY Test Kits | Order your own lab tests",
+          "Success Stories | Read patient outcomes"
+        ]
+      }
+    }
+  ],
+  "emails": [
+    {
+      "email_number": 1,
+      "type": "smart_practice_value_drop",
+      "subject": "Why your [PRIMARY_SYMPTOM] may not be what you think",
+      "preview": "A root-cause insight most doctors skip",
+      "body": "Hi [FIRST_NAME],\n\nWhen you shared that [PRIMARY_SYMPTOM] has been affecting your day-to-day life, it caught our attention — because it's one of the most commonly misunderstood signals the body sends.\n\nMost standard workups only check a handful of markers. At Advanced Functional Medicine, we run over 200 biomarkers specifically designed to uncover what's actually driving symptoms like yours. In many cases, [PRIMARY_SYMPTOM] traces back to hormonal imbalance, gut dysfunction, or systemic inflammation — issues that standard care simply doesn't screen for in depth.\n\nThat's not a knock on conventional medicine. It's just that conventional medicine is designed for acute care, not for the kind of chronic, root-cause investigation your body is asking for right now.\n\n[KEY_ASSESSMENT_INSIGHT] was one of the things your health assessment flagged. That's exactly the kind of signal we investigate further in a consultation.\n\nWhen you're ready to find out what's actually going on, we're here.\n\nWarm regards,\nThe Care Team at Advanced Functional Medicine\n\n[BOOKING_LINK]",
+      "cta_text": "Schedule Your Free Discovery Call",
+      "cta_url": "https://advfunctionalmedicine.com/new-patients/"
+    },
+    {
+      "email_number": 2,
+      "type": "mechanism_story",
+      "subject": "The 'canary in the coal mine' your body keeps sending",
+      "preview": "Why symptoms are signals, not the problem",
+      "body": "Hi [FIRST_NAME],\n\nHere's a simple way to think about what may be happening with [PRIMARY_SYMPTOM].\n\nImagine your body as a building. Symptoms are the smoke alarm going off. Standard care often focuses on silencing the alarm — managing symptoms with medication. Functional medicine asks: where's the fire?\n\nFor many people dealing with [PRIMARY_SYMPTOM], the 'fire' is somewhere upstream — a hormonal imbalance, a dysregulated immune response, or a gut lining that's allowing inflammatory signals to circulate. These root causes often don't show up on routine bloodwork because the standard panel simply isn't looking for them.\n\nWhat we focus on at Advanced Functional Medicine is [RECOMMENDED_SERVICE_OR_FOCUS] — investigating the upstream drivers so we can address them directly, not just quiet the alarm.\n\nThis approach doesn't come with guarantees, but it does come with a level of thoroughness most patients haven't experienced before.\n\nIf that sounds like what you've been looking for, your next step is simple.\n\nWarm regards,\nThe Care Team at Advanced Functional Medicine\n\n[BOOKING_LINK]",
+      "cta_text": "Book a Free Discovery Call",
+      "cta_url": "https://advfunctionalmedicine.com/new-patients/"
+    },
+    {
+      "email_number": 3,
+      "type": "proof_and_results",
+      "subject": "She had the same symptoms. Here's what changed.",
+      "preview": "An anonymized patient story worth reading",
+      "body": "Hi [FIRST_NAME],\n\nOne of our patients — a woman in her early 40s — came to us with a symptom pattern very similar to what you described: [PRIMARY_SYMPTOM], persistent fatigue, and the frustrating sense that every test came back 'normal.'\n\nAfter a comprehensive intake and our 200+ biomarker panel, we identified significant hormonal dysregulation and elevated inflammatory markers that hadn't been captured in her prior workups. We built a personalized protocol around her specific results.\n\nWithin a few months, she described feeling 'like herself again' for the first time in years — more energy, clearer thinking, and the symptoms that had been disrupting her life had meaningfully improved.\n\nIndividual results vary, and we never make promises. But what we can promise is a level of investigation and personalized attention that goes well beyond a 15-minute appointment.\n\n[FIRST_NAME], your health assessment gave us a strong signal that this kind of approach could be meaningful for you. The next step is a no-pressure discovery call to see if we're the right fit.\n\nWarm regards,\nThe Care Team at Advanced Functional Medicine\n\n[BOOKING_LINK]",
+      "cta_text": "Schedule Your Free Discovery Call",
+      "cta_url": "https://advfunctionalmedicine.com/new-patients/"
+    }
+  ],
+  "app_config": {
+    "practiceName": "Advanced Functional Medicine",
+    "practiceShortName": "AFM San Diego",
+    "providerName": "Dr. Matthew Willis",
+    "providerTitle": "Functional Medicine Physician",
+    "tagline": "Find the root cause. Restore your health.",
+    "primaryColor": "#2397CA",
+    "primaryDark": "#1A6F96",
+    "primaryLight": "#4DB8E8",
+    "primaryXLight": "#EAF6FC",
+    "backgroundColor": "#FFFFFF",
+    "bookingUrl": "https://advfunctionalmedicine.com/new-patients/",
+    "phone": "858-412-5744",
+    "concerns": [
+      {
+        "label": "Hormone Imbalance",
+        "emoji": "⚡"
+      },
+      {
+        "label": "Gut Health",
+        "emoji": "🌿"
+      },
+      {
+        "label": "Autoimmune Issues",
+        "emoji": "🛡️"
+      },
+      {
+        "label": "Thyroid Problems",
+        "emoji": "🔬"
+      },
+      {
+        "label": "Fatigue & Energy",
+        "emoji": "💤"
+      },
+      {
+        "label": "Weight Management",
+        "emoji": "⚖️"
+      },
+      {
+        "label": "Histamine Reactions",
+        "emoji": "🌡️"
+      },
+      {
+        "label": "Fertility Support",
+        "emoji": "🌸"
+      }
+    ],
+    "symptom_map": {
+      "Hormone Imbalance": [
+        "Unexplained weight gain despite dieting",
+        "Persistent fatigue even after rest",
+        "Mood swings or increased irritability",
+        "Low libido or sexual dysfunction",
+        "Night sweats or hot flashes",
+        "Brain fog and difficulty concentrating",
+        "Irregular or painful menstrual cycles",
+        "Hair thinning or hair loss"
+      ],
+      "Gut Health": [
+        "Chronic bloating after meals",
+        "Alternating constipation and diarrhea",
+        "Heartburn or acid reflux",
+        "Food sensitivities that seem to be increasing",
+        "Stomach cramps or discomfort",
+        "Feeling of incomplete digestion",
+        "Nausea without a clear cause",
+        "Greasy or abnormal stools"
+      ],
+      "Autoimmune Issues": [
+        "Widespread joint or muscle pain",
+        "Chronic low-grade inflammation",
+        "Frequent infections or slow recovery",
+        "Skin rashes or unexplained redness",
+        "Numbness or tingling in extremities",
+        "Persistent swollen lymph nodes",
+        "Extreme fatigue after minor activity",
+        "Labs showing elevated inflammatory markers"
+      ],
+      "Thyroid Problems": [
+        "Unexplained weight changes",
+        "Cold hands and feet even in warm weather",
+        "Thinning eyebrows especially the outer third",
+        "Sluggish metabolism and low energy",
+        "Depression or flat mood",
+        "Dry skin and brittle nails",
+        "Constipation without dietary explanation",
+        "Difficulty losing weight despite effort"
+      ],
+      "Fatigue & Energy": [
+        "Waking up tired despite 7-8 hours of sleep",
+        "Afternoon energy crashes",
+        "Reliance on caffeine to get through the day",
+        "Difficulty recovering from exercise",
+        "Low motivation and mental sluggishness",
+        "Feeling 'wired but tired' at night",
+        "Frequent yawning throughout the day",
+        "Poor sleep quality or insomnia"
+      ],
+      "Weight Management": [
+        "Inability to lose weight despite caloric restriction",
+        "Weight gain concentrated in the midsection",
+        "Carbohydrate or sugar cravings",
+        "Blood sugar spikes and crashes",
+        "Slow metabolism compared to before",
+        "Yo-yo weight fluctuations",
+        "Hunger that returns quickly after eating",
+        "History of thyroid or hormonal issues"
+      ],
+      "Histamine Reactions": [
+        "Flushing or skin redness after eating",
+        "Headaches or migraines triggered by food",
+        "Runny nose or nasal congestion not explained by allergies",
+        "Hives or itchy skin after certain meals",
+        "Heart palpitations after wine or aged cheese",
+        "Digestive discomfort after fermented foods",
+        "Fatigue or brain fog linked to specific foods",
+        "Sensitivity to alcohol especially red wine"
+      ],
+      "Fertility Support": [
+        "Irregular menstrual cycles",
+        "History of miscarriage or difficulty conceiving",
+        "Diagnosed with PCOS or endometriosis",
+        "Elevated FSH or abnormal hormone panels",
+        "Low AMH or diminished ovarian reserve",
+        "Unexplained infertility after standard workup",
+        "Cycle irregularities after stopping birth control",
+        "Partner with low sperm count or motility"
+      ]
+    },
+    "careModels": [
+      {
+        "name": "Discovery Call",
+        "desc": "A complimentary 20-minute call to discuss your symptoms, goals, and whether AFM is the right fit for you.",
+        "price": "Free"
+      },
+      {
+        "name": "Comprehensive Consultation",
+        "desc": "Full new-patient intake with detailed health history review, goal setting, and initial lab order selection.",
+        "price": "Contact for pricing"
+      },
+      {
+        "name": "Comprehensive Lab Panel",
+        "desc": "200+ biomarker analysis covering hormones, thyroid, gut markers, metabolic function, and inflammatory indicators.",
+        "price": "Contact for pricing"
+      },
+      {
+        "name": "Personalized Protocol",
+        "desc": "Custom plan including dietary guidance, targeted supplementation, lifestyle adjustments, and peptide or hormone therapy as appropriate.",
+        "price": "Contact for pricing"
+      }
+    ]
+  },
+  "report_url": "https://healthbizleads.com/advanced-functional-medicine/"
+}

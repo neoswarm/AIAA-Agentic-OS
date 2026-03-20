@@ -1,0 +1,22 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 0,
+  "unique_keywords": 0,
+  "estimated_traffic": 0,
+  "traffic_value": 0,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 0,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 0,
+  "pos2_3_count": 0,
+  "pos4_10_count": 0,
+  "pos11_20_count": 0,
+  "pos1_3_count": 0,
+  "quick_wins_count": 0,
+  "top_quick_wins": [],
+  "top3_sample": [],
+  "top_by_volume": [],
+  "competitors": []
+}

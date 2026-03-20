@@ -1,0 +1,242 @@
+{
+  "source": "semrush_api",
+  "units_used": 630,
+  "domain_rank": 1408357,
+  "unique_keywords": 355,
+  "estimated_traffic": 644,
+  "traffic_value": 2361,
+  "serp_features_traffic": 0,
+  "serp_features_value": 0,
+  "ai_overview_serp_count": 2,
+  "ai_overview_cited_count": 0,
+  "pos1_count": 2,
+  "pos2_3_count": 4,
+  "pos4_10_count": 14,
+  "pos11_20_count": 30,
+  "pos1_3_count": 6,
+  "quick_wins_count": 10,
+  "top_quick_wins": [
+    {
+      "keyword": "advanced medical",
+      "position": 4,
+      "volume": 2400,
+      "kd": 50.0
+    },
+    {
+      "keyword": "advanced medical institute",
+      "position": 9,
+      "volume": 880,
+      "kd": 35.0
+    },
+    {
+      "keyword": "advanced medical of florida",
+      "position": 10,
+      "volume": 590,
+      "kd": 18.0
+    },
+    {
+      "keyword": "clearwater pain management",
+      "position": 5,
+      "volume": 480,
+      "kd": 10.0
+    },
+    {
+      "keyword": "advanced medical treatment center",
+      "position": 10,
+      "volume": 170,
+      "kd": 32.0
+    },
+    {
+      "keyword": "advancemedical",
+      "position": 8,
+      "volume": 170,
+      "kd": 57.0
+    },
+    {
+      "keyword": "pain management clearwater",
+      "position": 5,
+      "volume": 170,
+      "kd": 42.0
+    },
+    {
+      "keyword": "physical therapy largo",
+      "position": 5,
+      "volume": 140,
+      "kd": 11.0
+    },
+    {
+      "keyword": "chiropractic largo",
+      "position": 10,
+      "volume": 140,
+      "kd": 25.0
+    },
+    {
+      "keyword": "palm harbor physical therapy",
+      "position": 10,
+      "volume": 110,
+      "kd": 4.0
+    }
+  ],
+  "top3_sample": [
+    {
+      "keyword": "advance medical",
+      "position": 2,
+      "volume": 1000
+    },
+    {
+      "keyword": "advance medical of florida",
+      "position": 1,
+      "volume": 170
+    },
+    {
+      "keyword": "pain management largo",
+      "position": 2,
+      "volume": 90
+    }
+  ],
+  "top_by_volume": [
+    {
+      "keyword": "advanced medical",
+      "position": 4,
+      "volume": 2400,
+      "kd": 50.0
+    },
+    {
+      "keyword": "advanced medical center",
+      "position": 17,
+      "volume": 1300,
+      "kd": 51.0
+    },
+    {
+      "keyword": "advance medical",
+      "position": 2,
+      "volume": 1000,
+      "kd": 52.0
+    },
+    {
+      "keyword": "advance medical group",
+      "position": 12,
+      "volume": 880,
+      "kd": 64.0
+    },
+    {
+      "keyword": "advanced medical institute",
+      "position": 9,
+      "volume": 880,
+      "kd": 35.0
+    },
+    {
+      "keyword": "advanced relief institute",
+      "position": 13,
+      "volume": 720,
+      "kd": 36.0
+    },
+    {
+      "keyword": "advanced medical of florida",
+      "position": 10,
+      "volume": 590,
+      "kd": 18.0
+    },
+    {
+      "keyword": "advanced medical of florida",
+      "position": 3,
+      "volume": 590,
+      "kd": 18.0
+    },
+    {
+      "keyword": "advanced medical of florida",
+      "position": 1,
+      "volume": 590,
+      "kd": 18.0
+    },
+    {
+      "keyword": "clearwater pain management",
+      "position": 5,
+      "volume": 480,
+      "kd": 10.0
+    },
+    {
+      "keyword": "advanced chirosport murphy tx",
+      "position": 18,
+      "volume": 320,
+      "kd": 21.0
+    },
+    {
+      "keyword": "advance med",
+      "position": 17,
+      "volume": 320,
+      "kd": 60.0
+    },
+    {
+      "keyword": "clearwater medical group",
+      "position": 16,
+      "volume": 260,
+      "kd": 12.0
+    },
+    {
+      "keyword": "advanced medical of twin cities",
+      "position": 14,
+      "volume": 260,
+      "kd": 30.0
+    },
+    {
+      "keyword": "advance medical center",
+      "position": 15,
+      "volume": 260,
+      "kd": 50.0
+    },
+    {
+      "keyword": "physical therapy clearwater",
+      "position": 14,
+      "volume": 210,
+      "kd": 33.0
+    },
+    {
+      "keyword": "advance medical of florida",
+      "position": 1,
+      "volume": 170,
+      "kd": 20.0
+    },
+    {
+      "keyword": "advanced medical treatment center",
+      "position": 10,
+      "volume": 170,
+      "kd": 32.0
+    },
+    {
+      "keyword": "advancemedical",
+      "position": 8,
+      "volume": 170,
+      "kd": 57.0
+    },
+    {
+      "keyword": "advanced medical centers",
+      "position": 14,
+      "volume": 170,
+      "kd": 35.0
+    }
+  ],
+  "competitors": [
+    {
+      "domain": "advmedhelp.com",
+      "relevance": "0.24",
+      "keywords": 150,
+      "traffic": 289,
+      "traffic_value": 1061
+    },
+    {
+      "domain": "advmedjax.com",
+      "relevance": "0.19",
+      "keywords": 775,
+      "traffic": 132,
+      "traffic_value": 310
+    },
+    {
+      "domain": "advmednaples.com",
+      "relevance": "0.19",
+      "keywords": 944,
+      "traffic": 4068,
+      "traffic_value": 8833
+    }
+  ]
+}

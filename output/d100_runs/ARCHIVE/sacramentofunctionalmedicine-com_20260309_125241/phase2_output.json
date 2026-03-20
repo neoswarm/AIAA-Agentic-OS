@@ -1,0 +1,366 @@
+{
+  "keywords": [
+    "functional medicine sacramento",
+    "naturopathic doctor sacramento",
+    "bioidentical hormone therapy sacramento",
+    "hormone replacement therapy sacramento",
+    "iv therapy sacramento",
+    "hcg weight loss sacramento",
+    "hyperbaric oxygen therapy sacramento",
+    "ozone therapy sacramento",
+    "functional medicine doctor sacramento",
+    "naturopathic doctor near me",
+    "bioidentical hormones sacramento ca",
+    "thyroid doctor sacramento",
+    "adrenal fatigue treatment sacramento",
+    "chronic fatigue sacramento",
+    "gut health doctor sacramento",
+    "hormone doctor sacramento",
+    "functional oncology sacramento",
+    "menopause treatment sacramento",
+    "testosterone therapy sacramento",
+    "integrative medicine sacramento",
+    "natural hormone replacement sacramento",
+    "functional medicine clinic sacramento",
+    "naturopathic clinic sacramento",
+    "dr godby sacramento",
+    "bhrt sacramento",
+    "fibromyalgia doctor sacramento",
+    "autoimmune doctor sacramento",
+    "vitamin iv therapy sacramento",
+    "natural weight loss sacramento",
+    "functional medicine sacramento ca"
+  ],
+  "ads": [
+    {
+      "campaign_name": "Hormone Replacement Therapy - Sacramento",
+      "target_audience": "Adults 40-65 experiencing hormone imbalance symptoms seeking natural solutions in Sacramento area",
+      "headlines": [
+        "Bioidentical Hormones Sacramento",
+        "Natural Hormone Therapy",
+        "Dr. Godby - 20 Years Experience",
+        "Balance Your Hormones Naturally",
+        "Plant-Based Hormone Treatment"
+      ],
+      "descriptions": [
+        "Personalized bioidentical hormone therapy for men and women. Free 15-minute consultation. Cash-pay.",
+        "Address fatigue, weight gain, mood changes at the root cause. Sacramento's longest-serving ND."
+      ],
+      "keywords": [
+        "[bioidentical hormone therapy sacramento]",
+        "[hormone replacement sacramento]",
+        "\"hormone doctor sacramento\"",
+        "\"bhrt sacramento\"",
+        "natural hormone therapy",
+        "bioidentical hormones near me",
+        "menopause treatment sacramento",
+        "testosterone therapy sacramento",
+        "hormone imbalance sacramento",
+        "low testosterone sacramento"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Free 15-Min Consultation",
+          "20 Years Experience",
+          "Plant-Based Hormones",
+          "Same-Week Appointments"
+        ],
+        "Sitelink Extensions": [
+          "New Patients | Start with a free 15-minute doctor consultation",
+          "About Dr. Godby | Meet Sacramento's longest-serving naturopathic physician",
+          "Hormone Therapy | Learn about our bioidentical hormone programs"
+        ]
+      }
+    },
+    {
+      "campaign_name": "Functional Medicine - Sacramento",
+      "target_audience": "Health-conscious adults with chronic conditions seeking root-cause care in Sacramento",
+      "headlines": [
+        "Functional Medicine Sacramento",
+        "Root Cause Health Solutions",
+        "Dr. Godby - Naturopathic Care",
+        "Personalized Health Plans",
+        "Advanced Diagnostic Testing"
+      ],
+      "descriptions": [
+        "Treat the root cause, not just symptoms. Functional medicine for chronic fatigue, gut health, thyroid.",
+        "Comprehensive testing and personalized treatment plans. 4 naturopathic doctors on staff."
+      ],
+      "keywords": [
+        "[functional medicine sacramento]",
+        "[naturopathic doctor sacramento]",
+        "\"functional medicine doctor sacramento\"",
+        "\"dr godby sacramento\"",
+        "integrative medicine sacramento",
+        "holistic doctor sacramento",
+        "root cause medicine",
+        "functional medicine clinic",
+        "chronic fatigue sacramento",
+        "thyroid doctor sacramento"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Free Doctor Consultation",
+          "4 Naturopathic Doctors",
+          "Advanced Lab Testing",
+          "Personalized Treatment"
+        ],
+        "Sitelink Extensions": [
+          "Services | Explore functional medicine, IV therapy, HBOT and more",
+          "Conditions Treated | See our specialized treatment areas",
+          "Book Consultation | Schedule your free 15-minute call today"
+        ]
+      }
+    },
+    {
+      "campaign_name": "IV Therapy & Weight Loss - Sacramento",
+      "target_audience": "Adults seeking wellness optimization, weight loss, and immune support in Sacramento",
+      "headlines": [
+        "IV Therapy Sacramento",
+        "HCG Weight Loss Program",
+        "Boost Energy & Immunity",
+        "Customized Vitamin IV Drips",
+        "Medical Weight Loss Sacramento"
+      ],
+      "descriptions": [
+        "Revive vitality with customized IV therapy. Essential vitamins, minerals delivered directly. Book now.",
+        "Medical weight loss with HCG protocol. Physician-supervised, personalized nutrition plans."
+      ],
+      "keywords": [
+        "[iv therapy sacramento]",
+        "[hcg weight loss sacramento]",
+        "\"vitamin iv therapy sacramento\"",
+        "\"medical weight loss sacramento\"",
+        "iv hydration sacramento",
+        "vitamin b12 injections",
+        "weight loss doctor sacramento",
+        "immune support iv",
+        "wellness iv therapy",
+        "iv drip sacramento"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Customized IV Protocols",
+          "Physician-Supervised",
+          "Same-Day Appointments",
+          "B12 Injections Available"
+        ],
+        "Sitelink Extensions": [
+          "IV Therapy | Browse our customized vitamin and nutrient protocols",
+          "Weight Loss | Learn about our HCG medical weight loss program",
+          "New Patient Info | What to expect at your first visit"
+        ]
+      }
+    }
+  ],
+  "emails": [
+    {
+      "email_number": 1,
+      "type": "smart_practice_value_drop",
+      "subject": "Your [PRIMARY_SYMPTOM] might be telling you something important",
+      "preview": "What your body is really trying to say...",
+      "body": "Hi [FIRST_NAME],\n\nThank you for completing your health assessment. When we reviewed your responses, one thing stood out: [PRIMARY_SYMPTOM] often signals something deeper than what shows up on standard lab work.\n\nMost conventional approaches focus on managing individual symptoms. But when someone experiences [PRIMARY_SYMPTOM] alongside the other patterns you described, it usually points to an underlying imbalance—often in hormones, gut function, or cellular energy production.\n\nYour assessment suggests [KEY_ASSESSMENT_INSIGHT]. This is exactly the kind of root-cause issue we help people address every day at Sacramento Functional Medicine.\n\nIf you're ready to understand what's really happening and explore a personalized path forward, we'd love to talk. Dr. Godby and our team offer a free 15-minute consultation to see if we're the right fit.\n\n[BOOKING_LINK]\n\nWarm regards,\nThe Sacramento Functional Medicine Team",
+      "cta_text": "Book Your Free Consultation",
+      "cta_url": "https://sacramentofunctionalmedicine.com/new-patients/"
+    },
+    {
+      "email_number": 2,
+      "type": "mechanism_story",
+      "subject": "Why [PRIMARY_SYMPTOM] keeps coming back",
+      "preview": "The biological mechanism most doctors miss",
+      "body": "Hi [FIRST_NAME],\n\nThink of your body like a house with a faulty electrical system. You can replace burnt-out lightbulbs all day long, but if the wiring is damaged, those bulbs will keep burning out.\n\n[PRIMARY_SYMPTOM] works the same way. When your hormones, immune system, or digestive function fall out of balance, symptoms keep returning no matter how many times you treat them individually.\n\nStandard medicine often looks at isolated problems: one symptom, one prescription. But functional medicine traces symptoms back to their source. In your case, the assessment pointed to [RECOMMENDED_SERVICE_OR_FOCUS]—something we see frequently and can evaluate with advanced testing.\n\nOnce we identify the underlying mechanism, we build a treatment plan that addresses the root issue, not just the surface symptoms. That's why our patients often see changes that felt impossible before.\n\nWant to explore what's really going on? Start with a free 15-minute call.\n\n[BOOKING_LINK]\n\nBest,\nSacramento Functional Medicine",
+      "cta_text": "Schedule Your Free Call",
+      "cta_url": "https://sacramentofunctionalmedicine.com/new-patients/"
+    },
+    {
+      "email_number": 3,
+      "type": "proof_and_results",
+      "subject": "How Sarah finally resolved her [PRIMARY_SYMPTOM]",
+      "preview": "A patient story that might sound familiar",
+      "body": "Hi [FIRST_NAME],\n\nWe recently worked with a patient—let's call her Sarah—who came to us after years of struggling with [PRIMARY_SYMPTOM]. She'd tried multiple approaches, seen several doctors, but nothing seemed to create lasting change.\n\nDuring her evaluation, we discovered what standard labs had missed: a combination of hormone imbalance and gut dysfunction that was driving her symptoms. Once we addressed those root causes through [RECOMMENDED_SERVICE_OR_FOCUS] and personalized nutrition, Sarah started feeling like herself again within weeks.\n\nOf course, everyone's situation is unique, and results vary. But Sarah's story is not uncommon here. When we identify and treat the actual source of symptoms—not just mask them—people often experience the kind of improvement they'd almost given up on.\n\nIf your assessment results remind you of Sarah's pattern, let's talk. Dr. Godby has been helping Sacramento patients like you for over 20 years.\n\n[BOOKING_LINK]\n\nWith care,\nDr. Godby and Team",
+      "cta_text": "Book Your Consultation",
+      "cta_url": "https://sacramentofunctionalmedicine.com/new-patients/"
+    }
+  ],
+  "app_config": {
+    "practiceName": "Sacramento Functional Medicine",
+    "practiceShortName": "Sacramento Functional Medicine",
+    "providerName": "Dr. Dennis Godby",
+    "providerTitle": "N.D., M.A.",
+    "tagline": "Optimal Health is Within Your Reach",
+    "primaryColor": "#65BC7B",
+    "primaryDark": "#4A9A5E",
+    "primaryLight": "#82CA95",
+    "primaryXLight": "#E8F5EC",
+    "backgroundColor": "#FFFFFF",
+    "bookingUrl": "https://sacramentofunctionalmedicine.com/new-patients/",
+    "phone": "(916) 252-3228",
+    "concerns": [
+      {
+        "label": "Hormone Imbalance",
+        "emoji": "⚖️"
+      },
+      {
+        "label": "Chronic Fatigue",
+        "emoji": "😴"
+      },
+      {
+        "label": "Thyroid Issues",
+        "emoji": "🦋"
+      },
+      {
+        "label": "Gut Health",
+        "emoji": "🌿"
+      },
+      {
+        "label": "Weight Loss",
+        "emoji": "💪"
+      },
+      {
+        "label": "Menopause Symptoms",
+        "emoji": "🌡️"
+      },
+      {
+        "label": "Low Testosterone",
+        "emoji": "📉"
+      },
+      {
+        "label": "Autoimmune Conditions",
+        "emoji": "🛡️"
+      },
+      {
+        "label": "Brain Fog",
+        "emoji": "🧠"
+      },
+      {
+        "label": "Sleep Problems",
+        "emoji": "🌙"
+      }
+    ],
+    "symptom_map": {
+      "Hormone Imbalance": [
+        "Unexplained weight gain or difficulty losing weight",
+        "Persistent fatigue despite adequate sleep",
+        "Mood swings or increased irritability",
+        "Low libido or sexual dysfunction",
+        "Night sweats or hot flashes",
+        "Hair thinning or loss",
+        "Sleep disturbances or insomnia",
+        "Brain fog or difficulty concentrating"
+      ],
+      "Chronic Fatigue": [
+        "Exhaustion that doesn't improve with rest",
+        "Feeling drained after minimal activity",
+        "Difficulty getting out of bed in the morning",
+        "Afternoon energy crashes",
+        "Needing caffeine just to function",
+        "Muscle weakness or heaviness",
+        "Post-exertional malaise",
+        "Unrefreshing sleep"
+      ],
+      "Thyroid Issues": [
+        "Unexplained weight changes",
+        "Constant fatigue or sluggishness",
+        "Cold sensitivity or always feeling cold",
+        "Dry skin and brittle nails",
+        "Hair loss or thinning eyebrows",
+        "Constipation or digestive issues",
+        "Depression or anxiety",
+        "Brain fog or memory problems"
+      ],
+      "Gut Health": [
+        "Chronic bloating or gas",
+        "Irregular bowel movements",
+        "Food sensitivities or intolerances",
+        "Acid reflux or heartburn",
+        "Abdominal pain or cramping",
+        "Skin issues like eczema or acne",
+        "Brain fog or mood changes",
+        "Frequent infections or weakened immunity"
+      ],
+      "Weight Loss": [
+        "Inability to lose weight despite diet and exercise",
+        "Rapid weight gain without lifestyle changes",
+        "Cravings for sugar or carbohydrates",
+        "Fatigue or low energy levels",
+        "Slow metabolism or feeling cold",
+        "Difficulty building or maintaining muscle",
+        "Hormonal imbalances affecting weight",
+        "Emotional eating or stress-related weight gain"
+      ],
+      "Menopause Symptoms": [
+        "Hot flashes or night sweats",
+        "Mood swings or irritability",
+        "Sleep disturbances or insomnia",
+        "Vaginal dryness or discomfort",
+        "Low libido or sexual changes",
+        "Weight gain, especially around the midsection",
+        "Brain fog or memory lapses",
+        "Joint pain or stiffness"
+      ],
+      "Low Testosterone": [
+        "Decreased sex drive or libido",
+        "Erectile dysfunction or performance issues",
+        "Persistent fatigue or low energy",
+        "Loss of muscle mass or strength",
+        "Increased body fat, especially around the waist",
+        "Mood changes, depression, or irritability",
+        "Difficulty concentrating or brain fog",
+        "Reduced stamina or endurance"
+      ],
+      "Autoimmune Conditions": [
+        "Chronic inflammation or pain",
+        "Persistent fatigue unrelieved by rest",
+        "Joint pain, stiffness, or swelling",
+        "Skin rashes or sensitivity",
+        "Digestive issues or food sensitivities",
+        "Brain fog or cognitive difficulties",
+        "Recurring infections or slow healing",
+        "Hair loss or changes in appearance"
+      ],
+      "Brain Fog": [
+        "Difficulty concentrating or focusing",
+        "Memory problems or forgetfulness",
+        "Mental fatigue or sluggish thinking",
+        "Trouble finding words or expressing thoughts",
+        "Confusion or disorientation",
+        "Lack of mental clarity",
+        "Difficulty making decisions",
+        "Feeling mentally overwhelmed"
+      ],
+      "Sleep Problems": [
+        "Difficulty falling asleep at night",
+        "Waking frequently during the night",
+        "Waking too early and unable to return to sleep",
+        "Unrefreshing sleep or waking tired",
+        "Racing thoughts or anxiety at bedtime",
+        "Restless legs or body discomfort",
+        "Snoring or sleep apnea symptoms",
+        "Daytime fatigue despite sleeping"
+      ]
+    },
+    "careModels": [
+      {
+        "name": "Functional Medicine Consultation",
+        "desc": "Comprehensive evaluation with advanced diagnostic testing to identify root causes of chronic health issues. Personalized treatment plans addressing hormones, gut health, nutrition, and lifestyle.",
+        "price": "Starting at $300"
+      },
+      {
+        "name": "Bioidentical Hormone Replacement",
+        "desc": "Plant-based hormone therapy for men and women experiencing age-related or lifestyle-induced hormone decline. Customized protocols for menopause, andropause, thyroid, and adrenal support.",
+        "price": "Starting at $350"
+      },
+      {
+        "name": "IV Therapy & Nutritional Support",
+        "desc": "Customized intravenous vitamin, mineral, and nutrient therapy to boost immunity, energy, and recovery. B12 injections and specialized protocols for specific health goals.",
+        "price": "Starting at $150"
+      },
+      {
+        "name": "HCG Medical Weight Loss",
+        "desc": "Physician-supervised weight loss program using HCG protocol with personalized nutrition guidance. Addresses metabolic resistance and hormone-related weight challenges.",
+        "price": "Starting at $400"
+      }
+    ]
+  },
+  "report_url": "https://healthbizleads.com/sacramento-functional-medicine/"
+}

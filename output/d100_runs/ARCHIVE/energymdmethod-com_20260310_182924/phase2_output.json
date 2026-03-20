@@ -1,0 +1,265 @@
+{
+  "keywords": [
+    "chronic fatigue doctor",
+    "functional medicine fatigue",
+    "energy optimization doctor",
+    "root cause fatigue treatment",
+    "chronic fatigue specialist",
+    "low energy doctor online",
+    "virtual functional medicine",
+    "chronic fatigue syndrome treatment",
+    "why am i always tired",
+    "extreme fatigue causes",
+    "functional medicine doctor online",
+    "chronic exhaustion treatment",
+    "fatigue root cause analysis",
+    "energy medicine specialist",
+    "adrenal fatigue doctor",
+    "mitochondrial dysfunction treatment",
+    "thyroid fatigue specialist",
+    "hormone imbalance fatigue",
+    "chronic tiredness doctor",
+    "functional medicine energy",
+    "virtual fatigue specialist",
+    "online energy doctor",
+    "fatigue functional medicine",
+    "evan hirsch md",
+    "energy md method",
+    "root cause medicine online",
+    "chronic fatigue virtual consultation",
+    "persistent fatigue treatment",
+    "low energy functional medicine",
+    "fatigue specialist near me"
+  ],
+  "ads": [
+    {
+      "campaign_name": "Chronic Fatigue Solutions",
+      "target_audience": "Adults 30-60 experiencing persistent fatigue, exhaustion, low energy despite normal labs seeking root-cause answers",
+      "headlines": [
+        "Find Your Energy Again",
+        "Chronic Fatigue Solved",
+        "Root Cause Energy Medicine",
+        "Virtual Fatigue Specialist",
+        "Dr. Evan Hirsch MD"
+      ],
+      "descriptions": [
+        "Functional medicine for chronic fatigue. Virtual consultations nationwide. Find the root cause.",
+        "Specialized care for persistent low energy. Online appointments. Get your life back."
+      ],
+      "keywords": [
+        "[chronic fatigue doctor]",
+        "[functional medicine fatigue]",
+        "\"energy optimization doctor\"",
+        "\"root cause fatigue treatment\"",
+        "chronic fatigue specialist",
+        "virtual functional medicine",
+        "low energy doctor",
+        "fatigue root cause",
+        "chronic exhaustion treatment",
+        "online energy doctor"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Virtual Appointments",
+          "Root Cause Approach",
+          "Nationwide Access",
+          "Fatigue Specialists"
+        ],
+        "Sitelink Extensions": [
+          "New Patients | Start your energy recovery journey",
+          "Our Approach | How we find fatigue root causes",
+          "Meet Dr. Hirsch | Functional medicine expertise"
+        ]
+      }
+    },
+    {
+      "campaign_name": "Energy Optimization",
+      "target_audience": "High-performers, professionals, and busy adults seeking energy optimization and preventive functional medicine care",
+      "headlines": [
+        "Optimize Your Energy",
+        "Feel Energized Again",
+        "Functional Energy Medicine",
+        "Virtual Care Nationwide",
+        "Energy Recovery Program"
+      ],
+      "descriptions": [
+        "Get to the root of low energy. Virtual functional medicine consultations. Personalized care plans.",
+        "Specialized energy optimization. Online appointments available. Reclaim your vitality today."
+      ],
+      "keywords": [
+        "[energy optimization doctor]",
+        "[online functional medicine]",
+        "\"virtual fatigue specialist\"",
+        "\"chronic tiredness doctor\"",
+        "energy medicine specialist",
+        "functional medicine doctor online",
+        "persistent fatigue treatment",
+        "low energy functional medicine",
+        "adrenal fatigue doctor",
+        "mitochondrial dysfunction"
+      ],
+      "extensions": {
+        "Callout Extensions": [
+          "Personalized Care Plans",
+          "Virtual Consultations",
+          "Expert Diagnostics",
+          "Whole-Body Approach"
+        ],
+        "Sitelink Extensions": [
+          "Book Consultation | Schedule your first visit",
+          "Services | Comprehensive energy medicine",
+          "About Us | Meet our specialized team"
+        ]
+      }
+    }
+  ],
+  "emails": [
+    {
+      "email_number": 1,
+      "type": "smart_practice_value_drop",
+      "subject": "[FIRST_NAME], there's a reason you're still tired",
+      "preview": "Your [PRIMARY_SYMPTOM] may have a hidden cause",
+      "body": "Hi [FIRST_NAME],\n\nThank you for completing your health assessment. Your experience with [PRIMARY_SYMPTOM] is more common than you might think, and there's often a reason why conventional approaches haven't helped.\n\nMost fatigue care focuses on managing symptoms or running basic labs that come back 'normal.' But chronic exhaustion usually has root causes hiding beneath the surface: mitochondrial dysfunction, hidden infections, toxin accumulation, or hormonal imbalances that standard testing misses.\n\nBased on [KEY_ASSESSMENT_INSIGHT], there may be specific pathways worth exploring together. Our approach is different because we look deeper, test comprehensively, and address what's actually driving your fatigue, not just what shows up on routine panels.\n\nWhen you're ready to explore what might be causing your symptoms, we're here.\n\nThe Energy MD Method Team",
+      "cta_text": "Book Your Consultation",
+      "cta_url": "https://energymdmethod.com/new-patients/"
+    },
+    {
+      "email_number": 2,
+      "type": "mechanism_story",
+      "subject": "Why your body feels like a phone that won't charge",
+      "preview": "Understanding the real energy problem",
+      "body": "Hi [FIRST_NAME],\n\nThink of your cells like tiny batteries. When they're healthy, they charge fully and power you through your day. But when something interferes with that charging process, you can rest all you want and still wake up drained.\n\nThat's what happens with mitochondrial dysfunction, one of the most overlooked causes of chronic fatigue. Your mitochondria are the power plants inside every cell. When they're blocked by toxins, starved of nutrients, or under attack from hidden infections, they simply can't produce enough energy, no matter how much you sleep.\n\nStandard care often misses this because routine blood work doesn't measure mitochondrial function. We focus on [RECOMMENDED_SERVICE_OR_FOCUS] to identify what's blocking your cellular energy production and address it at the source.\n\nIt's not about trying harder to rest. It's about removing what's in the way.\n\nThe Energy MD Method Team",
+      "cta_text": "Learn About Our Approach",
+      "cta_url": "https://energymdmethod.com/new-patients/"
+    },
+    {
+      "email_number": 3,
+      "type": "proof_and_results",
+      "subject": "How Sarah went from exhausted to energized",
+      "preview": "A patient story you might relate to",
+      "body": "Hi [FIRST_NAME],\n\nI wanted to share a story that might resonate with you. Sarah came to us after two years of debilitating fatigue. She'd been to multiple doctors, tried supplements and diet changes, but nothing helped. Her labs were always 'normal.'\n\nWhen we dug deeper, we found chronic Epstein-Barr reactivation, heavy metal toxicity, and severely depleted nutrient levels that standard testing had missed. Once we addressed these root causes with a personalized protocol, her energy gradually returned. Within six months, she was back to hiking and working full days without crashing.\n\nEvery patient is different, and results vary, but Sarah's story shows what's possible when you find and treat the actual causes instead of just managing symptoms.\n\nIf you've been searching for answers like Sarah was, we'd be honored to help you explore what might be driving your [PRIMARY_SYMPTOM].\n\nThe Energy MD Method Team",
+      "cta_text": "Schedule Your Visit",
+      "cta_url": "https://energymdmethod.com/new-patients/"
+    }
+  ],
+  "app_config": {
+    "practiceName": "Energy MD Method",
+    "practiceShortName": "Energy MD",
+    "providerName": "Dr. Evan Hirsch",
+    "providerTitle": "MD, Functional Medicine Physician",
+    "tagline": "Root-cause medicine for chronic fatigue and energy optimization",
+    "primaryColor": "#2C7A7B",
+    "primaryDark": "#1A5557",
+    "primaryLight": "#4FD1C5",
+    "primaryXLight": "#E6FFFA",
+    "backgroundColor": "#FFFFFF",
+    "bookingUrl": "https://energymdmethod.com/new-patients/",
+    "phone": "",
+    "concerns": [
+      {
+        "label": "Chronic Fatigue",
+        "emoji": "😴"
+      },
+      {
+        "label": "Low Energy",
+        "emoji": "🔋"
+      },
+      {
+        "label": "Brain Fog",
+        "emoji": "🧠"
+      },
+      {
+        "label": "Hormone Imbalance",
+        "emoji": "⚖️"
+      },
+      {
+        "label": "Sleep Issues",
+        "emoji": "🌙"
+      },
+      {
+        "label": "Weight Concerns",
+        "emoji": "⚖️"
+      }
+    ],
+    "symptom_map": {
+      "Chronic Fatigue": [
+        "Exhausted despite sleeping 8+ hours",
+        "Energy crashes in afternoon",
+        "Too tired to exercise or socialize",
+        "Need multiple naps during day",
+        "Fatigue worsening over months or years",
+        "Feel drained after minimal activity",
+        "Can't recover energy no matter what you try",
+        "Morning exhaustion that never lifts"
+      ],
+      "Low Energy": [
+        "Constantly feeling run down",
+        "Difficulty concentrating due to tiredness",
+        "No motivation or drive",
+        "Energy levels inconsistent day to day",
+        "Relying on caffeine to function",
+        "Feeling physically and mentally drained",
+        "Unable to keep up with daily demands",
+        "Energy lower than it used to be"
+      ],
+      "Brain Fog": [
+        "Difficulty focusing or concentrating",
+        "Memory problems or forgetfulness",
+        "Confused or mentally cloudy feeling",
+        "Trouble finding words when speaking",
+        "Slow processing or thinking",
+        "Mental fatigue worse than physical",
+        "Can't think clearly through tasks",
+        "Foggy headed most of the day"
+      ],
+      "Hormone Imbalance": [
+        "Unexplained weight gain or loss",
+        "Mood swings or irritability",
+        "Low libido or sexual dysfunction",
+        "Irregular periods or cycle changes",
+        "Hot flashes or night sweats",
+        "Persistent fatigue despite rest",
+        "Hair thinning or skin changes",
+        "Sleep disruption or insomnia"
+      ],
+      "Sleep Issues": [
+        "Difficulty falling asleep at night",
+        "Waking frequently during the night",
+        "Waking too early and can't get back to sleep",
+        "Unrefreshing sleep despite hours in bed",
+        "Daytime sleepiness or drowsiness",
+        "Restless or disrupted sleep patterns",
+        "Trouble staying asleep through the night",
+        "Never feel rested no matter how long you sleep"
+      ],
+      "Weight Concerns": [
+        "Unexplained weight gain despite healthy eating",
+        "Inability to lose weight no matter what you try",
+        "Weight fluctuations without diet changes",
+        "Stubborn belly fat that won't budge",
+        "Slow metabolism or metabolic issues",
+        "Weight gain with fatigue or low energy",
+        "Cravings or appetite changes",
+        "Thyroid symptoms with weight changes"
+      ]
+    },
+    "careModels": [
+      {
+        "name": "Initial Consultation",
+        "desc": "Comprehensive root-cause assessment with Dr. Hirsch to identify underlying causes of fatigue and create personalized treatment roadmap",
+        "price": "Contact for pricing"
+      },
+      {
+        "name": "Energy Recovery Program",
+        "desc": "Full functional medicine program including advanced testing, supplement protocols, and ongoing support to restore cellular energy production",
+        "price": "Custom program pricing"
+      },
+      {
+        "name": "Ongoing Care",
+        "desc": "Continued functional medicine support with regular follow-ups, lab monitoring, and protocol adjustments as you progress",
+        "price": "Monthly or per-visit options"
+      }
+    ]
+  },
+  "report_url": "https://healthbizleads.com/energy-md-method/"
+}
