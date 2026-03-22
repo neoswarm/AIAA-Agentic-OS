@@ -32,3 +32,11 @@ aiaa-agentic-os-*.json
 output/
 app-dist/
 vercel-dist/
+
+# Template backup files
+templates/*.BACKUP*.html
+templates/*BACKUP*.html
+
+# Root-level scratch/test CSVs
+*.csv
+!D100-input/*.csv
