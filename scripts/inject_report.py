@@ -143,36 +143,66 @@ def escape_html(s):
 
 
 def _extract_city(p1: dict) -> str:
-    """Extract city from context string."""
-    context = p1.get("context", "") or ""
-    m = re.search(r'([A-Z][a-zA-Z\s]+,\s*[A-Z]{2})', context)
-    if m:
-        return m.group(1).strip()
-    website = p1.get("website", "")
-    if website:
-        domain = website.replace("https://","").replace("http://","").split("/")[0].split(".")[0]
-        return domain.replace("-"," ").title()
+    """Extract city from context string or phase1 primary_city field."""
+    # 1. Direct field (set by runner's 4-layer location pipeline)
+    pc = (p1.get("primary_city") or "").strip()
+    ps = (p1.get("primary_state") or "").strip()
+    if pc:
+        return f"{pc}, {ps}" if ps else pc
+
+    # 2. Regex: "City, ST" pattern in context or raw_scrape
+    for field in ("context", "raw_scrape"):
+        text = p1.get(field, "") or ""
+        m = re.search(r'([A-Z][a-zA-Z\s]{2,25},\s*[A-Z]{2})\b', text)
+        if m:
+            return m.group(1).strip()
+
+    # 3. Never return "www"/"app"/"mail" etc from domain — just return generic
     return "your area"
 
 
 def _extract_primary_condition(p1: dict) -> str:
     """Extract primary condition from keywords or practice name."""
+    # 1. Explicit field from app_config (most reliable)
     app_cfg = p1.get("app_config", {}) or {}
     specialty = app_cfg.get("specialty", "") or app_cfg.get("primary_condition", "")
     if specialty:
         return specialty.lower()
-    semrush = p1.get("semrush", {}) or {}
-    top = semrush.get("top_by_volume", [])
-    if top:
-        kw = top[0].get("keyword", "")
-        kw = re.sub(r'\b(near me|michigan|mi|bloomfield|west|dr|doctor|specialist|com)\b', '', kw, flags=re.IGNORECASE).strip()
-        if kw:
-            return kw.lower()
+
+    # 2. Infer from practice name
     name = (p1.get("name", "") or "").lower()
-    for word in ["chiropractic", "functional medicine", "naturopathic", "integrative", "neurofeedback"]:
+    SPECIALTY_WORDS = [
+        "functional medicine", "integrative medicine", "naturopathic",
+        "regenerative", "longevity", "concierge", "hormone", "chiropractic",
+        "neurofeedback", "stem cell", "aesthetics", "wellness", "preventive"
+    ]
+    for word in SPECIALTY_WORDS:
         if word in name:
             return word
-    return "your condition"
+
+    # 3. SEMrush keywords — filter out scientific jargon, abbreviations, genetics terms
+    JUNK_PATTERNS = re.compile(
+        r"^(snp|snps|what (is|are)|how to|textbook|book|definition|meaning|"
+        r"wikipedia|pubmed|journal|study|research|\w{1,2}\d|[a-z]{1,3}\b)",
+        re.IGNORECASE
+    )
+    USEFUL_TERMS = re.compile(
+        r"(functional medicine|integrative|naturopath|hormone|thyroid|gut|"
+        r"fatigue|autoimmune|regenerative|stem cell|longevity|concierge|wellness|"
+        r"chiropractic|neurofeedback|adhd|anxiety|depression|pain|weight)",
+        re.IGNORECASE
+    )
+    semrush = p1.get("semrush", {}) or {}
+    for bucket in ("top_quick_wins", "top_by_volume"):
+        for kw_obj in (semrush.get(bucket) or []):
+            kw = kw_obj.get("keyword", "") if isinstance(kw_obj, dict) else str(kw_obj)
+            if JUNK_PATTERNS.search(kw.strip()):
+                continue
+            m = USEFUL_TERMS.search(kw)
+            if m:
+                return m.group(0).lower()
+
+    return "functional medicine"
 
 
 def extract_favicon_url(raw_scrape: str, website: str) -> str:
@@ -1124,9 +1154,9 @@ export default async function handler(req, res) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text: `\ud83d\udc41 *Report Opened* \u2014 ${practice}`,
+          text: `👁 *Report Opened* \u2014 ${practice}`,
           blocks: [{ type: 'section', text: { type: 'mrkdwn',
-            text: `\ud83d\udc41 *Report Opened*\n*Practice:* ${practice}\n*URL:* <${url}|${url}>\n${emailNote}\n${slNote}\n*Time:* ${ts} MT`
+            text: `👁 *Report Opened*\n*Practice:* ${practice}\n*URL:* <${url}|${url}>\n${emailNote}\n${slNote}\n*Time:* ${ts} MT`
           }}]
         })
       });
