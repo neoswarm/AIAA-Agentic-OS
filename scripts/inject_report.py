@@ -157,22 +157,46 @@ def _extract_city(p1: dict) -> str:
 
 def _extract_primary_condition(p1: dict) -> str:
     """Extract primary condition from keywords or practice name."""
+    # 1. Explicit field from app_config (most reliable)
     app_cfg = p1.get("app_config", {}) or {}
     specialty = app_cfg.get("specialty", "") or app_cfg.get("primary_condition", "")
     if specialty:
         return specialty.lower()
-    semrush = p1.get("semrush", {}) or {}
-    top = semrush.get("top_by_volume", [])
-    if top:
-        kw = top[0].get("keyword", "")
-        kw = re.sub(r'\b(near me|michigan|mi|bloomfield|west|dr|doctor|specialist|com)\b', '', kw, flags=re.IGNORECASE).strip()
-        if kw:
-            return kw.lower()
+
+    # 2. Infer from practice name
     name = (p1.get("name", "") or "").lower()
-    for word in ["chiropractic", "functional medicine", "naturopathic", "integrative", "neurofeedback"]:
+    SPECIALTY_WORDS = [
+        "functional medicine", "integrative medicine", "naturopathic",
+        "regenerative", "longevity", "concierge", "hormone", "chiropractic",
+        "neurofeedback", "stem cell", "aesthetics", "wellness", "preventive"
+    ]
+    for word in SPECIALTY_WORDS:
         if word in name:
             return word
-    return "your condition"
+
+    # 3. SEMrush keywords — filter out jargon, genetics terms, abbreviations
+    JUNK_PATTERNS = re.compile(
+        r"^(snp|snps|what (is|are)|how to|textbook|book|definition|meaning|"
+        r"wikipedia|pubmed|journal|study|research|\w{1,2}\d|[a-z]{1,3}\b)",
+        re.IGNORECASE
+    )
+    USEFUL_TERMS = re.compile(
+        r"(functional medicine|integrative|naturopath|hormone|thyroid|gut|"
+        r"fatigue|autoimmune|regenerative|stem cell|longevity|concierge|wellness|"
+        r"chiropractic|neurofeedback|adhd|anxiety|depression|pain|weight)",
+        re.IGNORECASE
+    )
+    semrush = p1.get("semrush", {}) or {}
+    for bucket in ("top_quick_wins", "top_by_volume"):
+        for kw_obj in (semrush.get(bucket) or []):
+            kw = kw_obj.get("keyword", "") if isinstance(kw_obj, dict) else str(kw_obj)
+            if JUNK_PATTERNS.search(kw.strip()):
+                continue
+            m = USEFUL_TERMS.search(kw)
+            if m:
+                return m.group(0).lower()
+
+    return "functional medicine"
 
 
 def extract_favicon_url(raw_scrape: str, website: str) -> str:
