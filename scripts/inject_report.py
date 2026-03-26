@@ -46,17 +46,22 @@ if _env_path.exists():
 
 
 def _clarity_snippet(project_id: str) -> str:
-    """Return the Microsoft Clarity <script> tag, or '' if no project_id."""
+    """Return the Microsoft Clarity <script> tag wrapped in preview guard, or '' if no project_id."""
     if not project_id:
         return ""
-    return (
-        '<script type="text/javascript">'
+    clarity_code = (
         "(function(c,l,a,r,i,t,y){"
         "c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};"
         "t=l.createElement(r);t.async=1;"
         't.src="https://www.clarity.ms/tag/"+i;'
         "y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);"
         f'}})(window,document,"clarity","script","{project_id}");'
+    )
+    return (
+        '<script type="text/javascript">'
+        "if(new URLSearchParams(window.location.search).get('preview')!=='1'){"
+        + clarity_code +
+        "}"
         "</script>"
     )
 
