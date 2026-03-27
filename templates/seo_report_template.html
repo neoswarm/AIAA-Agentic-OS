@@ -396,6 +396,41 @@
       .red-block__title { font-size: 1.6rem; }
       .red-block__body { font-size: 1.3rem; }
     }
+  
+    /* === ADS DIAGRAM === */
+    .ads-diagram-wrap { font-family: 'Source Sans 3', 'Inter', sans-serif; max-width: 900px; margin: 0 auto; }
+    .ads-diagram-wrap *, .ads-diagram-wrap *::before, .ads-diagram-wrap *::after { box-sizing: border-box; }
+    .ads-d-outer { display: flex; align-items: stretch; gap: 0; }
+    .ads-d-col { flex: 1; min-width: 0; }
+    .ads-d-arrow { display: flex; justify-content: center; align-items: center; height: 32px; color: #94a3b8; font-size: 20px; }
+    .ads-d-banner { border-radius: 14px; padding: 22px 28px; text-align: center; margin-bottom: 0; }
+    .ads-d-banner h3 { font-size: clamp(16px,2.2vw,22px); font-weight: 800; margin-bottom: 6px; line-height: 1.3; }
+    .ads-d-banner p { font-size: clamp(13px,1.5vw,15px); opacity: 0.88; margin: 0; }
+    .ads-db-1 { background: #4f46e5; } .ads-db-1 h3 { color: #fff; } .ads-db-1 p { color: #c7d2fe; }
+    .ads-db-2 { background: #374151; } .ads-db-2 h3 { color: #fff; } .ads-db-2 p { color: #d1d5db; }
+    .ads-db-3 { background: #9d174d; } .ads-db-3 h3 { color: #fff; } .ads-db-3 p { color: #fbcfe8; }
+    .ads-d-3col { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .ads-d-temp { border-radius: 14px; padding: 20px 16px; text-align: center; }
+    .ads-d-temp .ads-d-emoji { font-size: 24px; display: block; margin-bottom: 8px; }
+    .ads-d-temp h4 { font-size: clamp(15px,1.8vw,19px); font-weight: 800; margin-bottom: 6px; line-height: 1.2; color: #fff; }
+    .ads-d-temp p { font-size: clamp(12px,1.3vw,14px); line-height: 1.5; margin-bottom: 10px; }
+    .ads-d-temp .ads-d-cta { font-size: clamp(12px,1.3vw,14px); font-weight: 700; }
+    .ads-dt-hot { background: #b91c1c; } .ads-dt-hot p { color: #fecaca; } .ads-dt-hot .ads-d-cta { color: #ffe4e6; }
+    .ads-dt-warm { background: #92400e; } .ads-dt-warm p { color: #fde68a; } .ads-dt-warm .ads-d-cta { color: #fef3c7; }
+    .ads-dt-cool { background: #1e40af; } .ads-dt-cool p { color: #bfdbfe; } .ads-dt-cool .ads-d-cta { color: #dbeafe; }
+    .ads-d-lp { background: #065f46; border-radius: 14px; padding: 18px 14px; text-align: center; }
+    .ads-d-lp h4 { font-size: clamp(13px,1.6vw,17px); font-weight: 800; color: #fff; margin-bottom: 5px; }
+    .ads-d-lp p { font-size: clamp(11px,1.2vw,13px); color: #6ee7b7; margin: 0; }
+    .ads-d-conv { background: #14532d; border-radius: 14px; padding: 14px 12px; text-align: center; }
+    .ads-d-conv h4 { font-size: clamp(13px,1.5vw,16px); font-weight: 800; color: #fff; margin: 0; }
+    .ads-d-budget { border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; text-align: center; margin-top: 14px; background: #f8fafc; }
+    .ads-d-budget p { font-size: clamp(12px,1.4vw,14px); color: #475569; font-weight: 600; margin: 0; }
+    .ads-d-rail { width: 72px; flex-shrink: 0; position: relative; }
+    .ads-d-rail-line { position: absolute; left: 33px; top: 24px; bottom: 24px; border-left: 2px dashed #6366f1; }
+    .ads-d-rail-arrow { position: absolute; left: 26px; top: 14px; width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 12px solid #6366f1; }
+    .ads-d-rail-text { position: absolute; left: 33px; top: 50%; transform: translateX(12px) translateY(-50%) rotate(90deg); transform-origin: left center; white-space: nowrap; font-size: 11px; font-weight: 700; color: #6366f1; letter-spacing: 0.04em; background: #f8fafc; padding: 0 5px; }
+    @media (max-width: 640px) { .ads-d-3col { grid-template-columns: 1fr; } .ads-d-rail { display: none; } }
+
   </style>
 </head>
 <body>
@@ -1157,64 +1192,76 @@ const CONFIG = {
 
     </div>
 
-    <!-- Campaign results callout -->
-    <div class="rounded-2xl p-8 mb-10 fade-up" style="background: #0f172a;">
-      <div class="flex items-start gap-6">
-        <div class="flex-shrink-0 text-4xl">📅</div>
-        <div>
-          <h4 class="text-white font-bold text-xl mb-3">What You'll See in 30 / 60 / 90 Days</h4>
-          <div class="flex flex-col gap-3">
-            <div class="flex items-start gap-4">
-              <span class="inline-block text-xs font-black rounded-full px-3 py-1 flex-shrink-0 mt-0.5" style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);">Day 1–30</span>
-              <p class="m-0" style="color: rgba(255,255,255,0.7); font-size: 17px; line-height: 1.7;">All 3 campaigns live. First inquiries come in. We monitor quality scores and kill underperformers fast.</p>
-            </div>
-            <div class="flex items-start gap-4">
-              <span class="inline-block text-xs font-black rounded-full px-3 py-1 flex-shrink-0 mt-0.5" style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);">Day 31–60</span>
-              <p class="m-0" style="color: rgba(255,255,255,0.7); font-size: 17px; line-height: 1.7;">Best-performing ads scale. Cost-per-inquiry drops. Retargeting begins collecting site visitors and building your audience list.</p>
-            </div>
-            <div class="flex items-start gap-4">
-              <span class="inline-block text-xs font-black rounded-full px-3 py-1 flex-shrink-0 mt-0.5" style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);">Day 61–90</span>
-              <p class="m-0" style="color: rgba(255,255,255,0.7); font-size: 17px; line-height: 1.7;">Fully optimized. Every dollar traceable to a real patient inquiry. You own the account, the data, and the audience lists — forever.</p>
-            </div>
-          </div>
+
+<div class="ads-diagram-wrap mt-10 mb-4 fade-up">
+  <div class="ads-d-outer">
+    <div class="ads-d-col">
+      <div class="ads-d-banner ads-db-1">
+        <h3>Step 1 — Catch patients already searching for help</h3>
+        <p>We target people typing symptoms, conditions, and "functional medicine near me"</p>
+      </div>
+      <div class="ads-d-arrow">↓</div>
+      <div class="ads-d-3col">
+        <div class="ads-d-temp ads-dt-hot">
+          <span class="ads-d-emoji">🔥</span>
+          <h4>Ready Now</h4>
+          <p style="color:#fecaca;">Searching for a specific doctor or condition by name</p>
+          <div class="ads-d-cta">→ Book a call now</div>
+        </div>
+        <div class="ads-d-temp ads-dt-warm">
+          <span class="ads-d-emoji">🌡️</span>
+          <h4>Almost Ready</h4>
+          <p style="color:#fde68a;">Searching symptoms, not solutions yet</p>
+          <div class="ads-d-cta">→ Take a free quiz</div>
+        </div>
+        <div class="ads-d-temp ads-dt-cool">
+          <span class="ads-d-emoji">🔍</span>
+          <h4>Just Looking</h4>
+          <p style="color:#bfdbfe;">Learning what functional medicine is</p>
+          <div class="ads-d-cta">→ Get a health score</div>
         </div>
       </div>
-    </div>
-
-    <!-- A Preview of What We Built -->
-    <div class="rounded-2xl p-8 mb-8 fade-up" style="background: #0f172a;">
-      <h3 class="text-white font-bold text-xl mb-2">A Preview of What We Built</h3>
-      <p class="mb-6" style="color: rgba(255,255,255,0.55); font-size: 16px; line-height: 1.7;">These are real headlines from Campaign 1 — built for <strong class="text-white">{{PRACTICE_NAME}}</strong>'s top condition before this call.</p>
-
-      <div class="rounded-xl p-6 mb-4" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
-        <p class="text-white font-bold mb-4" style="font-size: 15px;">Campaign 1 — {{PRIMARY_CONDITION}} in {{CITY}}</p>
-        <div class="flex flex-col gap-3 mb-5">
-          <div class="rounded-lg p-4" style="background: rgba(255,255,255,0.06);">
-            <span class="text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.35);">Headline A</span>
-            <p class="text-white mt-1 m-0" style="font-size: 16px;">{{CITY}} {{PRIMARY_CONDITION}} Specialist — New Patients Welcome This Week</p>
-          </div>
-          <div class="rounded-lg p-4" style="background: rgba(255,255,255,0.06);">
-            <span class="text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.35);">Headline B</span>
-            <p class="text-white mt-1 m-0" style="font-size: 16px;">Tired of Living With {{PRIMARY_CONDITION}}? We Treat the Cause, Not the Symptom</p>
-          </div>
-          <div class="rounded-lg p-4" style="background: rgba(255,255,255,0.06);">
-            <span class="text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.35);">Headline C</span>
-            <p class="text-white mt-1 m-0" style="font-size: 16px;">{{PRIMARY_CONDITION}} Relief in {{CITY}} — Most Patients See Results in 30 Days</p>
-          </div>
-        </div>
-        <div class="rounded-lg p-4" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
-          <span class="text-xs font-bold uppercase tracking-widest" style="color: rgba(255,255,255,0.35);">Description</span>
-          <p class="mt-1 m-0" style="color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.65;">Most practices send you to a generic page. We send you to a page built around exactly what you searched — so the first thing you read feels like we already know what's wrong.</p>
-        </div>
+      <div class="ads-d-arrow">↓</div>
+      <div class="ads-d-3col">
+        <div class="ads-d-lp"><h4>Condition page</h4><p>Their symptom → your solution</p></div>
+        <div class="ads-d-lp"><h4>Quiz / guide page</h4><p>Captures email, builds trust</p></div>
+        <div class="ads-d-lp"><h4>Health score page</h4><p>Pulls them in, starts nurture</p></div>
       </div>
-
-      <p style="color: rgba(255,255,255,0.4); font-size: 14px; line-height: 1.6;">Campaigns 2 and 3 cover your next two highest-volume conditions. We walk through all three live on the call.</p>
+      <div class="ads-d-arrow">↓</div>
+      <div class="ads-d-3col">
+        <div class="ads-d-conv"><h4>Appointment booked</h4></div>
+        <div class="ads-d-conv"><h4>Email captured</h4></div>
+        <div class="ads-d-conv"><h4>Assessment done</h4></div>
+      </div>
+      <div class="ads-d-arrow">↓</div>
+      <div class="ads-d-banner ads-db-2">
+        <h3>Step 2 — Follow up with people who didn't book</h3>
+        <p>Second ad to anyone who visited but left — at 60–80% lower cost per click</p>
+      </div>
+      <div class="ads-d-arrow">↓</div>
+      <div class="ads-d-banner ads-db-3">
+        <h3>Step 3 — Block wasted spend before it happens</h3>
+        <p>We block "free," "insurance," "urgent care" — you only pay for real prospects</p>
+      </div>
+      <div class="ads-d-budget">
+        <p>Budget allocation: 60% ready-now &nbsp;·&nbsp; 30% almost-ready &nbsp;·&nbsp; 10% just-looking</p>
+      </div>
     </div>
-
-    <!-- City callout -->
-    <div class="rounded-2xl p-8 fade-up" style="background: #1e293b; color: white;">
-      <p class="leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">We show you the exact searches your ideal patients are running in <strong>{{CITY}}</strong> right now. You'll see where <strong>{{PRACTICE_NAME}}</strong>'s ad spend is winning and where it's being lost. We cover this live on the call.</p>
+    <div class="ads-d-rail">
+      <div class="ads-d-rail-arrow"></div>
+      <div class="ads-d-rail-line"></div>
+      <span class="ads-d-rail-text">Continuously refined — never set and forget</span>
     </div>
+  </div>
+</div>
+
+<div class="rounded-2xl p-8 mt-8 fade-up" style="background: #0f172a;">
+  <p style="color: rgba(255,255,255,0.85); font-size: 18px; line-height: 1.75; margin: 0;">
+    We show you the exact searches patients in <strong style="color:#fff;">{{PRIMARY_CITY}}</strong> are running right now.
+    You'll see exactly where <strong style="color:#fff;">{{PRACTICE_NAME}}</strong> is winning ad spend — and where budget
+    is leaking to the wrong clicks. We build this out together on the call.
+  </p>
+</div>
 
   </div>
 </section>
