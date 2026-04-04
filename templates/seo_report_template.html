@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) — suppressed in ?preview=1 -->
+  <script>
+    if (new URLSearchParams(window.location.search).get('preview') !== '1') {
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-5753948CJZ';
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-5753948CJZ');
+    }
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI, SEO &amp; Ad Strategy — {{PRACTICE_NAME}}</title>
@@ -2018,15 +2031,26 @@ document.querySelectorAll('details').forEach(function(d) {
   (function() {
     try {
       if (new URLSearchParams(window.location.search).get('preview') === '1') return;
-      // Only fire once per session per slug (prevent repeat pings on refresh)
+      // Block headless browsers / bots
+      if (navigator.webdriver) return;
       var slug = '{{COMPANY_SLUG}}';
       var key  = 'd100_opened_' + slug;
-      if (sessionStorage.getItem(key)) return;
-      sessionStorage.setItem(key, '1');
-      fetch('/api/opened?slug=' + encodeURIComponent(slug) +
-            '&practice=' + encodeURIComponent('{{PRACTICE_NAME}}'),
-            { method: 'GET', keepalive: true })
-        .catch(function(){});
+      // Fire once per device ever (localStorage persists across sessions)
+      if (localStorage.getItem(key)) return;
+      // Require 4s on page + scroll before firing (humans scroll, bots don't)
+      var scrolled = false;
+      var fired = false;
+      function maybefire() {
+        if (fired || !scrolled) return;
+        fired = true;
+        localStorage.setItem(key, '1');
+        fetch('/api/opened?slug=' + encodeURIComponent(slug) +
+              '&practice=' + encodeURIComponent('{{PRACTICE_NAME}}'),
+              { method: 'GET', keepalive: true })
+          .catch(function(){});
+      }
+      window.addEventListener('scroll', function() { scrolled = true; }, { once: true, passive: true });
+      setTimeout(maybefire, 4000);
     } catch(_) {}
   })();
   </script>
