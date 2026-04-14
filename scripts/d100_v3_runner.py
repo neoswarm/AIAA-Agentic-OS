@@ -879,10 +879,11 @@ def _classify_competitor(domain: str) -> str:
 
 
 # ── Phase 1: DataForSEO API fetch (primary, preferred over SEMrush) ────────────
-# Cost per run: ~$0.041/domain (4 calls)
-#   domain_rank_overview      ~$0.010  → domain rank, position distribution, traffic value
-#   ranked_keywords (organic) ~$0.010  → keyword details, AI Overview SERP presence
-#   ranked_keywords (ai_ref)  ~$0.010  → AI Overview citation count
+# Cost per run: ~$0.005/domain (4 calls) after limit fixes
+#   domain_rank_overview      ~$0.002  → domain rank, position distribution, traffic value
+#   ranked_keywords (organic) ~$0.001  → top 20 KWs by volume (was limit:1000 = ~$0.010)
+#   ranked_keywords (ai_ref)  ~$0.001  → top 10 AI citation samples (was limit:100 = ~$0.010)
+#   competitors_domain        ~$0.001  → top competitors
 #   competitors_domain        ~$0.010  → top organic competitors
 def fetch_dataforseo(domain: str, login: str, password: str,
                      city: str = "", state: str = "", location_code: int = 2840) -> dict:
@@ -932,7 +933,7 @@ def fetch_dataforseo(domain: str, login: str, password: str,
                 "language_code": "en",
                 "location_code": 2840,
                 "item_types": ["organic"],
-                "limit": 1000,
+                "limit": 20,  # COST FIX: was 1000 — we only need top KWs for D100 report
                 "order_by": ["keyword_data.keyword_info.search_volume,desc"],
             }]
         )
@@ -943,7 +944,7 @@ def fetch_dataforseo(domain: str, login: str, password: str,
                 "language_code": "en",
                 "location_code": 2840,
                 "item_types": ["ai_overview_reference"],
-                "limit": 100,
+                "limit": 10,  # COST FIX: was 100 — AI citation count only needs a sample
             }]
         )
         fut_comp = ex.submit(post,
@@ -1283,6 +1284,188 @@ def fetch_dataforseo(domain: str, login: str, password: str,
         "serp_state":              state,
         "serp_location_code":      location_code,
         "serp_specialty":          specialty if 'specialty' in dir() else "",
+    }
+
+
+# ── Phase 1: LLM Visibility check (SEO angle) ─────────────────────────────────
+# Cost: ~$0.005/domain (3 GPT-4o-mini queries)
+# Checks if the practice domain appears in GPT-4o-mini responses to patient searches
+def fetch_llm_visibility(domain: str, specialty: str, city: str, openai_api_key: str) -> dict:
+    import urllib.request as _ureq
+    import json as _json
+
+    clean_domain = re.sub(r"https?://", "", domain).rstrip("/").lower()
+    practice_short = clean_domain.split(".")[0]
+    specialty_term = specialty or "functional medicine"
+    city_term = city or "your area"
+
+    queries = [
+        f"best {specialty_term} doctor in {city_term}",
+        f"top functional medicine clinic for chronic illness near {city_term}",
+        f"{specialty_term} near me",
+    ]
+
+    appeared = False
+    results = []
+
+    for q in queries:
+        try:
+            prompt = (
+                f"A patient is searching: '{q}'. "
+                f"Name the top 2-3 specific doctors or clinics they should consider. "
+                f"Be specific — include practice names and websites if you know them."
+            )
+            payload = _json.dumps({
+                "model": "gpt-4o-mini",
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 250,
+                "temperature": 0.3,
+            }).encode()
+            req = _ureq.Request(
+                "https://api.openai.com/v1/chat/completions",
+                data=payload,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {openai_api_key}",
+                }
+            )
+            with _ureq.urlopen(req, timeout=20) as resp:
+                resp_data = _json.loads(resp.read().decode())
+            answer = resp_data["choices"][0]["message"]["content"]
+            domain_mentioned = (
+                practice_short in answer.lower() or
+                clean_domain in answer.lower()
+            )
+            if domain_mentioned:
+                appeared = True
+            results.append({
+                "query": q,
+                "answer": answer[:400],
+                "domain_mentioned": domain_mentioned,
+            })
+        except Exception as e:
+            results.append({"query": q, "answer": f"Error: {e}", "domain_mentioned": False})
+
+    summary = (
+        f"{clean_domain} appears in AI patient search results for {specialty_term} in {city_term}."
+        if appeared else
+        f"{clean_domain} does not currently appear when patients search for {specialty_term} in {city_term}."
+    )
+
+    return {
+        "appeared_in_gpt":  appeared,
+        "queries_tested":   queries,
+        "results":          results,
+        "summary":          summary,
+        "context_note":     "Based on GPT-4o-mini responses to patient-style queries. Results vary by session.",
+        "city":             city_term,
+        "specialty":        specialty_term,
+    }
+
+
+# ── Phase 1: Ads intelligence (Ads angle) ─────────────────────────────────────
+# Cost: ~$0.004/domain (2 paid SERP queries + 1 keyword overview)
+# Fetches competitor Google Ads and CPC data via DataForSEO
+def fetch_ads_intelligence(domain: str, login: str, password: str,
+                            specialty: str, city: str,
+                            location_code: int = 2840) -> dict:
+    from base64 import b64encode as _b64
+
+    clean_domain = re.sub(r"https?://", "", domain).rstrip("/").lower()
+    specialty_term = specialty or "functional medicine"
+    city_term = city or ""
+
+    credentials = _b64(f"{login}:{password}".encode()).decode()
+
+    def _dfs_post(endpoint, payload):
+        import urllib.request as _ur, json as _j
+        data = _j.dumps(payload).encode()
+        req = _ur.Request(
+            f"https://api.dataforseo.com{endpoint}",
+            data=data,
+            headers={
+                "Authorization": f"Basic {credentials}",
+                "Content-Type": "application/json",
+            }
+        )
+        with _ur.urlopen(req, timeout=30) as resp:
+            return _j.loads(resp.read().decode())
+
+    ad_queries = [f"{specialty_term} doctor {city_term}".strip()]
+    if city_term:
+        ad_queries.append(f"functional medicine {city_term}")
+
+    competitor_ads = []
+
+    for q in ad_queries[:2]:
+        try:
+            resp = _dfs_post("/v3/serp/google/paid/live/advanced", [{
+                "keyword": q,
+                "language_code": "en",
+                "location_code": location_code,
+                "device": "desktop",
+                "depth": 10,
+            }])
+            items = (resp.get("tasks", [{}])[0].get("result") or [{}])[0].get("items", []) or []
+            for item in items:
+                if item.get("type") == "paid":
+                    competitor_ads.append({
+                        "headline":     item.get("title", ""),
+                        "description":  item.get("description", ""),
+                        "display_url":  item.get("url", ""),
+                        "domain":       (item.get("domain", "") or "").lower(),
+                        "position":     item.get("rank_absolute", 0),
+                        "query":        q,
+                    })
+        except Exception:
+            pass
+
+    # Deduplicate by domain, skip own domain
+    seen_domains = set()
+    unique_ads = []
+    for ad in sorted(competitor_ads, key=lambda x: x.get("position", 99)):
+        d = ad["domain"]
+        if d and d not in seen_domains and clean_domain not in d:
+            seen_domains.add(d)
+            unique_ads.append(ad)
+
+    competitor_count = len(seen_domains)
+
+    # CPC via keyword overview
+    cpc_values = []
+    monthly_searches = 0
+    try:
+        kw_terms = [f"{specialty_term} {city_term}".strip(), f"{specialty_term} near me"]
+        cpc_resp = _dfs_post("/v3/dataforseo_labs/google/keyword_overview/live", [{
+            "keywords": kw_terms[:2],
+            "language_code": "en",
+            "location_code": 2840,
+        }])
+        for task in (cpc_resp.get("tasks") or []):
+            for result in (task.get("result") or []):
+                for item in (result.get("items") or []):
+                    ki = item.get("keyword_info", {})
+                    cpc = ki.get("cpc")
+                    vol = ki.get("search_volume")
+                    if cpc:
+                        cpc_values.append(float(cpc))
+                    if vol:
+                        monthly_searches = max(monthly_searches, int(vol))
+    except Exception:
+        pass
+
+    cpc_low  = round(min(cpc_values), 2) if cpc_values else 0
+    cpc_high = round(max(cpc_values), 2) if cpc_values else 0
+
+    return {
+        "competitor_ads":   unique_ads[:5],
+        "competitor_count": competitor_count,
+        "cpc_low":          cpc_low,
+        "cpc_high":         cpc_high,
+        "monthly_searches": monthly_searches,
+        "queries_used":     ad_queries[:2],
+        "specialty":        specialty_term,
+        "city":             city_term,
     }
 
 
@@ -2058,6 +2241,10 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         semrush = json.loads(semrush_data_path.read_text(encoding="utf-8"))
         crawl_path = run_dir / "crawl_data.json"
         crawl = json.loads(crawl_path.read_text(encoding="utf-8")) if crawl_path.exists() else {}
+        llm_vis_path  = run_dir / "llm_visibility.json"
+        ads_intel_path = run_dir / "ads_intelligence.json"
+        llm_visibility   = json.loads(llm_vis_path.read_text(encoding="utf-8"))  if llm_vis_path.exists()  else {}
+        ads_intelligence = json.loads(ads_intel_path.read_text(encoding="utf-8")) if ads_intel_path.exists() else {}
         print(f"  ✓ Loaded from cache: {semrush['unique_keywords']:,} KWs | {semrush['quick_wins_count']} quick wins")
     else:
         print("\n📡 Phase 1: Collecting data...")
@@ -2130,6 +2317,47 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
             semrush = parse_semrush("")
         print(f"  ✓ {semrush['unique_keywords']:,} keywords | {semrush['quick_wins_count']} quick wins | ~{semrush['estimated_traffic']:,} traffic/mo")
 
+        # ── LLM Visibility (SEO angle — GPT-4o-mini patient searches) ──────────
+        llm_visibility = {}
+        openai_key = env.get("OPENAI_API_KEY", "").strip()
+        if openai_key:
+            print("  Checking LLM visibility (GPT-4o-mini ~$0.005)...")
+            try:
+                llm_visibility = fetch_llm_visibility(
+                    domain,
+                    semrush.get("serp_specialty", "functional medicine"),
+                    loc_data.get("primary_city", ""),
+                    openai_key,
+                )
+                appeared_str = "✅ appears" if llm_visibility.get("appeared_in_gpt") else "❌ not found"
+                print(f"  ✓ LLM visibility: {appeared_str} in GPT-4o-mini patient searches")
+                (run_dir / "llm_visibility.json").write_text(
+                    json.dumps(llm_visibility, indent=2, ensure_ascii=False), encoding="utf-8"
+                )
+            except Exception as _e:
+                print(f"  ⚠️  LLM visibility check failed: {_e}")
+        else:
+            print("  ⚠️  OPENAI_API_KEY not set — skipping LLM visibility check")
+
+        # ── Ads Intelligence (Ads angle — DataForSEO paid SERP + CPC) ───────────
+        ads_intelligence = {}
+        if dfs_login and dfs_password:
+            print("  Fetching competitor ads intelligence (~$0.004)...")
+            try:
+                ads_intelligence = fetch_ads_intelligence(
+                    domain, dfs_login, dfs_password,
+                    specialty=semrush.get("serp_specialty", "functional medicine"),
+                    city=loc_data.get("primary_city", ""),
+                    location_code=loc_data.get("location_code", 2840),
+                )
+                print(f"  ✓ Ads: {ads_intelligence.get('competitor_count', 0)} competitors | "
+                      f"CPC ${ads_intelligence.get('cpc_low', 0)}-${ads_intelligence.get('cpc_high', 0)}")
+                (run_dir / "ads_intelligence.json").write_text(
+                    json.dumps(ads_intelligence, indent=2, ensure_ascii=False), encoding="utf-8"
+                )
+            except Exception as _e:
+                print(f"  ⚠️  Ads intelligence fetch failed: {_e}")
+
         # Save SEMrush data for Claude Code SEO analysis step
         semrush_data_path.write_text(
             json.dumps(semrush, indent=2, ensure_ascii=False), encoding="utf-8"
@@ -2186,6 +2414,8 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
             "all_locations":    loc_data.get("all_locations", []),
             "is_multi_location": loc_data.get("is_multi_location", False),
             "location_source":  loc_data.get("location_source", "fallback"),
+            "llm_visibility":   llm_visibility,
+            "ads_intelligence": ads_intelligence,
             "images": {
                 "logo_url":    logo_url,
                 "favicon_url": favicon_url,
@@ -2248,6 +2478,14 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         logo_url = page_assets.get("logo_url", "")
         favicon_url = page_assets.get("favicon_url", "")
 
+        # Load LLM visibility + ads intelligence from cache files if available
+        if not 'llm_visibility' in dir():
+            _lv_path = run_dir / "llm_visibility.json"
+            llm_visibility = json.loads(_lv_path.read_text(encoding="utf-8")) if _lv_path.exists() else {}
+        if not 'ads_intelligence' in dir():
+            _ai_path = run_dir / "ads_intelligence.json"
+            ads_intelligence = json.loads(_ai_path.read_text(encoding="utf-8")) if _ai_path.exists() else {}
+
         phase1_data_for_inject = {
             "run_id":       run_id,
             "website":      website,
@@ -2263,6 +2501,8 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
                             extract_booking_url(raw_scrape, website) if raw_scrape else website)),
             # Logo + favicon extracted from live HTML
             "logo_url":     logo_url,
+            "llm_visibility":   llm_visibility,
+            "ads_intelligence": ads_intelligence,
             "images":       {
                 "logo_url":    logo_url,
                 "favicon_url": favicon_url,
