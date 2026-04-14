@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Activate scroll animations — runs sync before render so no FOUC.
+       If JS is blocked, 'anims' is never added → all content stays visible. -->
+  <script>document.documentElement.classList.add('anims');</script>
   <!-- Google tag (gtag.js) — suppressed in ?preview=1 -->
   <script>
     if (new URLSearchParams(window.location.search).get('preview') !== '1') {
@@ -134,26 +137,35 @@
     details summary::-webkit-details-marker { display: none; }
     details summary { user-select: none; list-style: none; }
 
-    /* ── Animation system ──────────────────────────────────── */
+    /* ── Animation system — progressive enhancement ────────── */
+    /* Elements are visible by default. Animations only activate when
+       JS adds the 'anims' class to <html> (see inline head script).
+       This guarantees content is NEVER hidden if JS fails or IO lags. */
 
-    .fade-up { opacity: 0; transform: translateY(32px); transition: opacity 0.65s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.65s cubic-bezier(0.25,0.46,0.45,0.94); }
-    .fade-up.visible { opacity: 1; transform: translateY(0); }
+    .fade-up { transition: opacity 0.65s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.65s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .stagger-children > * { transition: opacity 0.55s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .slide-left  { transition: opacity 0.6s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .slide-right { transition: opacity 0.6s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .scale-in    { transition: opacity 0.55s cubic-bezier(0.34,1.56,0.64,1), transform 0.55s cubic-bezier(0.34,1.56,0.64,1); }
 
-    .stagger-children > * { opacity: 0; transform: translateY(28px); transition: opacity 0.55s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94); }
+    /* Hidden state — only applied when JS is active */
+    html.anims .fade-up         { opacity: 0; transform: translateY(32px); }
+    html.anims .stagger-children > * { opacity: 0; transform: translateY(28px); }
+    html.anims .slide-left      { opacity: 0; transform: translateX(-40px); }
+    html.anims .slide-right     { opacity: 0; transform: translateX(40px); }
+    html.anims .scale-in        { opacity: 0; transform: scale(0.92); }
+
+    /* Visible state */
+    .fade-up.visible         { opacity: 1; transform: translateY(0); }
     .stagger-children.visible > * { opacity: 1; transform: translateY(0); }
     .stagger-children.visible > *:nth-child(1) { transition-delay: 0s; }
     .stagger-children.visible > *:nth-child(2) { transition-delay: 0.09s; }
     .stagger-children.visible > *:nth-child(3) { transition-delay: 0.18s; }
     .stagger-children.visible > *:nth-child(4) { transition-delay: 0.27s; }
     .stagger-children.visible > *:nth-child(5) { transition-delay: 0.36s; }
-
-    .slide-left  { opacity: 0; transform: translateX(-40px); transition: opacity 0.6s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
-    .slide-left.visible { opacity: 1; transform: translateX(0); }
-    .slide-right { opacity: 0; transform: translateX(40px);  transition: opacity 0.6s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
-    .slide-right.visible { opacity: 1; transform: translateX(0); }
-
-    .scale-in { opacity: 0; transform: scale(0.92); transition: opacity 0.55s cubic-bezier(0.34,1.56,0.64,1), transform 0.55s cubic-bezier(0.34,1.56,0.64,1); }
-    .scale-in.visible { opacity: 1; transform: scale(1); }
+    .slide-left.visible      { opacity: 1; transform: translateX(0); }
+    .slide-right.visible     { opacity: 1; transform: translateX(0); }
+    .scale-in.visible        { opacity: 1; transform: scale(1); }
 
     .stat-num { display: block; }
 
@@ -1725,11 +1737,23 @@ window.addEventListener('scroll', function() {
   if (bar) bar.style.width = pct + '%';
 }, { passive: true });
 
-// Scroll animations
+// Scroll animations — progressive enhancement
+// 'anims' class was added to <html> at head-parse time (before render).
+// Elements start opacity:0 via CSS. IO reveals them on scroll.
+// Failsafe: force-reveal everything after 1.5s so content is NEVER permanently hidden.
 (function() {
-  var animClasses = ['.fade-up', '.slide-left', '.slide-right', '.scale-in', '.stagger-children'];
-  var els = document.querySelectorAll(animClasses.join(','));
+  var sel = '.fade-up,.slide-left,.slide-right,.scale-in,.stagger-children';
+  var els = document.querySelectorAll(sel);
   if (!els.length) return;
+
+  function revealAll() {
+    document.querySelectorAll(sel).forEach(function(el) {
+      el.classList.add('visible');
+    });
+  }
+
+  // Failsafe: everything visible after 1.5s regardless
+  var failsafe = setTimeout(revealAll, 1500);
 
   var io = new IntersectionObserver(function(entries) {
     entries.forEach(function(e) {
@@ -1738,9 +1762,22 @@ window.addEventListener('scroll', function() {
         io.unobserve(e.target);
       }
     });
-  }, { threshold: 0.07, rootMargin: '0px 0px -30px 0px' });
+  }, { threshold: 0.05, rootMargin: '50px 0px 0px 0px' });
 
-  els.forEach(function(el) { io.observe(el); });
+  els.forEach(function(el) {
+    // Immediately reveal if already in viewport
+    var rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 50 && rect.bottom >= 0) {
+      el.classList.add('visible');
+    } else {
+      io.observe(el);
+    }
+  });
+
+  // Cancel failsafe once user starts scrolling (IO is working)
+  window.addEventListener('scroll', function() {
+    clearTimeout(failsafe);
+  }, { once: true, passive: true });
 })();
 
 // Number counter animation
