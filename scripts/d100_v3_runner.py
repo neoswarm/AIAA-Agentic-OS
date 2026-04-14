@@ -46,6 +46,17 @@ PROJECT_ROOT = SCRIPT_DIR.parent
 TEMPLATE_PATH = PROJECT_ROOT / "skills" / "templates" / "health_assessment_template.html"
 OUTPUT_ROOT = PROJECT_ROOT / "output" / "d100_runs"
 
+# ── Angle → template mapping ───────────────────────────────────────────────────
+# Each angle uses a different HTML template and collects different Phase 1 data.
+# seo  → keyword gaps, LLM visibility, organic traffic analysis
+# ads  → competitor ad copy, CPC data, paid landscape
+# ai   → automation opportunities, operational gaps (no extra API calls)
+ANGLE_TEMPLATES = {
+    "seo": PROJECT_ROOT / "templates" / "d100_template_seo.html",
+    "ads": PROJECT_ROOT / "templates" / "d100_template_ads.html",
+    "ai":  PROJECT_ROOT / "templates" / "d100_template_ai.html",
+}
+
 # ── GitHub deploy config ────────────────────────────────────────────────────────
 # Deliverables page slug format: Plug-and-play-AI-SEO-and-Ad-Strategy-for-{Company-Name}
 # GitHub user is resolved at runtime via: gh api user --jq '.login'
@@ -2194,7 +2205,11 @@ def notify_slack_submit(webhook, practice, gen_id, website, semrush, run_id):
 def run_single(row: dict, env: dict, dry_run: bool = False,
                phase1_only: bool = False,
                existing_run_dir: str = None,
-               preview: bool = False) -> dict:
+               preview: bool = False,
+               angle: str = "seo") -> dict:
+    # Validate angle
+    if angle not in ANGLE_TEMPLATES:
+        raise ValueError(f"Unknown angle '{angle}'. Must be one of: {list(ANGLE_TEMPLATES)}")
     website = row.get("website", "").rstrip("/")
     context = row.get("context", "")
     # booking_url and semrush_csv are auto-resolved — not required in CSV
@@ -2221,7 +2236,7 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
     (run_dir / "seo_data").mkdir(exist_ok=True)
 
     print(f"\n{'='*60}")
-    print(f"🚀 D100 v3.2 — {website}")
+    print(f"🚀 D100 v3.2 — {website}  [angle: {angle.upper()}]")
     print(f"   Run ID: {run_id}")
     if phase1_only:
         print(f"   Mode: Phase 1 only (data collection → phase1_data.json)")
@@ -2317,46 +2332,54 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
             semrush = parse_semrush("")
         print(f"  ✓ {semrush['unique_keywords']:,} keywords | {semrush['quick_wins_count']} quick wins | ~{semrush['estimated_traffic']:,} traffic/mo")
 
-        # ── LLM Visibility (SEO angle — GPT-4o-mini patient searches) ──────────
+        # ── LLM Visibility (SEO angle only — GPT-4o-mini patient searches) ───────
         llm_visibility = {}
-        openai_key = env.get("OPENAI_API_KEY", "").strip()
-        if openai_key:
-            print("  Checking LLM visibility (GPT-4o-mini ~$0.005)...")
-            try:
-                llm_visibility = fetch_llm_visibility(
-                    domain,
-                    semrush.get("serp_specialty", "functional medicine"),
-                    loc_data.get("primary_city", ""),
-                    openai_key,
-                )
-                appeared_str = "✅ appears" if llm_visibility.get("appeared_in_gpt") else "❌ not found"
-                print(f"  ✓ LLM visibility: {appeared_str} in GPT-4o-mini patient searches")
-                (run_dir / "llm_visibility.json").write_text(
-                    json.dumps(llm_visibility, indent=2, ensure_ascii=False), encoding="utf-8"
-                )
-            except Exception as _e:
-                print(f"  ⚠️  LLM visibility check failed: {_e}")
+        if angle == "seo":
+            openai_key = env.get("OPENAI_API_KEY", "").strip()
+            if openai_key:
+                print("  Checking LLM visibility (GPT-4o-mini ~$0.005)...")
+                try:
+                    llm_visibility = fetch_llm_visibility(
+                        domain,
+                        semrush.get("serp_specialty", "functional medicine"),
+                        loc_data.get("primary_city", ""),
+                        openai_key,
+                    )
+                    appeared_str = "✅ appears" if llm_visibility.get("appeared_in_gpt") else "❌ not found"
+                    print(f"  ✓ LLM visibility: {appeared_str} in GPT-4o-mini patient searches")
+                    (run_dir / "llm_visibility.json").write_text(
+                        json.dumps(llm_visibility, indent=2, ensure_ascii=False), encoding="utf-8"
+                    )
+                except Exception as _e:
+                    print(f"  ⚠️  LLM visibility check failed: {_e}")
+            else:
+                print("  ⚠️  OPENAI_API_KEY not set — skipping LLM visibility check")
         else:
-            print("  ⚠️  OPENAI_API_KEY not set — skipping LLM visibility check")
+            print(f"  ⏭  LLM visibility skipped (angle={angle}, only runs for seo)")
 
-        # ── Ads Intelligence (Ads angle — DataForSEO paid SERP + CPC) ───────────
+        # ── Ads Intelligence (Ads angle only — DataForSEO paid SERP + CPC) ───────
         ads_intelligence = {}
-        if dfs_login and dfs_password:
-            print("  Fetching competitor ads intelligence (~$0.004)...")
-            try:
-                ads_intelligence = fetch_ads_intelligence(
-                    domain, dfs_login, dfs_password,
-                    specialty=semrush.get("serp_specialty", "functional medicine"),
-                    city=loc_data.get("primary_city", ""),
-                    location_code=loc_data.get("location_code", 2840),
-                )
-                print(f"  ✓ Ads: {ads_intelligence.get('competitor_count', 0)} competitors | "
-                      f"CPC ${ads_intelligence.get('cpc_low', 0)}-${ads_intelligence.get('cpc_high', 0)}")
-                (run_dir / "ads_intelligence.json").write_text(
-                    json.dumps(ads_intelligence, indent=2, ensure_ascii=False), encoding="utf-8"
-                )
-            except Exception as _e:
-                print(f"  ⚠️  Ads intelligence fetch failed: {_e}")
+        if angle == "ads":
+            if dfs_login and dfs_password:
+                print("  Fetching competitor ads intelligence (~$0.004)...")
+                try:
+                    ads_intelligence = fetch_ads_intelligence(
+                        domain, dfs_login, dfs_password,
+                        specialty=semrush.get("serp_specialty", "functional medicine"),
+                        city=loc_data.get("primary_city", ""),
+                        location_code=loc_data.get("location_code", 2840),
+                    )
+                    print(f"  ✓ Ads: {ads_intelligence.get('competitor_count', 0)} competitors | "
+                          f"CPC ${ads_intelligence.get('cpc_low', 0)}-${ads_intelligence.get('cpc_high', 0)}")
+                    (run_dir / "ads_intelligence.json").write_text(
+                        json.dumps(ads_intelligence, indent=2, ensure_ascii=False), encoding="utf-8"
+                    )
+                except Exception as _e:
+                    print(f"  ⚠️  Ads intelligence fetch failed: {_e}")
+            else:
+                print("  ⚠️  DataForSEO not configured — skipping ads intelligence")
+        else:
+            print(f"  ⏭  Ads intelligence skipped (angle={angle}, only runs for ads)")
 
         # Save SEMrush data for Claude Code SEO analysis step
         semrush_data_path.write_text(
@@ -2398,6 +2421,7 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         booking_url = extract_booking_url(raw_scrape, website) if raw_scrape else website
         p1_data = {
             "run_id":           run_id,
+            "angle":            angle,    # seo | ads | ai — controls template + phase 2 prompt
             "website":          website,
             "context":          context,
             "raw_scrape":       raw_scrape[:6000] if raw_scrape else "",
@@ -2488,6 +2512,7 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
 
         phase1_data_for_inject = {
             "run_id":       run_id,
+            "angle":        angle,    # seo | ads | ai — controls template + phase 2 prompt
             "website":      website,
             "context":      context,
             "raw_scrape":   raw_scrape[:6000] if raw_scrape else "",
@@ -2580,7 +2605,7 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         # Run injector as subprocess to isolate imports
         import subprocess as _sp
         inj_result = _sp.run(
-            [sys.executable, str(injector_path), str(run_dir)],
+            [sys.executable, str(injector_path), str(run_dir), "--angle", angle],
             capture_output=True, text=True, timeout=60,
         )
         if inj_result.returncode != 0:
@@ -2616,7 +2641,7 @@ def run_single(row: dict, env: dict, dry_run: bool = False,
         # healthbizleads.com/[slug]/  +  app.healthbizleads.com/[slug]/
         sys.path.insert(0, str(SCRIPT_DIR))
         from deploy_vercel_incremental import deploy_deliverables, deploy_assessment_app
-        report_url = deploy_deliverables(run_dir, practice_name, vercel_token, dry_run=False)
+        report_url = deploy_deliverables(run_dir, practice_name, vercel_token, angle=angle, dry_run=False)
         # Deploy assessment app (best-effort — don't fail the run if app deploy errors)
         try:
             p1_data = json.loads((run_dir / "phase1_data.json").read_text(encoding="utf-8"))
@@ -2743,7 +2768,7 @@ def find_run_dir_for_site(website: str):
 
 def run_with_checkpoint(args_tuple):
     """Thread worker: checkpoint check → run_single → write checkpoint on success."""
-    i, row, env, dry_run, phase1_only, existing_run_dir, preview_flag = args_tuple
+    i, row, env, dry_run, phase1_only, existing_run_dir, preview_flag, angle = args_tuple
     website = row.get("website", "")
 
     # Checkpoint: skip already-completed runs
@@ -2762,7 +2787,7 @@ def run_with_checkpoint(args_tuple):
 
     result = run_single(row, env, dry_run=dry_run, phase1_only=phase1_only,
                         existing_run_dir=existing_run_dir,
-                        preview=preview_flag)
+                        preview=preview_flag, angle=angle)
 
     # Write checkpoint on success
     if result.get("status") == "completed":
@@ -2797,6 +2822,10 @@ def main():
                         help="Existing run directory to use (single-site override for --phase3-only).")
     parser.add_argument("--preview", action="store_true",
                         help="Preview run — suppresses Slack notification even if webhook is configured.")
+    parser.add_argument("--angle", choices=["seo", "ads", "ai"], default="seo",
+                        help="D100 angle to run: seo (default) | ads | ai. "
+                             "Controls which template is used, which Phase 1 data is collected, "
+                             "and which Phase 2 prompt variant is applied.")
     args = parser.parse_args()
 
     if not os.path.exists(args.csv):
@@ -2812,6 +2841,7 @@ def main():
     print(f"  Note: All LLM generation is Claude Code native (Claude Max — zero API cost)")
     vercel_tok = env.get("VERCEL_TOKEN", "")
     print(f"  Note: Phase 3 = template inject → {'Vercel' if vercel_tok else 'GitHub Pages'}")
+    print(f"  Angle: {args.angle.upper()} — template: d100_template_{args.angle}.html")
 
     with open(args.csv, newline="", encoding="utf-8-sig") as f:
         rows = list(csv.DictReader(f))
@@ -2845,7 +2875,7 @@ def main():
                 results.append({"website": website, "status": "skipped_no_phase2", "report_url": ""})
                 continue
             print(f"  📁 [{i+1}/{n}] {website} → {existing_run_dir}")
-        worker_args.append((i, row, env, args.dry_run, args.phase1_only, existing_run_dir, getattr(args, "preview", False)))
+        worker_args.append((i, row, env, args.dry_run, args.phase1_only, existing_run_dir, getattr(args, "preview", False), args.angle))
 
     workers = 1 if (args.site_index is not None or args.phase1_only) else MAX_WORKERS
     print(f"\n🚀 Starting {len(worker_args)} run(s) with max_workers={workers}...")

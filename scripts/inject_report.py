@@ -30,7 +30,14 @@ from html import escape
 # ── Paths ─────────────────────────────────────────────────────────────────────
 SCRIPT_DIR  = Path(__file__).parent
 PROJECT_DIR = SCRIPT_DIR.parent
-TEMPLATE    = PROJECT_DIR / "templates" / "seo_report_template.html"
+TEMPLATE    = PROJECT_DIR / "templates" / "seo_report_template.html"  # legacy fallback
+
+# ── Angle → template map ───────────────────────────────────────────────────────
+ANGLE_TEMPLATES = {
+    "seo": PROJECT_DIR / "templates" / "d100_template_seo.html",
+    "ads": PROJECT_DIR / "templates" / "d100_template_ads.html",
+    "ai":  PROJECT_DIR / "templates" / "d100_template_ai.html",
+}
 
 # Load .env into os.environ (simple parser — no external dependency)
 _env_path = PROJECT_DIR / ".env"
@@ -871,17 +878,17 @@ def build_replacements(p1: dict, p2: dict) -> dict:
     }
 
 
-def inject(run_dir: Path, deploy: bool = False, dry_run: bool = False) -> Path:
+def inject(run_dir: Path, deploy: bool = False, dry_run: bool = False,
+           angle: str = None) -> Path:
     """
     Main inject function.
     Reads data, fills template, writes index.html.
     Optionally deploys to Vercel.
     Returns path to generated index.html.
-    """
-    print(f"\n📄 D100 Template Injector")
-    print(f"   Run dir : {run_dir}")
-    print(f"   Template: {TEMPLATE}")
 
+    angle: "seo" | "ads" | "ai" | None. If None, reads from phase1_data.json["angle"],
+           falling back to "seo" for backward compatibility with older run dirs.
+    """
     # Load data
     p1_path = run_dir / "phase1_data.json"
     p2_path = run_dir / "phase2_output.json"
@@ -890,16 +897,31 @@ def inject(run_dir: Path, deploy: bool = False, dry_run: bool = False) -> Path:
         raise FileNotFoundError(f"phase1_data.json not found: {p1_path}")
     if not p2_path.exists():
         raise FileNotFoundError(f"phase2_output.json not found: {p2_path}")
-    if not TEMPLATE.exists():
-        raise FileNotFoundError(f"Template not found: {TEMPLATE}")
 
     p1 = json.loads(p1_path.read_text(encoding="utf-8"))
     p2 = json.loads(p2_path.read_text(encoding="utf-8"))
 
+    # Resolve angle: CLI arg > phase1_data.json > fallback "seo"
+    resolved_angle = angle or p1.get("angle", "seo")
+    if resolved_angle not in ANGLE_TEMPLATES:
+        print(f"   ⚠ Unknown angle '{resolved_angle}' — falling back to seo")
+        resolved_angle = "seo"
+
+    template_path = ANGLE_TEMPLATES[resolved_angle]
+    if not template_path.exists():
+        print(f"   ⚠ Angle template not found: {template_path} — falling back to legacy template")
+        template_path = TEMPLATE
+    if not template_path.exists():
+        raise FileNotFoundError(f"Template not found: {template_path}")
+
+    print(f"\n📄 D100 Template Injector")
+    print(f"   Run dir : {run_dir}")
+    print(f"   Angle   : {resolved_angle.upper()}")
+    print(f"   Template: {template_path.name}")
     print(f"   Practice: {p1.get('name', 'Unknown')}")
 
     # Load template
-    template = TEMPLATE.read_text(encoding="utf-8")
+    template = template_path.read_text(encoding="utf-8")
     print(f"   Template size: {len(template):,} bytes")
 
     # Build replacements
@@ -1211,6 +1233,8 @@ if __name__ == "__main__":
     parser.add_argument("run_dir", help="Path to run directory containing phase1_data.json + phase2_output.json")
     parser.add_argument("--deploy-vercel", action="store_true", help="Deploy to Vercel after injection")
     parser.add_argument("--dry-run",       action="store_true", help="Skip actual deployment")
+    parser.add_argument("--angle", choices=["seo", "ads", "ai"], default=None,
+                        help="D100 angle: seo | ads | ai. Overrides phase1_data.json['angle'] if set.")
     args = parser.parse_args()
 
     run_dir = Path(args.run_dir).resolve()
@@ -1219,7 +1243,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     try:
-        result = inject(run_dir, deploy=args.deploy_vercel, dry_run=args.dry_run)
+        result = inject(run_dir, deploy=args.deploy_vercel, dry_run=args.dry_run, angle=args.angle)
         if isinstance(result, tuple):
             out_path, deploy_url = result
             print(f"\n✅ Done! index.html → {out_path}")

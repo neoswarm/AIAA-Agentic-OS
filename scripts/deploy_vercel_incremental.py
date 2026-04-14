@@ -321,16 +321,21 @@ def deploy_deliverables(
     run_dir: Path,
     practice_name: str,
     token: str,
+    angle: str = "seo",
     dry_run: bool = False,
 ) -> str:
     """
-    Copy index.html from run_dir into vercel-dist/[slug]/index.html
-    then run `vercel --prod` from vercel-dist/.
-    Returns the live URL.
+    Copy index.html from run_dir into vercel-dist/[angle]/[slug]/index.html
+    then deploy via Vercel REST API.
+    Returns the live URL: healthbizleads.com/[angle]/[slug]/
+
+    angle: "seo" | "ads" | "ai" — used as a URL prefix so prospects can't
+           accidentally see the wrong angle's report.
     """
     slug        = make_company_slug(practice_name)
     index_src   = run_dir / "index.html"
-    company_dir = VERCEL_DIST / slug
+    # angle subfolder keeps SEO/Ads/AI reports separate on the same Vercel project
+    company_dir = VERCEL_DIST / angle / slug
 
     if not index_src.exists():
         raise RuntimeError(f"index.html not found in {run_dir}")
@@ -338,13 +343,13 @@ def deploy_deliverables(
         raise RuntimeError(f"index.html too small ({index_src.stat().st_size}B) — build failed?")
 
     if dry_run:
-        print(f"  [DRY RUN] Would deploy deliverables → healthbizleads.com/{slug}/")
-        return f"https://healthbizleads.com/{slug}/"
+        print(f"  [DRY RUN] Would deploy deliverables → healthbizleads.com/{angle}/{slug}/")
+        return f"https://healthbizleads.com/{angle}/{slug}/"
 
-    # Create company subfolder and copy HTML
+    # Create angle/company subfolder and copy HTML
     company_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy(str(index_src), str(company_dir / "index.html"))
-    print(f"  ✓ Copied index.html → vercel-dist/{slug}/")
+    print(f"  ✓ Copied index.html → vercel-dist/{angle}/{slug}/")
 
     # Deploy via Vercel REST API (no CLI needed — pure Python, works in subagents)
     print(f"  🚀 Deploying deliverables project to Vercel REST API...")
@@ -357,7 +362,7 @@ def deploy_deliverables(
     )
     print(f"  ✓ Vercel deploy URL: {deploy_url}")
 
-    live_url = f"https://healthbizleads.com/{slug}/"
+    live_url = f"https://healthbizleads.com/{angle}/{slug}/"
     print(f"  ✓ Live → {live_url}")
     return live_url
 
