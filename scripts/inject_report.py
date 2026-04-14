@@ -1257,9 +1257,9 @@ export default async function handler(req, res) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text: `\ud83d\udc41 *Report Opened* \u2014 ${practice}`,
+          text: `\U0001f441 *Report Opened* \u2014 ${practice}`,
           blocks: [{ type: 'section', text: { type: 'mrkdwn',
-            text: `\ud83d\udc41 *Report Opened*\n*Practice:* ${practice}\n*URL:* <${url}|${url}>\n${emailNote}\n${slNote}\n*Time:* ${ts} MT`
+            text: `\U0001f441 *Report Opened*\n*Practice:* ${practice}\n*URL:* <${url}|${url}>\n${emailNote}\n${slNote}\n*Time:* ${ts} MT`
           }}]
         })
       });
