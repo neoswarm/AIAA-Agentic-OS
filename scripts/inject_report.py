@@ -709,15 +709,85 @@ def build_ai_seo_callout(semrush: dict, p1: dict) -> str:
         )
 
 
+def _build_llm_appearance_summary(p1: dict) -> str:
+    """One-line LLM visibility summary for the SEO template hero stat."""
+    llm = p1.get("llm_visibility", {})
+    if not llm:
+        return "Not checked"
+    appeared = llm.get("appeared_in_gpt", False)
+    city = llm.get("city", p1.get("primary_city", "your area"))
+    specialty = llm.get("specialty", "functional medicine")
+    if appeared:
+        return f"✅ Appears in AI results for {specialty} in {city}"
+    return f"❌ Not appearing when patients search for {specialty} in {city}"
+
+
+def _build_llm_chatgpt_result(p1: dict) -> str:
+    """What ChatGPT returned for patient searches — for display in the SEO template."""
+    llm = p1.get("llm_visibility", {})
+    if not llm:
+        return "LLM visibility data not available for this run."
+    results = llm.get("results", [])
+    if not results:
+        return llm.get("summary", "No results available.")
+    # Return the first result's response snippet
+    first = results[0] if results else {}
+    response = first.get("response", "")
+    return response[:400] + "…" if len(response) > 400 else response or llm.get("summary", "")
+
+
+def _build_llm_perplexity_result(p1: dict) -> str:
+    """Placeholder — Perplexity not queried yet. Returns context note."""
+    llm = p1.get("llm_visibility", {})
+    if not llm:
+        return "Perplexity data not available."
+    return llm.get("context_note", "Perplexity AI visibility not yet checked for this practice.")
+
+
+def _build_llm_context_note(p1: dict) -> str:
+    """Explanatory note about LLM visibility for the prospect."""
+    llm = p1.get("llm_visibility", {})
+    appeared = llm.get("appeared_in_gpt", False) if llm else None
+    city = p1.get("primary_city", "your area")
+    practice = p1.get("name", "Your practice")
+    if appeared is None:
+        return "AI visibility data was not collected for this report."
+    if appeared:
+        return (f"{practice} currently appears in ChatGPT responses when patients "
+                f"search for specialists in {city} — a strong signal to protect and expand.")
+    return (f"{practice} does not currently appear when patients ask ChatGPT for "
+            f"specialists in {city}. This is a growth opportunity — practices that appear "
+            f"in AI search results capture patients before they ever reach Google.")
+
+
+def _build_competitor_ads_rows(ads: list) -> str:
+    """Build HTML table rows for competitor ads (Ads angle template)."""
+    if not ads:
+        return ('<tr><td colspan="3" style="text-align:center;padding:16px;color:#888;">'
+                'No paid competitors detected — this market is wide open.</td></tr>')
+    rows = []
+    for ad in ads[:5]:
+        domain = ad.get("domain", ad.get("url", "unknown"))
+        title  = ad.get("title", "")[:60]
+        desc   = ad.get("description", ad.get("snippet", ""))[:100]
+        rows.append(
+            f'<tr><td style="padding:8px 12px;font-weight:600">{domain}</td>'
+            f'<td style="padding:8px 12px">{title}</td>'
+            f'<td style="padding:8px 12px;color:#555">{desc}</td></tr>'
+        )
+    return "\n".join(rows)
+
+
 def build_replacements(p1: dict, p2: dict) -> dict:
     """
     Build the full token → value mapping from phase1 + phase2 data.
     Returns dict where keys are the placeholder name (without {{ }}).
     """
-    semrush = p1.get("semrush", {})
-    images  = p1.get("images", {})
-    brand   = p1.get("brand_colors", {})
-    app_cfg = p2.get("app_config", {})
+    semrush   = p1.get("semrush", {})
+    images    = p1.get("images", {})
+    brand     = p1.get("brand_colors", {})
+    app_cfg   = p2.get("app_config", {})
+    ads_intel = p1.get("ads_intelligence", {})
 
     # ── Brand colors ─────────────────────────────────────────────────────────
     # Phase 2 app_config colors take priority (validated in runner, non-generic)
@@ -875,6 +945,18 @@ def build_replacements(p1: dict, p2: dict) -> dict:
         "COMPETITOR_1_DOMAIN":       comp1_domain,
         "CLINICAL_TRAFFIC_VALUE":    clinical_traffic_value,
         "COMPETITOR_TYPE_NOTE":      competitor_type_note,
+        # ── LLM Visibility (SEO angle) ──────────────────────────────────────────
+        "AI_OVERVIEW_SERP_COUNT":    str(semrush.get("ai_overview_serp_count", 0)),
+        "LLM_APPEARANCE_SUMMARY":    _build_llm_appearance_summary(p1),
+        "LLM_CHATGPT_RESULT":        _build_llm_chatgpt_result(p1),
+        "LLM_PERPLEXITY_RESULT":     _build_llm_perplexity_result(p1),
+        "LLM_CONTEXT_NOTE":          _build_llm_context_note(p1),
+        # ── Ads Intelligence (Ads angle) ────────────────────────────────────────
+        "ADS_COMPETITOR_COUNT":      str(ads_intel.get("competitor_count", 0)),
+        "ADS_MONTHLY_SEARCHES":      fmt_number(int(ads_intel.get("monthly_searches", 0) or 0)),
+        "CPC_LOW":                   f"${ads_intel.get('cpc_low', 0):.2f}",
+        "CPC_HIGH":                  f"${ads_intel.get('cpc_high', 0):.2f}",
+        "COMPETITOR_ADS_TABLE_ROWS": _build_competitor_ads_rows(ads_intel.get("competitor_ads", [])),
     }
 
 

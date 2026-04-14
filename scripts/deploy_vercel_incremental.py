@@ -490,6 +490,8 @@ def main():
     p.add_argument("run_dir",     help="Path to the D100 run directory")
     p.add_argument("--dry-run",   action="store_true")
     p.add_argument("--no-app",    action="store_true", help="Skip assessment app deploy")
+    p.add_argument("--angle",     choices=["seo", "ads", "ai"], default=None,
+                   help="Angle override (default: read from phase1_data.json['angle'] or 'seo')")
     args = p.parse_args()
 
     run_dir = Path(args.run_dir).resolve()
@@ -512,10 +514,13 @@ def main():
     phase2 = json.loads(phase2_path.read_text()) if phase2_path.exists() else {}
 
     practice_name = phase1.get("name") or phase1.get("practice_name", "Unknown Practice")
-    print(f"\n📦 Deploying: {practice_name}")
 
-    # 1) Deliverables page → healthbizleads.com/[slug]/
-    report_url = deploy_deliverables(run_dir, practice_name, token, args.dry_run)
+    # Resolve angle: CLI > phase1_data > fallback seo
+    angle = args.angle or phase1.get("angle", "seo")
+    print(f"\n📦 Deploying: {practice_name}  [angle: {angle}]")
+
+    # 1) Deliverables page → healthbizleads.com/[angle]/[slug]/
+    report_url = deploy_deliverables(run_dir, practice_name, token, angle=angle, dry_run=args.dry_run)
 
     # 2) Assessment app → app.healthbizleads.com/[slug]/
     app_url = None
