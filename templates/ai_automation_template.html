@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) — suppressed in ?preview=1 -->
+  <script>
+    if (new URLSearchParams(window.location.search).get('preview') !== '1') {
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-5753948CJZ';
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-5753948CJZ');
+    }
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Automation Strategy — {{PRACTICE_NAME}}</title>
+  <link rel="icon" href="{{FAVICON_URL}}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600&display=swap" rel="stylesheet">
+  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: '{{BRAND_PRIMARY}}',
+            accent: '{{BRAND_ACCENT}}',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  {{CLARITY_SNIPPET}}
+  <style>
+    :root {
+      --brand-primary: {{BRAND_PRIMARY}};
+      --brand-accent: {{BRAND_ACCENT}};
+      --black: #080808;
+      --dark: #0f172a;
+      --surface: #f8fafc;
+      --white: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --subtle: #e2e8f0;
+    }
+
+    html { scroll-behavior: smooth; font-size: 18px; }
+    body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; background: #fff; color: var(--text); }
+
+    /* Progress bar */
+    #progress-bar { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: var(--brand-accent); z-index: 9999; transition: width 0.1s; }
+
+    /* Hero headline */
+    .hero-headline {
+      font-size: clamp(52px, 7.5vw, 92px);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+    }
+
+    /* Section headlines */
+    .section-headline {
+      font-size: clamp(36px, 5vw, 60px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    /* Label / eyebrow */
+    .label-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--brand-accent);
+    }
+
+    /* Subheadings */
+    .subheading {
+      font-size: clamp(22px, 2.5vw, 30px);
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    /* Video wrappers */
+    .loom-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: #000; }
+    .loom-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+
+    .yt-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: #000; }
+    .yt-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+
+    /* Calendly */
+    .calendly-inline-widget { min-width: 320px; height: 950px; border-radius: 12px; overflow: hidden; }
+
+    /* Accordion */
+    details summary { user-select: none; display: flex !important; align-items: center; justify-content: space-between; }
+    details summary::-webkit-details-marker { display: none; }
+    details[open] .accordion-icon { transform: rotate(45deg); }
+    .accordion-icon { transition: transform 0.25s ease; display: inline-block; line-height: 1; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #0f172a;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.78rem;
+      padding: 14px 16px;
+      text-align: left;
+      white-space: nowrap;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    tbody td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; color: #334155; font-size: 0.92rem; vertical-align: top; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:nth-child(even) { background: #f8fafc; }
+    tbody tr:hover { background: #f1f5f9; }
+
+    /* Badges */
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 0.78rem; font-weight: 700; }
+    .badge-high { background: rgba(13,122,78,0.12); color: #059669; border: 1px solid rgba(13,122,78,0.25); }
+    .badge-medium { background: rgba(245,158,11,0.1); color: #d97706; border: 1px solid rgba(245,158,11,0.2); }
+    .badge-low { background: rgba(99,102,241,0.1); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); }
+
+    /* Details / accordion */
+    details summary::-webkit-details-marker { display: none; }
+    details summary { user-select: none; list-style: none; }
+
+    /* ── Animation system ──────────────────────────────────── */
+    /* Class 'revealed' used instead of 'visible' to avoid Tailwind CDN collision */
+
+    .fade-up { opacity: 0; transform: translateY(32px); transition: opacity 0.65s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.65s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .fade-up.revealed { opacity: 1; transform: translateY(0); }
+
+    .stagger-children > * { opacity: 0; transform: translateY(28px); transition: opacity 0.55s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .stagger-children.revealed > * { opacity: 1; transform: translateY(0); }
+    .stagger-children.revealed > *:nth-child(1) { transition-delay: 0s; }
+    .stagger-children.revealed > *:nth-child(2) { transition-delay: 0.09s; }
+    .stagger-children.revealed > *:nth-child(3) { transition-delay: 0.18s; }
+    .stagger-children.revealed > *:nth-child(4) { transition-delay: 0.27s; }
+    .stagger-children.revealed > *:nth-child(5) { transition-delay: 0.36s; }
+
+    .slide-left  { opacity: 0; transform: translateX(-40px); transition: opacity 0.6s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .slide-left.revealed { opacity: 1; transform: translateX(0); }
+    .slide-right { opacity: 0; transform: translateX(40px);  transition: opacity 0.6s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .slide-right.revealed { opacity: 1; transform: translateX(0); }
+
+    .scale-in { opacity: 0; transform: scale(0.92); transition: opacity 0.55s cubic-bezier(0.34,1.56,0.64,1), transform 0.55s cubic-bezier(0.34,1.56,0.64,1); }
+    .scale-in.revealed { opacity: 1; transform: scale(1); }
+
+    .stat-num { display: block; }
+
+    @keyframes heroFadeUp {
+      from { opacity: 0; transform: translateY(50px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes heroPill {
+      from { opacity: 0; transform: translateY(18px) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .hero-animate-1 { animation: heroPill 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.15s both; }
+    .hero-animate-2 { animation: heroFadeUp 0.75s cubic-bezier(0.25,0.46,0.45,0.94) 0.3s both; }
+    .hero-animate-3 { animation: heroFadeUp 0.7s cubic-bezier(0.25,0.46,0.45,0.94) 0.5s both; }
+    .hero-animate-4 { animation: heroFadeUp 0.8s cubic-bezier(0.25,0.46,0.45,0.94) 0.65s both; }
+
+    @keyframes floatBadge {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-6px); }
+    }
+    .float-badge { animation: floatBadge 4s ease-in-out infinite; }
+
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 0 0 transparent; }
+      50%       { box-shadow: 0 0 20px 4px color-mix(in srgb, var(--brand-accent) 40%, transparent); }
+    }
+    .glow-pulse { animation: glowPulse 3s ease-in-out infinite; }
+
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    @keyframes marqueeScroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    .marquee-track { animation: marqueeScroll 24s linear infinite; }
+
+    @keyframes videoReveal {
+      from { opacity: 0; transform: scale(0.96) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .video-reveal { animation: videoReveal 0.9s cubic-bezier(0.25,0.46,0.45,0.94) 0.8s both; }
+
+    .hover-card {
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
+    }
+    .hover-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.1), 0 0 0 1px color-mix(in srgb, var(--brand-accent) 30%, transparent);
+    }
+
+    .hover-card-dark {
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .hover-card-dark:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 0 1px color-mix(in srgb, var(--brand-accent) 40%, transparent);
+      border-color: color-mix(in srgb, var(--brand-accent) 50%, transparent) !important;
+    }
+
+    .btn-press {
+      transition: transform 0.12s ease, opacity 0.12s ease;
+    }
+    .btn-press:active { transform: scale(0.97); opacity: 0.9; }
+
+    tbody tr {
+      transition: background 0.2s ease;
+    }
+
+    .stat-dark {
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-dark::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--brand-accent), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .stat-dark:hover::after { opacity: 1; }
+    .stat-dark { transition: transform 0.2s ease; }
+    .stat-dark:hover { transform: translateY(-3px); }
+
+    details > div {
+      overflow: hidden;
+    }
+
+    .section-glow-line {
+      width: 60px; height: 3px;
+      background: var(--brand-accent);
+      border-radius: 2px;
+      margin: 0 auto 2rem;
+      box-shadow: 0 0 12px 2px color-mix(in srgb, var(--brand-accent) 60%, transparent);
+    }
+
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+    @keyframes stepReveal {
+      from { opacity: 0; transform: translateX(-20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .step-num-animate { animation: stepReveal 0.5s cubic-bezier(0.25,0.46,0.45,0.94) both; }
+
+    .stat-dark {
+      background: #0f172a;
+      color: #fff;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .stat-dark .stat-num {
+      display: block;
+      font-size: clamp(26px, 3vw, 36px);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 0.35rem;
+    }
+    .stat-dark .stat-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+
+    .quote-dark {
+      border: 1px solid rgba(255,255,255,0.1);
+      border-left: 4px solid var(--brand-accent);
+      border-radius: 1rem;
+      padding: 2rem;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .check-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .check-row:last-child { border-bottom: none; }
+
+    @media (max-width: 640px) {
+      html { font-size: 16px; }
+      .hero-headline { font-size: 46px; }
+      .section-headline { font-size: 34px; }
+      .ads-grid { grid-template-columns: 1fr !important; }
+    }
+
+    #main-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: #0d0d0d;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    #main-nav a.nav-link {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    #main-nav a.nav-link:hover { color: #ffffff; }
+
+    .step-card {
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+      padding: 2rem;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 1.25rem;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    .step-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.08);
+    }
+    .step-badge {
+      flex-shrink: 0;
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .agenda-item {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .agenda-item:last-child { border-bottom: none; }
+    .agenda-time {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--brand-accent);
+      padding-top: 3px;
+      min-width: 100px;
+    }
+
+    .red-block {
+      background: #CC1010;
+      border-radius: 12px;
+      padding: 32px 36px;
+      margin-top: 28px;
+    }
+    .red-block__title {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .red-block__body {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.5;
+      margin-top: 14px;
+    }
+    .green-block {
+      background: #0d7a4e;
+      border-radius: 12px;
+      padding: 32px 36px;
+      margin-top: 20px;
+    }
+    .green-block h3 {
+      color: #fff;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .green-block p {
+      color: rgba(255,255,255,0.9);
+      font-size: 1.3rem;
+      line-height: 1.75;
+      margin: 0;
+    }
+    @media (max-width: 640px) {
+      .red-block, .green-block { padding: 24px 20px; }
+      .red-block__title { font-size: 1.6rem; }
+      .red-block__body { font-size: 1.3rem; }
+    }
+
+    /* === ADS DIAGRAM === */
+    .ads-diagram-wrap { font-family: 'Source Sans 3', 'Inter', sans-serif; max-width: 900px; margin: 0 auto; }
+    .ads-diagram-wrap *, .ads-diagram-wrap *::before, .ads-diagram-wrap *::after { box-sizing: border-box; }
+    .ads-d-outer { display: flex; align-items: stretch; gap: 0; }
+    .ads-d-col { flex: 1; min-width: 0; }
+    .ads-d-arrow { display: flex; justify-content: center; align-items: center; height: 32px; color: #94a3b8; font-size: 20px; }
+    .ads-d-banner { border-radius: 14px; padding: 22px 28px; text-align: center; margin-bottom: 0; }
+    .ads-d-banner h3 { font-size: clamp(16px,2.2vw,22px); font-weight: 800; margin-bottom: 6px; line-height: 1.3; }
+    .ads-d-banner p { font-size: clamp(13px,1.5vw,15px); opacity: 0.88; margin: 0; }
+    .ads-db-1 { background: #4f46e5; } .ads-db-1 h3 { color: #fff; } .ads-db-1 p { color: #c7d2fe; }
+    .ads-db-2 { background: #374151; } .ads-db-2 h3 { color: #fff; } .ads-db-2 p { color: #d1d5db; }
+    .ads-db-3 { background: #9d174d; } .ads-db-3 h3 { color: #fff; } .ads-db-3 p { color: #fbcfe8; }
+    .ads-d-3col { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .ads-d-temp { border-radius: 14px; padding: 20px 16px; text-align: center; }
+    .ads-d-temp .ads-d-emoji { font-size: 24px; display: block; margin-bottom: 8px; }
+    .ads-d-temp h4 { font-size: clamp(15px,1.8vw,19px); font-weight: 800; margin-bottom: 6px; line-height: 1.2; color: #fff; }
+    .ads-d-temp p { font-size: clamp(12px,1.3vw,14px); line-height: 1.5; margin-bottom: 10px; }
+    .ads-d-temp .ads-d-cta { font-size: clamp(12px,1.3vw,14px); font-weight: 700; }
+    .ads-dt-hot { background: #b91c1c; } .ads-dt-hot p { color: #fecaca; } .ads-dt-hot .ads-d-cta { color: #ffe4e6; }
+    .ads-dt-warm { background: #92400e; } .ads-dt-warm p { color: #fde68a; } .ads-dt-warm .ads-d-cta { color: #fef3c7; }
+    .ads-dt-cool { background: #1e40af; } .ads-dt-cool p { color: #bfdbfe; } .ads-dt-cool .ads-d-cta { color: #dbeafe; }
+    .ads-d-lp { background: #065f46; border-radius: 14px; padding: 18px 14px; text-align: center; }
+    .ads-d-lp h4 { font-size: clamp(13px,1.6vw,17px); font-weight: 800; color: #fff; margin-bottom: 5px; }
+    .ads-d-lp p { font-size: clamp(11px,1.2vw,13px); color: #6ee7b7; margin: 0; }
+    .ads-d-conv { background: #14532d; border-radius: 14px; padding: 14px 12px; text-align: center; }
+    .ads-d-conv h4 { font-size: clamp(13px,1.5vw,16px); font-weight: 800; color: #fff; margin: 0; }
+    .ads-d-budget { border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; text-align: center; margin-top: 14px; background: #f8fafc; }
+    .ads-d-budget p { font-size: clamp(12px,1.4vw,14px); color: #475569; font-weight: 600; margin: 0; }
+    .ads-d-rail { width: 72px; flex-shrink: 0; position: relative; }
+    .ads-d-rail-line { position: absolute; left: 33px; top: 24px; bottom: 24px; border-left: 2px dashed #6366f1; }
+    .ads-d-rail-arrow { position: absolute; left: 26px; top: 14px; width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 12px solid #6366f1; }
+    .ads-d-rail-text { position: absolute; left: 33px; top: 50%; transform: translateX(12px) translateY(-50%) rotate(90deg); transform-origin: left center; white-space: nowrap; font-size: 11px; font-weight: 700; color: #6366f1; letter-spacing: 0.04em; background: #f8fafc; padding: 0 5px; }
+    @media (max-width: 640px) { .ads-d-3col { grid-template-columns: 1fr; } .ads-d-rail { display: none; } }
+
+  </style>
+</head>
+<body>
+
+<!-- OPEN TRACKING BEACON -->
+<script>
+(function() {
+  try {
+    if (new URLSearchParams(window.location.search).get('preview') === '1') return;
+    if (localStorage.getItem('hbl_notrack') === '1') return;
+    var SK = 'hbl_sid_{{COMPANY_SLUG}}';
+    var sid = localStorage.getItem(SK);
+    var isNew = !sid ? '1' : '0';
+    if (!sid) { sid = Math.random().toString(36).slice(2,10) + Date.now().toString(36); localStorage.setItem(SK, sid); }
+    var tz = (Intl && Intl.DateTimeFormat) ? (Intl.DateTimeFormat().resolvedOptions().timeZone || '') : '';
+    var mob = (window.innerWidth < 768) ? '1' : '0';
+    var scr = (window.screen ? window.screen.width + 'x' + window.screen.height : '');
+    var lp = encodeURIComponent(window.location.pathname);
+    var params = ['c={{COMPANY_SLUG}}','n={{PRACTICE_NAME_ENCODED}}','s={{COMPANY_SLUG}}','tz='+encodeURIComponent(tz),'mob='+mob,'scr='+encodeURIComponent(scr),'sid='+encodeURIComponent(sid),'new='+isNew,'lp='+lp].join('&');
+    fetch('/api/track?' + params, { method: 'GET', mode: 'no-cors', keepalive: true }).catch(function(){});
+  } catch(e) {}
+})();
+</script>
+
+<div id="progress-bar"></div>
+
+<!-- JS CONFIG BLOCK -->
+<script>
+const CONFIG = {
+  practice_name: "{{PRACTICE_NAME}}",
+  doctor_name: "{{DOCTOR_NAME}}",
+  website: "{{WEBSITE}}",
+  logo_url: "{{LOGO_URL}}",
+  loom_id: "{{LOOM_ID}}",
+  booking_url: "{{BOOKING_URL}}",
+  brand_primary: "{{BRAND_PRIMARY}}",
+  brand_accent: "{{BRAND_ACCENT}}",
+  city: "{{CITY}}",
+  company_slug: "{{COMPANY_SLUG}}",
+  run_date: "{{RUN_DATE}}"
+};
+</script>
+
+<!-- =============================
+     STICKY NAV
+     ============================= -->
+<nav id="main-nav" role="navigation" aria-label="Main navigation">
+  <div class="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between gap-4">
+    <a href="#section-hero" aria-label="{{PRACTICE_NAME}} home" class="flex items-center flex-shrink-0">
+      <img src="{{LOGO_URL}}" alt="{{PRACTICE_NAME}} logo" class="h-8 w-auto object-contain" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span style="display:none; color: var(--brand-accent); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em;">{{PRACTICE_NAME}}</span>
+    </a>
+    <div class="hidden md:flex items-center gap-7 flex-1 justify-center">
+      <a href="#section-whats-inside" class="nav-link">What We Found</a>
+      <a href="#section-social-proof" class="nav-link">Results</a>
+      <a href="#section-documentation" class="nav-link">Documentation Cost</a>
+      <a href="#section-communication" class="nav-link">Patient Gaps</a>
+      <a href="#section-faq" class="nav-link">FAQ</a>
+    </div>
+    <a href="#calendly-1" class="inline-flex items-center gap-2 font-bold py-2.5 px-6 rounded-full text-sm text-white hover:opacity-90 transition-opacity whitespace-nowrap no-underline btn-press flex-shrink-0" style="background: #F4570D;">
+      Book Your Free Assessment &rarr;
+    </a>
+  </div>
+</nav>
+
+<!-- =============================
+     SECTION 1 — HERO
+     ============================= -->
+<section id="section-hero" style="background: #080808; min-height: 100vh;" class="flex flex-col justify-center pt-20 pb-28 px-5">
+  <div class="max-w-5xl mx-auto w-full">
+
+    <!-- Pill badge -->
+    <div class="mb-8 hero-animate-1">
+      <span class="inline-block border border-white/20 text-white/60 text-xs font-semibold tracking-widest uppercase px-4 py-2 rounded-full float-badge">
+        Built exclusively for {{PRACTICE_NAME}}
+      </span>
+    </div>
+
+    <!-- Hero headline -->
+    <h1 class="hero-headline text-white mb-7 hero-animate-2">
+      Your Practice Is Losing Time<br>
+      <span style="color: var(--brand-accent);">Every Single Day.</span>
+    </h1>
+
+    <!-- Hero subtext -->
+    <p class="text-white/50 mb-14 hero-animate-3" style="font-size: 18px; line-height: 1.7;">
+      You didn't go to school for a decade to spend half your day on paperwork. This document was built for {{PRACTICE_NAME}} — before we spoke — to show you exactly where the time is going and what's already possible to change it.
+    </p>
+
+    <!-- Loom embed — hidden until loom_id is added (controlled by {{LOOM_SECTION_STYLE}}) -->
+    <div id="loom-video-section" {{LOOM_SECTION_STYLE}}>
+
+    <div class="max-w-4xl video-reveal">
+      <div class="loom-wrapper">
+        <iframe id="loom-frame"
+          src="https://www.loom.com/embed/{{LOOM_ID}}?hide_owner=true&hide_share=true&hide_title=true&hideEmbedTopBar=true"
+          allow="fullscreen; encrypted-media"
+          title="Personalized strategy video for {{PRACTICE_NAME}}"></iframe>
+      </div>
+    </div>
+
+    <div class="red-block max-w-4xl mx-auto">
+      <div class="red-block__title">&#x26D4; Don't Skip The Video Above</div>
+      <div class="red-block__body">Seriously&hellip; It's A Personalized Video Made For You, &amp; Only You.</div>
+    </div>
+
+    <div class="green-block max-w-4xl mx-auto">
+      <h3>How This Document Can Help Your Practice</h3>
+      <p>Somewhere between your first patient of the day and your last chart note, hours disappear. This document shows you exactly where — calculated for your specific practice. Every number is pulled from real data. Read it and you'll know exactly what's worth fixing — whether you work with us or not.</p>
+    </div>
+
+    </div><!-- /#loom-video-section -->
+
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 2 — WHAT'S INSIDE
+     ============================= -->
+<section id="section-whats-inside" class="bg-white py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="mb-5 fade-up">
+      <span class="label-tag">What We Found For {{PRACTICE_NAME}}</span>
+    </div>
+
+    <h2 class="section-headline text-slate-900 mb-4 fade-up">
+      We Looked At Your Practice Before This Call.
+    </h2>
+    <p class="text-slate-500 mb-16 fade-up" style="font-size: 18px; line-height: 1.7; max-width: 560px;">
+      Three specific things. Real numbers. Built around your practice — not a template.
+    </p>
+
+    <!-- STEP format — 3 numbered findings -->
+    <div class="flex flex-col gap-4 mb-14 stagger-children">
+
+      <!-- STEP 1 -->
+      <div class="step-card fade-up">
+        <div class="step-badge" style="background: var(--brand-accent);">1</div>
+        <div class="flex-1">
+          <p class="text-xs font-bold tracking-widest uppercase mb-1" style="color: var(--brand-accent);">STEP 1</p>
+          <h4 class="text-slate-900 font-bold text-lg mb-2">What Documentation Is Actually Costing You</h4>
+          <p class="text-slate-500 leading-relaxed m-0" style="font-size: 17px; line-height: 1.75;">Using your provider count and specialty benchmarks, we calculated how many hours per week are going to charting, lab interpretation, and pre-visit prep at {{PRACTICE_NAME}} — and what that translates to in real dollars annually. The number surprises most practices.</p>
+        </div>
+        <span class="hidden md:block text-xs font-bold px-3 py-1.5 rounded-full flex-shrink-0 self-start mt-1" style="background: rgba(132,189,187,0.1); border: 1px solid var(--brand-accent); color: var(--brand-accent); white-space: nowrap;">Calculated for you</span>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-card fade-up">
+        <div class="step-badge" style="background: var(--brand-accent);">2</div>
+        <div class="flex-1">
+          <p class="text-xs font-bold tracking-widest uppercase mb-1" style="color: var(--brand-accent);">STEP 2</p>
+          <h4 class="text-slate-900 font-bold text-lg mb-2">Patients Who Reached Out and Got Silence</h4>
+          <p class="text-slate-500 leading-relaxed m-0" style="font-size: 17px; line-height: 1.75;">We pulled your Google Business Profile data and counted every patient review that went unanswered in the last 90 days — and every question that was never replied to. Each one is a patient who reached out publicly and heard nothing back. That's visible to every new patient researching you right now.</p>
+        </div>
+        <span class="hidden md:block text-xs font-bold px-3 py-1.5 rounded-full flex-shrink-0 self-start mt-1" style="background: rgba(132,189,187,0.1); border: 1px solid var(--brand-accent); color: var(--brand-accent); white-space: nowrap;">Live data</span>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step-card fade-up">
+        <div class="step-badge" style="background: var(--brand-accent);">3</div>
+        <div class="flex-1">
+          <p class="text-xs font-bold tracking-widest uppercase mb-1" style="color: var(--brand-accent);">STEP 3</p>
+          <h4 class="text-slate-900 font-bold text-lg mb-2">What Happens When a Patient Calls After Hours</h4>
+          <p class="text-slate-500 leading-relaxed m-0" style="font-size: 17px; line-height: 1.75;">We looked at your listed hours and your booking system. For a practice with your schedule, we can estimate how many hours per week your phones are either unmanned or going to a voicemail with no booking option. Industry data says 67% of patients who hit voicemail call a competitor next.</p>
+        </div>
+        <span class="hidden md:block text-xs font-bold px-3 py-1.5 rounded-full flex-shrink-0 self-start mt-1" style="background: rgba(132,189,187,0.1); border: 1px solid var(--brand-accent); color: var(--brand-accent); white-space: nowrap;">Analysis complete</span>
+      </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center fade-up">
+      <a href="#calendly-1" class="inline-flex items-center gap-2 text-white font-bold text-lg py-4 px-12 rounded-xl hover:opacity-90 transition-opacity no-underline btn-press" style="background: var(--brand-primary);">
+        Book Your Free AI Assessment &rarr;
+      </a>
+      <p class="text-slate-400 mt-4 text-sm">30 minutes. Real numbers. No pitch. No pressure.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 4 — AGITATION (DARK)
+     ============================= -->
+<section id="section-agitation" style="background: #080808;" class="py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Bridge line -->
+    <p class="text-white/75 mb-16 fade-up" style="font-size: 16px; line-height: 1.7; max-width: 560px;">Before we show you what we found — here's the pattern we see in almost every functional medicine practice we look at. And why the standard solutions don't fix it.</p>
+
+    <!-- Label -->
+    <div class="mb-6 fade-up">
+      <span class="label-tag">The Pattern We Keep Seeing</span>
+    </div>
+
+    <!-- Headline -->
+    <h2 class="hero-headline text-white mb-4 fade-up">
+      You're Not Short on Tools.
+    </h2>
+    <p class="text-white/60 fade-up" style="font-size: clamp(28px, 4vw, 48px); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 3.5rem;">
+      You're Short on Time.
+    </p>
+
+    <!-- Quote grid -->
+    <div class="grid gap-5 mb-16 stagger-children" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+
+      <div class="quote-dark hover-card-dark">
+        <p class="text-white/80 italic leading-relaxed mb-4" style="font-size: 18px; line-height: 1.7;">"I leave the clinic at 7pm because the notes aren't done. I've been telling myself I'll get faster. I've been telling myself that for two years."</p>
+        <span class="label-tag">Functional Medicine Physician</span>
+      </div>
+
+      <div class="quote-dark hover-card-dark">
+        <p class="text-white/80 italic leading-relaxed mb-4" style="font-size: 18px; line-height: 1.7;">"We have a front desk person who spends half her day answering the same five questions. The patients who actually need to book can't get through."</p>
+        <span class="label-tag">Naturopathic Practice Owner</span>
+      </div>
+
+      <div class="quote-dark hover-card-dark">
+        <p class="text-white/80 italic leading-relaxed mb-4" style="font-size: 18px; line-height: 1.7;">"I knew I was behind on reviews. I just didn't realize there were unanswered questions on my Google listing from three months ago that anyone could see."</p>
+        <span class="label-tag">Integrative Health Director</span>
+      </div>
+
+    </div>
+
+    <!-- Problem breakdown cards -->
+    <div class="flex flex-col gap-5 fade-up">
+
+      <div class="rounded-2xl p-8 border border-white/10 hover-card-dark" style="background: rgba(255,255,255,0.04);">
+        <h4 class="text-white font-bold text-lg mb-3">&#x1F4CB; Documentation that eats your evenings.</h4>
+        <p class="mb-4" style="color: rgba(255,255,255,0.6); font-size: 17px; line-height: 1.7;">The average functional medicine provider spends 2–3 hours per day on documentation. That's not a character flaw — it's the complexity of the work. DUTCH panels, GI-MAP interpretation, naturopathic treatment plans, constitutional assessment. The notes are longer because the medicine is deeper. But those hours compound. Across a year, across providers, it becomes the single largest invisible cost in the practice.</p>
+        <p style="color: rgba(255,255,255,0.85); font-size: 16px; line-height: 1.7;"><strong style="color: var(--brand-accent);">What we do:</strong> We build AI that documents the way you practice — not the way a hospital does. Notes reviewed and approved in under 2 minutes. Labs pre-read before you open the chart.</p>
+      </div>
+
+      <div class="rounded-2xl p-8 border border-white/10 hover-card-dark" style="background: rgba(255,255,255,0.04);">
+        <h4 class="text-white font-bold text-lg mb-3">&#x1F4F5; After-hours silence that costs new patients.</h4>
+        <p class="mb-4" style="color: rgba(255,255,255,0.6); font-size: 17px; line-height: 1.7;">A patient finds you at 9pm. They're ready. They've been researching for months, they've been dismissed by conventional medicine, and they finally found someone who sounds like the right fit. They call. They get voicemail. Sixty-seven percent of them call the next practice on their list. You never knew they existed.</p>
+        <p style="color: rgba(255,255,255,0.85); font-size: 16px; line-height: 1.7;"><strong style="color: var(--brand-accent);">What we do:</strong> 24/7 AI receptionist that answers calls, books appointments, and captures new patient information in your voice — while you sleep.</p>
+      </div>
+
+      <div class="rounded-2xl p-8 border border-white/10 hover-card-dark" style="background: rgba(255,255,255,0.04);">
+        <h4 class="text-white font-bold text-lg mb-3">&#x2B50; Unanswered reviews that kill trust silently.</h4>
+        <p class="mb-4" style="color: rgba(255,255,255,0.6); font-size: 17px; line-height: 1.7;">Every unanswered review is a signal to the next patient researching you. Not just that you didn't respond — but that you might not be present, might not care, might not be accessible. In a cash-pay practice where trust is everything, this is expensive. Most practices don't know how many they have.</p>
+        <p style="color: rgba(255,255,255,0.85); font-size: 16px; line-height: 1.7;"><strong style="color: var(--brand-accent);">What we do:</strong> AI review manager that monitors your GBP, responds to every review in your voice within hours, and flags anything that needs a human.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 5 — SOCIAL PROOF
+     ============================= -->
+<section id="section-social-proof" class="bg-white py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Bridge line -->
+    <p class="text-slate-400 mb-10 fade-up" style="font-size: 16px; line-height: 1.7;">That's the pattern. Here's what happens when you fix the systems around the clinical work.</p>
+
+    <h2 class="section-headline text-slate-900 mb-12 fade-up">Don't Take Our Word for It</h2>
+
+    <div class="yt-wrapper mb-8 fade-up">
+      <iframe src="https://www.youtube.com/embed/1C5OkpnlCvQ?rel=0&start=1" allow="fullscreen; encrypted-media; autoplay" title="Dr. Diane testimonial — Health Biz Scale"></iframe>
+    </div>
+
+    <div class="rounded-2xl p-8 mb-12 fade-up" style="background: var(--surface); border-left: 5px solid var(--brand-accent);">
+      <p class="text-slate-700 text-lg italic leading-relaxed">"Because Mike has a program and developer background and mindset, he's been able to create things beyond what a normal marketing company has been able to do. Working with Mike has definitely helped me to simplify my operations."</p>
+      <p class="text-slate-500 font-semibold mt-3 text-sm m-0">— Dr. Diane Mueller, Functional Medicine Physician, Denver CO</p>
+    </div>
+
+    <h3 class="subheading text-slate-900 mb-8 fade-up">What Dr. Diane Is Really Describing</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10 stagger-children">
+      <div class="bg-white rounded-2xl border border-slate-100 p-7 shadow-sm hover-card" style="border-left: 3px solid var(--brand-primary);">
+        <h4 class="font-bold text-base mb-2" style="color: var(--brand-accent);">Technical Depth, Not Template Work</h4>
+        <p class="text-slate-500 text-sm leading-relaxed m-0">Mike's background isn't marketing. It's technology and healthcare — specifically building a custom healthcare app from zero to $500 million. That's the foundation. When Dr. Diane says he created things "beyond what a normal marketing company has been able to do," she's describing what happens when an engineer builds systems for a practice instead of a marketer selling a package.</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-100 p-7 shadow-sm hover-card" style="border-left: 3px solid var(--brand-primary);">
+        <h4 class="font-bold text-base mb-2" style="color: var(--brand-accent);">Systems That Simplify Operations</h4>
+        <p class="text-slate-500 text-sm leading-relaxed m-0">Dr. Diane didn't get more complexity. She got operations that got quieter. Systems that ran without her team having to manage them. Work that got handled before it became a fire. That's what "simplify my operations" actually means in a cash-pay functional medicine practice.</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-100 p-7 shadow-sm hover-card" style="border-left: 3px solid var(--brand-primary);">
+        <h4 class="font-bold text-base mb-2" style="color: var(--brand-accent);">Built Around How You Practice</h4>
+        <p class="text-slate-500 text-sm leading-relaxed m-0">Functional medicine isn't conventional medicine with extra supplements. The documentation is different. The patient journey is different. The language is different. Every system built for {{PRACTICE_NAME}} will be built around the way your practice actually operates — not adapted from something built for a hospital or a dental chain.</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-100 p-7 shadow-sm hover-card" style="border-left: 3px solid var(--brand-primary);">
+        <h4 class="font-bold text-base mb-2" style="color: var(--brand-accent);">What the 30-Minute Assessment Covers</h4>
+        <p class="text-slate-500 text-sm leading-relaxed m-0">We look at your specific operation — documentation time, patient communication gaps, after-hours coverage. We tell you honestly what's worth addressing first based on where you are right now. No pitch deck. No generic demo. Your practice, your numbers, your decision.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 6 — THREE PILLARS
+     ============================= -->
+<section id="section-three-pillars" style="background: #f8fafc;" class="py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Bridge line -->
+    <p class="text-slate-400 mb-12 fade-up" style="font-size: 16px; line-height: 1.7;">Three operational gaps. Three systems that close them. Each one stands on its own — you start where it makes the most sense.</p>
+
+    <div class="mb-6 fade-up">
+      <span class="label-tag">Three Systems. One Practice.</span>
+    </div>
+
+    <h2 class="section-headline text-slate-900 mb-4 fade-up">
+      Fix the Operations. The Growth Follows.
+    </h2>
+    <p class="text-slate-500 mb-16 fade-up" style="font-size: 18px; line-height: 1.7; max-width: 560px;">
+      Most practices have the clinical excellence. The bottleneck is everything around it — the time, the follow-through, the systems that should run without you touching them.
+    </p>
+
+    <div class="flex flex-col fade-up" style="border-top: 1px solid #e2e8f0;">
+
+      <div class="flex gap-8 items-start py-12" style="border-bottom: 1px solid #e2e8f0;">
+        <div class="flex-shrink-0 w-16 text-right">
+          <span class="font-black text-4xl" style="color: rgba(0,0,0,0.08);">01</span>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-slate-900 font-bold text-2xl mb-4">&#x1F399;&#xFE0F; AI Clinical Scribe</h3>
+          <p style="color: #64748b; font-size: 17px; line-height: 1.7;">Notes done before you leave. Labs pre-read before you open the chart. A one-page brief for every patient before you walk in. Documentation that understands functional medicine — not just conventional billing codes.</p>
+        </div>
+      </div>
+
+      <div class="flex gap-8 items-start py-12" style="border-bottom: 1px solid #e2e8f0;">
+        <div class="flex-shrink-0 w-16 text-right">
+          <span class="font-black text-4xl" style="color: rgba(0,0,0,0.08);">02</span>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-slate-900 font-bold text-2xl mb-4">&#x2B50; AI Review Manager</h3>
+          <p style="color: #64748b; font-size: 17px; line-height: 1.7;">Every review responded to within hours, in your voice. Every question on your listing answered. Unanswered reviews flagged before they compound. Patients who reached out publicly get a real response.</p>
+        </div>
+      </div>
+
+      <div class="flex gap-8 items-start py-12">
+        <div class="flex-shrink-0 w-16 text-right">
+          <span class="font-black text-4xl" style="color: rgba(0,0,0,0.08);">03</span>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-slate-900 font-bold text-2xl mb-4">&#x1F4DE; AI Voice Receptionist</h3>
+          <p style="color: #64748b; font-size: 17px; line-height: 1.7;">24/7 call answering that books appointments, answers common questions, and captures new patient information — without your front desk being available. Built around your conditions, your protocols, your schedule.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 7 — DOCUMENTATION COST
+     ============================= -->
+<section id="section-documentation" style="background: #080808;" class="py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Bridge line -->
+    <p class="text-white/30 mb-12 fade-up" style="font-size: 16px; line-height: 1.7;">Here's the actual data on {{PRACTICE_NAME}}. Real numbers, pulled from real sources.</p>
+
+    <div class="mb-6 fade-up">
+      <span class="label-tag">Your Documentation Cost</span>
+    </div>
+
+    <h2 class="section-headline text-white mb-5 fade-up">
+      Provider Time Going to Paperwork.
+    </h2>
+
+    <!-- 4 dark stat cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 stagger-children">
+      <div class="stat-dark">
+        <span class="stat-num">{{PROVIDER_COUNT}}</span>
+        <span class="stat-label">Providers at {{PRACTICE_NAME}}</span>
+      </div>
+      <div class="stat-dark">
+        <span class="stat-num">{{DAILY_DOC_HOURS}}</span>
+        <span class="stat-label">Est. Hours/Day on Documentation</span>
+      </div>
+      <div class="stat-dark">
+        <span class="stat-num">{{ANNUAL_DOC_HOURS}}</span>
+        <span class="stat-label">Annual Hours in Paperwork</span>
+      </div>
+      <div class="stat-dark" style="border-left: 2px solid rgba(132,189,187,0.3);">
+        <span class="stat-num">{{ANNUAL_DOC_COST}}</span>
+        <span class="stat-label">Annual Cost at Provider Rate</span>
+      </div>
+    </div>
+
+    <!-- Callout box -->
+    <div class="rounded-2xl p-8 mb-12 fade-up" style="background: rgba(255,255,255,0.04); border-left: 4px solid var(--brand-accent);">
+      <h3 class="font-bold text-lg mb-3" style="color: var(--brand-accent);">What This Number Represents</h3>
+      <p style="color: rgba(255,255,255,0.7); font-size: 17px; line-height: 1.7; margin: 0;">This is an estimate based on your provider count from the NPI Registry and published benchmarks for functional medicine documentation — which runs longer than conventional medicine because the notes are more complex. The number above isn't the worst-case scenario. It's the average. Practices that implement AI clinical documentation typically recover 80–90% of that time within the first 30 days.</p>
+    </div>
+
+    <!-- Two-column comparison -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-up">
+
+      <!-- LEFT — Before (red) -->
+      <div class="rounded-2xl p-7 border border-white/10" style="background: rgba(239,68,68,0.05); border-color: rgba(239,68,68,0.2);">
+        <h4 class="font-bold text-base mb-5" style="color: #ef4444;">&#x274C; What documentation looks like now</h4>
+        <div class="flex flex-col gap-0">
+          <div class="check-row">
+            <span style="color: #ef4444; flex-shrink: 0; margin-top: 2px;">&#x2717;</span>
+            <span style="color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.6;">Notes finished after the last patient leaves</span>
+          </div>
+          <div class="check-row">
+            <span style="color: #ef4444; flex-shrink: 0; margin-top: 2px;">&#x2717;</span>
+            <span style="color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.6;">Labs interpreted from scratch for each result</span>
+          </div>
+          <div class="check-row">
+            <span style="color: #ef4444; flex-shrink: 0; margin-top: 2px;">&#x2717;</span>
+            <span style="color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.6;">Morning spent scrambling through old charts to remember where you left off</span>
+          </div>
+          <div class="check-row">
+            <span style="color: #ef4444; flex-shrink: 0; margin-top: 2px;">&#x2717;</span>
+            <span style="color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.6;">Protocol delivery is manual, inconsistent, or skipped when time runs out</span>
+          </div>
+          <div class="check-row">
+            <span style="color: #ef4444; flex-shrink: 0; margin-top: 2px;">&#x2717;</span>
+            <span style="color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.6;">Providers regularly leaving late because the charts aren't done</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT — After (green) -->
+      <div class="rounded-2xl p-7 border border-white/10" style="background: rgba(5,150,105,0.06); border-color: rgba(5,150,105,0.25);">
+        <h4 class="font-bold text-base mb-5" style="color: #10b981;">&#x2713; What it looks like with AI documentation</h4>
+        <div class="flex flex-col gap-0">
+          <div class="check-row" style="border-bottom-color: rgba(5,150,105,0.15);">
+            <span style="color: #10b981; flex-shrink: 0; margin-top: 2px;">&#x2713;</span>
+            <span style="color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.6;">Notes reviewed and approved in under 2 minutes</span>
+          </div>
+          <div class="check-row" style="border-bottom-color: rgba(5,150,105,0.15);">
+            <span style="color: #10b981; flex-shrink: 0; margin-top: 2px;">&#x2713;</span>
+            <span style="color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.6;">Labs pre-read and summarized before you open the chart</span>
+          </div>
+          <div class="check-row" style="border-bottom-color: rgba(5,150,105,0.15);">
+            <span style="color: #10b981; flex-shrink: 0; margin-top: 2px;">&#x2713;</span>
+            <span style="color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.6;">A one-page brief for every patient waiting before you walk in</span>
+          </div>
+          <div class="check-row" style="border-bottom-color: rgba(5,150,105,0.15);">
+            <span style="color: #10b981; flex-shrink: 0; margin-top: 2px;">&#x2713;</span>
+            <span style="color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.6;">Personalized protocol guides delivered automatically after each visit</span>
+          </div>
+          <div class="check-row">
+            <span style="color: #10b981; flex-shrink: 0; margin-top: 2px;">&#x2713;</span>
+            <span style="color: rgba(255,255,255,0.65); font-size: 15px; line-height: 1.6;">Providers leaving on time — charts done, patients briefed</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =============================
+     SECTION 8 — PATIENT COMMUNICATION GAP
+     ============================= -->
+<section id="section-communication" class="bg-white py-28 px-5">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Bridge line -->
+    <p class="text-slate-400 mb-10 fade-up" style="font-size: 16px; line-height: 1.7;">Documentation is the biggest time cost. Patient communication is the biggest trust cost.</p>
+
+    <div class="mb-5 fade-up">
+      <span class="label-tag">Your Patient Communication Gap</span>
+    </div>
+
+    <h2 class="section-headline text-slate-900 mb-5 fade-up">
+      Patients Are Reaching Out. Here's What They're Finding.
+    </h2>
+
+    <!-- Stats bar: 5 dark cards -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10 stagger-children">
+      <div class="stat-dark">
+        <span class="stat-num">{{TOTAL_REVIEWS}}</span>
+        <span class="stat-label">Total Google Reviews</span>
+      </div>
+      <div class="stat-dark">
+        <span class="stat-num">{{RESPONSE_RATE}}</span>
+        <span class="stat-label">Response Rate</span>
+      </div>
+      <div class="stat-dark">
+        <span class="stat-num">{{UNANSWERED_REVIEWS}}</span>
+        <span class="stat-label">Unanswered Reviews</span>
+      </div>
+      <div class="stat-dark">
+        <span class="stat-num">{{UNANSWERED_QUESTIONS}}</span>
+        <span class="stat-label">Unanswered Questions</span>
+      </div>
+      <div class="stat-dark" style="border-left: 2px solid rgba(239,68,68,0.4);">
+        <span class="stat-num">{{DAYS_SINCE_LAST_RESPONSE}}</span>
+        <span class="stat-label">Days Since Last Response</span>
+      </div>
+    </div>
+
+    <!-- Competitor context callout -->
+    <div class="rounded-2xl p-7 mb-6 fade-up" style="background: #f8fafc; border-left: 4px solid var(--brand-primary);">
+      <p class="text-slate-700 leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">{{REVIEW_CONTEXT_SENTENCE}}</p>
+    </div>
+
+    <!-- After-hours callout -->
+    <div class="rounded-2xl p-7 mb-12 fade-up" style="background: #0f172a; border-left: 4px solid #ef4444;">
+      <p class="text-white leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">{{AFTER_HOURS_CALLOUT}}</p>
+    </div>
+
+    <!-- Attack Plan -->
+    <h3 class="text-slate-900 font-bold text-xl mb-6 fade-up">3-Priority Attack Plan</h3>
+    <div class="flex flex-col gap-5 fade-up">
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex gap-6 items-start hover-card slide-left">
+        <span class="inline-flex items-center justify-center w-11 h-11 rounded-full text-white font-black text-base flex-shrink-0" style="background: var(--brand-primary);">1</span>
+        <div>
+          <h4 class="text-slate-900 font-bold text-base mb-2">Close the Unanswered Review Gap</h4>
+          <p class="text-slate-500 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">The {{UNANSWERED_REVIEWS}} unanswered reviews on your Google listing are the first thing new patients see when they research {{PRACTICE_NAME}}. AI review management responds to each one in your voice within hours — and monitors for new reviews continuously.</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex gap-6 items-start hover-card slide-left">
+        <span class="inline-flex items-center justify-center w-11 h-11 rounded-full text-white font-black text-base flex-shrink-0" style="background: var(--brand-primary);">2</span>
+        <div>
+          <h4 class="text-slate-900 font-bold text-base mb-2">Capture After-Hours New Patient Inquiries</h4>
+          <p class="text-slate-500 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">The {{AFTER_HOURS_HOURS}} hours per week your phones are unmanned represent the highest-conversion window for new patient acquisition — people research practices in the evening, not during business hours. AI voice receptionist captures and books these patients automatically.</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex gap-6 items-start hover-card slide-left">
+        <span class="inline-flex items-center justify-center w-11 h-11 rounded-full text-white font-black text-base flex-shrink-0" style="background: var(--brand-primary);">3</span>
+        <div>
+          <h4 class="text-slate-900 font-bold text-base mb-2">Build the Documentation System First</h4>
+          <p class="text-slate-500 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">Time saved on documentation is time available for everything else. Practices that implement AI clinical documentation first consistently report that their team has the capacity to handle the patient communication improvements that follow — without adding headcount.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =============================
+     SECTION — FAQ
+     ============================= -->
+<section id="section-faq" class="bg-white py-28 px-5" style="background: #f8fafc;">
+  <div class="max-w-3xl mx-auto">
+
+    <div class="mb-5 fade-up">
+      <span class="label-tag">Common Questions</span>
+    </div>
+    <h2 class="section-headline text-slate-900 mb-12 fade-up">What You're Probably Wondering</h2>
+
+    <!-- FAQ 1 -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-4 fade-up" style="background: #fff;">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer font-semibold text-slate-900 text-base">
+        <span>Is This HIPAA Compliant?</span>
+        <span class="text-3xl font-light flex-shrink-0 ml-4" style="color: var(--brand-accent);">+</span>
+      </summary>
+      <div class="px-7 pb-7">
+        <p class="text-slate-600 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">Yes — and not because of a contract. The AI runs on hardware inside your building. Your patient data never touches an outside server, a cloud platform, or a third-party system. Compliance is structural, not contractual. This is architecturally different from every other AI tool being sold into healthcare right now.</p>
+      </div>
+    </details>
+
+    <!-- FAQ 2 -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-4 fade-up" style="background: #fff;">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer font-semibold text-slate-900 text-base">
+        <span>What Happens to My Patient Data?</span>
+        <span class="text-3xl font-light flex-shrink-0 ml-4" style="color: var(--brand-accent);">+</span>
+      </summary>
+      <div class="px-7 pb-7">
+        <p class="text-slate-600 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">It stays in your building on equipment you own. The audio, the transcript, the note — none of it leaves your physical location. You control the hardware. You control the data. This isn't a feature. It's the foundation the entire system is built on.</p>
+      </div>
+    </details>
+
+    <!-- FAQ 3 -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-4 fade-up" style="background: #fff;">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer font-semibold text-slate-900 text-base">
+        <span>Do I Need IT Support to Run This?</span>
+        <span class="text-3xl font-light flex-shrink-0 ml-4" style="color: var(--brand-accent);">+</span>
+      </summary>
+      <div class="px-7 pb-7">
+        <p class="text-slate-600 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">No. Setup is handled entirely by our team. Once it's running, your staff interacts with it the same way they'd interact with any other tool in the practice. No technical background required. We handle the infrastructure. You handle the medicine.</p>
+      </div>
+    </details>
+
+    <!-- FAQ 4 -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-4 fade-up" style="background: #fff;">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer font-semibold text-slate-900 text-base">
+        <span>What If I'm Already Using Jane App, Epic, or Another EHR?</span>
+        <span class="text-3xl font-light flex-shrink-0 ml-4" style="color: var(--brand-accent);">+</span>
+      </summary>
+      <div class="px-7 pb-7">
+        <p class="text-slate-600 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">We build around your existing systems, not on top of them. You don't replace your EHR. The AI handles the documentation workflow and hands off the finished note wherever your team needs it — in the format your current system expects.</p>
+      </div>
+    </details>
+
+    <!-- FAQ 5 -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-4 fade-up" style="background: #fff;">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer font-semibold text-slate-900 text-base">
+        <span>How Is This Different from Dragon or the AI Scribe Tools I've Already Seen?</span>
+        <span class="text-3xl font-light flex-shrink-0 ml-4" style="color: var(--brand-accent);">+</span>
+      </summary>
+      <div class="px-7 pb-7">
+        <p class="text-slate-600 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">Dragon transcribes. Most AI scribes are built for conventional medicine — standard SOAP notes, ICD-10 billing codes, 15-minute appointments. What we build understands functional medicine — DUTCH panels, GI-MAP, naturopathic treatment plans, constitutional assessment, complex chronic illness protocols. It documents the way you practice, not the way a hospitalist does.</p>
+      </div>
+    </details>
+
+    <!-- FAQ 6 -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-4 fade-up" style="background: #fff;">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer font-semibold text-slate-900 text-base">
+        <span>How Long Does It Take to Get Running?</span>
+        <span class="text-3xl font-light flex-shrink-0 ml-4" style="color: var(--brand-accent);">+</span>
+      </summary>
+      <div class="px-7 pb-7">
+        <p class="text-slate-600 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">The assessment takes 3–5 days. Implementation depends on which services make the most sense for your practice — most practices are operational within 2–4 weeks of the kickoff call. The AI clinical scribe is typically the fastest to deploy and the highest immediate ROI.</p>
+      </div>
+    </details>
+
+    <!-- FAQ 7 -->
+    <details class="border border-slate-200 rounded-2xl overflow-hidden mb-4 fade-up" style="background: #fff;">
+      <summary class="flex items-center justify-between px-7 py-6 cursor-pointer font-semibold text-slate-900 text-base">
+        <span>What Does the 30-Minute Call Actually Cover?</span>
+        <span class="text-3xl font-light flex-shrink-0 ml-4" style="color: var(--brand-accent);">+</span>
+      </summary>
+      <div class="px-7 pb-7">
+        <p class="text-slate-600 leading-relaxed m-0" style="font-size: 16px; line-height: 1.7;">Three things. What your practice's current situation looks like based on what we've already pulled — provider count, documentation estimate, communication gaps, after-hours coverage. Which of the three gaps makes the most sense to close first based on where you are right now. And what it looks like to work together if it's a fit. No pitch deck. No generic demo. No pressure.</p>
+      </div>
+    </details>
+
+  </div>
+</section>
+
+<!-- =============================
+     BRIDGE
+     ============================= -->
+<section style="background: #080808;" class="py-16 px-5">
+  <div class="max-w-3xl mx-auto text-center">
+    <p style="color: rgba(255,255,255,0.9); font-size: clamp(22px, 3vw, 32px); font-weight: 800; line-height: 1.25; letter-spacing: -0.02em; margin-bottom: 20px;">
+      The documentation cost, the review gaps, the after-hours window —<br>it's all in this report.
+    </p>
+    <p style="color: rgba(255,255,255,0.5); font-size: 17px; line-height: 1.7; max-width: 500px; margin: 0 auto;">
+      The call is us walking through it together for {{PRACTICE_NAME}} — specific actions, specific systems, no fluff. The plan is yours to keep whether we work together or not.
+    </p>
+  </div>
+</section>
+
+<!-- =============================
+     SECTION — FINAL CTA
+     ============================= -->
+<section id="calendly-1" class="py-28 px-5" style="background: var(--brand-primary);">
+  <div class="max-w-3xl mx-auto text-center">
+
+    <div class="mb-6">
+      <span class="inline-block border border-white/30 text-white/80 rounded-full px-5 py-2 text-xs font-semibold tracking-widest uppercase">Book your assessment</span>
+    </div>
+
+    <h2 class="text-white font-black mb-5" style="font-size: clamp(32px, 5vw, 54px); letter-spacing: -0.025em; line-height: 1.0;">
+      See Exactly What {{PRACTICE_NAME}} Is Losing. In 30 Minutes.
+    </h2>
+    <p class="text-white/80 mb-12 max-w-xl mx-auto" style="font-size: 18px; line-height: 1.7;">
+      One conversation. Real numbers on your practice. Specific to {{PRACTICE_NAME}}. You'll walk away knowing exactly what to fix first — whether you hire us or not.
+    </p>
+
+    <div class="flex flex-col gap-5 max-w-lg mx-auto mb-12 text-left">
+      <div class="flex items-start gap-5">
+        <span class="font-black text-2xl flex-shrink-0 leading-tight" style="color: rgba(255,255,255,0.4);">01</span>
+        <p class="text-white/90 leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">Recover Provider Time — hours returned to clinical work, not charts</p>
+      </div>
+      <div class="flex items-start gap-5">
+        <span class="font-black text-2xl flex-shrink-0 leading-tight" style="color: rgba(255,255,255,0.4);">02</span>
+        <p class="text-white/90 leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">Never Miss a Patient Who Reached Out — every call, every review, every question answered</p>
+      </div>
+      <div class="flex items-start gap-5">
+        <span class="font-black text-2xl flex-shrink-0 leading-tight" style="color: rgba(255,255,255,0.4);">03</span>
+        <p class="text-white/90 leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">Build the Operational Foundation — systems that run without you touching them</p>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-white/20 p-8 mb-12 text-left" style="background: rgba(255,255,255,0.08);">
+      <p class="text-white/80 italic leading-relaxed m-0" style="font-size: 17px; line-height: 1.7;">"I believe the best way to earn someone's trust is to be genuinely useful before they ever pay you a dollar. After this call, you'll have a clear picture of what's costing your practice the most right now — and what it would take to fix it. With or without me. No hard feelings, no follow-up pressure, no obligation whatsoever."</p>
+    </div>
+
+    <div class="rounded-2xl border border-white/20 p-6 md:p-10" style="background: rgba(255,255,255,0.08);">
+      <h3 class="text-white font-black text-2xl mb-3">Get Your Free Practice AI Assessment</h3>
+      <p class="text-white/70 mb-8" style="font-size: 17px; line-height: 1.7;">30 minutes. Real data on your practice. No pitch. No pressure.</p>
+      <div class="bg-white rounded-2xl p-4">
+        <div class="calendly-inline-widget" data-url="https://calendly.com/mike-kohl/30min"></div>
+      </div>
+      <p class="text-white/40 text-sm mt-5">The strategy is yours to keep — whether we work together or not.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- =============================
+     FOOTER
+     ============================= -->
+<footer style="background: #080808; border-top: 1px solid rgba(255,255,255,0.06);" class="py-10 px-5 text-center">
+  <p class="text-sm m-0" style="color: rgba(255,255,255,0.4);">
+    <a href="https://healthbizscale.com" target="_blank" class="no-underline hover:opacity-80 transition-opacity" style="color: rgba(255,255,255,0.4);">healthbizscale.com</a>
+    &middot; Health Biz Scale
+  </p>
+  <p class="text-xs mt-2" style="color: rgba(255,255,255,0.2);">This page was built exclusively for {{PRACTICE_NAME}}.</p>
+</footer>
+
+<!-- =============================
+     SCRIPTS
+     ============================= -->
+<script>
+// Loom ID override from URL param
+(function() {
+  var p = new URLSearchParams(window.location.search).get('loom');
+  var f = document.getElementById('loom-frame');
+  if (f && p) f.src = 'https://www.loom.com/embed/' + p + '?hide_owner=true&hide_share=true&hide_title=true&hideEmbedTopBar=true';
+})();
+
+// Progress bar
+window.addEventListener('scroll', function() {
+  var d = document.documentElement;
+  var pct = (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100;
+  var bar = document.getElementById('progress-bar');
+  if (bar) bar.style.width = pct + '%';
+}, { passive: true });
+
+// Scroll animations — 'revealed' class avoids Tailwind CDN '.visible' collision
+(function() {
+  var sel = '.fade-up,.slide-left,.slide-right,.scale-in,.stagger-children';
+  var els = document.querySelectorAll(sel);
+  if (!els.length) return;
+
+  function revealAll() {
+    document.querySelectorAll(sel).forEach(function(el) {
+      el.classList.add('revealed');
+    });
+  }
+
+  // Failsafe: force-reveal everything after 2s so content is NEVER permanently hidden
+  setTimeout(revealAll, 2000);
+
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) {
+        e.target.classList.add('revealed');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.05, rootMargin: '50px 0px 0px 0px' });
+
+  els.forEach(function(el) {
+    var rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 50 && rect.bottom >= 0) {
+      el.classList.add('revealed');
+    } else {
+      io.observe(el);
+    }
+  });
+})();
+
+// Number counter animation
+(function() {
+  function formatNum(n, prefix, suffix) {
+    var abs = Math.abs(n);
+    var formatted;
+    if (abs >= 1000000) {
+      formatted = (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    } else if (abs >= 1000) {
+      formatted = (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    } else {
+      formatted = n.toString();
+    }
+    return (prefix || '') + formatted + (suffix || '');
+  }
+
+  function animateCounter(el) {
+    var raw = el.getAttribute('data-count');
+    if (!raw) return;
+    var num = parseFloat(raw.replace(/[^0-9.]/g, '')) || 0;
+    if (!num) return;
+    var prefix = el.getAttribute('data-prefix') || '';
+    var suffix = el.getAttribute('data-suffix') || '';
+    var upperRaw = raw.toUpperCase();
+    var multiplier = 1;
+    if (upperRaw.indexOf('M') !== -1) multiplier = 1000000;
+    else if (upperRaw.indexOf('K') !== -1) multiplier = 1000;
+    var target = num * multiplier;
+    var duration = 1400;
+    var start = null;
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+    function step(ts) {
+      if (!start) start = ts;
+      var elapsed = ts - start;
+      var progress = Math.min(elapsed / duration, 1);
+      var current = Math.round(easeOut(progress) * target);
+      el.textContent = formatNum(current, prefix, suffix);
+      if (progress < 1) requestAnimationFrame(step);
+      else el.textContent = (prefix || '') + raw.replace(/[^0-9.,KMB]/g, '') + (suffix || '');
+    }
+    requestAnimationFrame(step);
+  }
+
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) {
+        animateCounter(e.target);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('[data-count]').forEach(function(el) { io.observe(el); });
+})();
+
+// Parallax tilt on hero headline
+(function() {
+  var hero = document.getElementById('section-hero');
+  var h1 = hero ? hero.querySelector('.hero-headline') : null;
+  if (!h1 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.addEventListener('mousemove', function(e) {
+    var cx = window.innerWidth / 2;
+    var cy = window.innerHeight / 2;
+    var dx = (e.clientX - cx) / cx;
+    var dy = (e.clientY - cy) / cy;
+    h1.style.transform = 'translate(' + (dx * 6) + 'px, ' + (dy * 3) + 'px)';
+  }, { passive: true });
+})();
+
+// Ripple effect on brand-primary buttons
+(function() {
+  document.querySelectorAll('a.btn-press, button.btn-press').forEach(function(btn) {
+    btn.style.position = 'relative';
+    btn.style.overflow = 'hidden';
+    btn.addEventListener('click', function(e) {
+      var rect = btn.getBoundingClientRect();
+      var ripple = document.createElement('span');
+      var size = Math.max(rect.width, rect.height) * 2;
+      ripple.style.cssText = [
+        'position:absolute',
+        'border-radius:50%',
+        'background:rgba(255,255,255,0.25)',
+        'width:' + size + 'px',
+        'height:' + size + 'px',
+        'left:' + (e.clientX - rect.left - size/2) + 'px',
+        'top:' + (e.clientY - rect.top - size/2) + 'px',
+        'transform:scale(0)',
+        'animation:rippleAnim 0.55s ease-out forwards',
+        'pointer-events:none'
+      ].join(';');
+      btn.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    });
+  });
+  var s = document.createElement('style');
+  s.textContent = '@keyframes rippleAnim { to { transform: scale(1); opacity: 0; } }';
+  document.head.appendChild(s);
+})();
+
+// Calendly script loader
+(function() {
+  var s = document.createElement('script');
+  s.src = 'https://assets.calendly.com/assets/external/widget.js';
+  s.async = true;
+  document.head.appendChild(s);
+})();
+
+// FAQ + details toggle
+  // Fix blurry Loom/YouTube iframes inside <details>: reload src on open
+  document.querySelectorAll('details').forEach(function(det) {
+    det.addEventListener('toggle', function() {
+      if (det.open) {
+        det.querySelectorAll('iframe').forEach(function(iframe) {
+          var src = iframe.src;
+          iframe.src = '';
+          iframe.src = src;
+        });
+      }
+    });
+  });
+document.querySelectorAll('details').forEach(function(d) {
+  d.addEventListener('toggle', function() {
+    var icon = d.querySelector('summary span:last-child');
+    if (icon) icon.textContent = d.open ? '×' : '+';
+  });
+});
+</script>
+
+  <!-- D100 open-tracking beacon — fires Slack notification on first load -->
+  <!-- Suppressed when URL contains ?preview=1 -->
+  <script>
+  (function() {
+    try {
+      if (new URLSearchParams(window.location.search).get('preview') === '1') return;
+      // Block headless browsers / bots
+      if (navigator.webdriver) return;
+      var slug = '{{COMPANY_SLUG}}';
+      var key  = 'd100_opened_' + slug;
+      // Fire once per device ever (localStorage persists across sessions)
+      if (localStorage.getItem(key)) return;
+      // Require 4s on page + scroll before firing (humans scroll, bots don't)
+      var scrolled = false;
+      var fired = false;
+      function maybefire() {
+        if (fired || !scrolled) return;
+        fired = true;
+        localStorage.setItem(key, '1');
+        fetch('/api/opened?slug=' + encodeURIComponent(slug) +
+              '&practice=' + encodeURIComponent('{{PRACTICE_NAME}}'),
+              { method: 'GET', keepalive: true })
+          .catch(function(){});
+      }
+      window.addEventListener('scroll', function() { scrolled = true; }, { once: true, passive: true });
+      setTimeout(maybefire, 4000);
+    } catch(_) {}
+  })();
+  </script>
+</body>
+</html>
